@@ -216,6 +216,21 @@ class ProjectConfig
     }
 
     /**
+     * @param $audienceId string ID of the audience.
+     *
+     * @return Audience Entity corresponding to the ID.
+     *         Dummy entity is returned if ID is invalid.
+     */
+    public function getAudience($audienceId)
+    {
+        if (isset($this->_audienceIdMap[$audienceId])) {
+            return $this->_audienceIdMap[$audienceId];
+        }
+
+        return new Audience();
+    }
+
+    /**
      * @param $attributeKey string Key of the attribute.
      *
      * @return Attribute Entity corresponding to the key.

@@ -45,11 +45,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
     }
 
-    public function testInit()
-    {
-        $this->markTestSkipped('To be implemented.');
-    }
-
     public function testInitValidEventDispatcher()
     {
         $validDispatcher = new ValidEventDispatcher();
