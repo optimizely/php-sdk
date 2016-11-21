@@ -1,0 +1,19 @@
+<phpunit
+        colors="true"
+        stderr="true"
+        convertErrorsToExceptions="true"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true"
+        stopOnFailure="false"
+        bootstrap="vendor/autoload.php">
+    <testsuites>
+        <testsuite name="Optimizely PHP SDK Tests">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./src/Optimizely</directory>
+        </whitelist>
+    </filter>
+</phpunit>
