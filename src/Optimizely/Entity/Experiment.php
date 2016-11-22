@@ -279,7 +279,6 @@ class Experiment
      * Determine if user is in forced variation of experiment.
      *
      * @param $userId string ID of the user.
-     *
      * @return boolean True if user is in forced variation of experiment. False otherwise.
      */
     public function isUserInForcedVariation($userId)

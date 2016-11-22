@@ -31,14 +31,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 {
     private $datafile;
     private $eventBuilderMock;
-    private $optObj;
+    private $optimizelyObject;
     private $projectConfig;
 
     public function setUp()
     {
         $this->datafile = DATAFILE;
         $this->projectConfig = new ProjectConfig($this->datafile);
-        $this->optObj = new Optimizely($this->datafile);
+        $this->optimizelyObject = new Optimizely($this->datafile);
 
         // Mock EventBuilder
         $this->eventBuilderMock = $this->getMockBuilder(EventBuilder::class)
@@ -152,7 +152,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $validatePreconditions->invoke(
-                $this->optObj,
+                $this->optimizelyObject,
                 $this->projectConfig->getExperimentFromKey('paused_experiment'),
                 'test_user',
                 [])
@@ -166,7 +166,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $validatePreconditions->invoke(
-                $this->optObj,
+                $this->optimizelyObject,
                 $this->projectConfig->getExperimentFromKey('test_experiment'),
                 'test_user',
                 [])
@@ -180,7 +180,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $validatePreconditions->invoke(
-                $this->optObj,
+                $this->optimizelyObject,
                 $this->projectConfig->getExperimentFromKey('test_experiment'),
                 'user_1',
                 [])
@@ -194,7 +194,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $validatePreconditions->invoke(
-                $this->optObj,
+                $this->optimizelyObject,
                 $this->projectConfig->getExperimentFromKey('test_experiment'),
                 'user1',
                 [])
@@ -209,7 +209,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Will get updated when we have audience evaluation and user does not meet conditions
         $this->assertTrue(
             $validatePreconditions->invoke(
-                $this->optObj,
+                $this->optimizelyObject,
                 $this->projectConfig->getExperimentFromKey('test_experiment'),
                 'test_user',
                 [])
@@ -224,7 +224,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Will get updated when we have audience evaluation and user does meets conditions
         $this->assertTrue(
             $validatePreconditions->invoke(
-                $this->optObj,
+                $this->optimizelyObject,
                 $this->projectConfig->getExperimentFromKey('test_experiment'),
                 'test_user',
                 [])
@@ -296,12 +296,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariation()
     {
-        $this->assertEquals('control', $this->optObj->getVariation('test_experiment', 'test_user'));
+        $this->assertEquals('control', $this->optimizelyObject->getVariation('test_experiment', 'test_user'));
     }
 
     public function testGetVariationExperimentNotRunning()
     {
-        $this->assertNull($this->optObj->getVariation('paused_experiment', 'test_user'));
+        $this->assertNull($this->optimizelyObject->getVariation('paused_experiment', 'test_user'));
     }
 
     public function testTrackNoAttributesNoEventValue()
