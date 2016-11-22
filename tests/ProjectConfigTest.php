@@ -202,7 +202,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $event = $this->config->getEvent('purchase');
         $this->assertEquals('purchase', $event->getKey());
         $this->assertEquals('7718020063', $event->getId());
-        $this->assertEquals(['7716830082', '7723330021', '7718750065'], $event->getExperimentIds());
+        $this->assertEquals(['7716830082', '7723330021', '7718750065', '7716830585'], $event->getExperimentIds());
     }
 
     public function testGetEventInvalidKey()

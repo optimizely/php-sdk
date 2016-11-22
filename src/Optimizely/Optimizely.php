@@ -226,7 +226,7 @@ class Optimizely
     {
         $experiment = $this->_config->getExperimentFromKey($experimentKey);
 
-        if (!is_null($experiment->getKey())) {
+        if (is_null($experiment->getKey())) {
             return null;
         }
 

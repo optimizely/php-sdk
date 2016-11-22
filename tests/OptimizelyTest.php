@@ -278,6 +278,32 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('control', $optlyObject->activate('test_experiment', 'test_user', $userAttributes));
     }
 
+    public function testActivateExperimentNotRunning()
+    {
+        $this->eventBuilderMock->expects($this->never())
+            ->method('createImpressionEvent');
+
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher());
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Call activate
+        $this->assertNull($optlyObject->activate('paused_experiment', 'test_user', null));
+    }
+
+
+    public function testGetVariation()
+    {
+        $this->assertEquals('control', $this->optObj->getVariation('test_experiment', 'test_user'));
+    }
+
+    public function testGetVariationExperimentNotRunning()
+    {
+        $this->assertNull($this->optObj->getVariation('paused_experiment', 'test_user'));
+    }
+
     public function testTrackNoAttributesNoEventValue()
     {
         $this->eventBuilderMock->expects($this->once())
