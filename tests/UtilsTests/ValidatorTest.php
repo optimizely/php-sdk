@@ -59,14 +59,14 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     {
         $config = new ProjectConfig(DATAFILE);
 
-        // Test with empty
+        // Test with empty attributes
         $this->assertFalse(Validator::isUserInExperiment(
             $config,
             $config->getExperimentFromKey('test_experiment'),
             []
         ));
 
-        // Test with null
+        // Test with null attributes
         $this->assertFalse(Validator::isUserInExperiment(
             $config,
             $config->getExperimentFromKey('test_experiment'),
