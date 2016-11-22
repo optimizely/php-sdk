@@ -22,6 +22,16 @@ use Optimizely\Utils\ConfigParser;
 class Experiment
 {
     /**
+     * @const string String denoting running state of experiment.
+     */
+    const STATUS_RUNNING = 'Running';
+
+    /**
+     * @const string String denoting policy of mutually exclusive group.
+     */
+    const MUTEX_GROUP_POLICY = 'random';
+
+    /**
      * @var string Experiment ID.
      */
     private $_id;
@@ -262,7 +272,7 @@ class Experiment
      */
     public function isInMutexGroup()
     {
-        return !is_null($this->_groupPolicy) && $this->_groupPolicy == 'random';
+        return !is_null($this->_groupPolicy) && $this->_groupPolicy == self::MUTEX_GROUP_POLICY;
     }
 
     /**
@@ -272,7 +282,7 @@ class Experiment
      */
     public function isExperimentRunning()
     {
-        return !is_null($this->_status) && $this->_status == 'Running';
+        return !is_null($this->_status) && $this->_status == self::STATUS_RUNNING;
     }
 
     /**
