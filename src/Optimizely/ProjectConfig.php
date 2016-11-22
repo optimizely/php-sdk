@@ -23,6 +23,7 @@ use Optimizely\Entity\Event;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Group;
 use Optimizely\Entity\Variation;
+use Optimizely\Utils\ConditionDecoder;
 use Optimizely\Utils\ConfigParser;
 
 /**
@@ -100,17 +101,17 @@ class ProjectConfig
      */
     public function __construct($datafile)
     {
-        $config = json_decode($datafile);
-        $this->_version = $config->{'version'};
-        $this->_accountId = $config->{'accountId'};
-        $this->_projectId = $config->{'projectId'};
-        $this->_revision = $config->{'revision'};
+        $config = json_decode($datafile, true);
+        $this->_version = $config['version'];
+        $this->_accountId = $config['accountId'];
+        $this->_projectId = $config['projectId'];
+        $this->_revision = $config['revision'];
 
-        $groups = $config->{'groups'};
-        $experiments = $config->{'experiments'};
-        $events = $config->{'events'};
-        $attributes = $config->{'attributes'};
-        $audiences = $config->{'audiences'};
+        $groups = $config['groups'];
+        $experiments = $config['experiments'];
+        $events = $config['events'];
+        $attributes = $config['attributes'];
+        $audiences = $config['audiences'];
 
         $this->_groupIdMap = ConfigParser::generateMap($groups, 'id', Group::class);
         $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);
@@ -136,6 +137,12 @@ class ProjectConfig
                 $this->_variationKeyMap[$experiment->getKey()][$variation->getKey()] = $variation;
                 $this->_variationIdMap[$experiment->getKey()][$variation->getId()] = $variation;
             }
+        }
+
+        $conditionDecoder = new ConditionDecoder();
+        forEach(array_values($this->_audienceIdMap) as $audience) {
+            $conditionDecoder->deserializeAudienceConditions($audience->getConditions());
+            $audience->setConditionsList($conditionDecoder->getConditionsList());
         }
     }
 
