@@ -214,7 +214,7 @@ class Experiment
      */
     public function setForcedVariations($forcedVariations)
     {
-        $this->_forcedVariations = get_object_vars($forcedVariations);
+        $this->_forcedVariations = $forcedVariations;
     }
 
     /**

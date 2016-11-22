@@ -129,7 +129,9 @@ class Optimizely
             return true;
         }
 
-        //@TODO(ali): Insert audience check
+        if (!Validator::isUserInExperiment($this->_config, $experiment, $attributes)) {
+            return false;
+        }
 
         return true;
     }

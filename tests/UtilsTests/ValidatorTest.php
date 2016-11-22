@@ -17,6 +17,7 @@
 
 namespace Optimizely\Tests;
 
+use Optimizely\ProjectConfig;
 use Optimizely\Utils\Validator;
 
 
@@ -42,5 +43,54 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     public function testAreAttributesValidReturnsTrue()
     {
         $this->assertTrue(Validator::areAttributesValid('some attributes here'));
+    }
+
+    public function testIsUserInExperimentNoAudienceUsedInExperiment()
+    {
+        $config = new ProjectConfig(DATAFILE);
+        $this->assertTrue(Validator::isUserInExperiment(
+            $config,
+            $config->getExperimentFromKey('paused_experiment'),
+            []
+        ));
+    }
+
+    public function testIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
+    {
+        $config = new ProjectConfig(DATAFILE);
+
+        // Test with empty attributes
+        $this->assertFalse(Validator::isUserInExperiment(
+            $config,
+            $config->getExperimentFromKey('test_experiment'),
+            []
+        ));
+
+        // Test with null attributes
+        $this->assertFalse(Validator::isUserInExperiment(
+            $config,
+            $config->getExperimentFromKey('test_experiment'),
+            null
+        ));
+    }
+
+    public function testIsUserInExperimentAudienceMatch()
+    {
+        $config = new ProjectConfig(DATAFILE);
+        $this->assertTrue(Validator::isUserInExperiment(
+            $config,
+            $config->getExperimentFromKey('test_experiment'),
+            ['device_type' => 'iPhone', 'location' => 'San Francisco']
+        ));
+    }
+
+    public function testIsUserInExperimentAudienceNoMatch()
+    {
+        $config = new ProjectConfig(DATAFILE);
+        $this->assertFalse(Validator::isUserInExperiment(
+            $config,
+            $config->getExperimentFromKey('test_experiment'),
+            ['device_type' => 'Android', 'location' => 'San Francisco']
+        ));
     }
 }
