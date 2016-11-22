@@ -96,15 +96,12 @@ class ConditionEvaluator
                 case self::AND_OPERATOR:
                     array_shift($conditions);
                     return $this->andEvaluator(array_shift($conditions), $userAttributes);
-                    break;
                 case self::OR_OPERATOR:
                     array_shift($conditions);
                     return $this->orEvaluator(array_shift($conditions), $userAttributes);
-                    break;
                 case self::NOT_OPERATOR:
                     array_shift($conditions);
                     return $this->notEvaluator(array_shift($conditions), $userAttributes);
-                    break;
                 default:
                     return false;
             }

@@ -182,7 +182,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             $validatePreconditions->invoke(
                 $this->optimizelyObject,
                 $this->projectConfig->getExperimentFromKey('test_experiment'),
-                'user_1',
+                'user1',
                 [])
         );
     }
@@ -229,14 +229,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testActivateNoAttributes()
+    public function testActivateNoAudienceNoAttributes()
     {
         $this->eventBuilderMock->expects($this->once())
             ->method('createImpressionEvent')
             ->with(
                 $this->projectConfig,
-                $this->projectConfig->getExperimentFromKey('test_experiment'),
-                '7722370027', 'test_user', null
+                $this->projectConfig->getExperimentFromKey('group_experiment_1'),
+                '7722360022', 'user_1', null
             )
             ->willReturn(new LogEvent('logx.optimizely.com', [], 'POST', []));
 
@@ -247,7 +247,22 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
 
         // Call activate
-        $this->assertEquals('control', $optlyObject->activate('test_experiment', 'test_user'));
+        $this->assertEquals('group_exp_1_var_2', $optlyObject->activate('group_experiment_1', 'user_1'));
+    }
+
+    public function testActivateAudienceNoAttributes()
+    {
+        $this->eventBuilderMock->expects($this->never())
+            ->method('createImpressionEvent');
+
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher());
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Call activate
+        $this->assertNull($optlyObject->activate('test_experiment', 'test_user'));
     }
 
     public function testActivateWithAttributes()
@@ -291,10 +306,21 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($optlyObject->activate('paused_experiment', 'test_user', null));
     }
 
-
-    public function testGetVariation()
+    public function testGetVariationAudienceMatch()
     {
-        $this->assertEquals('control', $this->optimizelyObject->getVariation('test_experiment', 'test_user'));
+        $this->assertEquals(
+            'control',
+            $this->optimizelyObject->getVariation(
+                'test_experiment',
+                'test_user',
+                ['device_type' => 'iPhone', 'location' => 'San Francisco']
+            )
+        );
+    }
+
+    public function testGetVariationAudienceNoMatch()
+    {
+        $this->assertNull($this->optimizelyObject->getVariation('test_experiment', 'test_user'));
     }
 
     public function testGetVariationExperimentNotRunning()
@@ -309,8 +335,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                [$this->projectConfig->getExperimentFromKey('test_experiment'),
-                    $this->projectConfig->getExperimentFromKey('group_experiment_1'),
+                [$this->projectConfig->getExperimentFromKey('group_experiment_1'),
                     $this->projectConfig->getExperimentFromKey('group_experiment_2')],
                 'test_user',
                 null,
@@ -366,8 +391,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                [$this->projectConfig->getExperimentFromKey('test_experiment'),
-                    $this->projectConfig->getExperimentFromKey('group_experiment_1'),
+                [$this->projectConfig->getExperimentFromKey('group_experiment_1'),
                     $this->projectConfig->getExperimentFromKey('group_experiment_2')],
                 'test_user',
                 null,
