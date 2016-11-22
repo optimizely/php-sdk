@@ -42,9 +42,11 @@ class ConditionEvaluator
      */
     private function andEvaluator($conditions, $userAttributes)
     {
-        $result = $this->evaluate($conditions, $userAttributes);
-        if (!$result) {
-            return false;
+        forEach ($conditions as $condition) {
+            $result = $this->evaluate($condition, $userAttributes);
+            if (!$result) {
+                return false;
+            }
         }
 
         return true;
@@ -58,27 +60,29 @@ class ConditionEvaluator
      */
     private function orEvaluator($conditions, $userAttributes)
     {
-        $result = $this->evaluate($conditions, $userAttributes);
-        if ($result) {
-            return true;
+        forEach ($conditions as $condition) {
+            $result = $this->evaluate($condition, $userAttributes);
+            if ($result) {
+                return true;
+            }
         }
 
         return false;
     }
 
     /**
-     * @param $conditions array Audience conditions list consisting of single condition.
+     * @param $condition array Audience conditions list consisting of single condition.
      * @param $userAttributes array Associative array of user attributes to values.
      *
      * @return boolean True if the condition evaluates to False.
      */
-    private function notEvaluator($conditions, $userAttributes)
+    private function notEvaluator($condition, $userAttributes)
     {
-        if (count($conditions) != 1) {
+        if (count($condition) != 1) {
             return false;
         }
 
-        return !$this->evaluate($conditions[0], $userAttributes);
+        return !$this->evaluate($condition[0], $userAttributes);
     }
 
     /**
@@ -95,13 +99,13 @@ class ConditionEvaluator
             switch ($conditions[0]) {
                 case self::AND_OPERATOR:
                     array_shift($conditions);
-                    return $this->andEvaluator(array_shift($conditions), $userAttributes);
+                    return $this->andEvaluator($conditions, $userAttributes);
                 case self::OR_OPERATOR:
                     array_shift($conditions);
-                    return $this->orEvaluator(array_shift($conditions), $userAttributes);
+                    return $this->orEvaluator($conditions, $userAttributes);
                 case self::NOT_OPERATOR:
                     array_shift($conditions);
-                    return $this->notEvaluator(array_shift($conditions), $userAttributes);
+                    return $this->notEvaluator($conditions, $userAttributes);
                 default:
                     return false;
             }

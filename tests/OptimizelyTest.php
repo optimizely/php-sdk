@@ -269,7 +269,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         $userAttributes = [
             'device_type' => 'iPhone',
-            'company' => 'Optimizely'
+            'company' => 'Optimizely',
+            'location' => 'San Francisco'
         ];
 
         $this->eventBuilderMock->expects($this->once())
@@ -357,7 +358,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         $userAttributes = [
             'device_type' => 'iPhone',
-            'company' => 'Optimizely'
+            'company' => 'Optimizely',
+            'location' => 'San Francisco'
         ];
 
         $this->eventBuilderMock->expects($this->once())
@@ -421,8 +423,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                [$this->projectConfig->getExperimentFromKey('test_experiment'),
-                    $this->projectConfig->getExperimentFromKey('group_experiment_1'),
+                [$this->projectConfig->getExperimentFromKey('group_experiment_1'),
                     $this->projectConfig->getExperimentFromKey('group_experiment_2')],
                 'test_user',
                 $userAttributes,
