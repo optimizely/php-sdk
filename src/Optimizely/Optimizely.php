@@ -18,6 +18,7 @@ namespace Optimizely;
 
 use Exception;
 use Optimizely\Entity\Experiment;
+use Optimizely\Logger\DefaultLogger;
 use Throwable;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
@@ -66,6 +67,11 @@ class Optimizely
     private $_eventBuilder;
 
     /**
+     * @var boolean Denotes whether Optimizely object is valid or not.
+     */
+    private $_isValid;
+
+    /**
      * Optimizely constructor for managing Full Stack PHP projects.
      *
      * @param $datafile string JSON string representing the project.
@@ -80,16 +86,28 @@ class Optimizely
                                 ErrorHandlerInterface $errorHandler = null,
                                 $skipJsonValidation = false)
     {
+        $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
-        $this->_logger = $logger ?: new NoOpLogger();;
-        $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();;
+        $this->_logger = $logger ?: new NoOpLogger();
+        $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
 
-        $this->validateInputs($datafile, $skipJsonValidation);
+        if (!$this->validateInputs($datafile, $skipJsonValidation)) {
+            $this->_isValid = false;
+            $this->_logger = new DefaultLogger();
+        }
+
         try {
           $this->_config = new ProjectConfig($datafile);
         }
-        catch (Throwable $exception) {}
-        catch (Exception $exception) {}
+        catch (Throwable $exception) {
+            $this->_isValid = false;
+            $this->_logger = new DefaultLogger();
+        }
+        catch (Exception $exception) {
+            $this->_isValid = false;
+            $this->_logger = new DefaultLogger();
+        }
+
         $this->_bucketer = new Bucketer();
         $this->_eventBuilder = new EventBuilder($this->_bucketer);
     }
