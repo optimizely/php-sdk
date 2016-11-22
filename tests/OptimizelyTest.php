@@ -31,12 +31,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 {
     private $datafile;
     private $eventBuilderMock;
+    private $optObj;
     private $projectConfig;
 
     public function setUp()
     {
         $this->datafile = DATAFILE;
         $this->projectConfig = new ProjectConfig($this->datafile);
+        $this->optObj = new Optimizely($this->datafile);
 
         // Mock EventBuilder
         $this->eventBuilderMock = $this->getMockBuilder(EventBuilder::class)
@@ -140,6 +142,92 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(
             $validateInputsMethod->invoke(new Optimizely('Random datafile', null, null, null, true),
             'Random datafile', true)
+        );
+    }
+
+    public function testValidatePreconditionsExperimentNotRunning()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        $this->assertFalse(
+            $validatePreconditions->invoke(
+                $this->optObj,
+                $this->projectConfig->getExperimentFromKey('paused_experiment'),
+                'test_user',
+                [])
+        );
+    }
+
+    public function testValidatePreconditionsExperimentRunning()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        $this->assertTrue(
+            $validatePreconditions->invoke(
+                $this->optObj,
+                $this->projectConfig->getExperimentFromKey('test_experiment'),
+                'test_user',
+                [])
+        );
+    }
+
+    public function testValidatePreconditionsUserInForcedVariationNotInExperiment()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        $this->assertTrue(
+            $validatePreconditions->invoke(
+                $this->optObj,
+                $this->projectConfig->getExperimentFromKey('test_experiment'),
+                'user_1',
+                [])
+        );
+    }
+
+    public function testValidatePreconditionsUserInForcedVariationInExperiment()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        $this->assertTrue(
+            $validatePreconditions->invoke(
+                $this->optObj,
+                $this->projectConfig->getExperimentFromKey('test_experiment'),
+                'user1',
+                [])
+        );
+    }
+
+    public function testValidatePreconditionsUserNotInForcedVariationNotInExperiment()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        // Will get updated when we have audience evaluation and user does not meet conditions
+        $this->assertTrue(
+            $validatePreconditions->invoke(
+                $this->optObj,
+                $this->projectConfig->getExperimentFromKey('test_experiment'),
+                'test_user',
+                [])
+        );
+    }
+
+    public function testValidatePreconditionsUserNotInForcedVariationInExperiment()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        // Will get updated when we have audience evaluation and user does meets conditions
+        $this->assertTrue(
+            $validatePreconditions->invoke(
+                $this->optObj,
+                $this->projectConfig->getExperimentFromKey('test_experiment'),
+                'test_user',
+                [])
         );
     }
 

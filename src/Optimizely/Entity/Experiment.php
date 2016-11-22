@@ -264,4 +264,27 @@ class Experiment
     {
         return !is_null($this->_groupPolicy) && $this->_groupPolicy == 'random';
     }
+
+    /**
+     * Determine if experiment is running or not.
+     *
+     * @return boolean True if experiment has status "Running". False otherwise.
+     */
+    public function isExperimentRunning()
+    {
+        return !is_null($this->_status) && $this->_status == 'Running';
+    }
+
+    /**
+     * Determine if user is in forced variation of experiment.
+     *
+     * @param $userId string ID of the user.
+     *
+     * @return boolean True if user is in forced variation of experiment. False otherwise.
+     */
+    public function isUserInForcedVariation($userId)
+    {
+        $forcedVariations = $this->getForcedVariations();
+        return !is_null($forcedVariations) && isset($forcedVariations[$userId]);
+    }
 }

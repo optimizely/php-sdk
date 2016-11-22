@@ -119,6 +119,18 @@ class Optimizely
      */
     private function validatePreconditions($experiment, $userId, $attributes)
     {
+        // TODO(ali): Insert attributes validation
+
+        if (!$experiment->isExperimentRunning()) {
+            return false;
+        }
+
+        if ($experiment->isUserInForcedVariation($userId)) {
+            return true;
+        }
+
+        // TODO(ali): Insert audience check
+
         return true;
     }
 
