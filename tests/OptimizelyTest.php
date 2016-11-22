@@ -31,12 +31,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 {
     private $datafile;
     private $eventBuilderMock;
+    private $optimizelyObject;
     private $projectConfig;
 
     public function setUp()
     {
         $this->datafile = DATAFILE;
         $this->projectConfig = new ProjectConfig($this->datafile);
+        $this->optimizelyObject = new Optimizely($this->datafile);
 
         // Mock EventBuilder
         $this->eventBuilderMock = $this->getMockBuilder(EventBuilder::class)
@@ -143,6 +145,92 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testValidatePreconditionsExperimentNotRunning()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        $this->assertFalse(
+            $validatePreconditions->invoke(
+                $this->optimizelyObject,
+                $this->projectConfig->getExperimentFromKey('paused_experiment'),
+                'test_user',
+                [])
+        );
+    }
+
+    public function testValidatePreconditionsExperimentRunning()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        $this->assertTrue(
+            $validatePreconditions->invoke(
+                $this->optimizelyObject,
+                $this->projectConfig->getExperimentFromKey('test_experiment'),
+                'test_user',
+                [])
+        );
+    }
+
+    public function testValidatePreconditionsUserInForcedVariationNotInExperiment()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        $this->assertTrue(
+            $validatePreconditions->invoke(
+                $this->optimizelyObject,
+                $this->projectConfig->getExperimentFromKey('test_experiment'),
+                'user_1',
+                [])
+        );
+    }
+
+    public function testValidatePreconditionsUserInForcedVariationInExperiment()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        $this->assertTrue(
+            $validatePreconditions->invoke(
+                $this->optimizelyObject,
+                $this->projectConfig->getExperimentFromKey('test_experiment'),
+                'user1',
+                [])
+        );
+    }
+
+    public function testValidatePreconditionsUserNotInForcedVariationNotInExperiment()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        // Will get updated when we have audience evaluation and user does not meet conditions
+        $this->assertTrue(
+            $validatePreconditions->invoke(
+                $this->optimizelyObject,
+                $this->projectConfig->getExperimentFromKey('test_experiment'),
+                'test_user',
+                [])
+        );
+    }
+
+    public function testValidatePreconditionsUserNotInForcedVariationInExperiment()
+    {
+        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
+        $validatePreconditions->setAccessible(true);
+
+        // Will get updated when we have audience evaluation and user does meets conditions
+        $this->assertTrue(
+            $validatePreconditions->invoke(
+                $this->optimizelyObject,
+                $this->projectConfig->getExperimentFromKey('test_experiment'),
+                'test_user',
+                [])
+        );
+    }
+
     public function testActivateNoAttributes()
     {
         $this->eventBuilderMock->expects($this->once())
@@ -188,6 +276,32 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call activate
         $this->assertEquals('control', $optlyObject->activate('test_experiment', 'test_user', $userAttributes));
+    }
+
+    public function testActivateExperimentNotRunning()
+    {
+        $this->eventBuilderMock->expects($this->never())
+            ->method('createImpressionEvent');
+
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher());
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Call activate
+        $this->assertNull($optlyObject->activate('paused_experiment', 'test_user', null));
+    }
+
+
+    public function testGetVariation()
+    {
+        $this->assertEquals('control', $this->optimizelyObject->getVariation('test_experiment', 'test_user'));
+    }
+
+    public function testGetVariationExperimentNotRunning()
+    {
+        $this->assertNull($this->optimizelyObject->getVariation('paused_experiment', 'test_user'));
     }
 
     public function testTrackNoAttributesNoEventValue()

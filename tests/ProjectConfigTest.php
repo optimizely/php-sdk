@@ -69,6 +69,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $experimentKeyMap->setAccessible(true);
         $this->assertEquals([
             'test_experiment' => $this->config->getExperimentFromKey('test_experiment'),
+            'paused_experiment' => $this->config->getExperimentFromKey('paused_experiment'),
             'group_experiment_1' => $this->config->getExperimentFromKey('group_experiment_1'),
             'group_experiment_2' => $this->config->getExperimentFromKey('group_experiment_2')
         ], $experimentKeyMap->getValue($this->config));
@@ -79,7 +80,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([
             '7716830082' => $this->config->getExperimentFromId('7716830082'),
             '7723330021' => $this->config->getExperimentFromId('7723330021'),
-            '7718750065' => $this->config->getExperimentFromId('7718750065')
+            '7718750065' => $this->config->getExperimentFromId('7718750065'),
+            '7716830585' => $this->config->getExperimentFromId('7716830585')
         ], $experimentIdMap->getValue($this->config));
 
         // Check event key map
@@ -112,6 +114,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
                 'control' => $this->config->getVariationFromKey('test_experiment', 'control'),
                 'variation' => $this->config->getVariationFromKey('test_experiment', 'variation')
             ],
+            'paused_experiment' => [
+                'control' => $this->config->getVariationFromKey('paused_experiment', 'control'),
+                'variation' => $this->config->getVariationFromKey('paused_experiment', 'variation')
+            ],
             'group_experiment_1' => [
                 'group_exp_1_var_1' => $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_1'),
                 'group_exp_1_var_2' => $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_2')
@@ -129,6 +135,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment' => [
                 '7722370027' => $this->config->getVariationFromId('test_experiment', '7722370027'),
                 '7721010009' => $this->config->getVariationFromId('test_experiment', '7721010009')
+            ],
+            'paused_experiment' => [
+                '7722370427' => $this->config->getVariationFromId('paused_experiment', '7722370427'),
+                '7721010509' => $this->config->getVariationFromId('paused_experiment', '7721010509')
             ],
             'group_experiment_1' => [
                 '7722260071' => $this->config->getVariationFromId('group_experiment_1', '7722260071'),
@@ -192,7 +202,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $event = $this->config->getEvent('purchase');
         $this->assertEquals('purchase', $event->getKey());
         $this->assertEquals('7718020063', $event->getId());
-        $this->assertEquals(['7716830082', '7723330021', '7718750065'], $event->getExperimentIds());
+        $this->assertEquals(['7716830082', '7723330021', '7718750065', '7716830585'], $event->getExperimentIds());
     }
 
     public function testGetEventInvalidKey()
