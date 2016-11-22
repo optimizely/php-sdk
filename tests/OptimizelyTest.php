@@ -169,7 +169,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 $this->optimizelyObject,
                 $this->projectConfig->getExperimentFromKey('test_experiment'),
                 'test_user',
-                [])
+                ['device_type' => 'iPhone', 'location' => 'San Francisco'])
         );
     }
 
@@ -206,8 +206,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
         $validatePreconditions->setAccessible(true);
 
-        // Will get updated when we have audience evaluation and user does not meet conditions
-        $this->assertTrue(
+        $this->assertFalse(
             $validatePreconditions->invoke(
                 $this->optimizelyObject,
                 $this->projectConfig->getExperimentFromKey('test_experiment'),
@@ -221,13 +220,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
         $validatePreconditions->setAccessible(true);
 
-        // Will get updated when we have audience evaluation and user does meets conditions
         $this->assertTrue(
             $validatePreconditions->invoke(
                 $this->optimizelyObject,
                 $this->projectConfig->getExperimentFromKey('test_experiment'),
                 'test_user',
-                [])
+                ['device_type' => 'iPhone', 'location' => 'San Francisco'])
         );
     }
 
