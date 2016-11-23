@@ -21,6 +21,7 @@ use Monolog\Logger;
 use Optimizely\Bucketer;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
+use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
 use TypeError;
@@ -250,6 +251,32 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->expectOutputRegex('/Datafile has invalid format. Failing "activate"./');
     }
 
+    public function testActivateInvalidAttributes()
+    {
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, 'Provided attributes are in an invalid format.');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO, 'Not activating user "test_user".');
+
+        $errorHandlerMock = $this->getMockBuilder(NoOpErrorHandler::class)
+            ->setMethods(array('handleError'))
+            ->getMock();
+        $errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidAttributeException('Provided attributes are in an invalid format.'));
+
+        $optlyObject = new Optimizely(
+            $this->datafile, new ValidEventDispatcher(), $this->loggerMock, $errorHandlerMock
+        );
+
+        // Call activate
+        $this->assertNull($optlyObject->activate('test_experiment', 'test_user', 42));
+    }
+
     public function testActivateNoAudienceNoAttributes()
     {
         $this->eventBuilderMock->expects($this->once())
@@ -400,6 +427,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->expectOutputRegex('/Datafile has invalid format. Failing "getVariation"./');
     }
 
+    public function testGetVariationInvalidAttributes()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Provided attributes are in an invalid format.');
+
+        $errorHandlerMock = $this->getMockBuilder(NoOpErrorHandler::class)
+            ->setMethods(array('handleError'))
+            ->getMock();
+        $errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidAttributeException('Provided attributes are in an invalid format.'));
+
+        $optlyObject = new Optimizely(
+            $this->datafile, new ValidEventDispatcher(), $this->loggerMock, $errorHandlerMock
+        );
+
+        // Call activate
+        $this->assertNull($optlyObject->getVariation('test_experiment', 'test_user', 42));
+    }
+
     public function testGetVariationAudienceMatch()
     {
         $this->loggerMock->expects($this->exactly(2))
@@ -445,6 +493,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject = new Optimizely('Random datafile');
         $optlyObject->track('some_event', 'some_user');
         $this->expectOutputRegex('/Datafile has invalid format. Failing "track"./');
+    }
+
+    public function testTrackInvalidAttributes()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Provided attributes are in an invalid format.');
+
+        $errorHandlerMock = $this->getMockBuilder(NoOpErrorHandler::class)
+            ->setMethods(array('handleError'))
+            ->getMock();
+        $errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidAttributeException('Provided attributes are in an invalid format.'));
+
+        $optlyObject = new Optimizely(
+            $this->datafile, new ValidEventDispatcher(), $this->loggerMock, $errorHandlerMock
+        );
+
+        // Call activate
+        $this->assertNull($optlyObject->track('purchase', 'test_user', 42));
     }
 
     public function testTrackNoAttributesNoEventValue()
