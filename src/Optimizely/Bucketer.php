@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 namespace Optimizely;
+use Monolog\Logger;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
+use Optimizely\Logger\LoggerInterface;
 
 /**
  * Class Bucketer
@@ -44,6 +46,20 @@ class Bucketer
      * @var integer Maximum possible hash value.
      */
     private static $MAX_HASH_VALUE = 0x100000000;
+
+    /**
+     * @var LoggerInterface Logger for logging messages.
+     */
+    private $_logger;
+
+    /**
+     * Bucketer constructor.
+     * @param LoggerInterface $logger
+     */
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->_logger = $logger;
+    }
 
     /**
      * Generate a hash value to be used in determining which variation the user will be put in.
@@ -82,8 +98,8 @@ class Bucketer
     {
         // Generate bucketing ID based on combination of user ID and experiment ID or group ID.
         $bucketingId = $userId.$parentId;
-
         $bucketingNumber = $this->generateBucketValue($bucketingId);
+        $this->_logger->log(Logger::DEBUG, sprintf('Assigned bucket %s to user "%s".', $bucketingNumber, $userId));
 
         forEach ($trafficAllocations as $trafficAllocation)
         {
@@ -116,6 +132,12 @@ class Bucketer
         if (!is_null($forcedVariations) && isset($forcedVariations[$userId])) {
             $variationKey = $forcedVariations[$userId];
             $variation = $config->getVariationFromKey($experiment->getKey(), $variationKey);
+            if ($variationKey) {
+                $this->_logger->log(
+                    Logger::INFO,
+                    sprintf('User "%s" is forced in variation "%s".', $userId, $variationKey)
+                );
+            }
             return $variation;
         }
 
@@ -129,21 +151,37 @@ class Bucketer
 
             $userExperimentId = $this->findBucket($userId, $group->getId(), $group->getTrafficAllocation());
             if (is_null($userExperimentId)) {
+                $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no experiment "%s".', $userId));
                 return new Variation();
             }
 
             if ($userExperimentId != $experiment->getId()) {
+                $this->_logger->log(
+                    Logger::INFO,
+                    sprintf('User "%s" is not in experiment %s of group %s.',
+                        $userId, $experiment->getKey(), $experiment->getGroupId()
+                    ));
                 return new Variation();
             }
+
+            $this->_logger->log(Logger::INFO,
+                sprintf('User "%s" is in experiment %s of group %s.',
+                    $userId, $experiment->getKey(), $experiment->getGroupId()
+                ));
         }
 
         // Bucket user if not in whitelist and in group (if any).
         $variationId = $this->findBucket($userId, $experiment->getId(), $experiment->getTrafficAllocation());
         if (!is_null($variationId)) {
             $variation = $config->getVariationFromId($experiment->getKey(), $variationId);
+            $this->_logger->log(Logger::INFO,
+                sprintf('User "%s" is in variation %s of experiment %s.',
+                    $userId, $variation->getKey(), $experiment->getKey()
+                ));
             return $variation;
         }
 
+        $this->_logger->log(Logger::INFO,  sprintf('User "%s" is in no variation.', $userId));
         return new Variation();
     }
 }

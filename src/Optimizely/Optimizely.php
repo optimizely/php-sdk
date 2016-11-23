@@ -17,9 +17,10 @@
 namespace Optimizely;
 
 use Exception;
+use Throwable;
+use Monolog\Logger;
 use Optimizely\Entity\Experiment;
 use Optimizely\Logger\DefaultLogger;
-use Throwable;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
@@ -94,6 +95,8 @@ class Optimizely
         if (!$this->validateInputs($datafile, $skipJsonValidation)) {
             $this->_isValid = false;
             $this->_logger = new DefaultLogger();
+            $this->_logger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
+            return;
         }
 
         try {
@@ -102,13 +105,17 @@ class Optimizely
         catch (Throwable $exception) {
             $this->_isValid = false;
             $this->_logger = new DefaultLogger();
+            $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
+            return;
         }
         catch (Exception $exception) {
             $this->_isValid = false;
             $this->_logger = new DefaultLogger();
+            $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
+            return;
         }
 
-        $this->_bucketer = new Bucketer();
+        $this->_bucketer = new Bucketer($this->_logger);
         $this->_eventBuilder = new EventBuilder($this->_bucketer);
     }
 
@@ -137,9 +144,13 @@ class Optimizely
      */
     private function validatePreconditions($experiment, $userId, $attributes)
     {
-        //@TODO(ali): Insert attributes validation
+        if (!is_null($attributes) && !Validator::areAttributesValid($attributes)) {
+            $this->_logger->log(Logger::ERROR, 'Provided attributes are in an invalid format.');
+            return false;
+        }
 
         if (!$experiment->isExperimentRunning()) {
+            $this->_logger->log(Logger::INFO, sprintf('Experiment "%s" is not running', $experiment->getKey()));
             return false;
         }
 
@@ -148,6 +159,10 @@ class Optimizely
         }
 
         if (!Validator::isUserInExperiment($this->_config, $experiment, $attributes)) {
+            $this->_logger->log(
+                Logger::INFO,
+                sprintf('User "%s" does not meet conditions to be in experiment "%s".', $userId, $experiment->getKey())
+            );
             return false;
         }
 
@@ -165,13 +180,20 @@ class Optimizely
      */
     public function activate($experimentKey, $userId, $attributes = null)
     {
+        if (!$this->_isValid) {
+            $this->_logger->log(Logger::ERROR, 'Datafile has invalid format. Failing "activate".');
+            return null;
+        }
+
         $experiment = $this->_config->getExperimentFromKey($experimentKey);
 
         if (is_null($experiment->getKey())) {
+            $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
             return null;
         }
 
         if (!$this->validatePreconditions($experiment, $userId, $attributes)) {
+            $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
             return null;
         }
 
@@ -179,13 +201,29 @@ class Optimizely
         $variationKey = $variation->getKey();
 
         if (is_null($variationKey)) {
+            $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
             return $variationKey;
         }
 
         $impressionEvent = $this->_eventBuilder
             ->createImpressionEvent($this->_config, $experiment, $variation->getId(), $userId, $attributes);
+        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
+        $this->_logger->log(
+            Logger::DEBUG,
+            sprintf('Dispatching impression event to URL %s with params %s.',
+                $impressionEvent->getUrl(), implode(',', $impressionEvent->getParams())
+            )
+        );
 
-        $this->_eventDispatcher->dispatchEvent($impressionEvent);
+        try {
+            $this->_eventDispatcher->dispatchEvent($impressionEvent);
+        }
+        catch (Throwable $exception) {
+            $this->_logger->log(Logger::ERROR, 'Unable to dispatch impression event.');
+        }
+        catch (Exception $exception) {
+            $this->_logger->log(Logger::ERROR, 'Unable to dispatch impression event.');
+        }
 
         return $variationKey;
     }
@@ -200,13 +238,20 @@ class Optimizely
      */
     public function track($eventKey, $userId, $attributes = null, $eventValue = null)
     {
+        if (!$this->_isValid) {
+            $this->_logger->log(Logger::ERROR, 'Datafile has invalid format. Failing "track".');
+            return;
+        }
+
         if (!is_null($attributes) && !Validator::areAttributesValid($attributes)) {
+            $this->_logger->log(Logger::ERROR, 'Provided attributes are in an invalid format.');
             return;
         }
 
         $event = $this->_config->getEvent($eventKey);
 
         if (is_null($event->getKey())) {
+            $this->_logger->log(Logger::ERROR, 'Not tracking user "%s" for event "%s".', $userId, $eventKey);
             return;
         }
 
@@ -216,6 +261,9 @@ class Optimizely
             $experiment = $this->_config->getExperimentFromId($experimentId);
             if ($this->validatePreconditions($experiment, $userId, $attributes)) {
                 array_push($validExperiments, $experiment);
+            } else {
+                $this->_logger->log(Logger::INFO, 'Not tracking user "%s" for experiment "%s".',
+                    $userId, $experiment->getKey());
             }
         }
 
@@ -229,7 +277,28 @@ class Optimizely
                     $attributes,
                     $eventValue
                 );
-            $this->_eventDispatcher->dispatchEvent($conversionEvent);
+            $this->_logger->log(Logger::INFO, sprintf('Tracking event "%s" for user "%s".', $eventKey, $userId));
+            $this->_logger->log(
+                Logger::DEBUG,
+                sprintf('Dispatching conversion event to URL %s with params %s.',
+                    $conversionEvent->getUrl(), implode(',', $conversionEvent->getParams())
+                ));
+
+            try {
+                $this->_eventDispatcher->dispatchEvent($conversionEvent);
+            }
+            catch (Throwable $exception) {
+                $this->_logger->log(Logger::ERROR, 'Unable to dispatch conversion event.');
+            }
+            catch (Exception $exception) {
+                $this->_logger->log(Logger::ERROR, 'Unable to dispatch conversion event.');
+            }
+
+        } else {
+            $this->_logger->log(
+                Logger::INFO,
+                sprintf('There are no valid experiments for event "%s" to track.', $eventKey)
+            );
         }
     }
 
@@ -244,6 +313,11 @@ class Optimizely
      */
     public function getVariation($experimentKey, $userId, $attributes = null)
     {
+        if (!$this->_isValid) {
+            $this->_logger->log(Logger::ERROR, 'Datafile has invalid format. Failing "getVariation".');
+            return null;
+        }
+
         $experiment = $this->_config->getExperimentFromKey($experimentKey);
 
         if (is_null($experiment->getKey())) {
