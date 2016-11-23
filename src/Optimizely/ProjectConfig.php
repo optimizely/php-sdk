@@ -300,7 +300,8 @@ class ProjectConfig
             return $this->_variationKeyMap[$experimentKey][$variationKey];
         }
 
-        $this->_logger->log(Logger::ERROR, sprintf('Variation key "%s" is not in datafile.', $variationKey));
+        $this->_logger->log(Logger::ERROR, sprintf(
+            'No variation key "%s" defined in datafile for experiment "%s".', $variationKey, $experimentKey));
         $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
         return new Variation();
     }
@@ -319,7 +320,8 @@ class ProjectConfig
             return $this->_variationIdMap[$experimentKey][$variationId];
         }
 
-        $this->_logger->log(Logger::ERROR, sprintf('Variation ID "%s" is not in datafile.', $variationId));
+        $this->_logger->log(Logger::ERROR, sprintf(
+            'No variation ID "%s" defined in datafile for experiment "%s".', $variationId, $experimentKey));
         $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
         return new Variation();
     }

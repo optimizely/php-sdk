@@ -307,7 +307,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
     {
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with(Logger::ERROR, 'Variation key "invalid_key" is not in datafile.');
+            ->with(
+                Logger::ERROR,
+                'No variation key "invalid_key" defined in datafile for experiment "test_experiment".'
+            );
         $this->errorHandlerMock->expects($this->once())
             ->method('handleError')
             ->with(new InvalidVariationException('Provided variation is not in datafile.'));
@@ -319,7 +322,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
     {
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with(Logger::ERROR, 'Variation key "control" is not in datafile.');
+            ->with(
+                Logger::ERROR,
+                'No variation key "control" defined in datafile for experiment "invalid_experiment".'
+            );
         $this->errorHandlerMock->expects($this->once())
             ->method('handleError')
             ->with(new InvalidVariationException('Provided variation is not in datafile.'));
@@ -338,7 +344,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
     {
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with(Logger::ERROR, 'Variation ID "invalid_id" is not in datafile.');
+            ->with(
+                Logger::ERROR,
+                'No variation ID "invalid_id" defined in datafile for experiment "test_experiment".'
+            );
         $this->errorHandlerMock->expects($this->once())
             ->method('handleError')
             ->with(new InvalidVariationException('Provided variation is not in datafile.'));
@@ -350,7 +359,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
     {
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with(Logger::ERROR, 'Variation ID "7722370027" is not in datafile.');
+            ->with(
+                Logger::ERROR,
+                'No variation ID "7722370027" defined in datafile for experiment "invalid_experiment".'
+            );
         $this->errorHandlerMock->expects($this->once())
             ->method('handleError')
             ->with(new InvalidVariationException('Provided variation is not in datafile.'));
