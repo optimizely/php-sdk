@@ -17,6 +17,7 @@
 
 namespace Optimizely\Tests;
 use Optimizely\Bucketer;
+use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Event\LogEvent;
 use Optimizely\Logger\NoOpLogger;
@@ -32,8 +33,8 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->testUserId = 'testUserId';
-        $this->config = new ProjectConfig(DATAFILE);
         $logger = new NoOpLogger();
+        $this->config = new ProjectConfig(DATAFILE, $logger, new NoOpErrorHandler());
         $this->eventBuilder = new EventBuilder(new Bucketer($logger));
     }
 

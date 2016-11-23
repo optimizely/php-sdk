@@ -100,7 +100,7 @@ class Optimizely
         }
 
         try {
-          $this->_config = new ProjectConfig($datafile);
+          $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
         }
         catch (Throwable $exception) {
             $this->_isValid = false;

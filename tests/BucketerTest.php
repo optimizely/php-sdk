@@ -21,6 +21,7 @@ use Monolog\Logger;
 use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
+use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
 
@@ -33,11 +34,11 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->testUserId = 'testUserId';
-        $this->config = new ProjectConfig(DATAFILE);
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))
             ->getMock();
+        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
     }
 
     private function getBucketingId($userId, $experimentId)

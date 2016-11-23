@@ -151,7 +151,7 @@ class Bucketer
 
             $userExperimentId = $this->findBucket($userId, $group->getId(), $group->getTrafficAllocation());
             if (is_null($userExperimentId)) {
-                $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no experiment "%s".', $userId));
+                $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no experiment.', $userId));
                 return new Variation();
             }
 

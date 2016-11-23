@@ -19,6 +19,7 @@ namespace Optimizely\Tests;
 use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
+use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
@@ -40,12 +41,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->datafile = DATAFILE;
-        $this->projectConfig = new ProjectConfig($this->datafile);
+
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))
             ->getMock();
         $this->optimizelyObject = new Optimizely($this->datafile, null, $this->loggerMock);
+
+        $this->projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
 
         // Mock EventBuilder
         $this->eventBuilderMock = $this->getMockBuilder(EventBuilder::class)
