@@ -224,10 +224,12 @@ class Optimizely
             $this->_eventDispatcher->dispatchEvent($impressionEvent);
         }
         catch (Throwable $exception) {
-            $this->_logger->log(Logger::ERROR, 'Unable to dispatch impression event.');
+            $this->_logger->log(Logger::ERROR, sprintf(
+                'Unable to dispatch impression event. Error %s', $exception->getMessage()));
         }
         catch (Exception $exception) {
-            $this->_logger->log(Logger::ERROR, 'Unable to dispatch impression event.');
+            $this->_logger->log(Logger::ERROR, sprintf(
+                'Unable to dispatch impression event. Error %s', $exception->getMessage()));
         }
 
         return $variationKey;
@@ -296,10 +298,12 @@ class Optimizely
                 $this->_eventDispatcher->dispatchEvent($conversionEvent);
             }
             catch (Throwable $exception) {
-                $this->_logger->log(Logger::ERROR, 'Unable to dispatch conversion event.');
+                $this->_logger->log(Logger::ERROR, sprintf(
+                    'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
             }
             catch (Exception $exception) {
-                $this->_logger->log(Logger::ERROR, 'Unable to dispatch conversion event.');
+                $this->_logger->log(Logger::ERROR, sprintf(
+                    'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
             }
 
         } else {
