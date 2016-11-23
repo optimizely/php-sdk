@@ -251,7 +251,7 @@ class Optimizely
         $event = $this->_config->getEvent($eventKey);
 
         if (is_null($event->getKey())) {
-            $this->_logger->log(Logger::ERROR, 'Not tracking user "%s" for event "%s".', $userId, $eventKey);
+            $this->_logger->log(Logger::ERROR, sprintf('Not tracking user "%s" for event "%s".', $userId, $eventKey));
             return;
         }
 
@@ -262,8 +262,8 @@ class Optimizely
             if ($this->validatePreconditions($experiment, $userId, $attributes)) {
                 array_push($validExperiments, $experiment);
             } else {
-                $this->_logger->log(Logger::INFO, 'Not tracking user "%s" for experiment "%s".',
-                    $userId, $experiment->getKey());
+                $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for experiment "%s".',
+                    $userId, $experiment->getKey()));
             }
         }
 
