@@ -18,21 +18,41 @@
 namespace Optimizely\Tests;
 include('TestData.php');
 
+use Monolog\Logger;
 use Optimizely\Entity\Attribute;
 use Optimizely\Entity\Audience;
 use Optimizely\Entity\Event;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Group;
 use Optimizely\Entity\Variation;
+use Optimizely\ErrorHandler\NoOpErrorHandler;
+use Optimizely\Exceptions\InvalidAttributeException;
+use Optimizely\Exceptions\InvalidAudienceException;
+use Optimizely\Exceptions\InvalidEventException;
+use Optimizely\Exceptions\InvalidExperimentException;
+use Optimizely\Exceptions\InvalidGroupException;
+use Optimizely\Exceptions\InvalidVariationException;
+use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
 
 class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 {
     private $config;
+    private $loggerMock;
+    private $errorHandlerMock;
 
     protected function setUp()
     {
-        $this->config = new ProjectConfig(DATAFILE);
+        // Mock Logger
+        $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
+            ->setMethods(array('log'))
+            ->getMock();
+        // Mock Error handler
+        $this->errorHandlerMock = $this->getMockBuilder(NoOpErrorHandler::class)
+            ->setMethods(array('handleError'))
+            ->getMock();
+
+        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
     }
 
     public function testInit()
@@ -69,6 +89,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $experimentKeyMap->setAccessible(true);
         $this->assertEquals([
             'test_experiment' => $this->config->getExperimentFromKey('test_experiment'),
+            'paused_experiment' => $this->config->getExperimentFromKey('paused_experiment'),
             'group_experiment_1' => $this->config->getExperimentFromKey('group_experiment_1'),
             'group_experiment_2' => $this->config->getExperimentFromKey('group_experiment_2')
         ], $experimentKeyMap->getValue($this->config));
@@ -79,7 +100,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([
             '7716830082' => $this->config->getExperimentFromId('7716830082'),
             '7723330021' => $this->config->getExperimentFromId('7723330021'),
-            '7718750065' => $this->config->getExperimentFromId('7718750065')
+            '7718750065' => $this->config->getExperimentFromId('7718750065'),
+            '7716830585' => $this->config->getExperimentFromId('7716830585')
         ], $experimentIdMap->getValue($this->config));
 
         // Check event key map
@@ -112,6 +134,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
                 'control' => $this->config->getVariationFromKey('test_experiment', 'control'),
                 'variation' => $this->config->getVariationFromKey('test_experiment', 'variation')
             ],
+            'paused_experiment' => [
+                'control' => $this->config->getVariationFromKey('paused_experiment', 'control'),
+                'variation' => $this->config->getVariationFromKey('paused_experiment', 'variation')
+            ],
             'group_experiment_1' => [
                 'group_exp_1_var_1' => $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_1'),
                 'group_exp_1_var_2' => $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_2')
@@ -129,6 +155,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment' => [
                 '7722370027' => $this->config->getVariationFromId('test_experiment', '7722370027'),
                 '7721010009' => $this->config->getVariationFromId('test_experiment', '7721010009')
+            ],
+            'paused_experiment' => [
+                '7722370427' => $this->config->getVariationFromId('paused_experiment', '7722370427'),
+                '7721010509' => $this->config->getVariationFromId('paused_experiment', '7721010509')
             ],
             'group_experiment_1' => [
                 '7722260071' => $this->config->getVariationFromId('group_experiment_1', '7722260071'),
@@ -160,6 +190,13 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetGroupInvalidId()
     {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Group ID "invalid_id" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidGroupException('Provided group is not in datafile.'));
+
         $this->assertEquals(new Group(), $this->config->getGroup('invalid_id'));
     }
 
@@ -172,6 +209,13 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetExperimentInvalidKey()
     {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Experiment key "invalid_key" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidExperimentException('Provided experiment is not in datafile.'));
+
         $this->assertEquals(new Experiment(), $this->config->getExperimentFromKey('invalid_key'));
     }
 
@@ -184,6 +228,13 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetExperimentInvalidId()
     {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Experiment ID "42" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidExperimentException('Provided experiment is not in datafile.'));
+
         $this->assertEquals(new Experiment(), $this->config->getExperimentFromId('42'));
     }
 
@@ -192,11 +243,18 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $event = $this->config->getEvent('purchase');
         $this->assertEquals('purchase', $event->getKey());
         $this->assertEquals('7718020063', $event->getId());
-        $this->assertEquals(['7716830082', '7723330021', '7718750065'], $event->getExperimentIds());
+        $this->assertEquals(['7716830082', '7723330021', '7718750065', '7716830585'], $event->getExperimentIds());
     }
 
     public function testGetEventInvalidKey()
     {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Event key "invalid_key" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidEventException('Provided event is not in datafile.'));
+
         $this->assertEquals(new Event(), $this->config->getEvent('invalid_key'));
     }
 
@@ -209,6 +267,13 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetAudienceInvalidKey()
     {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Audience ID "invalid_id" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidAudienceException('Provided audience is not in datafile.'));
+
         $this->assertEquals(new Audience(), $this->config->getAudience('invalid_id'));
     }
 
@@ -221,6 +286,13 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetAttributeInvalidKey()
     {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Attribute key "invalid_key" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidAttributeException('Provided attribute is not in datafile.'));
+
         $this->assertEquals(new Attribute(), $this->config->getAttribute('invalid_key'));
     }
 
@@ -233,12 +305,32 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationFromKeyValidExperimentKeyInvalidVariationKey()
     {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(
+                Logger::ERROR,
+                'No variation key "invalid_key" defined in datafile for experiment "test_experiment".'
+            );
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidVariationException('Provided variation is not in datafile.'));
+
         $this->assertEquals(new Variation(), $this->config->getVariationFromKey('test_experiment', 'invalid_key'));
     }
 
     public function testGetVariationFromKeyInvalidExperimentKey()
     {
-        $this->assertEquals(new Variation(), $this->config->getVariationFromKey('invalid_experiment', '7722370027'));
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(
+                Logger::ERROR,
+                'No variation key "control" defined in datafile for experiment "invalid_experiment".'
+            );
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidVariationException('Provided variation is not in datafile.'));
+
+        $this->assertEquals(new Variation(), $this->config->getVariationFromKey('invalid_experiment', 'control'));
     }
 
     public function testGetVariationFromIdValidExperimentKeyValidVariationId()
@@ -250,11 +342,31 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationFromIdValidExperimentKeyInvalidVariationId()
     {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(
+                Logger::ERROR,
+                'No variation ID "invalid_id" defined in datafile for experiment "test_experiment".'
+            );
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidVariationException('Provided variation is not in datafile.'));
+
         $this->assertEquals(new Variation(), $this->config->getVariationFromId('test_experiment', 'invalid_id'));
     }
 
     public function testGetVariationFromIdInvalidExperimentKey()
     {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(
+                Logger::ERROR,
+                'No variation ID "7722370027" defined in datafile for experiment "invalid_experiment".'
+            );
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidVariationException('Provided variation is not in datafile.'));
+
         $this->assertEquals(new Variation(), $this->config->getVariationFromId('invalid_experiment', '7722370027'));
     }
 }

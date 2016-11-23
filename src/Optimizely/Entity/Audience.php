@@ -34,6 +34,11 @@ class Audience
      */
     private $_conditions;
 
+    /**
+     * @var array De-serialized audience conditions
+     */
+    private $_conditionsList;
+
 
     public function __construct($id = null, $name = null, $conditions = null) {
         $this->_id = $id;
@@ -87,5 +92,21 @@ class Audience
     public function setConditions($conditions)
     {
         $this->_conditions = $conditions;
+    }
+
+    /**
+     * @return array De-serialized audience conditions.
+     */
+    public function getConditionsList()
+    {
+        return $this->_conditionsList;
+    }
+
+    /**
+     * @param $conditionsList array De-serialized audience conditions.
+     */
+    public function setConditionsList($conditionsList)
+    {
+        $this->_conditionsList = $conditionsList;
     }
 }

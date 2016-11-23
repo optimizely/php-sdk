@@ -22,6 +22,16 @@ use Optimizely\Utils\ConfigParser;
 class Experiment
 {
     /**
+     * @const string String denoting running state of experiment.
+     */
+    const STATUS_RUNNING = 'Running';
+
+    /**
+     * @const string String denoting policy of mutually exclusive group.
+     */
+    const MUTEX_GROUP_POLICY = 'random';
+
+    /**
      * @var string Experiment ID.
      */
     private $_id;
@@ -204,7 +214,7 @@ class Experiment
      */
     public function setForcedVariations($forcedVariations)
     {
-        $this->_forcedVariations = get_object_vars($forcedVariations);
+        $this->_forcedVariations = $forcedVariations;
     }
 
     /**
@@ -262,6 +272,28 @@ class Experiment
      */
     public function isInMutexGroup()
     {
-        return !is_null($this->_groupPolicy) && $this->_groupPolicy == 'random';
+        return !is_null($this->_groupPolicy) && $this->_groupPolicy == self::MUTEX_GROUP_POLICY;
+    }
+
+    /**
+     * Determine if experiment is running or not.
+     *
+     * @return boolean True if experiment has status "Running". False otherwise.
+     */
+    public function isExperimentRunning()
+    {
+        return !is_null($this->_status) && $this->_status == self::STATUS_RUNNING;
+    }
+
+    /**
+     * Determine if user is in forced variation of experiment.
+     *
+     * @param $userId string ID of the user.
+     * @return boolean True if user is in forced variation of experiment. False otherwise.
+     */
+    public function isUserInForcedVariation($userId)
+    {
+        $forcedVariations = $this->getForcedVariations();
+        return !is_null($forcedVariations) && isset($forcedVariations[$userId]);
     }
 }

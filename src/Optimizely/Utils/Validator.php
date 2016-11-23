@@ -17,6 +17,8 @@
 namespace Optimizely\Utils;
 
 use JsonSchema;
+use Optimizely\Entity\Experiment;
+use Optimizely\ProjectConfig;
 
 
 class Validator
@@ -43,7 +45,40 @@ class Validator
      */
     public static function areAttributesValid($attributes)
     {
-        //TODO(ali): Implement me
-        return True;
+        return is_array($attributes) && count(array_filter(array_keys($attributes), 'is_int')) == 0;
+    }
+
+    /**
+     * @param $config ProjectConfig Configuration for the project.
+     * @param $experiment Experiment Entity representing the experiment.
+     * @param $userAttributes array Attributes of the user.
+     *
+     * @return boolean Representing whether user meets audience conditions to be in experiment or not.
+     */
+    public static function isUserInExperiment($config, $experiment, $userAttributes)
+    {
+        $audienceIds = $experiment->getAudienceIds();
+
+        // Return true if experiment is not targeted to any audience.
+        if (empty($audienceIds)) {
+            return true;
+        }
+
+        // Return false if there is audience, but no user attributes.
+        if (empty($userAttributes)) {
+            return false;
+        }
+
+        // Return true if conditions for any audience are met.
+        $conditionEvaluator = new ConditionEvaluator();
+        forEach ($audienceIds as $audienceId) {
+            $audience = $config->getAudience($audienceId);
+            $result = $conditionEvaluator->evaluate($audience->getConditionsList(), $userAttributes);
+            if ($result) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

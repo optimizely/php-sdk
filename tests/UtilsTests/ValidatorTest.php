@@ -17,6 +17,9 @@
 
 namespace Optimizely\Tests;
 
+use Optimizely\ErrorHandler\NoOpErrorHandler;
+use Optimizely\Logger\NoOpLogger;
+use Optimizely\ProjectConfig;
 use Optimizely\Utils\Validator;
 
 
@@ -39,8 +42,82 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::validateJsonSchema($invalidDatafile));
     }
 
-    public function testAreAttributesValidReturnsTrue()
+    public function testAreAttributesValidValidAttributes()
     {
-        $this->assertTrue(Validator::areAttributesValid('some attributes here'));
+        // Empty attributes
+        $this->assertTrue(Validator::areAttributesValid([]));
+
+        // Valid attributes
+        $this->assertTrue(Validator::areAttributesValid([
+            'location' => 'San Francisco',
+            'browser' => 'Firefox'
+        ]));
+    }
+
+    public function testAreAttributesValidInvalidAttributes()
+    {
+        // String as attributes
+        $this->assertFalse(Validator::areAttributesValid('Invalid string attributes.'));
+
+        // Integer as attributes
+        $this->assertFalse(Validator::areAttributesValid(42));
+
+        // Boolean as attributes
+        $this->assertFalse(Validator::areAttributesValid(true));
+
+        // Sequential array as attributes
+        $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42]));
+
+        // Mixed array as attributes
+        $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42, 'abc' => 'def']));
+    }
+
+    public function testIsUserInExperimentNoAudienceUsedInExperiment()
+    {
+        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $this->assertTrue(Validator::isUserInExperiment(
+            $config,
+            $config->getExperimentFromKey('paused_experiment'),
+            []
+        ));
+    }
+
+    public function testIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
+    {
+        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+
+        // Test with empty attributes
+        $this->assertFalse(Validator::isUserInExperiment(
+            $config,
+            $config->getExperimentFromKey('test_experiment'),
+            []
+        ));
+
+        // Test with null attributes
+        $this->assertFalse(Validator::isUserInExperiment(
+            $config,
+            $config->getExperimentFromKey('test_experiment'),
+            null
+        ));
+    }
+
+    public function testIsUserInExperimentAudienceMatch()
+    {
+        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $this->assertTrue(Validator::isUserInExperiment(
+            $config,
+            $config->getExperimentFromKey('test_experiment'),
+            ['device_type' => 'iPhone', 'location' => 'San Francisco']
+        ));
+    }
+
+    public function testIsUserInExperimentAudienceNoMatch()
+    {
+        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $this->assertFalse(Validator::isUserInExperiment(
+            $config,
+            $config->getExperimentFromKey('test_experiment'),
+            ['device_type' => 'Android', 'location' => 'San Francisco']
+        ));
     }
 }

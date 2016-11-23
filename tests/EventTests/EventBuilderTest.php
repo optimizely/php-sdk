@@ -17,8 +17,10 @@
 
 namespace Optimizely\Tests;
 use Optimizely\Bucketer;
+use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Event\LogEvent;
+use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
 
 
@@ -31,14 +33,15 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->testUserId = 'testUserId';
-        $this->config = new ProjectConfig(DATAFILE);
-        $this->eventBuilder = new EventBuilder(new Bucketer());
+        $logger = new NoOpLogger();
+        $this->config = new ProjectConfig(DATAFILE, $logger, new NoOpErrorHandler());
+        $this->eventBuilder = new EventBuilder(new Bucketer($logger));
     }
 
     public function testCreateImpressionEventNoAttributes()
     {
         $expectedLogEvent = new LogEvent(
-            'https://p13nlog.dz.optimizely.com/log/decision',
+            'https://logx.optimizely.com/log/decision',
             [
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
@@ -72,7 +75,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     public function testCreateImpressionEventWithAttributes()
     {
         $expectedLogEvent = new LogEvent(
-            'https://p13nlog.dz.optimizely.com/log/decision',
+            'https://logx.optimizely.com/log/decision',
             [
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
@@ -117,7 +120,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     public function testCreateConversionEventNoAttributesNoValue()
     {
         $expectedLogEvent = new LogEvent(
-            'https://p13nlog.dz.optimizely.com/log/event',
+            'https://logx.optimizely.com/log/event',
             [
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
@@ -159,7 +162,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     public function testCreateConversionEventWithAttributesNoValue()
     {
         $expectedLogEvent = new LogEvent(
-            'https://p13nlog.dz.optimizely.com/log/event',
+            'https://logx.optimizely.com/log/event',
             [
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
@@ -212,7 +215,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     public function testCreateConversionEventNoAttributesWithValue()
     {
         $expectedLogEvent = new LogEvent(
-            'https://p13nlog.dz.optimizely.com/log/event',
+            'https://logx.optimizely.com/log/event',
             [
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
@@ -257,7 +260,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     public function testCreateConversionEventWithAttributesWithValue()
     {
         $expectedLogEvent = new LogEvent(
-            'https://p13nlog.dz.optimizely.com/log/event',
+            'https://logx.optimizely.com/log/event',
             [
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
