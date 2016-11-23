@@ -46,7 +46,7 @@ class Validator
     public static function areAttributesValid($attributes)
     {
         //TODO(ali): Implement me
-        return True;
+        return true;
     }
 
     /**

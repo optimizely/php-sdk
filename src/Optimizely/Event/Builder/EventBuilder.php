@@ -38,12 +38,12 @@ class EventBuilder
     /**
      * @var string URL to send impression event to.
      */
-    private static $IMPRESSION_ENDPOINT = 'https://p13nlog.dz.optimizely.com/log/decision';
+    private static $IMPRESSION_ENDPOINT = 'https://logx.optimizely.com/log/decision';
 
     /**
      * @var string URL to send conversion event to.
      */
-    private static $CONVERSION_ENDPOINT = 'https://p13nlog.dz.optimizely.com/log/event';
+    private static $CONVERSION_ENDPOINT = 'https://logx.optimizely.com/log/event';
 
     /**
      * @var string HTTP method to be used when making call to log endpoint.

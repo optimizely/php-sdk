@@ -17,12 +17,21 @@
 
 namespace Optimizely;
 
+use Monolog\Logger;
 use Optimizely\Entity\Attribute;
 use Optimizely\Entity\Audience;
 use Optimizely\Entity\Event;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Group;
 use Optimizely\Entity\Variation;
+use Optimizely\ErrorHandler\ErrorHandlerInterface;
+use Optimizely\Exceptions\InvalidAttributeException;
+use Optimizely\Exceptions\InvalidAudienceException;
+use Optimizely\Exceptions\InvalidEventException;
+use Optimizely\Exceptions\InvalidExperimentException;
+use Optimizely\Exceptions\InvalidGroupException;
+use Optimizely\Exceptions\InvalidVariationException;
+use Optimizely\Logger\LoggerInterface;
 use Optimizely\Utils\ConditionDecoder;
 use Optimizely\Utils\ConfigParser;
 
@@ -93,15 +102,28 @@ class ProjectConfig
      */
     private $_audienceIdMap;
 
+    /**
+     * @var LoggerInterface Logger for logging messages.
+     */
+    private $_logger;
+
+    /**
+     * @var ErrorHandlerInterface Handler for exceptions.
+     */
+    private $_errorHandler;
 
     /**
      * ProjectConfig constructor to load and set project configuration data.
      *
      * @param $datafile string JSON string representing the project.
+     * @param $logger LoggerInterface
+     * @param $errorHandler ErrorHandlerInterface
      */
-    public function __construct($datafile)
+    public function __construct($datafile, $logger, $errorHandler)
     {
         $config = json_decode($datafile, true);
+        $this->_logger = $logger;
+        $this->_errorHandler = $errorHandler;
         $this->_version = $config['version'];
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
@@ -174,6 +196,8 @@ class ProjectConfig
             return $this->_groupIdMap[$groupId];
         }
 
+        $this->_logger->log(Logger::ERROR, sprintf('Group ID "%s" is not in datafile.', $groupId));
+        $this->_errorHandler->handleError(new InvalidGroupException('Provided group is not in datafile.'));
         return new Group();
     }
 
@@ -189,6 +213,8 @@ class ProjectConfig
             return $this->_experimentKeyMap[$experimentKey];
         }
 
+        $this->_logger->log(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $experimentKey));
+        $this->_errorHandler->handleError(new InvalidExperimentException('Provided experiment is not in datafile.'));
         return new Experiment();
     }
 
@@ -204,6 +230,8 @@ class ProjectConfig
             return $this->_experimentIdMap[$experimentId];
         }
 
+        $this->_logger->log(Logger::ERROR, sprintf('Experiment ID "%s" is not in datafile.', $experimentId));
+        $this->_errorHandler->handleError(new InvalidExperimentException('Provided experiment is not in datafile.'));
         return new Experiment();
     }
 
@@ -219,6 +247,8 @@ class ProjectConfig
             return $this->_eventKeyMap[$eventKey];
         }
 
+        $this->_logger->log(Logger::ERROR, sprintf('Event key "%s" is not in datafile.', $eventKey));
+        $this->_errorHandler->handleError(new InvalidEventException('Provided event is not in datafile.'));
         return new Event();
     }
 
@@ -234,6 +264,8 @@ class ProjectConfig
             return $this->_audienceIdMap[$audienceId];
         }
 
+        $this->_logger->log(Logger::ERROR, sprintf('Audience ID "%s" is not in datafile.', $audienceId));
+        $this->_errorHandler->handleError(new InvalidAudienceException('Provided audience is not in datafile.'));
         return new Audience();
     }
 
@@ -249,6 +281,8 @@ class ProjectConfig
             return $this->_attributeKeyMap[$attributeKey];
         }
 
+        $this->_logger->log(Logger::ERROR, sprintf('Attribute key "%s" is not in datafile.', $attributeKey));
+        $this->_errorHandler->handleError(new InvalidAttributeException('Provided attribute is not in datafile.'));
         return new Attribute();
     }
 
@@ -266,6 +300,9 @@ class ProjectConfig
             return $this->_variationKeyMap[$experimentKey][$variationKey];
         }
 
+        $this->_logger->log(Logger::ERROR, sprintf(
+            'No variation key "%s" defined in datafile for experiment "%s".', $variationKey, $experimentKey));
+        $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
         return new Variation();
     }
 
@@ -283,6 +320,9 @@ class ProjectConfig
             return $this->_variationIdMap[$experimentKey][$variationId];
         }
 
+        $this->_logger->log(Logger::ERROR, sprintf(
+            'No variation ID "%s" defined in datafile for experiment "%s".', $variationId, $experimentKey));
+        $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
         return new Variation();
     }
 }

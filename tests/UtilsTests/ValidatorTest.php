@@ -17,6 +17,8 @@
 
 namespace Optimizely\Tests;
 
+use Optimizely\ErrorHandler\NoOpErrorHandler;
+use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
 use Optimizely\Utils\Validator;
 
@@ -47,7 +49,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentNoAudienceUsedInExperiment()
     {
-        $config = new ProjectConfig(DATAFILE);
+        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertTrue(Validator::isUserInExperiment(
             $config,
             $config->getExperimentFromKey('paused_experiment'),
@@ -57,7 +59,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
     {
-        $config = new ProjectConfig(DATAFILE);
+        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
 
         // Test with empty attributes
         $this->assertFalse(Validator::isUserInExperiment(
@@ -76,7 +78,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentAudienceMatch()
     {
-        $config = new ProjectConfig(DATAFILE);
+        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertTrue(Validator::isUserInExperiment(
             $config,
             $config->getExperimentFromKey('test_experiment'),
@@ -86,7 +88,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentAudienceNoMatch()
     {
-        $config = new ProjectConfig(DATAFILE);
+        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertFalse(Validator::isUserInExperiment(
             $config,
             $config->getExperimentFromKey('test_experiment'),
