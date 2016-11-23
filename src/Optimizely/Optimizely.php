@@ -150,7 +150,7 @@ class Optimizely
         }
 
         if (!$experiment->isExperimentRunning()) {
-            $this->_logger->log(Logger::INFO, sprintf('Experiment "%s" is not running', $experiment->getKey()));
+            $this->_logger->log(Logger::INFO, sprintf('Experiment "%s" is not running.', $experiment->getKey()));
             return false;
         }
 
