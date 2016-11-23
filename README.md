@@ -1,6 +1,6 @@
 #Optimizely PHP SDK
 [![Build Status](https://travis-ci.org/optimizely/php-sdk.svg?branch=master)](https://travis-ci.org/optimizely/php-sdk)
-[![Coverage Status](https://coveralls.io/repos/github/optimizely/php-sdk/badge.svg)](https://coveralls.io/github/optimizely/php-sdk)
+[![Coverage Status](https://coveralls.io/repos/github/optimizely/php-sdk/badge.svg?branch=master)](https://coveralls.io/github/optimizely/php-sdk?branch=master)
 [![Apache 2.0](https://img.shields.io/github/license/nebula-plugins/gradle-extra-configurations-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 This repository houses the PHP SDK for Optimizely Full Stack.
