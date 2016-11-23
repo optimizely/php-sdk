@@ -45,8 +45,7 @@ class Validator
      */
     public static function areAttributesValid($attributes)
     {
-        //TODO(ali): Implement me
-        return true;
+        return is_array($attributes) && count(array_filter(array_keys($attributes), 'is_int')) == 0;
     }
 
     /**

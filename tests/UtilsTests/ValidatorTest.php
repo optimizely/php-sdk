@@ -42,9 +42,34 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::validateJsonSchema($invalidDatafile));
     }
 
-    public function testAreAttributesValidReturnsTrue()
+    public function testAreAttributesValidValidAttributes()
     {
-        $this->assertTrue(Validator::areAttributesValid('some attributes here'));
+        // Empty attributes
+        $this->assertTrue(Validator::areAttributesValid([]));
+
+        // Valid attributes
+        $this->assertTrue(Validator::areAttributesValid([
+            'location' => 'San Francisco',
+            'browser' => 'Firefox'
+        ]));
+    }
+
+    public function testAreAttributesValidInvalidAttributes()
+    {
+        // String as attributes
+        $this->assertFalse(Validator::areAttributesValid('Invalid string attributes.'));
+
+        // Integer as attributes
+        $this->assertFalse(Validator::areAttributesValid(42));
+
+        // Boolean as attributes
+        $this->assertFalse(Validator::areAttributesValid(true));
+
+        // Sequential array as attributes
+        $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42]));
+
+        // Mixed array as attributes
+        $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42, 'abc' => 'def']));
     }
 
     public function testIsUserInExperimentNoAudienceUsedInExperiment()

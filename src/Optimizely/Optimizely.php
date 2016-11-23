@@ -16,7 +16,6 @@
  */
 namespace Optimizely;
 
-use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use Exception;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Throwable;
