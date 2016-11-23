@@ -16,7 +16,9 @@
  */
 namespace Optimizely;
 
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use Exception;
+use Optimizely\Exceptions\InvalidAttributeException;
 use Throwable;
 use Monolog\Logger;
 use Optimizely\Entity\Experiment;
@@ -146,6 +148,9 @@ class Optimizely
     {
         if (!is_null($attributes) && !Validator::areAttributesValid($attributes)) {
             $this->_logger->log(Logger::ERROR, 'Provided attributes are in an invalid format.');
+            $this->_errorHandler->handleError(
+                new InvalidAttributeException('Provided attributes are in an invalid format.')
+            );
             return false;
         }
 
@@ -245,6 +250,9 @@ class Optimizely
 
         if (!is_null($attributes) && !Validator::areAttributesValid($attributes)) {
             $this->_logger->log(Logger::ERROR, 'Provided attributes are in an invalid format.');
+            $this->_errorHandler->handleError(
+                new InvalidAttributeException('Provided attributes are in an invalid format.')
+            );
             return;
         }
 
