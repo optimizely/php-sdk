@@ -315,7 +315,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(5))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Dispatching impression event to URL logx.optimizely.com/decision with params val1,val2.');
+                'Dispatching impression event to URL logx.optimizely.com/decision with params param1=val1&param2=val2.');
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
@@ -383,7 +383,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(3))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Dispatching impression event to URL logx.optimizely.com/decision with params val1.');
+                'Dispatching impression event to URL logx.optimizely.com/decision with params param1=val1.');
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -555,7 +555,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(5))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params val1.');
+                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -605,7 +605,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(3))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params val1.');
+                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -656,7 +656,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(5))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params val1.');
+                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -712,7 +712,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(5))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params val1.');
+                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 

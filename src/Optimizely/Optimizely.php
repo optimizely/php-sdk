@@ -215,7 +215,7 @@ class Optimizely
         $this->_logger->log(
             Logger::DEBUG,
             sprintf('Dispatching impression event to URL %s with params %s.',
-                $impressionEvent->getUrl(), implode(',', $impressionEvent->getParams())
+                $impressionEvent->getUrl(), http_build_query($impressionEvent->getParams())
             )
         );
 
@@ -290,7 +290,7 @@ class Optimizely
             $this->_logger->log(
                 Logger::DEBUG,
                 sprintf('Dispatching conversion event to URL %s with params %s.',
-                    $conversionEvent->getUrl(), implode(',', $conversionEvent->getParams())
+                    $conversionEvent->getUrl(), http_build_query($conversionEvent->getParams())
                 ));
 
             try {
