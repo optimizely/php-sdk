@@ -9,7 +9,11 @@ This repository houses the PHP SDK for Optimizely Full Stack.
 
 ###Installing the SDK
 
-The Optimizely PHP SDK will be available through [Composer](https://getcomposer.org/). Instructions coming soon.
+The Optimizely PHP SDK can be installed through [Composer](https://getcomposer.org/). Please use the following command: 
+
+```
+php composer.phar require optimizely/optimizely-sdk
+```
 
 ###Using the SDK
 See the Optimizely Full Stack [developer documentation](https://developers.optimizely.com/x/solutions/sdks/reference/?language=php) to learn how to set up your first Full Stack project and use the SDK.
