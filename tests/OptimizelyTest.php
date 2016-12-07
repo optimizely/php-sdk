@@ -143,6 +143,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'Random datafile',
             false)
         );
+
+        $this->expectOutputRegex('/Provided "datafile" has invalid schema./');
     }
 
     public function testValidateInputsInvalidFileJsonValidationSkipped()
