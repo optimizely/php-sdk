@@ -28,18 +28,13 @@ class CurlEventDispatcher implements EventDispatcherInterface
 {
     public function dispatchEvent(LogEvent $event)
     {
-        $curl = curl_init();
-        $options = [
-            CURLOPT_URL => $event->getUrl(),
-            CURLOPT_HTTPHEADER => $event->getHeaders(),
-            CURLOPT_POSTFIELDS => http_build_query($event->getParams()),
-            CURLOPT_POST => 1,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT_MS => 1
-        ];
-
-        curl_setopt_array($curl, $options);
-        curl_exec($curl);
-        curl_close($curl);
+        $cmd = "curl";
+        $cmd.= " -X ".$event->getHttpVerb();
+        foreach($event->getHeaders() as $type => $value) {
+            $cmd.= " -H '".$type.": ".$value."'";
+        }
+        $cmd.= " -d '".json_encode($event->getParams())."'";
+        $cmd.= " '".$event->getUrl()."' > /dev/null 2>&1 &";
+        exec($cmd);
     }
 }
