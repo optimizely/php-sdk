@@ -17,6 +17,7 @@
 
 namespace Optimizely\Event\Dispatcher;
 
+use Exception;
 use Optimizely\Event\LogEvent;
 
 /**
@@ -35,6 +36,10 @@ class CurlEventDispatcher implements EventDispatcherInterface
         }
         $cmd.= " -d '".json_encode($event->getParams())."'";
         $cmd.= " '".$event->getUrl()."' > /dev/null 2>&1 &";
-        exec($cmd);
+        exec($cmd, $output, $exit_code);
+
+        if ($exit_code !== 0) {
+            throw new Exception('Curl command failed.');
+        }
     }
 }
