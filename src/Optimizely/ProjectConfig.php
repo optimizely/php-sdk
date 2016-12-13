@@ -129,11 +129,11 @@ class ProjectConfig
         $this->_projectId = $config['projectId'];
         $this->_revision = $config['revision'];
 
-        $groups = $config['groups'];
-        $experiments = $config['experiments'];
-        $events = $config['events'];
-        $attributes = $config['attributes'];
-        $audiences = $config['audiences'];
+        $groups = $config['groups'] ?: [];
+        $experiments = $config['experiments'] ?: [];
+        $events = $config['events'] ?: [];
+        $attributes = $config['attributes'] ?: [];
+        $audiences = $config['audiences'] ?: [];
 
         $this->_groupIdMap = ConfigParser::generateMap($groups, 'id', Group::class);
         $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);

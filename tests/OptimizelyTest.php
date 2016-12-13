@@ -156,8 +156,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             $validateInputsMethod->invoke(new Optimizely('Random datafile', null, null, null, true),
             'Random datafile', true)
         );
-
-        $this->expectOutputRegex('/Provided "datafile" is in an invalid format./');
     }
 
     public function testValidatePreconditionsExperimentNotRunning()
@@ -275,6 +273,40 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call activate
         $this->assertNull($optlyObject->activate('test_experiment', 'test_user', 42));
+    }
+
+    public function testActivateUserInNoVariation()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco'
+        ];
+
+        $this->eventBuilderMock->expects($this->never())
+            ->method('createImpressionEvent');
+
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log');
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 8495 to user "not_in_variation_user".');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO,
+                'User "not_in_variation_user" is in no variation.');
+        $this->loggerMock->expects($this->at(2))
+            ->method('log')
+            ->with(Logger::INFO, 'Not activating user "not_in_variation_user".');
+
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Call activate
+        $this->assertNull($optlyObject->activate('test_experiment', 'not_in_variation_user', $userAttributes));
     }
 
     public function testActivateNoAudienceNoAttributes()

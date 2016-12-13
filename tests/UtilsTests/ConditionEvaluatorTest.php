@@ -29,7 +29,7 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $decoder = new ConditionDecoder();
-        $conditions = "[\"and\", [\"or\", [\"or\", {\"name\": \"device_type\", \"type\": \"custom_attribute\", \"value\": \"iPhone\"}]], [\"or\", [\"or\", {\"name\": \"location\", \"type\": \"custom_attribute\", \"value\": \"San Francisco\"}]]]";
+        $conditions = "[\"and\", [\"or\", [\"or\", {\"name\": \"device_type\", \"type\": \"custom_attribute\", \"value\": \"iPhone\"}]], [\"or\", [\"or\", {\"name\": \"location\", \"type\": \"custom_attribute\", \"value\": \"San Francisco\"}]], [\"or\", [\"not\", [\"or\", {\"name\": \"browser\", \"type\": \"custom_attribute\", \"value\": \"Firefox\"}]]]]";
         $decoder->deserializeAudienceConditions($conditions);
 
         $this->conditionsList = $decoder->getConditionsList();
@@ -41,7 +41,7 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         $userAttributes = [
             'device_type' => 'iPhone',
             'location' => 'San Francisco',
-            'browser' => 'chrome'
+            'browser' => 'Chrome'
         ];
 
         $this->assertTrue($this->conditionEvaluator->evaluate($this->conditionsList, $userAttributes));
@@ -51,8 +51,9 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testEvaluateConditionsDoNotMatch()
     {
         $userAttributes = [
+            'device_type' => 'iPhone',
             'location' => 'San Francisco',
-            'browser' => 'chrome'
+            'browser' => 'Firefox'
         ];
 
         $this->assertFalse($this->conditionEvaluator->evaluate($this->conditionsList, $userAttributes));
