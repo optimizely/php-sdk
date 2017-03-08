@@ -16,7 +16,6 @@
  */
 
 namespace Optimizely\Tests;
-include('TestData.php');
 
 use Monolog\Logger;
 use Optimizely\Entity\Attribute;
@@ -52,7 +51,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('handleError'))
             ->getMock();
 
-        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
+        $this->config = new ProjectConfig(Fixtures::DATAFILE, $this->loggerMock, $this->errorHandlerMock);
     }
 
     public function testInit()

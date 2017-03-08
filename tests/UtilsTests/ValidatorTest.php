@@ -27,7 +27,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 {
     public function testValidateJsonSchemaValidFile()
     {
-        $this->assertTrue(Validator::validateJsonSchema(DATAFILE));
+        $this->assertTrue(Validator::validateJsonSchema(Fixtures::DATAFILE));
     }
 
     public function testValidateJsonSchemaInvalidFile()
@@ -74,7 +74,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentNoAudienceUsedInExperiment()
     {
-        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $config = new ProjectConfig(Fixtures::DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertTrue(Validator::isUserInExperiment(
             $config,
             $config->getExperimentFromKey('paused_experiment'),
@@ -84,7 +84,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
     {
-        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $config = new ProjectConfig(Fixtures::DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
 
         // Test with empty attributes
         $this->assertFalse(Validator::isUserInExperiment(
@@ -103,7 +103,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentAudienceMatch()
     {
-        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $config = new ProjectConfig(Fixtures::DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertTrue(Validator::isUserInExperiment(
             $config,
             $config->getExperimentFromKey('test_experiment'),
@@ -113,7 +113,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentAudienceNoMatch()
     {
-        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $config = new ProjectConfig(Fixtures::DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertFalse(Validator::isUserInExperiment(
             $config,
             $config->getExperimentFromKey('test_experiment'),

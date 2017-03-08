@@ -20,10 +20,12 @@ use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
+use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Event\LogEvent;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
+use stdClass;
 use TypeError;
 use Optimizely\ErrorHandler\DefaultErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
@@ -38,17 +40,19 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     private $loggerMock;
     private $optimizelyObject;
     private $projectConfig;
+    private $eventDispatcherMock;
 
-    public function setUp()
+    protected function setUp()
     {
-        $this->datafile = DATAFILE;
+        $this->datafile = Fixtures::DATAFILE;
 
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))
             ->getMock();
-        $this->optimizelyObject = new Optimizely($this->datafile, null, $this->loggerMock);
 
+        $this->eventDispatcherMock = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
+        $this->optimizelyObject = new Optimizely($this->datafile, null, $this->loggerMock);
         $this->projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
 
         // Mock EventBuilder
@@ -60,16 +64,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testInitValidEventDispatcher()
     {
-        $validDispatcher = new ValidEventDispatcher();
-        $optlyObject = new Optimizely($this->datafile, $validDispatcher);
+        $optlyObject = new Optimizely($this->datafile, $this->eventDispatcherMock);
     }
 
     public function testInitInvalidEventDispatcher()
     {
-        $invalidDispatcher = new InvalidEventDispatcher();
         try
         {
-            $optlyObject = new Optimizely($this->datafile, $invalidDispatcher);
+            $optlyObject = new Optimizely($this->datafile, new stdClass());
         }
         catch (Exception $exception)
         {
@@ -91,10 +93,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testInitInvalidLogger()
     {
-        $invalidLogger = new InvalidLogger();
         try
         {
-            $optlyObject = new Optimizely($this->datafile, null, $invalidLogger);
+            $optlyObject = new Optimizely($this->datafile, null, new stdClass());
         }
         catch (Exception $exception)
         {
@@ -116,10 +117,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testInitInvalidErrorHandler()
     {
-        $invalidErrorHandler = new InvalidErrorHandler();
         try
         {
-            $optlyObject = new Optimizely($this->datafile, null, null, $invalidErrorHandler);
+            $optlyObject = new Optimizely($this->datafile, null, null, new stdClass());
         }
         catch (Exception $exception)
         {
@@ -139,9 +139,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $validateInputsMethod->setAccessible(true);
 
         $this->assertFalse(
-            $validateInputsMethod->invoke(new Optimizely('Random datafile'),
-            'Random datafile',
-            false)
+            $validateInputsMethod->invoke(new Optimizely('Random datafile', null, new DefaultLogger()), 'Random datafile', false)
         );
 
         $this->expectOutputRegex('/Provided "datafile" has invalid schema./');
@@ -244,7 +242,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testActivateInvalidOptimizelyObject()
     {
-        $optlyObject = new Optimizely('Random datafile');
+        $optlyObject = new Optimizely('Random datafile', null, new DefaultLogger());
         $optlyObject->activate('some_experiment', 'some_user');
         $this->expectOutputRegex('/Datafile has invalid format. Failing "activate"./');
     }
@@ -268,7 +266,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(new InvalidAttributeException('Provided attributes are in an invalid format.'));
 
         $optlyObject = new Optimizely(
-            $this->datafile, new ValidEventDispatcher(), $this->loggerMock, $errorHandlerMock
+            $this->datafile, $this->eventDispatcherMock, $this->loggerMock, $errorHandlerMock
         );
 
         // Call activate
@@ -299,7 +297,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'Not activating user "not_in_variation_user".');
 
-        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+        $optlyObject = new Optimizely($this->datafile, $this->eventDispatcherMock, $this->loggerMock);
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -349,7 +347,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG,
                 'Dispatching impression event to URL logx.optimizely.com/decision with params param1=val1&param2=val2.');
 
-        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+        $optlyObject = new Optimizely($this->datafile, $this->eventDispatcherMock, $this->loggerMock);
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
         $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
@@ -373,7 +371,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::INFO,
                 'Not activating user "test_user".');
 
-        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+        $optlyObject = new Optimizely($this->datafile, $this->eventDispatcherMock, $this->loggerMock);
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -417,7 +415,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG,
                 'Dispatching impression event to URL logx.optimizely.com/decision with params param1=val1.');
 
-        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+        $optlyObject = new Optimizely($this->datafile, $this->eventDispatcherMock, $this->loggerMock);
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -442,7 +440,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::INFO,
                 'Not activating user "test_user".');
 
-        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+        $optlyObject = new Optimizely($this->datafile, $this->eventDispatcherMock, $this->loggerMock);
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -454,7 +452,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationInvalidOptimizelyObject()
     {
-        $optlyObject = new Optimizely('Random datafile');
+        $optlyObject = new Optimizely('Random datafile', null, new DefaultLogger());
         $optlyObject->getVariation('some_experiment', 'some_user');
         $this->expectOutputRegex('/Datafile has invalid format. Failing "getVariation"./');
     }
@@ -473,7 +471,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(new InvalidAttributeException('Provided attributes are in an invalid format.'));
 
         $optlyObject = new Optimizely(
-            $this->datafile, new ValidEventDispatcher(), $this->loggerMock, $errorHandlerMock
+            $this->datafile, $this->eventDispatcherMock, $this->loggerMock, $errorHandlerMock
         );
 
         // Call activate
@@ -522,7 +520,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testTrackInvalidOptimizelyObject()
     {
-        $optlyObject = new Optimizely('Random datafile');
+        $optlyObject = new Optimizely('Random datafile', null, new DefaultLogger());
         $optlyObject->track('some_event', 'some_user');
         $this->expectOutputRegex('/Datafile has invalid format. Failing "track"./');
     }
@@ -541,7 +539,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(new InvalidAttributeException('Provided attributes are in an invalid format.'));
 
         $optlyObject = new Optimizely(
-            $this->datafile, new ValidEventDispatcher(), $this->loggerMock, $errorHandlerMock
+            $this->datafile, $this->eventDispatcherMock, $this->loggerMock, $errorHandlerMock
         );
 
         // Call activate
@@ -589,7 +587,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG,
                 'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
 
-        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+        $optlyObject = new Optimizely($this->datafile, $this->eventDispatcherMock, $this->loggerMock);
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -639,7 +637,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG,
                 'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
 
-        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+        $optlyObject = new Optimizely($this->datafile, $this->eventDispatcherMock, $this->loggerMock);
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -690,7 +688,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG,
                 'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
 
-        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+        $optlyObject = new Optimizely($this->datafile, $this->eventDispatcherMock, $this->loggerMock);
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -746,7 +744,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG,
                 'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
 
-        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+        $optlyObject = new Optimizely($this->datafile, $this->eventDispatcherMock, $this->loggerMock);
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
