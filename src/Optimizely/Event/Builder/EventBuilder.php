@@ -22,6 +22,7 @@ use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
 use Optimizely\Event\LogEvent;
 use Optimizely\ProjectConfig;
+use Optimizely\Utils\EventTagUtils;
 
 class EventBuilder
 {
@@ -172,14 +173,14 @@ class EventBuilder
                     'shouldIndex' => false,
                 );
                 array_push($this->_eventParams[EVENT_FEATURES], $eventFeature);
-
-                if ($eventTagId == 'revenue') {
-                    $eventMetric = array(
-                        'name' => 'revenue',
-                        'value' => $eventTagValue,
-                    );
-                    array_push($this->_eventParams[EVENT_METRICS], $eventMetric);
-                }
+            }
+            $eventValue = EventTagUtils::getRevenueValue($eventTags);
+            if ($eventValue) {
+                $eventMetric = array(
+                    'name' => 'revenue',
+                    'value' => $eventValue,
+                );
+                array_push($this->_eventParams[EVENT_METRICS], $eventMetric);
             }
         }
 
