@@ -18,6 +18,7 @@ namespace Optimizely;
 
 use Exception;
 use Optimizely\Exceptions\InvalidAttributeException;
+use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
 use Monolog\Logger;
 use Optimizely\Entity\Experiment;
@@ -240,9 +241,9 @@ class Optimizely
      * @param $eventKey string Event key representing the event which needs to be recorded.
      * @param $userId string ID for user.
      * @param $attributes array Attributes of the user.
-     * @param $eventValue integer Value associated with event.
+     * @param $eventTags array Hash representing metadata associated with the event.
      */
-    public function track($eventKey, $userId, $attributes = null, $eventValue = null)
+    public function track($eventKey, $userId, $attributes = null, $eventTags = null)
     {
         if (!$this->_isValid) {
             $this->_logger->log(Logger::ERROR, 'Datafile has invalid format. Failing "track".');
@@ -255,6 +256,24 @@ class Optimizely
                 new InvalidAttributeException('Provided attributes are in an invalid format.')
             );
             return;
+        }
+
+        if (!is_null($eventTags)) {
+            if (is_numeric($eventTags) && !is_string($eventTags)) {
+                $eventTags = array(
+                    'revenue' => $eventTags,
+                );
+                $this->_logger->log(
+                    Logger::WARN,
+                    'Event value is deprecated in track call. Use event tags to pass in revenue value instead.'
+                );
+            }
+            if (!Validator::areAttributesValid($eventTags)) {
+                $this->_logger->log(Logger::ERROR, 'Provided event tags are in an invalid format.');
+                $this->_errorHandler->handleError(
+                    new InvalidEventTagException('Provided event tags are in an invalid format.')
+                );
+            }
         }
 
         $event = $this->_config->getEvent($eventKey);
@@ -284,7 +303,7 @@ class Optimizely
                     $validExperiments,
                     $userId,
                     $attributes,
-                    $eventValue
+                    $eventTags
                 );
             $this->_logger->log(Logger::INFO, sprintf('Tracking event "%s" for user "%s".', $eventKey, $userId));
             $this->_logger->log(
