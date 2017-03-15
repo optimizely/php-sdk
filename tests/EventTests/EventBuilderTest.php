@@ -282,6 +282,12 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                         'type' => 'custom',
                         'value' => 42,
                         'shouldIndex' => false
+                    ],
+                    [
+                        'id' => 'non-revenue',
+                        'type' => 'custom',
+                        'value' => 'definitely',
+                        'shouldIndex' => false
                     ]
                 ],
                 'eventMetrics' => [[
@@ -321,7 +327,68 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [$this->config->getExperimentFromKey('test_experiment')],
             $this->testUserId,
             $userAttributes,
-            array('revenue' => 42)
+            array(
+                'revenue' => 42,
+                'non-revenue' => 'definitely'
+            )
+        );
+
+        $this->assertEquals($expectedLogEvent, $logEvent);
+    }
+
+    public function testCreateConversionEventNoAttributesWithInvalidValue()
+    {
+        $expectedLogEvent = new LogEvent(
+            'https://logx.optimizely.com/log/event',
+            [
+                'projectId' => '7720880029',
+                'accountId' => '1592310167',
+                'visitorId' => 'testUserId',
+                'clientEngine' => 'php-sdk',
+                'clientVersion' => '1.0.1',
+                'userFeatures' => [],
+                'isGlobalHoldback' => false,
+                'timestamp' => time() * 1000,
+                'eventFeatures' => [
+                    [
+                        'id' => 'revenue',
+                        'type' => 'custom',
+                        'value' => 42,
+                        'shouldIndex' => false
+                    ],
+                    [
+                        'id' => 'non-revenue',
+                        'type' => 'custom',
+                        'value' => 'definitely',
+                        'shouldIndex' => false
+                    ]
+                ],
+                'eventMetrics' => [],
+                'eventEntityId' => '7718020063',
+                'eventName' => 'purchase',
+                'layerStates' => [[
+                    'layerId' => '7719770039',
+                    'actionTriggered' => true,
+                    'decision' =>  [
+                        'experimentId' => '7716830082',
+                        'variationId' => '7722370027',
+                        'isLayerHoldback' => false
+                    ]
+                ]]
+            ],
+            'POST',
+            ['Content-Type' => 'application/json']
+        );
+        $logEvent = $this->eventBuilder->createConversionEvent(
+            $this->config,
+            'purchase',
+            [$this->config->getExperimentFromKey('test_experiment')],
+            $this->testUserId,
+            null,
+            array(
+                'revenue' => '42',
+                'non-revenue' => 'definitely'
+            )
         );
 
         $this->assertEquals($expectedLogEvent, $logEvent);

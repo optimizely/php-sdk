@@ -649,7 +649,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject->track('purchase', 'test_user', $userAttributes);
     }
 
-    public function testTrackNoAttributesWithEventValue()
+    public function testTrackNoAttributesWithDeprecatedEventValue()
     {
         $this->eventBuilderMock->expects($this->once())
             ->method('createConversionEvent')
@@ -704,7 +704,110 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject->track('purchase', 'test_user', null, 42);
     }
 
-    public function testTrackWithAttributesWithEventValue()
+    public function testTrackNoAttributesWithEventValue()
+    {
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfig,
+                'purchase',
+                [$this->projectConfig->getExperimentFromKey('group_experiment_1'),
+                    $this->projectConfig->getExperimentFromKey('group_experiment_2')],
+                'test_user',
+                null,
+                array('revenue' => 42)
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log');
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Not tracking user "test_user" for experiment "test_experiment".');
+        $this->loggerMock->expects($this->at(2))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Experiment "paused_experiment" is not running.');
+        $this->loggerMock->expects($this->at(3))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Not tracking user "test_user" for experiment "paused_experiment".');
+        $this->loggerMock->expects($this->at(4))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Tracking event "purchase" for user "test_user".');
+        $this->loggerMock->expects($this->at(5))
+            ->method('log')
+            ->with(Logger::DEBUG,
+                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
+
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Call track
+        $optlyObject->track('purchase', 'test_user', null, array('revenue' => 42));
+    }
+
+    public function testTrackNoAttributesWithInvalidEventValue()
+    {
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfig,
+                'purchase',
+                [$this->projectConfig->getExperimentFromKey('group_experiment_1'),
+                    $this->projectConfig->getExperimentFromKey('group_experiment_2')],
+                'test_user',
+                null,
+                array('revenue' => '4200')
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Not tracking user "test_user" for experiment "test_experiment".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Experiment "paused_experiment" is not running.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Not tracking user "test_user" for experiment "paused_experiment".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Tracking event "purchase" for user "test_user".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG,
+                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
+
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Call track
+        $optlyObject->track('purchase', 'test_user', null, array('revenue' => '4200'));
+    }
+
+    public function testTrackWithAttributesWithDeprecatedEventValue()
     {
         $userAttributes = [
             'device_type' => 'iPhone',
@@ -762,5 +865,62 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call track
         $optlyObject->track('purchase', 'test_user', $userAttributes, 42);
+    }
+
+    public function testTrackWithAttributesWithEventValue()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely'
+        ];
+
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfig,
+                'purchase',
+                [$this->projectConfig->getExperimentFromKey('group_experiment_1'),
+                    $this->projectConfig->getExperimentFromKey('group_experiment_2')],
+                'test_user',
+                $userAttributes,
+                array('revenue' => 42)
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Not tracking user "test_user" for experiment "test_experiment".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Experiment "paused_experiment" is not running.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Not tracking user "test_user" for experiment "paused_experiment".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Tracking event "purchase" for user "test_user".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG,
+                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
+
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Call track
+        $optlyObject->track('purchase', 'test_user', $userAttributes, array('revenue' => 42));
     }
 }
