@@ -660,32 +660,36 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                     $this->projectConfig->getExperimentFromKey('group_experiment_2')],
                 'test_user',
                 null,
-                42
+                array('revenue' => 42)
             )
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
-        $this->loggerMock->expects($this->exactly(6))
+        $this->loggerMock->expects($this->exactly(7))
             ->method('log');
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
+            ->with(Logger::WARNING,
+                'Event value is deprecated in track call. Use event tags to pass in revenue value instead.');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::INFO,
-                'Not tracking user "test_user" for experiment "test_experiment".');
+            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
         $this->loggerMock->expects($this->at(2))
             ->method('log')
             ->with(Logger::INFO,
-                'Experiment "paused_experiment" is not running.');
+                'Not tracking user "test_user" for experiment "test_experiment".');
         $this->loggerMock->expects($this->at(3))
             ->method('log')
             ->with(Logger::INFO,
-                'Not tracking user "test_user" for experiment "paused_experiment".');
+                'Experiment "paused_experiment" is not running.');
         $this->loggerMock->expects($this->at(4))
             ->method('log')
             ->with(Logger::INFO,
-                'Tracking event "purchase" for user "test_user".');
+                'Not tracking user "test_user" for experiment "paused_experiment".');
         $this->loggerMock->expects($this->at(5))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Tracking event "purchase" for user "test_user".');
+        $this->loggerMock->expects($this->at(6))
             ->method('log')
             ->with(Logger::DEBUG,
                 'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
@@ -716,32 +720,36 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                     $this->projectConfig->getExperimentFromKey('group_experiment_2')],
                 'test_user',
                 $userAttributes,
-                42
+                array('revenue' => 42)
             )
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
-        $this->loggerMock->expects($this->exactly(6))
+        $this->loggerMock->expects($this->exactly(7))
             ->method('log');
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
+            ->with(Logger::WARNING,
+                'Event value is deprecated in track call. Use event tags to pass in revenue value instead.');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::INFO,
-                'Not tracking user "test_user" for experiment "test_experiment".');
+            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
         $this->loggerMock->expects($this->at(2))
             ->method('log')
             ->with(Logger::INFO,
-                'Experiment "paused_experiment" is not running.');
+                'Not tracking user "test_user" for experiment "test_experiment".');
         $this->loggerMock->expects($this->at(3))
             ->method('log')
             ->with(Logger::INFO,
-                'Not tracking user "test_user" for experiment "paused_experiment".');
+                'Experiment "paused_experiment" is not running.');
         $this->loggerMock->expects($this->at(4))
             ->method('log')
             ->with(Logger::INFO,
-                'Tracking event "purchase" for user "test_user".');
+                'Not tracking user "test_user" for experiment "paused_experiment".');
         $this->loggerMock->expects($this->at(5))
+            ->method('log')
+            ->with(Logger::INFO,
+                'Tracking event "purchase" for user "test_user".');
+        $this->loggerMock->expects($this->at(6))
             ->method('log')
             ->with(Logger::DEBUG,
                 'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');

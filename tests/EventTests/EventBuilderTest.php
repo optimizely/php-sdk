@@ -225,7 +225,14 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'userFeatures' => [],
                 'isGlobalHoldback' => false,
                 'timestamp' => time() * 1000,
-                'eventFeatures' => [],
+                'eventFeatures' => [
+                    [
+                        'id' => 'revenue',
+                        'type' => 'custom',
+                        'value' => 42,
+                        'shouldIndex' => false
+                    ]
+                ],
                 'eventMetrics' => [[
                     'name' => 'revenue',
                     'value' => 42
@@ -251,7 +258,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [$this->config->getExperimentFromKey('test_experiment')],
             $this->testUserId,
             null,
-            42
+            array('revenue' => 42)
         );
 
         $this->assertEquals($expectedLogEvent, $logEvent);
@@ -269,7 +276,14 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'clientVersion' => '1.0.1',
                 'isGlobalHoldback' => false,
                 'timestamp' => time() * 1000,
-                'eventFeatures' => [],
+                'eventFeatures' => [
+                    [
+                        'id' => 'revenue',
+                        'type' => 'custom',
+                        'value' => 42,
+                        'shouldIndex' => false
+                    ]
+                ],
                 'eventMetrics' => [[
                     'name' => 'revenue',
                     'value' => 42
@@ -307,7 +321,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [$this->config->getExperimentFromKey('test_experiment')],
             $this->testUserId,
             $userAttributes,
-            42
+            array('revenue' => 42)
         );
 
         $this->assertEquals($expectedLogEvent, $logEvent);

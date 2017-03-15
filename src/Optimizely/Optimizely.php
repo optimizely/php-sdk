@@ -264,7 +264,7 @@ class Optimizely
                     'revenue' => $eventTags,
                 );
                 $this->_logger->log(
-                    Logger::WARN,
+                    Logger::WARNING,
                     'Event value is deprecated in track call. Use event tags to pass in revenue value instead.'
                 );
             }
