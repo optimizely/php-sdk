@@ -177,7 +177,7 @@ class EventBuilder
             $eventValue = EventTagUtils::getRevenueValue($eventTags);
             if ($eventValue) {
                 $eventMetric = array(
-                    'name' => 'revenue',
+                    'name' => EventTagUtils::REVENUE_EVENT_METRIC_NAME,
                     'value' => $eventValue,
                 );
                 array_push($this->_eventParams[EVENT_METRICS], $eventMetric);

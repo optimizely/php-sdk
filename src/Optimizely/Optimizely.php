@@ -30,6 +30,7 @@ use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\Validator;
 
 /**
@@ -261,14 +262,14 @@ class Optimizely
         if (!is_null($eventTags)) {
             if (is_numeric($eventTags) && !is_string($eventTags)) {
                 $eventTags = array(
-                    'revenue' => $eventTags,
+                    EventTagUtils::REVENUE_EVENT_METRIC_NAME => $eventTags,
                 );
                 $this->_logger->log(
                     Logger::WARNING,
                     'Event value is deprecated in track call. Use event tags to pass in revenue value instead.'
                 );
             }
-            if (!Validator::areAttributesValid($eventTags)) {
+            if (!Validator::areEventTagsValid($eventTags)) {
                 $this->_logger->log(Logger::ERROR, 'Provided event tags are in an invalid format.');
                 $this->_errorHandler->handleError(
                     new InvalidEventTagException('Provided event tags are in an invalid format.')

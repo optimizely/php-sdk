@@ -49,6 +49,16 @@ class Validator
     }
 
     /**
+     * @param $eventTags mixed Event tags to be validated.
+     *
+     * @return boolean representing whether event tags are valid or not.
+     */
+    public static function areEventTagsValid($eventTags)
+    {
+        return is_array($eventTags) && count(array_filter(array_keys($eventTags), 'is_int')) == 0;
+    }
+
+    /**
      * @param $config ProjectConfig Configuration for the project.
      * @param $experiment Experiment Entity representing the experiment.
      * @param $userAttributes array Attributes of the user.

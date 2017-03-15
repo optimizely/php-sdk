@@ -72,6 +72,37 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42, 'abc' => 'def']));
     }
 
+    public function testAreEventTagsValidValidAttributes()
+    {
+        // Empty attributes
+        $this->assertTrue(Validator::areEventTagsValid([]));
+
+        // Valid attributes
+        $this->assertTrue(Validator::areEventTagsValid([
+            'revenue' => 0,
+            'location' => 'San Francisco',
+            'browser' => 'Firefox'
+        ]));
+    }
+
+    public function testAreEventTagsValidInvalidAttributes()
+    {
+        // String as attributes
+        $this->assertFalse(Validator::areEventTagsValid('Invalid string attributes.'));
+
+        // Integer as attributes
+        $this->assertFalse(Validator::areEventTagsValid(42));
+
+        // Boolean as attributes
+        $this->assertFalse(Validator::areEventTagsValid(true));
+
+        // Sequential array as attributes
+        $this->assertFalse(Validator::areEventTagsValid([0, 1, 2, 42]));
+
+        // Mixed array as attributes
+        $this->assertFalse(Validator::areEventTagsValid([0, 1, 2, 42, 'abc' => 'def']));
+    }
+
     public function testIsUserInExperimentNoAudienceUsedInExperiment()
     {
         $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());

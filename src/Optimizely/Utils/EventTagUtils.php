@@ -20,6 +20,11 @@ namespace Optimizely\Utils;
 class EventTagUtils
 {
     /**
+     * @const string Reserved word for event tag representing event revenue value.
+     */
+    const REVENUE_EVENT_METRIC_NAME = 'revenue';
+
+    /**
      * Grab the revenue value from the event tags. "revenue" is a reserved keyword.
      *
      * @param $eventTags array representing metadata associated with the event.
@@ -33,11 +38,11 @@ class EventTagUtils
             return null;
         }
 
-        if (!$eventTags['revenue']) {
+        if (!$eventTags[self::REVENUE_EVENT_METRIC_NAME]) {
             return null;
         }
 
-        $raw_value = $eventTags['revenue'];
+        $raw_value = $eventTags[self::REVENUE_EVENT_METRIC_NAME];
         if (!is_int($raw_value)) {
             return null;
         }
