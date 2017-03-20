@@ -38,7 +38,7 @@ class EventTagUtils
             return null;
         }
 
-        if (!$eventTags[self::REVENUE_EVENT_METRIC_NAME]) {
+        if (!isset($eventTags[self::REVENUE_EVENT_METRIC_NAME]) or !$eventTags[self::REVENUE_EVENT_METRIC_NAME]) {
             return null;
         }
 
