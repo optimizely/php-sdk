@@ -26,7 +26,7 @@ class Validator
     /**
      * @param $datafile string JSON string representing the project.
      *
-     * @return boolean representing whether schema is valid or not.
+     * @return boolean Representing whether schema is valid or not.
      */
     public static function validateJsonSchema($datafile)
     {
@@ -41,7 +41,7 @@ class Validator
     /**
      * @param $attributes mixed Attributes of the user.
      *
-     * @return boolean representing whether attributes are valid or not.
+     * @return boolean Representing whether attributes are valid or not.
      */
     public static function areAttributesValid($attributes)
     {
@@ -51,7 +51,7 @@ class Validator
     /**
      * @param $eventTags mixed Event tags to be validated.
      *
-     * @return boolean representing whether event tags are valid or not.
+     * @return boolean Representing whether event tags are valid or not.
      */
     public static function areEventTagsValid($eventTags)
     {

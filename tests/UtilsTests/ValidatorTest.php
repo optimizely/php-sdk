@@ -72,7 +72,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42, 'abc' => 'def']));
     }
 
-    public function testAreEventTagsValidValidAttributes()
+    public function testAreEventTagsValidValidEventTags()
     {
         // Empty attributes
         $this->assertTrue(Validator::areEventTagsValid([]));
@@ -85,7 +85,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         ]));
     }
 
-    public function testAreEventTagsValidInvalidAttributes()
+    public function testAreEventTagsValidInvalidEventTags()
     {
         // String as attributes
         $this->assertFalse(Validator::areEventTagsValid('Invalid string attributes.'));

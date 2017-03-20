@@ -27,8 +27,8 @@ class EventTagUtils
     /**
      * Grab the revenue value from the event tags. "revenue" is a reserved keyword.
      *
-     * @param $eventTags array representing metadata associated with the event.
-     * @return number revenue value as an integer number or null if revenue can't be retrieved from the event tags
+     * @param $eventTags array Representing metadata associated with the event.
+     * @return integer Revenue value as an integer number or null if revenue can't be retrieved from the event tags
      */
     public static function getRevenueValue($eventTags) {
         if (!$eventTags) {
