@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016-2017, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ class Bucketer
      * @param $parentId mixed ID representing Experiment or Group.
      * @param $trafficAllocations array Traffic allocations for variation or experiment.
      *
-     * @returns string ID representing experiment or variation.
+     * @return string ID representing experiment or variation.
      */
     private function findBucket($userId, $parentId, $trafficAllocations)
     {
