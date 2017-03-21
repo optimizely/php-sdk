@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016-2017, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,37 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
         // Mixed array as attributes
         $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42, 'abc' => 'def']));
+    }
+
+    public function testAreEventTagsValidValidEventTags()
+    {
+        // Empty attributes
+        $this->assertTrue(Validator::areEventTagsValid([]));
+
+        // Valid attributes
+        $this->assertTrue(Validator::areEventTagsValid([
+            'revenue' => 0,
+            'location' => 'San Francisco',
+            'browser' => 'Firefox'
+        ]));
+    }
+
+    public function testAreEventTagsValidInvalidEventTags()
+    {
+        // String as attributes
+        $this->assertFalse(Validator::areEventTagsValid('Invalid string attributes.'));
+
+        // Integer as attributes
+        $this->assertFalse(Validator::areEventTagsValid(42));
+
+        // Boolean as attributes
+        $this->assertFalse(Validator::areEventTagsValid(true));
+
+        // Sequential array as attributes
+        $this->assertFalse(Validator::areEventTagsValid([0, 1, 2, 42]));
+
+        // Mixed array as attributes
+        $this->assertFalse(Validator::areEventTagsValid([0, 1, 2, 42, 'abc' => 'def']));
     }
 
     public function testIsUserInExperimentNoAudienceUsedInExperiment()

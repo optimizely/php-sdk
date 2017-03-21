@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016-2017, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
 use Optimizely\Event\LogEvent;
 use Optimizely\ProjectConfig;
+use Optimizely\Utils\EventTagUtils;
 
 class EventBuilder
 {
@@ -153,20 +154,34 @@ class EventBuilder
      * @param $eventKey string Key representing the event.
      * @param $experiments array Experiments for which conversion event needs to be recorded.
      * @param $userId string ID of user.
-     * @param $eventValue integer Value associated with the event.
+     * @param $eventTags array Hash representing metadata associated with the event.
      */
-    private function setConversionParams($config, $eventKey, $experiments, $userId, $eventValue)
+    private function setConversionParams($config, $eventKey, $experiments, $userId, $eventTags)
     {
         $this->_eventParams[EVENT_FEATURES] = [];
         $this->_eventParams[EVENT_METRICS] = [];
 
-        if (!is_null($eventValue)) {
-            $this->_eventParams[EVENT_METRICS] = [
-                [
-                    'name' => 'revenue',
-                    'value' => $eventValue
-                ]
-            ];
+        if (!is_null($eventTags)) {
+            forEach ($eventTags as $eventTagId => $eventTagValue) {
+                if (is_null($eventTagValue)) {
+                    continue;
+                }
+                $eventFeature = array(
+                    'id' => $eventTagId,
+                    'type' => 'custom',
+                    'value' => $eventTagValue,
+                    'shouldIndex' => false,
+                );
+                array_push($this->_eventParams[EVENT_FEATURES], $eventFeature);
+            }
+            $eventValue = EventTagUtils::getRevenueValue($eventTags);
+            if ($eventValue) {
+                $eventMetric = array(
+                    'name' => EventTagUtils::REVENUE_EVENT_METRIC_NAME,
+                    'value' => $eventValue,
+                );
+                array_push($this->_eventParams[EVENT_METRICS], $eventMetric);
+            }
         }
 
         $eventEntity = $config->getEvent($eventKey);
@@ -218,15 +233,15 @@ class EventBuilder
      * @param $experiments array Experiments for which conversion event needs to be recorded.
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.
-     * @param $eventValue integer Value associated with the event.
+     * @param $eventTags array Hash representing metadata associated with the event.
      *
      * @return LogEvent Event object to be sent to dispatcher.
      */
-    public function createConversionEvent($config, $eventKey, $experiments, $userId, $attributes, $eventValue)
+    public function createConversionEvent($config, $eventKey, $experiments, $userId, $attributes, $eventTags)
     {
         $this->resetParams();
         $this->setCommonParams($config, $userId, $attributes);
-        $this->setConversionParams($config, $eventKey, $experiments, $userId, $eventValue);
+        $this->setConversionParams($config, $eventKey, $experiments, $userId, $eventTags);
 
         return new LogEvent(self::$CONVERSION_ENDPOINT, $this->getParams(), self::$HTTP_VERB, self::$HTTP_HEADERS);
     }

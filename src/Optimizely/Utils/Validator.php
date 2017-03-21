@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016-2017, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ class Validator
     /**
      * @param $datafile string JSON string representing the project.
      *
-     * @return boolean representing whether schema is valid or not.
+     * @return boolean Representing whether schema is valid or not.
      */
     public static function validateJsonSchema($datafile)
     {
@@ -41,11 +41,21 @@ class Validator
     /**
      * @param $attributes mixed Attributes of the user.
      *
-     * @return boolean representing whether attributes are valid or not.
+     * @return boolean Representing whether attributes are valid or not.
      */
     public static function areAttributesValid($attributes)
     {
         return is_array($attributes) && count(array_filter(array_keys($attributes), 'is_int')) == 0;
+    }
+
+    /**
+     * @param $eventTags mixed Event tags to be validated.
+     *
+     * @return boolean Representing whether event tags are valid or not.
+     */
+    public static function areEventTagsValid($eventTags)
+    {
+        return is_array($eventTags) && count(array_filter(array_keys($eventTags), 'is_int')) == 0;
     }
 
     /**
