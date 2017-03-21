@@ -22,7 +22,6 @@ use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
 use Monolog\Logger;
 use Optimizely\Entity\Experiment;
-use Optimizely\Logger\DefaultLogger;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
@@ -84,12 +83,13 @@ class Optimizely
      * @param $errorHandler ErrorHandlerInterface
      * @param $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
      */
-    public function __construct($datafile,
-                                EventDispatcherInterface $eventDispatcher = null,
-                                LoggerInterface $logger = null,
-                                ErrorHandlerInterface $errorHandler = null,
-                                $skipJsonValidation = false)
-    {
+    public function __construct(
+        $datafile,
+        EventDispatcherInterface $eventDispatcher = null,
+        LoggerInterface $logger = null,
+        ErrorHandlerInterface $errorHandler = null,
+        $skipJsonValidation = false
+    ) {
         $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
         $this->_logger = $logger ?: new NoOpLogger();
@@ -97,7 +97,6 @@ class Optimizely
 
         if (!$this->validateInputs($datafile, $skipJsonValidation)) {
             $this->_isValid = false;
-            $this->_logger = new DefaultLogger();
             $this->_logger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
             return;
         }
@@ -107,13 +106,11 @@ class Optimizely
         }
         catch (Throwable $exception) {
             $this->_isValid = false;
-            $this->_logger = new DefaultLogger();
             $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
             return;
         }
         catch (Exception $exception) {
             $this->_isValid = false;
-            $this->_logger = new DefaultLogger();
             $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
             return;
         }

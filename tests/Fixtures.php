@@ -16,13 +16,9 @@
  */
 namespace Optimizely\Tests;
 
-use Exception;
-use Optimizely\Bucketer;
-use Optimizely\Event\Dispatcher\EventDispatcherInterface;
-use Optimizely\Event\LogEvent;
-
-define('DATAFILE',
-    '{"experiments": [{"status": "Running", "key": "test_experiment", "layerId": "7719770039", 
+class Fixtures
+{
+    const DATAFILE = '{"experiments": [{"status": "Running", "key": "test_experiment", "layerId": "7719770039", 
     "trafficAllocation": [{"entityId": "7722370027", "endOfRange": 4000}, 
     {"entityId": "7721010009", "endOfRange": 8000}], "audienceIds": ["7718080042"], 
     "variations": [{"id": "7722370027", "key": "control"}, {"id": "7721010009", "key": "variation"}], 
@@ -37,47 +33,5 @@ define('DATAFILE',
     "attributes": [{"id": "7723280020", "key": "device_type"}, {"id": "7723340004", "key": "location"}], 
     "projectId": "7720880029", "accountId": "1592310167", 
     "events": [{"experimentIds": ["7716830082", "7723330021", "7718750065", "7716830585"], "id": "7718020063", "key": "purchase"}], 
-    "revision": "15"}');
-
-/**
- * Class TestBucketer
- * Extending Bucketer for the sake of tests.
- * In PHP we cannot mock private/protected methods and so this was the most novel way to test.
- *
- * @package Optimizely\Tests
- */
-class TestBucketer extends Bucketer
-{
-    private $values;
-
-    public function setBucketValues($values)
-    {
-        $this->values = $values;
-    }
-
-    public function generateBucketValue($bucketingId)
-    {
-        return array_shift($this->values);
-    }
-}
-
-
-class ValidEventDispatcher implements EventDispatcherInterface
-{
-    public function dispatchEvent(LogEvent $event) {}
-}
-
-class InvalidEventDispatcher
-{
-    public function dispatchEvent(LogEvent $event) {}
-}
-
-class InvalidLogger
-{
-    public function log($logLevel, $logMessage) {}
-}
-
-class InvalidErrorHandler
-{
-    public function handleError(Exception $error) {}
+    "revision": "15"}';
 }

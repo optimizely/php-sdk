@@ -34,7 +34,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     {
         $this->testUserId = 'testUserId';
         $logger = new NoOpLogger();
-        $this->config = new ProjectConfig(DATAFILE, $logger, new NoOpErrorHandler());
+        $this->config = new ProjectConfig(Fixtures::DATAFILE, $logger, new NoOpErrorHandler());
         $this->eventBuilder = new EventBuilder(new Bucketer($logger));
     }
 

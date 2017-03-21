@@ -31,14 +31,14 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     private $config;
     private $loggerMock;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->testUserId = 'testUserId';
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))
             ->getMock();
-        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
+        $this->config = new ProjectConfig(Fixtures::DATAFILE, $this->loggerMock, new NoOpErrorHandler());
     }
 
     private function getBucketingId($userId, $experimentId)
