@@ -150,7 +150,7 @@ class Bucketer
             }
 
             $userExperimentId = $this->findBucket($userId, $group->getId(), $group->getTrafficAllocation());
-            if (is_null($userExperimentId)) {
+            if (empty($userExperimentId)) {
                 $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no experiment.', $userId));
                 return new Variation();
             }
@@ -172,7 +172,7 @@ class Bucketer
 
         // Bucket user if not in whitelist and in group (if any).
         $variationId = $this->findBucket($userId, $experiment->getId(), $experiment->getTrafficAllocation());
-        if (!is_null($variationId)) {
+        if (!empty($variationId)) {
             $variation = $config->getVariationFromId($experiment->getKey(), $variationId);
             $this->_logger->log(Logger::INFO,
                 sprintf('User "%s" is in variation %s of experiment %s.',
