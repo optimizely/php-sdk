@@ -1,4 +1,4 @@
-#Optimizely PHP SDK
+# Optimizely PHP SDK
 [![Build Status](https://travis-ci.org/optimizely/php-sdk.svg?branch=master)](https://travis-ci.org/optimizely/php-sdk)
 [![Coverage Status](https://coveralls.io/repos/github/optimizely/php-sdk/badge.svg?branch=master)](https://coveralls.io/github/optimizely/php-sdk?branch=master)
 [![Total Downloads](https://poser.pugx.org/optimizely/optimizely-sdk/downloads)](https://packagist.org/packages/optimizely/optimizely-sdk)
@@ -6,9 +6,9 @@
 
 This repository houses the PHP SDK for Optimizely Full Stack.
 
-##Getting Started
+## Getting Started
 
-###Installing the SDK
+### Installing the SDK
 
 The Optimizely PHP SDK can be installed through [Composer](https://getcomposer.org/). Please use the following command: 
 
@@ -16,20 +16,20 @@ The Optimizely PHP SDK can be installed through [Composer](https://getcomposer.o
 php composer.phar require optimizely/optimizely-sdk
 ```
 
-###Using the SDK
+### Using the SDK
 See the Optimizely Full Stack [developer documentation](https://developers.optimizely.com/x/solutions/sdks/reference/?language=php) to learn how to set up your first Full Stack project and use the SDK.
 
-##Development
+## Development
 
-###Unit tests
+### Unit tests
 
-#####Running all tests
+##### Running all tests
 You can run all unit tests with:
 
 ```
 ./vendor/bin/phpunit
 ```
 
-###Contributing
+### Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md).

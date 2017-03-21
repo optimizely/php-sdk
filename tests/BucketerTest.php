@@ -82,10 +82,27 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     public function testBucketValidExperimentNotInGroup()
     {
         $bucketer = new TestBucketer($this->loggerMock);
-        $bucketer->setBucketValues([3000, 7000, 9000]);
+        $bucketer->setBucketValues([1000, 3000, 7000, 9000]);
         // Total calls in this test
-        $this->loggerMock->expects($this->exactly(6))
+        $this->loggerMock->expects($this->exactly(8))
             ->method('log');
+
+        // No variation (empty entity ID)
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 1000 to user "testUserId".');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO, 'User "testUserId" is in no variation.');
+
+        $this->assertEquals(
+            new Variation(),
+            $bucketer->bucket(
+                $this->config,
+                $this->config->getExperimentFromKey('test_experiment'),
+                $this->testUserId
+            )
+        );
 
         // control
         $this->loggerMock->expects($this->at(0))
@@ -145,10 +162,10 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     {
         $bucketer = new TestBucketer($this->loggerMock);
         // Total calls in this test
-        $this->loggerMock->expects($this->exactly(10))
+        $this->loggerMock->expects($this->exactly(14))
             ->method('log');
 
-        // group_experiment_1 (20% experiment)
+        // group_experiment_1 (15% experiment)
         // variation 1
         $bucketer->setBucketValues([1000, 4000]);
         $this->loggerMock->expects($this->at(0))
@@ -208,6 +225,41 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is not in experiment group_experiment_1 of group 7722400015.');
 
+        $this->assertEquals(
+            new Variation(),
+            $bucketer->bucket(
+                $this->config,
+                $this->config->getExperimentFromKey('group_experiment_1'),
+                $this->testUserId
+            )
+        );
+
+        // User not in any experiment (previously allocated space)
+        $bucketer->setBucketValues([400]);
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 400 to user "testUserId".');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
+
+        $this->assertEquals(
+            new Variation(),
+            $bucketer->bucket(
+                $this->config,
+                $this->config->getExperimentFromKey('group_experiment_1'),
+                $this->testUserId
+            )
+        );
+
+        // User not in any experiment (never allocated space)
+        $bucketer->setBucketValues([9000]);
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 9000 to user "testUserId".');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
         $this->assertEquals(
             new Variation(),
             $bucketer->bucket(
