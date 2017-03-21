@@ -1,3 +1,8 @@
+## 1.1.0
+- Added event tags to track API to allow users to pass in event metadata.
+- Deprecated the `eventValue` parameter from the track method. Should use `eventTags` to pass in event value instead.
+- Relaxed restriction on monolog package. 
+
 ## 1.0.1
 - Updated to support more versions of json-schema package.
 
