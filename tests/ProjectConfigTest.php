@@ -181,6 +181,11 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('7720880029', $this->config->getProjectId());
     }
 
+    public function testGetRevision()
+    {
+        $this->assertEquals('15', $this->config->getRevision());
+    }
+
     public function testGetGroupValidId()
     {
         $group = $this->config->getGroup('7722400015');

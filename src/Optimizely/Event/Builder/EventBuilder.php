@@ -105,6 +105,7 @@ class EventBuilder
     {
         $this->_eventParams[PROJECT_ID] = $config->getProjectId();
         $this->_eventParams[ACCOUNT_ID] = $config->getAccountId();
+        $this->_eventParams[REVISION] = $config->getRevision();
         $this->_eventParams[VISITOR_ID] = $userId;
         $this->_eventParams[CLIENT_ENGINE] = self::SDK_TYPE;
         $this->_eventParams[CLIENT_VERSION] = self::SDK_VERSION;
@@ -195,6 +196,7 @@ class EventBuilder
                 array_push($this->_eventParams[LAYER_STATES], [
                     LAYER_ID => $experiment->getLayerId(),
                     ACTION_TRIGGERED => true,
+                    REVISION => $config->getRevision(),
                     DECISION => [
                         EXPERIMENT_ID => $experiment->getId(),
                         VARIATION_ID => $variation->getId(),

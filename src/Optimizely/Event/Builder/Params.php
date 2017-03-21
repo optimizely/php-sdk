@@ -17,6 +17,7 @@
 
 define('ACCOUNT_ID', 'accountId');
 define('PROJECT_ID', 'projectId');
+define('REVISION', 'revision');
 define('LAYER_ID', 'layerId');
 define('EXPERIMENT_ID', 'experimentId');
 define('VARIATION_ID', 'variationId');

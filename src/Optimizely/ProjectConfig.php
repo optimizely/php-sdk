@@ -185,6 +185,14 @@ class ProjectConfig
     }
 
     /**
+     * @return string String representing revision of the datafile.
+     */
+    public function getRevision()
+    {
+        return $this->_revision;
+    }
+
+    /**
      * @param $groupId string ID of the group.
      *
      * @return Group Entity corresponding to the ID.

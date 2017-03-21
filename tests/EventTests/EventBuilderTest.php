@@ -45,6 +45,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
+                'revision' => '15',
                 'layerId' => '7719770039',
                 'visitorId' => 'testUserId',
                 'clientEngine' => 'php-sdk',
@@ -79,6 +80,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
+                'revision' => '15',
                 'layerId' => '7719770039',
                 'visitorId' => 'testUserId',
                 'clientEngine' => 'php-sdk',
@@ -125,6 +127,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
                 'visitorId' => 'testUserId',
+                'revision' => '15',
                 'clientEngine' => 'php-sdk',
                 'clientVersion' => '1.0.1',
                 'userFeatures' => [],
@@ -137,6 +140,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'layerStates' => [[
                     'layerId' => '7719770039',
                     'actionTriggered' => true,
+                    'revision' => '15',
                     'decision' =>  [
                         'experimentId' => '7716830082',
                         'variationId' => '7722370027',
@@ -167,6 +171,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
                 'visitorId' => 'testUserId',
+                'revision' => '15',
                 'clientEngine' => 'php-sdk',
                 'clientVersion' => '1.0.1',
                 'isGlobalHoldback' => false,
@@ -178,6 +183,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'layerStates' => [[
                     'layerId' => '7719770039',
                     'actionTriggered' => true,
+                    'revision' => '15',
                     'decision' =>  [
                         'experimentId' => '7716830082',
                         'variationId' => '7722370027',
@@ -220,6 +226,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
                 'visitorId' => 'testUserId',
+                'revision' => '15',
                 'clientEngine' => 'php-sdk',
                 'clientVersion' => '1.0.1',
                 'userFeatures' => [],
@@ -242,6 +249,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'layerStates' => [[
                     'layerId' => '7719770039',
                     'actionTriggered' => true,
+                    'revision' => '15',
                     'decision' =>  [
                         'experimentId' => '7716830082',
                         'variationId' => '7722370027',
@@ -272,6 +280,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
                 'visitorId' => 'testUserId',
+                'revision' => '15',
                 'clientEngine' => 'php-sdk',
                 'clientVersion' => '1.0.1',
                 'isGlobalHoldback' => false,
@@ -299,6 +308,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'layerStates' => [[
                     'layerId' => '7719770039',
                     'actionTriggered' => true,
+                    'revision' => '15',
                     'decision' =>  [
                         'experimentId' => '7716830082',
                         'variationId' => '7722370027',
@@ -344,6 +354,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
                 'visitorId' => 'testUserId',
+                'revision' => '15',
                 'clientEngine' => 'php-sdk',
                 'clientVersion' => '1.0.1',
                 'userFeatures' => [],
@@ -369,6 +380,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'layerStates' => [[
                     'layerId' => '7719770039',
                     'actionTriggered' => true,
+                    'revision' => '15',
                     'decision' =>  [
                         'experimentId' => '7716830082',
                         'variationId' => '7722370027',
