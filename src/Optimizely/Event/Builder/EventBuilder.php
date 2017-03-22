@@ -168,7 +168,7 @@ class EventBuilder
                     continue;
                 }
                 $eventFeature = array(
-                    'id' => $eventTagId,
+                    'name' => $eventTagId,
                     'type' => 'custom',
                     'value' => $eventTagValue,
                     'shouldIndex' => false,

@@ -234,7 +234,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'timestamp' => time() * 1000,
                 'eventFeatures' => [
                     [
-                        'id' => 'revenue',
+                        'name' => 'revenue',
                         'type' => 'custom',
                         'value' => 42,
                         'shouldIndex' => false
@@ -287,13 +287,13 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'timestamp' => time() * 1000,
                 'eventFeatures' => [
                     [
-                        'id' => 'revenue',
+                        'name' => 'revenue',
                         'type' => 'custom',
                         'value' => 42,
                         'shouldIndex' => false
                     ],
                     [
-                        'id' => 'non-revenue',
+                        'name' => 'non-revenue',
                         'type' => 'custom',
                         'value' => 'definitely',
                         'shouldIndex' => false
@@ -362,13 +362,13 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'timestamp' => time() * 1000,
                 'eventFeatures' => [
                     [
-                        'id' => 'revenue',
+                        'name' => 'revenue',
                         'type' => 'custom',
                         'value' => 42,
                         'shouldIndex' => false
                     ],
                     [
-                        'id' => 'non-revenue',
+                        'name' => 'non-revenue',
                         'type' => 'custom',
                         'value' => 'definitely',
                         'shouldIndex' => false
