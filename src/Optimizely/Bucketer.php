@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016-2017, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ class Bucketer
      * @param $parentId mixed ID representing Experiment or Group.
      * @param $trafficAllocations array Traffic allocations for variation or experiment.
      *
-     * @returns string ID representing experiment or variation.
+     * @return string ID representing experiment or variation.
      */
     private function findBucket($userId, $parentId, $trafficAllocations)
     {
@@ -150,7 +150,7 @@ class Bucketer
             }
 
             $userExperimentId = $this->findBucket($userId, $group->getId(), $group->getTrafficAllocation());
-            if (is_null($userExperimentId)) {
+            if (empty($userExperimentId)) {
                 $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no experiment.', $userId));
                 return new Variation();
             }
@@ -172,7 +172,7 @@ class Bucketer
 
         // Bucket user if not in whitelist and in group (if any).
         $variationId = $this->findBucket($userId, $experiment->getId(), $experiment->getTrafficAllocation());
-        if (!is_null($variationId)) {
+        if (!empty($variationId)) {
             $variation = $config->getVariationFromId($experiment->getKey(), $variationId);
             $this->_logger->log(Logger::INFO,
                 sprintf('User "%s" is in variation %s of experiment %s.',

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016-2017, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,11 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
+                'revision' => '15',
                 'layerId' => '7719770039',
                 'visitorId' => 'testUserId',
                 'clientEngine' => 'php-sdk',
-                'clientVersion' => '1.0.1',
+                'clientVersion' => '1.1.0',
                 'timestamp' => time() * 1000,
                 'isGlobalHoldback' => false,
                 'userFeatures' => [],
@@ -79,10 +80,11 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
+                'revision' => '15',
                 'layerId' => '7719770039',
                 'visitorId' => 'testUserId',
                 'clientEngine' => 'php-sdk',
-                'clientVersion' => '1.0.1',
+                'clientVersion' => '1.1.0',
                 'timestamp' => time() * 1000,
                 'isGlobalHoldback' => false,
                 'userFeatures' => [[
@@ -125,8 +127,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
                 'visitorId' => 'testUserId',
+                'revision' => '15',
                 'clientEngine' => 'php-sdk',
-                'clientVersion' => '1.0.1',
+                'clientVersion' => '1.1.0',
                 'userFeatures' => [],
                 'isGlobalHoldback' => false,
                 'timestamp' => time() * 1000,
@@ -137,6 +140,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'layerStates' => [[
                     'layerId' => '7719770039',
                     'actionTriggered' => true,
+                    'revision' => '15',
                     'decision' =>  [
                         'experimentId' => '7716830082',
                         'variationId' => '7722370027',
@@ -167,8 +171,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
                 'visitorId' => 'testUserId',
+                'revision' => '15',
                 'clientEngine' => 'php-sdk',
-                'clientVersion' => '1.0.1',
+                'clientVersion' => '1.1.0',
                 'isGlobalHoldback' => false,
                 'timestamp' => time() * 1000,
                 'eventFeatures' => [],
@@ -178,6 +183,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'layerStates' => [[
                     'layerId' => '7719770039',
                     'actionTriggered' => true,
+                    'revision' => '15',
                     'decision' =>  [
                         'experimentId' => '7716830082',
                         'variationId' => '7722370027',
@@ -220,12 +226,20 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
                 'visitorId' => 'testUserId',
+                'revision' => '15',
                 'clientEngine' => 'php-sdk',
-                'clientVersion' => '1.0.1',
+                'clientVersion' => '1.1.0',
                 'userFeatures' => [],
                 'isGlobalHoldback' => false,
                 'timestamp' => time() * 1000,
-                'eventFeatures' => [],
+                'eventFeatures' => [
+                    [
+                        'name' => 'revenue',
+                        'type' => 'custom',
+                        'value' => 42,
+                        'shouldIndex' => false
+                    ]
+                ],
                 'eventMetrics' => [[
                     'name' => 'revenue',
                     'value' => 42
@@ -235,6 +249,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'layerStates' => [[
                     'layerId' => '7719770039',
                     'actionTriggered' => true,
+                    'revision' => '15',
                     'decision' =>  [
                         'experimentId' => '7716830082',
                         'variationId' => '7722370027',
@@ -251,7 +266,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [$this->config->getExperimentFromKey('test_experiment')],
             $this->testUserId,
             null,
-            42
+            array('revenue' => 42)
         );
 
         $this->assertEquals($expectedLogEvent, $logEvent);
@@ -265,11 +280,25 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'projectId' => '7720880029',
                 'accountId' => '1592310167',
                 'visitorId' => 'testUserId',
+                'revision' => '15',
                 'clientEngine' => 'php-sdk',
-                'clientVersion' => '1.0.1',
+                'clientVersion' => '1.1.0',
                 'isGlobalHoldback' => false,
                 'timestamp' => time() * 1000,
-                'eventFeatures' => [],
+                'eventFeatures' => [
+                    [
+                        'name' => 'revenue',
+                        'type' => 'custom',
+                        'value' => 42,
+                        'shouldIndex' => false
+                    ],
+                    [
+                        'name' => 'non-revenue',
+                        'type' => 'custom',
+                        'value' => 'definitely',
+                        'shouldIndex' => false
+                    ]
+                ],
                 'eventMetrics' => [[
                     'name' => 'revenue',
                     'value' => 42
@@ -279,6 +308,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'layerStates' => [[
                     'layerId' => '7719770039',
                     'actionTriggered' => true,
+                    'revision' => '15',
                     'decision' =>  [
                         'experimentId' => '7716830082',
                         'variationId' => '7722370027',
@@ -307,7 +337,70 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [$this->config->getExperimentFromKey('test_experiment')],
             $this->testUserId,
             $userAttributes,
-            42
+            array(
+                'revenue' => 42,
+                'non-revenue' => 'definitely'
+            )
+        );
+
+        $this->assertEquals($expectedLogEvent, $logEvent);
+    }
+
+    public function testCreateConversionEventNoAttributesWithInvalidValue()
+    {
+        $expectedLogEvent = new LogEvent(
+            'https://logx.optimizely.com/log/event',
+            [
+                'projectId' => '7720880029',
+                'accountId' => '1592310167',
+                'visitorId' => 'testUserId',
+                'revision' => '15',
+                'clientEngine' => 'php-sdk',
+                'clientVersion' => '1.1.0',
+                'userFeatures' => [],
+                'isGlobalHoldback' => false,
+                'timestamp' => time() * 1000,
+                'eventFeatures' => [
+                    [
+                        'name' => 'revenue',
+                        'type' => 'custom',
+                        'value' => 42,
+                        'shouldIndex' => false
+                    ],
+                    [
+                        'name' => 'non-revenue',
+                        'type' => 'custom',
+                        'value' => 'definitely',
+                        'shouldIndex' => false
+                    ]
+                ],
+                'eventMetrics' => [],
+                'eventEntityId' => '7718020063',
+                'eventName' => 'purchase',
+                'layerStates' => [[
+                    'layerId' => '7719770039',
+                    'actionTriggered' => true,
+                    'revision' => '15',
+                    'decision' =>  [
+                        'experimentId' => '7716830082',
+                        'variationId' => '7722370027',
+                        'isLayerHoldback' => false
+                    ]
+                ]]
+            ],
+            'POST',
+            ['Content-Type' => 'application/json']
+        );
+        $logEvent = $this->eventBuilder->createConversionEvent(
+            $this->config,
+            'purchase',
+            [$this->config->getExperimentFromKey('test_experiment')],
+            $this->testUserId,
+            null,
+            array(
+                'revenue' => '42',
+                'non-revenue' => 'definitely'
+            )
         );
 
         $this->assertEquals($expectedLogEvent, $logEvent);
