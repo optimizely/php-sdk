@@ -154,7 +154,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
-            ['test_experiment' => 'control'],
+            ['7716830082' => '7722370027'],
             $this->testUserId,
             null,
             null
@@ -209,7 +209,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
-            ['test_experiment' => 'control'],
+            ['7716830082' => '7722370027'],
             $this->testUserId,
             $userAttributes,
             null
@@ -263,7 +263,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
-            ['test_experiment' => 'control'],
+            ['7716830082' => '7722370027'],
             $this->testUserId,
             null,
             array('revenue' => 42)
@@ -334,7 +334,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
-            ['test_experiment' => 'control'],
+            ['7716830082' => '7722370027'],
             $this->testUserId,
             $userAttributes,
             array(
@@ -394,7 +394,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
-            ['test_experiment' => 'control'],
+            ['7716830082' => '7722370027'],
             $this->testUserId,
             null,
             array(

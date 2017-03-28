@@ -546,7 +546,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ["group_experiment_2" => "group_exp_2_var_2"],
+                ["7718750065" => "7725250007"],
                 'test_user',
                 null,
                 null
@@ -632,8 +632,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 $this->projectConfig,
                 'purchase',
                 [
-                    'test_experiment' => 'control',
-                    'group_experiment_2' => 'group_exp_2_var_2'
+                    '7716830082' => '7722370027',
+                    '7718750065' => '7725250007'
                 ],
                 'test_user',
                 $userAttributes,
@@ -713,7 +713,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ['group_experiment_2' => 'group_exp_2_var_2'],
+                ['7718750065' => '7725250007'],
                 'test_user',
                 null,
                 array('revenue' => 42)
@@ -796,7 +796,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ['group_experiment_2' => 'group_exp_2_var_2'],
+                ['7718750065' => '7725250007'],
                 'test_user',
                 null,
                 array('revenue' => 42)
@@ -875,7 +875,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ['group_experiment_2' => 'group_exp_2_var_2'],
+                ['7718750065' => '7725250007'],
                 'test_user',
                 null,
                 array('revenue' => '4200')
@@ -961,8 +961,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 $this->projectConfig,
                 'purchase',
                 [
-                    'test_experiment' => 'control',
-                    'group_experiment_2' => 'group_exp_2_var_2'
+                    '7716830082' => '7722370027',
+                    '7718750065' => '7725250007'
                 ],
                 'test_user',
                 $userAttributes,
@@ -1054,8 +1054,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 $this->projectConfig,
                 'purchase',
                 [
-                    'test_experiment' => 'control',
-                    'group_experiment_2' => 'group_exp_2_var_2'
+                    '7716830082' => '7722370027',
+                    '7718750065' => '7725250007'
                 ],
                 'test_user',
                 $userAttributes,

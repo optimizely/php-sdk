@@ -151,7 +151,7 @@ class Optimizely
             return false;
         }
 
-        if (!$experiment->isExperimentRunning() && !$experiment->isExperimentLaunched()) {
+        if (!$experiment->isExperimentRunning()) {
             $this->_logger->log(Logger::INFO, sprintf('Experiment "%s" is not running.', $experiment->getKey()));
             return false;
         }
@@ -192,7 +192,7 @@ class Optimizely
      * @param  $event string Event key representing the event which needs to be recorded.
      * @param  $user string ID for user
      * @param  $attributes array Attributes of the user.
-     * @return Array Of objects where each object contains the experiment to track and the id of the variation the user is bucketed into
+     * @return Array Of objects where each object contains the id of the experiment to track and the id of the variation the user is bucketed into
      */
     private function getValidExperimentsForEvent($event, $userId, $attributes = null) {
         $validExperiments = [];
@@ -207,12 +207,8 @@ class Optimizely
                 continue;
             }
 
-            // Do not track events for experiment if it is in "LAUNCHED" state.
-            if ($experiment->isExperimentLaunched()) {
-                $this->_logger->log(Logger::DEBUG, sprintf('Experiment %s is in "Launched" state. Not tracking user for it.', $experimentKey));
-                continue;
-            }
-            $validExperiments[$experimentKey] = $variationKey;
+            $variation = $this->_config->getVariationFromKey($experimentKey, $variationKey);
+            $validExperiments[$experimentId] = $variation->getId();
         }
 
         return $validExperiments;

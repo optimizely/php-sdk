@@ -137,7 +137,7 @@ class EventBuilder
      *
      * @param $config ProjectConfig Configuration for the project.
      * @param $eventKey string Key representing the event.
-     * @param $experimentVariationMap array Map of experiment key to the key of the variation that the user is bucketed into
+     * @param $experimentVariationMap array Map of experiment id to the id of the variation that the user is bucketed into
      * @param $userId string ID of user.
      * @param $eventTags array Hash representing metadata associated with the event.
      */
@@ -174,16 +174,15 @@ class EventBuilder
         $this->_eventParams[EVENT_NAME] = $eventKey;
 
         $this->_eventParams[LAYER_STATES] = [];
-        forEach ($experimentVariationMap as $experimentKey => $variationKey) {
-            $variation = $config->getVariationFromKey($experimentKey, $variationKey);
-            $experiment = $config->getExperimentFromKey($experimentKey);
+        forEach ($experimentVariationMap as $experimentId => $variationId) {
+            $experiment = $config->getExperimentFromId($experimentId);
             array_push($this->_eventParams[LAYER_STATES], [
                 LAYER_ID => $experiment->getLayerId(),
                 ACTION_TRIGGERED => true,
                 REVISION => $config->getRevision(),
                 DECISION => [
                     EXPERIMENT_ID => $experiment->getId(),
-                    VARIATION_ID => $variation->getId(),
+                    VARIATION_ID => $variationId,
                     IS_LAYER_HOLDBACK => false
                 ]
             ]);
@@ -218,7 +217,7 @@ class EventBuilder
      *
      * @param $config ProjectConfig Configuration for the project.
      * @param $eventKey string Key representing the event.
-     * @param $experimentVariationMap array Map of experiment key to the key of the variation that the user is bucketed into
+     * @param $experimentVariationMap array Map of experiment id to the id of the variation that the user is bucketed into
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.
      * @param $eventTags array Hash representing metadata associated with the event.
