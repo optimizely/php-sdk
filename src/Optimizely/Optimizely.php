@@ -126,7 +126,7 @@ class Optimizely
      * @param $datafile string JSON string representing the project.
      * @param $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
      *
-     * @return boolean Representing whether all provided inputs are valid or not.
+     * @return boolean Representing whether the provided datafile is valid or not.
      */
     private function validateDatafile($datafile, $skipJsonValidation)
     {
@@ -143,6 +143,7 @@ class Optimizely
      * @param $experiment Experiment Object representing experiment.
      * @param $userId string ID for user.
      * @param $attributes array User attributes.
+     *
      * @return boolean Representing whether all conditions are met or not.
      */
     private function validatePreconditions($experiment, $userId, $attributes)
@@ -160,10 +161,12 @@ class Optimizely
     }
 
     /**
-     * Helper function to validate user inputs into the API methods
-     * @param  $userId string ID for user
-     * @param  $eventTags array Hash representing metadata associated with an event
-     * @return boolean Representing whether all user inputs are valid
+     * Helper function to validate user inputs into the API methods.
+     *
+     * @param  $userId string ID for user.
+     * @param  $eventTags array Hash representing metadata associated with an event.
+     *
+     * @return boolean Representing whether all user inputs are valid.
      */
     private function validateUserInputs($attributes, $eventTags = null) {
         if (!is_null($attributes) && !Validator::areAttributesValid($attributes)) {
@@ -189,10 +192,12 @@ class Optimizely
     /**
      * Get the experiments that we should be tracking for the given event. A valid experiment
      * is one that is in "Running" state and for which the user has been bucketed into.
+     *
      * @param  $event string Event key representing the event which needs to be recorded.
-     * @param  $user string ID for user
+     * @param  $user string ID for user.
      * @param  $attributes array Attributes of the user.
-     * @return Array Of objects where each object contains the id of the experiment to track and the id of the variation the user is bucketed into
+     *
+     * @return Array Of objects where each object contains the id of the experiment to track and the id of the variation the user is bucketed into.
      */
     private function getValidExperimentsForEvent($event, $userId, $attributes = null) {
         $validExperiments = [];

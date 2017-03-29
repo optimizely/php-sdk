@@ -137,7 +137,7 @@ class EventBuilder
      *
      * @param $config ProjectConfig Configuration for the project.
      * @param $eventKey string Key representing the event.
-     * @param $experimentVariationMap array Map of experiment id to the id of the variation that the user is bucketed into
+     * @param $experimentVariationMap array Map of experiment ID to the ID of the variation that the user is bucketed into.
      * @param $userId string ID of user.
      * @param $eventTags array Hash representing metadata associated with the event.
      */
@@ -181,7 +181,7 @@ class EventBuilder
                 ACTION_TRIGGERED => true,
                 REVISION => $config->getRevision(),
                 DECISION => [
-                    EXPERIMENT_ID => $experiment->getId(),
+                    EXPERIMENT_ID => $experimentId,
                     VARIATION_ID => $variationId,
                     IS_LAYER_HOLDBACK => false
                 ]

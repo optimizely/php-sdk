@@ -174,10 +174,11 @@ class Bucketer
     /**
      * Determine variation the user has been forced into.
      *
-     * @param $config
-     * @param $experiment
-     * @param $userId
-     * @return  null|Variation Representing the variation the user is forced into
+     * @param $config     ProjectConfig Configuration for the project.
+     * @param $experiment Experiment Experiment in which user is to be bucketed.
+     * @param $userId     string User identifier.
+     *
+     * @return  null|Variation Representing the variation the user is forced into.
      */
     public function getForcedVariation($config, $experiment, $userId)
     {
