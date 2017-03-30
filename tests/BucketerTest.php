@@ -282,7 +282,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testBucketValidExperimentNotInGroupUserInForcedVariation()
+    public function testGetForcedVariationExperimentNotInGroupUserInForcedVariation()
     {
         $bucketer = new Bucketer($this->loggerMock);
         $this->loggerMock->expects($this->once())
@@ -295,7 +295,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testBucketValidExperimentInGroupUserInForcedVariation()
+    public function testGetForcedVariationExperimentInGroupUserInForcedVariation()
     {
         $bucketer = new Bucketer($this->loggerMock);
         $this->loggerMock->expects($this->once())

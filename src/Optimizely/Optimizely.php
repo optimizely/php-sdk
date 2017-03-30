@@ -191,13 +191,13 @@ class Optimizely
 
     /**
      * Get the experiments that we should be tracking for the given event. A valid experiment
-     * is one that is in "Running" state and for which the user has been bucketed into.
+     * is one that is in "Running" state and into which the user has been bucketed.
      *
      * @param  $event string Event key representing the event which needs to be recorded.
      * @param  $user string ID for user.
      * @param  $attributes array Attributes of the user.
      *
-     * @return Array Of objects where each object contains the id of the experiment to track and the id of the variation the user is bucketed into.
+     * @return Array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
      */
     private function getValidExperimentsForEvent($event, $userId, $attributes = null) {
         $validExperiments = [];
