@@ -34,7 +34,7 @@ class EventBuilder
     /**
      * @const string Version of the Optimizely PHP SDK.
      */
-    const SDK_VERSION = '1.1.0';
+    const SDK_VERSION = '1.1.1';
 
     /**
      * @var string URL to send impression event to.

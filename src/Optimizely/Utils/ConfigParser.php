@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016-2017, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,9 @@ class ConfigParser
             forEach ($entity as $key => $value)
             {
                 $propSetter = 'set'.ucfirst($key);
-                $entityObject->$propSetter($value);
+                if (method_exists($entityObject, $propSetter)) {
+                    $entityObject->$propSetter($value);
+                }
             }
 
             if (is_null($entityId)) {

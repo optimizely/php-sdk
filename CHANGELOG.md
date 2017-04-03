@@ -1,3 +1,6 @@
+## 1.1.1
+- Updated datafile parsing to be able to handle additional fields.
+
 ## 1.1.0
 - Updated to send datafile revision information in log events.
 - Gracefully handle empty entity IDs.
