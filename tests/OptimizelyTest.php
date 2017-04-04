@@ -420,7 +420,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(3))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Experiment launched_experiment is in "Launched" state. Not tracking user for it.');
+                'Experiment launched_experiment is in "Launched" state. Not dispatching impression event.');
 
         // Launched experiments don't send impressions
         $this->eventDispatcherMock->expects($this->never())
@@ -1186,15 +1186,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testTrackExperimentLaunched()
     {
         $callIndex = 0;
-        $this->loggerMock->expects($this->exactly(4))
+        $this->loggerMock->expects($this->exactly(2))
             ->method('log');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 6329 to user "test_user".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO,
-                'User "test_user" is in variation variation of experiment launched_experiment.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,

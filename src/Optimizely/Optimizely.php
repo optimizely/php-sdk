@@ -204,17 +204,17 @@ class Optimizely
         forEach ($event->getExperimentIds() as $experimentId) {
             $experiment = $this->_config->getExperimentFromId($experimentId);
             $experimentKey = $experiment->getKey();
-            $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
-
-            if (is_null($variationKey)) {
-                $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for experiment "%s".',
-                    $userId, $experimentKey));
-                continue;
-            }
 
             // Do not track events for experiment if it is in "LAUNCHED" state.
             if ($experiment->isExperimentLaunched()) {
                 $this->_logger->log(Logger::DEBUG, sprintf('Experiment %s is in "Launched" state. Not tracking user for it.', $experimentKey));
+                continue;
+            }
+
+            $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
+            if (is_null($variationKey)) {
+                $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for experiment "%s".',
+                    $userId, $experimentKey));
                 continue;
             }
 
@@ -252,7 +252,7 @@ class Optimizely
         // Do not track events for experiment if it is in "LAUNCHED" state.
         $experiment = $this->_config->getExperimentFromKey($experimentKey);
         if ($experiment->isExperimentLaunched()) {
-            $this->_logger->log(Logger::DEBUG, sprintf('Experiment %s is in "Launched" state. Not tracking user for it.', $experimentKey));
+            $this->_logger->log(Logger::DEBUG, sprintf('Experiment %s is in "Launched" state. Not dispatching impression event.', $experimentKey));
             return $variationKey;
         }
 
