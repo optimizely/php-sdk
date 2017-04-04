@@ -35,7 +35,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->testUserId = 'testUserId';
         $logger = new NoOpLogger();
         $this->config = new ProjectConfig(DATAFILE, $logger, new NoOpErrorHandler());
-        $this->eventBuilder = new EventBuilder(new Bucketer($logger));
+        $this->eventBuilder = new EventBuilder();
     }
 
     public function testCreateImpressionEventNoAttributes()
@@ -55,7 +55,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'userFeatures' => [],
                 'decision' => [
                     'experimentId' => '7716830082',
-                    'variationId' => '77210100090',
+                    'variationId' => '7721010009',
                     'isLayerHoldback' => false
                 ]
             ],
@@ -64,8 +64,8 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         );
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
-            $this->config->getExperimentFromKey('test_experiment'),
-            '77210100090',
+            'test_experiment',
+            'variation',
             $this->testUserId,
             null
         );
@@ -96,7 +96,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 ]],
                 'decision' => [
                     'experimentId' => '7716830082',
-                    'variationId' => '77210100090',
+                    'variationId' => '7721010009',
                     'isLayerHoldback' => false
                 ]
             ],
@@ -110,8 +110,8 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         ];
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
-            $this->config->getExperimentFromKey('test_experiment'),
-            '77210100090',
+            'test_experiment',
+            'variation',
             $this->testUserId,
             $userAttributes
         );
@@ -154,7 +154,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
-            [$this->config->getExperimentFromKey('test_experiment')],
+            ['7716830082' => '7722370027'],
             $this->testUserId,
             null,
             null
@@ -209,7 +209,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
-            [$this->config->getExperimentFromKey('test_experiment')],
+            ['7716830082' => '7722370027'],
             $this->testUserId,
             $userAttributes,
             null
@@ -263,7 +263,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
-            [$this->config->getExperimentFromKey('test_experiment')],
+            ['7716830082' => '7722370027'],
             $this->testUserId,
             null,
             array('revenue' => 42)
@@ -334,7 +334,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
-            [$this->config->getExperimentFromKey('test_experiment')],
+            ['7716830082' => '7722370027'],
             $this->testUserId,
             $userAttributes,
             array(
@@ -394,7 +394,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
-            [$this->config->getExperimentFromKey('test_experiment')],
+            ['7716830082' => '7722370027'],
             $this->testUserId,
             null,
             array(

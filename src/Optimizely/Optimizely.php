@@ -51,7 +51,7 @@ class Optimizely
     private $_logger;
 
     /**
-     * @var ErrorHandlerInterface 
+     * @var ErrorHandlerInterface
      */
     private $_errorHandler;
 
@@ -95,7 +95,7 @@ class Optimizely
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
 
-        if (!$this->validateInputs($datafile, $skipJsonValidation)) {
+        if (!$this->validateDatafile($datafile, $skipJsonValidation)) {
             $this->_isValid = false;
             $this->_logger = new DefaultLogger();
             $this->_logger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
@@ -126,9 +126,9 @@ class Optimizely
      * @param $datafile string JSON string representing the project.
      * @param $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
      *
-     * @return boolean Representing whether all provided inputs are valid or not.
+     * @return boolean Representing whether the provided datafile is valid or not.
      */
-    private function validateInputs($datafile, $skipJsonValidation)
+    private function validateDatafile($datafile, $skipJsonValidation)
     {
         if (!$skipJsonValidation && !Validator::validateJsonSchema($datafile)) {
             return false;
@@ -143,15 +143,12 @@ class Optimizely
      * @param $experiment Experiment Object representing experiment.
      * @param $userId string ID for user.
      * @param $attributes array User attributes.
+     *
      * @return boolean Representing whether all conditions are met or not.
      */
     private function validatePreconditions($experiment, $userId, $attributes)
     {
-        if (!is_null($attributes) && !Validator::areAttributesValid($attributes)) {
-            $this->_logger->log(Logger::ERROR, 'Provided attributes are in an invalid format.');
-            $this->_errorHandler->handleError(
-                new InvalidAttributeException('Provided attributes are in an invalid format.')
-            );
+        if (!$this->validateUserInputs($attributes)) {
             return false;
         }
 
@@ -160,19 +157,66 @@ class Optimizely
             return false;
         }
 
-        if ($experiment->isUserInForcedVariation($userId)) {
-            return true;
-        }
+        return true;
+    }
 
-        if (!Validator::isUserInExperiment($this->_config, $experiment, $attributes)) {
-            $this->_logger->log(
-                Logger::INFO,
-                sprintf('User "%s" does not meet conditions to be in experiment "%s".', $userId, $experiment->getKey())
+    /**
+     * Helper function to validate user inputs into the API methods.
+     *
+     * @param  $userId string ID for user.
+     * @param  $eventTags array Hash representing metadata associated with an event.
+     *
+     * @return boolean Representing whether all user inputs are valid.
+     */
+    private function validateUserInputs($attributes, $eventTags = null) {
+        if (!is_null($attributes) && !Validator::areAttributesValid($attributes)) {
+            $this->_logger->log(Logger::ERROR, 'Provided attributes are in an invalid format.');
+            $this->_errorHandler->handleError(
+                new InvalidAttributeException('Provided attributes are in an invalid format.')
             );
             return false;
         }
 
+        if (!is_null($eventTags)) {
+            if (!Validator::areEventTagsValid($eventTags)) {
+                $this->_logger->log(Logger::ERROR, 'Provided event tags are in an invalid format.');
+                $this->_errorHandler->handleError(
+                    new InvalidEventTagException('Provided event tags are in an invalid format.')
+                );
+            }
+        }
+
         return true;
+    }
+
+    /**
+     * Get the experiments that we should be tracking for the given event. A valid experiment
+     * is one that is in "Running" state and into which the user has been bucketed.
+     *
+     * @param  $event string Event key representing the event which needs to be recorded.
+     * @param  $user string ID for user.
+     * @param  $attributes array Attributes of the user.
+     *
+     * @return Array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
+     */
+    private function getValidExperimentsForEvent($event, $userId, $attributes = null) {
+        $validExperiments = [];
+        forEach ($event->getExperimentIds() as $experimentId) {
+            $experiment = $this->_config->getExperimentFromId($experimentId);
+            $experimentKey = $experiment->getKey();
+            $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
+
+            if (is_null($variationKey)) {
+                $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for experiment "%s".',
+                    $userId, $experimentKey));
+                continue;
+            }
+
+            $variation = $this->_config->getVariationFromKey($experimentKey, $variationKey);
+            $validExperiments[$experimentId] = $variation->getId();
+        }
+
+        return $validExperiments;
     }
 
     /**
@@ -191,28 +235,14 @@ class Optimizely
             return null;
         }
 
-        $experiment = $this->_config->getExperimentFromKey($experimentKey);
-
-        if (is_null($experiment->getKey())) {
-            $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
-            return null;
-        }
-
-        if (!$this->validatePreconditions($experiment, $userId, $attributes)) {
-            $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
-            return null;
-        }
-
-        $variation = $this->_bucketer->bucket($this->_config, $experiment, $userId);
-        $variationKey = $variation->getKey();
-
+        $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
         if (is_null($variationKey)) {
             $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
             return $variationKey;
         }
 
         $impressionEvent = $this->_eventBuilder
-            ->createImpressionEvent($this->_config, $experiment, $variation->getId(), $userId, $attributes);
+            ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
         $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
         $this->_logger->log(
             Logger::DEBUG,
@@ -251,30 +281,18 @@ class Optimizely
             return;
         }
 
-        if (!is_null($attributes) && !Validator::areAttributesValid($attributes)) {
-            $this->_logger->log(Logger::ERROR, 'Provided attributes are in an invalid format.');
-            $this->_errorHandler->handleError(
-                new InvalidAttributeException('Provided attributes are in an invalid format.')
+        if (!is_null($eventTags) && is_numeric($eventTags) && !is_string($eventTags)) {
+            $eventTags = array(
+                EventTagUtils::REVENUE_EVENT_METRIC_NAME => $eventTags,
             );
-            return;
+            $this->_logger->log(
+                Logger::WARNING,
+                'Event value is deprecated in track call. Use event tags to pass in revenue value instead.'
+            );
         }
 
-        if (!is_null($eventTags)) {
-            if (is_numeric($eventTags) && !is_string($eventTags)) {
-                $eventTags = array(
-                    EventTagUtils::REVENUE_EVENT_METRIC_NAME => $eventTags,
-                );
-                $this->_logger->log(
-                    Logger::WARNING,
-                    'Event value is deprecated in track call. Use event tags to pass in revenue value instead.'
-                );
-            }
-            if (!Validator::areEventTagsValid($eventTags)) {
-                $this->_logger->log(Logger::ERROR, 'Provided event tags are in an invalid format.');
-                $this->_errorHandler->handleError(
-                    new InvalidEventTagException('Provided event tags are in an invalid format.')
-                );
-            }
+        if (!$this->validateUserInputs($attributes, $eventTags)) {
+            return;
         }
 
         $event = $this->_config->getEvent($eventKey);
@@ -285,23 +303,13 @@ class Optimizely
         }
 
         // Filter out experiments that are not running or when user(s) do not meet conditions.
-        $validExperiments = [];
-        forEach ($event->getExperimentIds() as $experimentId) {
-            $experiment = $this->_config->getExperimentFromId($experimentId);
-            if ($this->validatePreconditions($experiment, $userId, $attributes)) {
-                array_push($validExperiments, $experiment);
-            } else {
-                $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for experiment "%s".',
-                    $userId, $experiment->getKey()));
-            }
-        }
-
-        if (!empty($validExperiments)) {
+        $experimentVariationMap = $this->getValidExperimentsForEvent($event, $userId, $attributes);
+        if (!empty($experimentVariationMap)) {
             $conversionEvent = $this->_eventBuilder
                 ->createConversionEvent(
                     $this->_config,
                     $eventKey,
-                    $validExperiments,
+                    $experimentVariationMap,
                     $userId,
                     $attributes,
                     $eventTags
@@ -356,6 +364,19 @@ class Optimizely
         }
 
         if (!$this->validatePreconditions($experiment, $userId, $attributes)) {
+            return null;
+        }
+
+        $variation = $this->_bucketer->getForcedVariation($this->_config, $experiment, $userId);
+        if (!is_null($variation)) {
+            return $variation->getKey();
+        }
+
+        if (!Validator::isUserInExperiment($this->_config, $experiment, $attributes)) {
+            $this->_logger->log(
+                Logger::INFO,
+                sprintf('User "%s" does not meet conditions to be in experiment "%s".', $userId, $experiment->getKey())
+            );
             return null;
         }
 
