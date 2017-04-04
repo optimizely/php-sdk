@@ -152,7 +152,7 @@ class Optimizely
             return false;
         }
 
-        if (!$experiment->isExperimentRunning()) {
+        if (!$experiment->isExperimentRunning() && !$experiment->isExperimentLaunched()) {
             $this->_logger->log(Logger::INFO, sprintf('Experiment "%s" is not running.', $experiment->getKey()));
             return false;
         }
@@ -212,6 +212,12 @@ class Optimizely
                 continue;
             }
 
+            // Do not track events for experiment if it is in "LAUNCHED" state.
+            if ($experiment->isExperimentLaunched()) {
+                $this->_logger->log(Logger::DEBUG, sprintf('Experiment %s is in "Launched" state. Not tracking user for it.', $experimentKey));
+                continue;
+            }
+
             $variation = $this->_config->getVariationFromKey($experimentKey, $variationKey);
             $validExperiments[$experimentId] = $variation->getId();
         }
@@ -241,9 +247,17 @@ class Optimizely
             return $variationKey;
         }
 
+        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
+
+        // Do not track events for experiment if it is in "LAUNCHED" state.
+        $experiment = $this->_config->getExperimentFromKey($experimentKey);
+        if ($experiment->isExperimentLaunched()) {
+            $this->_logger->log(Logger::DEBUG, sprintf('Experiment %s is in "Launched" state. Not tracking user for it.', $experimentKey));
+            return $variationKey;
+        }
+
         $impressionEvent = $this->_eventBuilder
             ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
-        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
         $this->_logger->log(
             Logger::DEBUG,
             sprintf('Dispatching impression event to URL %s with params %s.',
