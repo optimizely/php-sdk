@@ -292,6 +292,8 @@ class Experiment
 
     /**
      * Determine if experiment is in launched state or not.
+     *
+     * @return boolean True if experiment has status "Launched". False otherwise.
      */
     public function isExperimentLaunched() {
         return !is_null($this->_status) && $this->_status == self::STATUS_LAUNCHED;

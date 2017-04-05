@@ -205,7 +205,7 @@ class Optimizely
             $experiment = $this->_config->getExperimentFromId($experimentId);
             $experimentKey = $experiment->getKey();
 
-            // Do not track events for experiment if it is in "LAUNCHED" state.
+            // Do not track events for experiment if it is in "Launched" state.
             if ($experiment->isExperimentLaunched()) {
                 $this->_logger->log(Logger::DEBUG, sprintf('Experiment %s is in "Launched" state. Not tracking user for it.', $experimentKey));
                 continue;
@@ -249,7 +249,7 @@ class Optimizely
 
         $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
 
-        // Do not track events for experiment if it is in "LAUNCHED" state.
+        // Do not track events for experiment if it is in "Launched" state.
         $experiment = $this->_config->getExperimentFromKey($experimentKey);
         if ($experiment->isExperimentLaunched()) {
             $this->_logger->log(Logger::DEBUG, sprintf('Experiment %s is in "Launched" state. Not dispatching impression event.', $experimentKey));
