@@ -27,6 +27,7 @@ use Optimizely\ProjectConfig;
 use TypeError;
 use Optimizely\ErrorHandler\DefaultErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
+use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\Optimizely;
 
@@ -35,6 +36,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 {
     private $datafile;
     private $eventBuilderMock;
+    private $eventDispatcherMock;
     private $loggerMock;
     private $optimizelyObject;
     private $projectConfig;
@@ -47,7 +49,13 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))
             ->getMock();
-        $this->optimizelyObject = new Optimizely($this->datafile, null, $this->loggerMock);
+
+        // Mock Event Dispatcher
+        $this->eventDispatcherMock = $this->getMockBuilder(DefaultEventDispatcher::class)
+            ->setMethods(array('dispatchEvent'))
+            ->getMock();
+
+        $this->optimizelyObject = new Optimizely($this->datafile, $this->eventDispatcherMock, $this->loggerMock);
 
         $this->projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
 
@@ -395,6 +403,36 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($optlyObject->activate('paused_experiment', 'test_user', null));
     }
 
+    public function testActivateExperimentLaunched()
+    {
+        $this->loggerMock->expects($this->exactly(4))
+            ->method('log');
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 6329 to user "test_user".');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO,
+                'User "test_user" is in variation variation of experiment launched_experiment.');
+        $this->loggerMock->expects($this->at(2))
+            ->method('log')
+            ->with(Logger::INFO, 'Activating user "test_user" in experiment "launched_experiment".');
+        $this->loggerMock->expects($this->at(3))
+            ->method('log')
+            ->with(Logger::DEBUG,
+                'Experiment launched_experiment is in "Launched" state. Not dispatching impression event.');
+
+        // Launched experiments don't send impressions
+        $this->eventDispatcherMock->expects($this->never())
+            ->method('dispatchEvent');
+
+        // Call activate
+        $this->assertEquals(
+            'variation',
+            $this->optimizelyObject->activate('launched_experiment', 'test_user')
+        );
+    }
+
     public function testGetVariationInvalidOptimizelyObject()
     {
         $optlyObject = new Optimizely('Random datafile');
@@ -461,6 +499,23 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::INFO, 'Experiment "paused_experiment" is not running.');
 
         $this->assertNull($this->optimizelyObject->getVariation('paused_experiment', 'test_user'));
+    }
+
+    public function testGetVariationExperimentLaunched() {
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 6329 to user "test_user".');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO,
+                'User "test_user" is in variation variation of experiment launched_experiment.');
+
+        $this->assertEquals(
+            'variation',
+            $this->optimizelyObject->getVariation('launched_experiment', 'test_user')
+        );
     }
 
     public function testGetVariationUserInForcedVariationInExperiment()
@@ -1126,5 +1181,26 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call track
         $optlyObject->track('purchase', 'test_user', $userAttributes, array('revenue' => 42));
+    }
+
+    public function testTrackExperimentLaunched()
+    {
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG,
+                'Experiment launched_experiment is in "Launched" state. Not tracking user for it.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO,
+                'There are no valid experiments for event "click" to track.');
+
+        // Launched experiments don't send impressions
+        $this->eventDispatcherMock->expects($this->never())
+            ->method('dispatchEvent');
+
+        $this->optimizelyObject->track('click', 'test_user');
     }
 }

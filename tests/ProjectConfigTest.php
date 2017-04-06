@@ -91,7 +91,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment' => $this->config->getExperimentFromKey('test_experiment'),
             'paused_experiment' => $this->config->getExperimentFromKey('paused_experiment'),
             'group_experiment_1' => $this->config->getExperimentFromKey('group_experiment_1'),
-            'group_experiment_2' => $this->config->getExperimentFromKey('group_experiment_2')
+            'group_experiment_2' => $this->config->getExperimentFromKey('group_experiment_2'),
+            'launched_experiment' => $this->config->getExperimentFromKey('launched_experiment')
         ], $experimentKeyMap->getValue($this->config));
 
         // Check experiment ID map
@@ -101,14 +102,16 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             '7716830082' => $this->config->getExperimentFromId('7716830082'),
             '7723330021' => $this->config->getExperimentFromId('7723330021'),
             '7718750065' => $this->config->getExperimentFromId('7718750065'),
-            '7716830585' => $this->config->getExperimentFromId('7716830585')
+            '7716830585' => $this->config->getExperimentFromId('7716830585'),
+            '7716830586' => $this->config->getExperimentFromId('7716830586')
         ], $experimentIdMap->getValue($this->config));
 
         // Check event key map
         $eventKeyMap = new \ReflectionProperty(ProjectConfig::class, '_eventKeyMap');
         $eventKeyMap->setAccessible(true);
         $this->assertEquals([
-            'purchase' => $this->config->getEvent('purchase')
+            'purchase' => $this->config->getEvent('purchase'),
+            'click' => $this->config->getEvent('click')
         ], $eventKeyMap->getValue($this->config));
 
         // Check attribute key map
@@ -145,6 +148,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'group_experiment_2' => [
                 'group_exp_2_var_1' => $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_1'),
                 'group_exp_2_var_2' => $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_2')
+            ],
+            'launched_experiment' => [
+                'control' => $this->config->getVariationFromKey('launched_experiment', 'control'),
+                'variation' => $this->config->getVariationFromKey('launched_experiment', 'variation')
             ]
         ], $variationKeyMap->getValue($this->config));
 
@@ -167,6 +174,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'group_experiment_2' => [
                 '7713030086' => $this->config->getVariationFromId('group_experiment_2', '7713030086'),
                 '7725250007' => $this->config->getVariationFromId('group_experiment_2', '7725250007')
+            ],
+            'launched_experiment' => [
+                '7722370428' => $this->config->getVariationFromId('launched_experiment', '7722370428'),
+                '7721010510' => $this->config->getVariationFromId('launched_experiment', '7721010510')
             ]
         ], $variationIdMap->getValue($this->config));
     }

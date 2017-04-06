@@ -27,6 +27,11 @@ class Experiment
     const STATUS_RUNNING = 'Running';
 
     /**
+     * @const string String denoting launched state of the experiment.
+     */
+    const STATUS_LAUNCHED = 'Launched';
+
+    /**
      * @const string String denoting policy of mutually exclusive group.
      */
     const MUTEX_GROUP_POLICY = 'random';
@@ -283,6 +288,15 @@ class Experiment
     public function isExperimentRunning()
     {
         return !is_null($this->_status) && $this->_status == self::STATUS_RUNNING;
+    }
+
+    /**
+     * Determine if experiment is in launched state or not.
+     *
+     * @return boolean True if experiment has status "Launched". False otherwise.
+     */
+    public function isExperimentLaunched() {
+        return !is_null($this->_status) && $this->_status == self::STATUS_LAUNCHED;
     }
 
     /**
