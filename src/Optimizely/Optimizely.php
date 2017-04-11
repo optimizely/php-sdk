@@ -152,7 +152,7 @@ class Optimizely
             return false;
         }
 
-        if (!$experiment->isExperimentRunning() && !$experiment->isExperimentLaunched()) {
+        if (!$experiment->isExperimentRunning()) {
             $this->_logger->log(Logger::INFO, sprintf('Experiment "%s" is not running.', $experiment->getKey()));
             return false;
         }
@@ -204,14 +204,8 @@ class Optimizely
         forEach ($event->getExperimentIds() as $experimentId) {
             $experiment = $this->_config->getExperimentFromId($experimentId);
             $experimentKey = $experiment->getKey();
-
-            // Do not track events for experiment if it is in "Launched" state.
-            if ($experiment->isExperimentLaunched()) {
-                $this->_logger->log(Logger::DEBUG, sprintf('Experiment %s is in "Launched" state. Not tracking user for it.', $experimentKey));
-                continue;
-            }
-
             $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
+
             if (is_null($variationKey)) {
                 $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for experiment "%s".',
                     $userId, $experimentKey));
@@ -247,17 +241,9 @@ class Optimizely
             return $variationKey;
         }
 
-        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
-
-        // Do not send impression event for experiment if it is in "Launched" state.
-        $experiment = $this->_config->getExperimentFromKey($experimentKey);
-        if ($experiment->isExperimentLaunched()) {
-            $this->_logger->log(Logger::DEBUG, sprintf('Experiment %s is in "Launched" state. Not dispatching impression event.', $experimentKey));
-            return $variationKey;
-        }
-
         $impressionEvent = $this->_eventBuilder
             ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
+        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
         $this->_logger->log(
             Logger::DEBUG,
             sprintf('Dispatching impression event to URL %s with params %s.',
