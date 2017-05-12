@@ -18,7 +18,6 @@
 namespace Optimizely\Event\Builder;
 include('Params.php');
 
-use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
 use Optimizely\Event\LogEvent;
 use Optimizely\ProjectConfig;
@@ -62,21 +61,6 @@ class EventBuilder
      * @var array Associative array of parameters to be sent for the event.
      */
     private $_eventParams;
-
-    /**
-     * @var Bucketer Providing Optimizely's bucket method.
-     */
-    private $_bucketer;
-
-    /**
-     * EventBuilder constructor.
-     *
-     * @param $bucketer Bucketer
-     */
-    public function __construct(Bucketer $bucketer)
-    {
-        $this->_bucketer = $bucketer;
-    }
 
     /**
      * Helper function to reset event params.
@@ -153,11 +137,11 @@ class EventBuilder
      *
      * @param $config ProjectConfig Configuration for the project.
      * @param $eventKey string Key representing the event.
-     * @param $experiments array Experiments for which conversion event needs to be recorded.
+     * @param $experimentVariationMap array Map of experiment ID to the ID of the variation that the user is bucketed into.
      * @param $userId string ID of user.
      * @param $eventTags array Hash representing metadata associated with the event.
      */
-    private function setConversionParams($config, $eventKey, $experiments, $userId, $eventTags)
+    private function setConversionParams($config, $eventKey, $experimentVariationMap, $userId, $eventTags)
     {
         $this->_eventParams[EVENT_FEATURES] = [];
         $this->_eventParams[EVENT_METRICS] = [];
@@ -190,20 +174,18 @@ class EventBuilder
         $this->_eventParams[EVENT_NAME] = $eventKey;
 
         $this->_eventParams[LAYER_STATES] = [];
-        forEach ($experiments as $experiment) {
-            $variation = $this->_bucketer->bucket($config, $experiment, $userId);
-            if (!is_null($variation->getKey())) {
-                array_push($this->_eventParams[LAYER_STATES], [
-                    LAYER_ID => $experiment->getLayerId(),
-                    ACTION_TRIGGERED => true,
-                    REVISION => $config->getRevision(),
-                    DECISION => [
-                        EXPERIMENT_ID => $experiment->getId(),
-                        VARIATION_ID => $variation->getId(),
-                        IS_LAYER_HOLDBACK => false
-                    ]
-                ]);
-            }
+        forEach ($experimentVariationMap as $experimentId => $variationId) {
+            $experiment = $config->getExperimentFromId($experimentId);
+            array_push($this->_eventParams[LAYER_STATES], [
+                LAYER_ID => $experiment->getLayerId(),
+                ACTION_TRIGGERED => true,
+                REVISION => $config->getRevision(),
+                DECISION => [
+                    EXPERIMENT_ID => $experimentId,
+                    VARIATION_ID => $variationId,
+                    IS_LAYER_HOLDBACK => false
+                ]
+            ]);
         }
     }
 
@@ -211,18 +193,21 @@ class EventBuilder
      * Create impression event to be sent to the logging endpoint.
      *
      * @param $config ProjectConfig Configuration for the project.
-     * @param $experiment Experiment Experiment being activated.
-     * @param $variationId string Variation user
+     * @param $experimentKey Experiment Experiment being activated.
+     * @param $variationKey string Variation user
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.
      *
      * @return LogEvent Event object to be sent to dispatcher.
      */
-    public function createImpressionEvent($config, Experiment $experiment, $variationId, $userId, $attributes)
+    public function createImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes)
     {
         $this->resetParams();
         $this->setCommonParams($config, $userId, $attributes);
-        $this->setImpressionParams($experiment, $variationId);
+
+        $experiment = $config->getExperimentFromKey($experimentKey);
+        $variation = $config->getVariationFromKey($experimentKey, $variationKey);
+        $this->setImpressionParams($experiment, $variation->getId());
 
         return new LogEvent(self::$IMPRESSION_ENDPOINT, $this->getParams(), self::$HTTP_VERB, self::$HTTP_HEADERS);
     }
@@ -232,18 +217,18 @@ class EventBuilder
      *
      * @param $config ProjectConfig Configuration for the project.
      * @param $eventKey string Key representing the event.
-     * @param $experiments array Experiments for which conversion event needs to be recorded.
+     * @param $experimentVariationMap array Map of experiment ID to the ID of the variation that the user is bucketed into.
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.
      * @param $eventTags array Hash representing metadata associated with the event.
      *
      * @return LogEvent Event object to be sent to dispatcher.
      */
-    public function createConversionEvent($config, $eventKey, $experiments, $userId, $attributes, $eventTags)
+    public function createConversionEvent($config, $eventKey, $experimentVariationMap, $userId, $attributes, $eventTags)
     {
         $this->resetParams();
         $this->setCommonParams($config, $userId, $attributes);
-        $this->setConversionParams($config, $eventKey, $experiments, $userId, $eventTags);
+        $this->setConversionParams($config, $eventKey, $experimentVariationMap, $userId, $eventTags);
 
         return new LogEvent(self::$CONVERSION_ENDPOINT, $this->getParams(), self::$HTTP_VERB, self::$HTTP_HEADERS);
     }
