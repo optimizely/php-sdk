@@ -127,20 +127,6 @@ class Bucketer
             return new Variation();
         }
 
-        // Check if user is whitelisted for a variation.
-        $forcedVariations = $experiment->getForcedVariations();
-        if (!is_null($forcedVariations) && isset($forcedVariations[$userId])) {
-            $variationKey = $forcedVariations[$userId];
-            $variation = $config->getVariationFromKey($experiment->getKey(), $variationKey);
-            if ($variationKey) {
-                $this->_logger->log(
-                    Logger::INFO,
-                    sprintf('User "%s" is forced in variation "%s".', $userId, $variationKey)
-                );
-            }
-            return $variation;
-        }
-
         // Determine if experiment is in a mutually exclusive group.
         if ($experiment->isInMutexGroup()) {
             $group = $config->getGroup($experiment->getGroupId());
@@ -183,5 +169,33 @@ class Bucketer
 
         $this->_logger->log(Logger::INFO,  sprintf('User "%s" is in no variation.', $userId));
         return new Variation();
+    }
+
+    /**
+     * Determine variation the user has been forced into.
+     *
+     * @param $config     ProjectConfig Configuration for the project.
+     * @param $experiment Experiment Experiment in which user is to be bucketed.
+     * @param $userId     string User identifier.
+     *
+     * @return  null|Variation Representing the variation the user is forced into.
+     */
+    public function getForcedVariation($config, $experiment, $userId)
+    {
+        // Check if user is whitelisted for a variation.
+        $forcedVariations = $experiment->getForcedVariations();
+        if (!is_null($forcedVariations) && isset($forcedVariations[$userId])) {
+            $variationKey = $forcedVariations[$userId];
+            $variation = $config->getVariationFromKey($experiment->getKey(), $variationKey);
+            if ($variationKey) {
+                $this->_logger->log(
+                    Logger::INFO,
+                    sprintf('User "%s" is forced in variation "%s" of experiment "%s".', $userId, $variationKey, $experiment->getKey())
+                );
+            }
+            return $variation;
+        }
+
+        return null;
     }
 }

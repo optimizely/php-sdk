@@ -282,29 +282,29 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testBucketValidExperimentNotInGroupUserInForcedVariation()
+    public function testGetForcedVariationExperimentNotInGroupUserInForcedVariation()
     {
         $bucketer = new Bucketer($this->loggerMock);
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with(Logger::INFO, 'User "user1" is forced in variation "control".');
+            ->with(Logger::INFO, 'User "user1" is forced in variation "control" of experiment "test_experiment".');
 
         $this->assertEquals(
             new Variation('7722370027', 'control'),
-            $bucketer->bucket($this->config, $this->config->getExperimentFromKey('test_experiment'), 'user1')
+            $bucketer->getForcedVariation($this->config, $this->config->getExperimentFromKey('test_experiment'), 'user1')
         );
     }
 
-    public function testBucketValidExperimentInGroupUserInForcedVariation()
+    public function testGetForcedVariationExperimentInGroupUserInForcedVariation()
     {
         $bucketer = new Bucketer($this->loggerMock);
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with(Logger::INFO, 'User "user1" is forced in variation "group_exp_1_var_1".');
+            ->with(Logger::INFO, 'User "user1" is forced in variation "group_exp_1_var_1" of experiment "group_experiment_1".');
 
         $this->assertEquals(
             new Variation('7722260071', 'group_exp_1_var_1'),
-            $bucketer->bucket($this->config, $this->config->getExperimentFromKey('group_experiment_1'), 'user1')
+            $bucketer->getForcedVariation($this->config, $this->config->getExperimentFromKey('group_experiment_1'), 'user1')
         );
     }
 }
