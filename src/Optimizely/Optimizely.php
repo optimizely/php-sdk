@@ -47,19 +47,19 @@ class Optimizely
     private $_config;
 
     /**
-     * @var EventDispatcherInterface
+     * @var DecisionService
      */
-    private $_eventDispatcher;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $_logger;
+    private $_decisionService;
 
     /**
      * @var ErrorHandlerInterface
      */
     private $_errorHandler;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $_eventDispatcher;
 
     /**
      * @var EventBuilder
@@ -72,9 +72,9 @@ class Optimizely
     private $_isValid;
 
     /**
-     * @var DecisionService
+     * @var LoggerInterface
      */
-    private $_decisionService;
+    private $_logger;
 
     /**
      * Optimizely constructor for managing Full Stack PHP projects.

@@ -30,9 +30,8 @@ use Optimizely\Utils\Validator;
  * The decision service contains all logic around how a user decision is made. This includes all of the following (in order):
  *   1. Checking experiment status
  *   2. Checking whitelisting
- *   3. Checking user profile service for past bucketing decisions (sticky bucketing)
- *   4. Checking audience targeting
- *   5. Using Murmurhash3 to bucket the user.
+ *   3. Checking audience targeting
+ *   4. Using Murmurhash3 to bucket the user.
  *
  * @package Optimizely
  */
@@ -70,6 +69,7 @@ class DecisionService
    *
    * @param  $experiment Experiment Experiment to get the variation for.
    * @param  $userId     string     User identifier.
+   * @param  $attributes array      Attributes of the user.
    *
    * @return Variation   Variation  which the user is bucketed into.
    */
