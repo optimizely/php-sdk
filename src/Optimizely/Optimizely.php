@@ -21,6 +21,7 @@ use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
 use Monolog\Logger;
+use Optimizely\DecisionService\DecisionService;
 use Optimizely\Entity\Experiment;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
@@ -41,14 +42,14 @@ use Optimizely\Utils\Validator;
 class Optimizely
 {
     /**
-     * @var EventDispatcherInterface
+     * @var ProjectConfig
      */
-    private $_eventDispatcher;
+    private $_config;
 
     /**
-     * @var LoggerInterface
+     * @var DecisionService
      */
-    private $_logger;
+    private $_decisionService;
 
     /**
      * @var ErrorHandlerInterface
@@ -56,14 +57,9 @@ class Optimizely
     private $_errorHandler;
 
     /**
-     * @var ProjectConfig
+     * @var EventDispatcherInterface
      */
-    private $_config;
-
-    /**
-     * @var Bucketer
-     */
-    private $_bucketer;
+    private $_eventDispatcher;
 
     /**
      * @var EventBuilder
@@ -74,6 +70,11 @@ class Optimizely
      * @var boolean Denotes whether Optimizely object is valid or not.
      */
     private $_isValid;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $_logger;
 
     /**
      * Optimizely constructor for managing Full Stack PHP projects.
@@ -118,8 +119,8 @@ class Optimizely
             return;
         }
 
-        $this->_bucketer = new Bucketer($this->_logger);
-        $this->_eventBuilder = new EventBuilder($this->_bucketer);
+        $this->_eventBuilder = new EventBuilder();
+        $this->_decisionService = new DecisionService($this->_logger, $this->_config);
     }
 
     /**
@@ -131,29 +132,6 @@ class Optimizely
     private function validateDatafile($datafile, $skipJsonValidation)
     {
         if (!$skipJsonValidation && !Validator::validateJsonSchema($datafile)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Helper function to validate all required conditions before performing activate or track.
-     *
-     * @param $experiment Experiment Object representing experiment.
-     * @param $userId string ID for user.
-     * @param $attributes array User attributes.
-     *
-     * @return boolean Representing whether all conditions are met or not.
-     */
-    private function validatePreconditions($experiment, $userId, $attributes)
-    {
-        if (!$this->validateUserInputs($attributes)) {
-            return false;
-        }
-
-        if (!$experiment->isExperimentRunning()) {
-            $this->_logger->log(Logger::INFO, sprintf('Experiment "%s" is not running.', $experiment->getKey()));
             return false;
         }
 
@@ -363,24 +341,14 @@ class Optimizely
             return null;
         }
 
-        if (!$this->validatePreconditions($experiment, $userId, $attributes)) {
+        if (!$this->validateUserInputs($attributes)) {
             return null;
         }
 
-        $variation = $this->_bucketer->getForcedVariation($this->_config, $experiment, $userId);
-        if (!is_null($variation)) {
-            return $variation->getKey();
-        }
-
-        if (!Validator::isUserInExperiment($this->_config, $experiment, $attributes)) {
-            $this->_logger->log(
-                Logger::INFO,
-                sprintf('User "%s" does not meet conditions to be in experiment "%s".', $userId, $experiment->getKey())
-            );
+        $variation = $this->_decisionService->getVariation($experiment, $userId, $attributes);
+        if (is_null($variation)) {
             return null;
         }
-
-        $variation = $this->_bucketer->bucket($this->_config, $experiment, $userId);
 
         return $variation->getKey();
     }

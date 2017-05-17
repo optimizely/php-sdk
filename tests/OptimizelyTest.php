@@ -18,7 +18,6 @@ namespace Optimizely\Tests;
 
 use Exception;
 use Monolog\Logger;
-use Optimizely\Bucketer;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
 use Optimizely\Exceptions\InvalidAttributeException;
@@ -154,34 +153,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(
             $validateInputsMethod->invoke(new Optimizely('Random datafile', null, null, null, true),
             'Random datafile', true)
-        );
-    }
-
-    public function testValidatePreconditionsExperimentNotRunning()
-    {
-        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
-        $validatePreconditions->setAccessible(true);
-
-        $this->assertFalse(
-            $validatePreconditions->invoke(
-                $this->optimizelyObject,
-                $this->projectConfig->getExperimentFromKey('paused_experiment'),
-                'test_user',
-                [])
-        );
-    }
-
-    public function testValidatePreconditionsExperimentRunning()
-    {
-        $validatePreconditions = new \ReflectionMethod('Optimizely\Optimizely', 'validatePreconditions');
-        $validatePreconditions->setAccessible(true);
-
-        $this->assertTrue(
-            $validatePreconditions->invoke(
-                $this->optimizelyObject,
-                $this->projectConfig->getExperimentFromKey('test_experiment'),
-                'test_user',
-                ['device_type' => 'iPhone', 'location' => 'San Francisco'])
         );
     }
 
