@@ -25,6 +25,7 @@ use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
+use Optimizely\UserProfile\UserProfileServiceInterface;
 
 
 class DecisionServiceTest extends \PHPUnit_Framework_TestCase
@@ -34,6 +35,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     private $decisionService;
     private $loggerMock;
     private $testUserId;
+    private $userProvideServiceMock;
 
     public function setUp()
     {
@@ -54,6 +56,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->bucketerMock = $this->getMockBuilder(Bucketer::class)
             ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('bucket'))
+            ->getMock();
+
+        // Mock user profile service implementation
+        $this->userProvideServiceMock = $this->getMockBuilder(UserProfileServiceInterface::class)
             ->getMock();
     }
 
@@ -237,5 +243,133 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $variation = $this->decisionService->getVariation($runningExperiment, $this->testUserId); // no matching attributes
 
         $this->assertNull($variation);
+    }
+
+    public function testGetVariationReturnsStoredVariationIfAvailable()
+    {
+        $userId = 'not_whitelisted_user';
+        $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
+        $expectedVariation = new Variation('7722370027', 'control');
+
+        $this->bucketerMock->expects($this->never())
+            ->method('bucket');
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, 'Returning previously activated variation "control" of experiment "test_experiment" for user "not_whitelisted_user" from user profile.');
+
+        $storedUserProfile = array(
+            'user_id' => $userId,
+            'experiment_bucket_map' => array(
+                '7716830082' => array(
+                    'variation_id' => '7722370027'
+                )
+            )
+        );
+        $this->userProvideServiceMock->expects($this->once())
+            ->method('lookup')
+            ->willReturn($storedUserProfile);
+
+        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+
+        $variation = $this->decisionService->getVariation($runningExperiment, $userId);
+        $this->assertEquals($expectedVariation, $variation);
+    }
+
+    public function testGetVariationBucketsIfNoStoredVariation()
+    {
+        $userId = $this->testUserId;
+        $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
+        $expectedVariation = new Variation('7722370027', 'control');
+
+        $this->bucketerMock->expects($this->once())
+            ->method('bucket')
+            ->willReturn($expectedVariation);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, 'No previously activated variation of experiment "test_experiment" for user "testUserId" found in user profile.');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".');
+
+        $storedUserProfile = array(
+            'user_id' => $userId,
+            'experiment_bucket_map' => array()
+        );
+        $this->userProvideServiceMock->expects($this->once())
+            ->method('lookup')
+            ->willReturn($storedUserProfile);
+
+        $this->userProvideServiceMock->expects($this->once())
+            ->method('save')
+            ->with(array(
+                'user_id' => $userId,
+                'experiment_bucket_map' => array(
+                    '7716830082' => array(
+                        'variation_id' => '7722370027'
+                    )
+                )
+            ));
+
+        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+
+        $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
+        $this->assertEquals($expectedVariation, $variation);
+    }
+
+    public function testGetVariationBucketsIfStoredVariationIsInvalid()
+    {
+        $userId = $this->testUserId;
+        $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
+        $expectedVariation = new Variation('7722370027', 'control');
+
+        $this->bucketerMock->expects($this->once())
+            ->method('bucket')
+            ->willReturn($expectedVariation);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, 'User "testUserId" was previously bucketed into variation with ID "invalid" for experiment "test_experiment", but no matching variation was found for that user. We will re-bucket the user.');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".');
+
+        $storedUserProfile = array(
+            'user_id' => $userId,
+            'experiment_bucket_map' => array(
+                '7716830082' => array(
+                    'variation_id' => 'invalid'
+                )
+            )
+        );
+        $this->userProvideServiceMock->expects($this->once())
+            ->method('lookup')
+            ->willReturn($storedUserProfile);
+
+        $this->userProvideServiceMock->expects($this->once())
+            ->method('save')
+            ->with(array(
+                'user_id' => $userId,
+                'experiment_bucket_map' => array(
+                    '7716830082' => array(
+                        'variation_id' => '7722370027'
+                    )
+                )
+            ));
+
+        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+
+        $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
+        $this->assertEquals($expectedVariation, $variation);
     }
 }
