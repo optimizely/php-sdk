@@ -16,6 +16,7 @@
  */
 namespace Optimizely\DecisionService;
 
+use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
@@ -181,7 +182,7 @@ class DecisionService
     } catch (Exception $e) {
       $this->_logger->log(
             Logger::ERROR,
-            'The User Profile Service returned an invalid user profile map.'
+            sprintf('The User Profile Service lookup method failed: %s.', $e->getMessage())
         );
     }
 

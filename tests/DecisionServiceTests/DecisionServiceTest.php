@@ -372,4 +372,95 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
     }
+
+    public function testGetVariationBucketsIfUserProfileServiceLookupThrows()
+    {
+        $userId = $this->testUserId;
+        $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
+        $expectedVariation = new Variation('7722370027', 'control');
+
+        $this->bucketerMock->expects($this->once())
+            ->method('bucket')
+            ->willReturn($expectedVariation);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, 'The User Profile Service lookup method failed: I am error.');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".');
+
+        $storedUserProfile = array(
+            'user_id' => $userId,
+            'experiment_bucket_map' => array(
+                '7716830082' => array(
+                    'variation_id' => 'invalid'
+                )
+            )
+        );
+        $this->userProvideServiceMock
+            ->method('lookup')
+            ->will($this->throwException(new Exception('I am error')));
+
+        $this->userProvideServiceMock->expects($this->once())
+            ->method('save')
+            ->with(array(
+                'user_id' => $userId,
+                'experiment_bucket_map' => array(
+                    '7716830082' => array(
+                        'variation_id' => '7722370027'
+                    )
+                )
+            ));
+
+        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+
+        $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
+        $this->assertEquals($expectedVariation, $variation);
+    }
+
+    public function testGetVariationBucketsIfUserProfileServiceSaveThrows()
+    {
+        $userId = $this->testUserId;
+        $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
+        $expectedVariation = new Variation('7722370027', 'control');
+
+        $this->bucketerMock->expects($this->once())
+            ->method('bucket')
+            ->willReturn($expectedVariation);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, 'No user profile found for user with ID "testUserId".');
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::WARNING, 'Failed to save variation "control" of experiment "test_experiment" for user "testUserId".');
+
+        $storedUserProfile = array(
+            'user_id' => $userId,
+            'experiment_bucket_map' => array(
+                '7716830082' => array(
+                    'variation_id' => 'invalid'
+                )
+            )
+        );
+        $this->userProvideServiceMock->expects($this->once())
+            ->method('lookup')
+            ->willReturn(null);
+
+        $this->userProvideServiceMock
+            ->method('save')
+            ->with($this->throwException(new Exception()));
+
+        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+
+        $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
+        $this->assertEquals($expectedVariation, $variation);
+    }
 }
