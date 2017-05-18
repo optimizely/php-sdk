@@ -242,19 +242,19 @@ class DecisionService
         return;
     }
 
+    $experimentId = $experiment->getId();
+    $decision = $userProfile->getDecisionForExperiment($experimentId);
+    $variationId = $variation->getId();
+    if (is_null($decision)) {
+        $decision = new Decision($variationId);
+    } else {
+        $decision->setVariationId($variationId);
+    }
+
+    $userProfile->saveDecisionForExperiment($experimentId, $decision);
+    $userProfileMap = UserProfileUtils::convertUserProfileToMap($userProfile);
+
     try {
-        $experimentId = $experiment->getId();
-        $decision = $userProfile->getDecisionForExperiment($experimentId);
-        $variationId = $variation->getId();
-        if (is_null($decision)) {
-            $decision = new Decision($variationId);
-        } else {
-            $decision->setVariationId($variationId);
-        }
-
-        $userProfile->saveDecisionForExperiment($experimentId, $decision);
-        $userProfileMap = UserProfileUtils::convertUserProfileToMap($userProfile);
-
         $this->_userProfileService->save($userProfileMap);
         $this->_logger->log(
             Logger::INFO,
