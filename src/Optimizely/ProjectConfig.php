@@ -333,4 +333,10 @@ class ProjectConfig
         $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
         return new Variation();
     }
+
+    public function isVariationIdValid($experimentKey, $variationId)
+    {
+        return isset($this->_variationIdMap[$experimentKey]) &&
+            isset($this->_variationIdMap[$experimentKey][$variationId]);
+    }
 }
