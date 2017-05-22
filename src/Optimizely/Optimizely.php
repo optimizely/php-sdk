@@ -31,6 +31,7 @@ use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\Validator;
 
@@ -84,12 +85,14 @@ class Optimizely
      * @param $logger LoggerInterface
      * @param $errorHandler ErrorHandlerInterface
      * @param $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
+     * @param $userProfileService UserProfileServiceInterface
      */
     public function __construct($datafile,
                                 EventDispatcherInterface $eventDispatcher = null,
                                 LoggerInterface $logger = null,
                                 ErrorHandlerInterface $errorHandler = null,
-                                $skipJsonValidation = false)
+                                $skipJsonValidation = false,
+                                UserProfileServiceInterface $userProfileService = null)
     {
         $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
@@ -120,7 +123,7 @@ class Optimizely
         }
 
         $this->_eventBuilder = new EventBuilder();
-        $this->_decisionService = new DecisionService($this->_logger, $this->_config);
+        $this->_decisionService = new DecisionService($this->_logger, $this->_config, $userProfileService);
     }
 
     /**

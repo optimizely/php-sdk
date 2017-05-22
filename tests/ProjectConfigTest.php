@@ -612,4 +612,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(new Variation(), $this->config->getVariationFromId('invalid_experiment', '7722370027'));
     }
+
+    public function testIsVariationIdValid()
+    {
+        $this->assertTrue($this->config->isVariationIdValid('test_experiment', '7722370027'));
+        $this->assertFalse($this->config->isVariationIdValid('test_experiment', 'invalid'));
+    }
 }
