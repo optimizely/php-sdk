@@ -113,6 +113,12 @@ class ProjectConfig
     private $_errorHandler;
 
     /**
+     * @var array Associative array of user IDs to an associative array 
+     * of experiments to variations.
+     */
+    private $_preferredVariationMap;
+
+    /**
      * ProjectConfig constructor to load and set project configuration data.
      *
      * @param $datafile string JSON string representing the project.
@@ -128,6 +134,7 @@ class ProjectConfig
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
         $this->_revision = $config['revision'];
+        $this->_preferredVariationMap = [];        
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
@@ -190,6 +197,85 @@ class ProjectConfig
     public function getRevision()
     {
         return $this->_revision;
+    }
+
+    /**
+     * Gets the forced variation key for the given user and experiment.  
+     * 
+     * @param $experimentKey string Key for experiment.
+     * @param $userId string The user Id.    
+     *
+     * @return Variation The variation which the given user and experiment should be forced into. 
+     */
+    public function getForcedVariation($experimentKey, $userId)
+    {
+        $experimentToVariationMap = $this->_preferredVariationMap[$userId];
+        if (is_null($experimentToVariationMap)) {
+            $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the preferred variation map.', $userId));
+            return null;
+        }
+
+        $experimentId = $this -> getExperimentFromKey($experimentKey) -> getId();
+        if (empty($experimentId)) {
+            $this->_logger->log(Logger::ERROR, sprintf('Experiment "%s" is not in the datafile.', $experimentKey));
+            $this->_errorHandler->handleError(new InvalidExperimentException('Experiment "%s" is not in the datafile.', $experimentKey));
+            return null;
+        }
+
+        $variationId = $experimentToVariationMap[$experimentId];
+        if (empty($variationId)) {
+            $this->_logger->log(Logger::DEBUG, sprintf('No variation mapped to experiment "%s" in the preferred variation map.', $experimentKey));
+            return null;
+        }
+
+        $variationKey = $this -> getVariationFromId($variationId) -> getKey();
+        if (empty($variationKey)) {
+            $this->_logger->log(Logger::DEBUG, sprintf('Variation "%s" is not in the datafile.', $variationId));
+            return null;
+        }
+
+        $this->_logger->log(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the preferred variation map', $variationKey, $experimentKey, $userId));
+
+        $variation = $this->getVariationFromKey($experimentKey, $variationKey);
+        return variation;
+    }
+
+    /**
+     * Sets an associative array of user IDs to an associative array of experiments 
+     * to forced variations. 
+     * 
+     * @param $experimentKey string Key for experiment.
+     * @param $userId string The user Id.
+     * @param $variationKey string Key for variation. If null, then clear the 
+     * existing experiment-to-variation mapping.
+     *
+     * @return boolean A boolean value that indicates if the set completed successfully. 
+     */
+    public function setForcedVariation($experimentKey, $userId, $variationKey)
+    {
+        $experimentId = $this -> getExperimentFromKey($experimentKey) -> getId();
+        if (empty($experimentId)) {
+            $this->_logger->log(Logger::ERROR, sprintf('Experiment "%s" is not in the datafile.', $experimentKey));
+            $this->_errorHandler->handleError(new InvalidExperimentException('Experiment "%s" is not in the datafile.', $experimentKey));
+            return FALSE;
+        }
+
+        if (empty($variationKey)) {
+            unset(_preferredVariationMap[$userId]);
+            $this->_logger->log(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed.', $experimentKey));
+            return TRUE;
+        }
+
+        $variationId = $this -> getVariationFromKey($variationKey) -> getId();
+        if (empty($variationId)) {
+            $this->_logger->log(Logger::ERROR, sprintf('Variation "%s" is not in the datafile.', $variationKey));
+            $this->_errorHandler->handleError(new InvalidExperimentException('Variation "%s" is not in the datafile.', $variationKey));
+            return FALSE;
+        }
+
+        $this->_preferredVariationMap[$userId][$experimentId] = $variationId;
+        $this->_logger->log(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the preferred variation map.', $variationId, $experimentId, $userId));     
+        return TRUE;   
     }
 
     /**
