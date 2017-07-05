@@ -368,7 +368,6 @@ class Optimizely
 	*/
 	public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
-        $this->_logger->log(Logger::INFO, 'Setting forced variation.');
         return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
     }
 }

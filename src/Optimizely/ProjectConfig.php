@@ -209,7 +209,12 @@ class ProjectConfig
      */
     public function getForcedVariation($experimentKey, $userId)
     {
-        if (!in_array($userId, $this->_preferredVariationMap)) {
+        if (!isset($this->_preferredVariationMap)) {
+            $this->_logger->log(Logger::DEBUG, sprintf('Preferred variation map is not set.'));
+            return null;
+        }
+
+        if (!isset($this->_preferredVariationMap[$userId])) {
             $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the preferred variation map.', $userId));
             return null;
         }
@@ -228,7 +233,7 @@ class ProjectConfig
             return null;
         }
 
-        $variationKey = $this -> getVariationFromId($variationId) -> getKey();
+        $variationKey = $this -> getVariationFromId($experimentKey, $variationId) -> getKey();
         if (empty($variationKey)) {
             $this->_logger->log(Logger::DEBUG, sprintf('Variation "%s" is not in the datafile.', $variationId));
             return null;
@@ -237,7 +242,7 @@ class ProjectConfig
         $this->_logger->log(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the preferred variation map', $variationKey, $experimentKey, $userId));
 
         $variation = $this->getVariationFromKey($experimentKey, $variationKey);
-        return variation;
+        return $variation;
     }
 
     /**
@@ -273,7 +278,7 @@ class ProjectConfig
             return FALSE;
         }
 
-        $this->_preferredVariationMap[$userId][$experimentId] = $variationId;
+        $this->_preferredVariationMap[$userId] = array($experimentId => $variationId);
         $this->_logger->log(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the preferred variation map.', $variationId, $experimentId, $userId));     
         return TRUE;   
     }
@@ -425,4 +430,5 @@ class ProjectConfig
         return isset($this->_variationIdMap[$experimentKey]) &&
             isset($this->_variationIdMap[$experimentKey][$variationId]);
     }
+
 }
