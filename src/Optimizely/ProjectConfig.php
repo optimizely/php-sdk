@@ -279,7 +279,8 @@ class ProjectConfig
         }
 
         $this->_preferredVariationMap[$userId] = array($experimentId => $variationId);
-        $this->_logger->log(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the preferred variation map.', $variationId, $experimentId, $userId));     
+        $this->_logger->log(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the preferred variation map.', $variationId, $experimentId, $userId));   
+          
         return TRUE;   
     }
 

@@ -1216,7 +1216,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $userAttributes = [
             'device_type' => 'iPhone',
-            'company' => 'Optimizely',
             'location' => 'San Francisco'
         ];
 
@@ -1235,6 +1234,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // test valid variation --> the user should be bucketed to the specified forced variation
         $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'variation'), 'Set variation to "variation" failed.');
         $forcedVariationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
+        $this->assertEquals('variation', $forcedVariationKey);
+
+        // make sure another setForcedVariation call sets a new forced variation correctly
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user2', 'variation'), 'Set variation to "variation" failed.');
+        $forcedVariationKey = $optlyObject->getVariation('test_experiment', 'test_user2', $userAttributes);
         $this->assertEquals('variation', $forcedVariationKey);
     }
 }
