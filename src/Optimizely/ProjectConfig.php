@@ -209,16 +209,16 @@ class ProjectConfig
      */
     public function getForcedVariation($experimentKey, $userId)
     {
-        $experimentToVariationMap = $this->_preferredVariationMap[$userId];
-        if (is_null($experimentToVariationMap)) {
+        if (!in_array($userId, $this->_preferredVariationMap)) {
             $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the preferred variation map.', $userId));
             return null;
         }
 
+        $experimentToVariationMap = $this->_preferredVariationMap[$userId];
         $experimentId = $this -> getExperimentFromKey($experimentKey) -> getId();
         if (empty($experimentId)) {
             $this->_logger->log(Logger::ERROR, sprintf('Experiment "%s" is not in the datafile.', $experimentKey));
-            $this->_errorHandler->handleError(new InvalidExperimentException('Experiment "%s" is not in the datafile.', $experimentKey));
+            $this->_errorHandler->handleError(new InvalidExperimentException('Provided experiment is not in the datafile.'));
             return null;
         }
 
@@ -256,20 +256,20 @@ class ProjectConfig
         $experimentId = $this -> getExperimentFromKey($experimentKey) -> getId();
         if (empty($experimentId)) {
             $this->_logger->log(Logger::ERROR, sprintf('Experiment "%s" is not in the datafile.', $experimentKey));
-            $this->_errorHandler->handleError(new InvalidExperimentException('Experiment "%s" is not in the datafile.', $experimentKey));
+            $this->_errorHandler->handleError(new InvalidExperimentException('Provided experiment is not in the datafile.'));
             return FALSE;
         }
 
         if (empty($variationKey)) {
-            unset(_preferredVariationMap[$userId]);
+            unset($this->_preferredVariationMap[$userId]);
             $this->_logger->log(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed.', $experimentKey));
             return TRUE;
         }
 
-        $variationId = $this -> getVariationFromKey($variationKey) -> getId();
+        $variationId = $this -> getVariationFromKey($experimentKey, $variationKey) -> getId();
         if (empty($variationId)) {
             $this->_logger->log(Logger::ERROR, sprintf('Variation "%s" is not in the datafile.', $variationKey));
-            $this->_errorHandler->handleError(new InvalidExperimentException('Variation "%s" is not in the datafile.', $variationKey));
+            $this->_errorHandler->handleError(new InvalidExperimentException('Provided variation is not in the datafile.'));
             return FALSE;
         }
 

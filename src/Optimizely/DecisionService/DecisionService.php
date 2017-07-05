@@ -93,7 +93,7 @@ class DecisionService
     }
 
     // check if a forced variation is set
-    $forcedVariation = $this->projectConfig->getForcedVariation($experiment->getKey(), $userId);
+    $forcedVariation = $this->_projectConfig->getForcedVariation($experiment->getKey(), $userId);
     if (!is_null($forcedVariation)) {
       return $forcedVariation;
     } 

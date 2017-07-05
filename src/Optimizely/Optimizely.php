@@ -357,17 +357,18 @@ class Optimizely
     }
 
     /**
-				* Force a user into a variation for a given experiment.
-				*
-				* @param $experimentKey string Key identifying the experiment.
-				* @param $userId string The user ID to be used for bucketing. 
-				* @param $variationKey string The variation key specifies the variation which the user  
-				* will be forced into. If null, then clear the existing experiment-to-variation mapping.
-				*
+	* Force a user into a variation for a given experiment.
+	*
+	* @param $experimentKey string Key identifying the experiment.
+	* @param $userId string The user ID to be used for bucketing. 
+	* @param $variationKey string The variation key specifies the variation which the user  
+	* will be forced into. If null, then clear the existing experiment-to-variation mapping.
+	*
     * @return boolean A boolean value that indicates if the set completed successfully. 
-				*/
-				public function setForcedVariation($experimentKey, $userId, $variationKey)
-			 {
-			    return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
-			 }
+	*/
+	public function setForcedVariation($experimentKey, $userId, $variationKey)
+    {
+        $this->_logger->log(Logger::INFO, 'Setting forced variation.');
+        return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
+    }
 }
