@@ -1241,4 +1241,100 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $forcedVariationKey = $optlyObject->getVariation('test_experiment', 'test_user2', $userAttributes);
         $this->assertEquals('variation', $forcedVariationKey);
     }
+
+    // check that the get forced variation is correct 
+    public function testGetForcedVariation()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'location' => 'San Francisco'
+        ];
+
+        $optlyObject->activate('test_experiment', 'test_user', $userAttributes);
+
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'variation'), 'Set variation to "variation" failed.');
+        // call getForcedVariation with valid experiment key and valid user ID
+        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', 'test_user');
+        $this->assertEquals('variation', $forcedVariationKey);
+        // call getForcedVariation with invalid experiment and valid userID
+        $forcedVariationKey = $optlyObject->getForcedVariation('invalid_experiment', 'test_user');
+        $this->assertEquals(null, $forcedVariationKey);
+        // call getForcedVariation with valid experiment and invalid userID
+        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', 'invalid_user');
+        $this->assertEquals(null, $forcedVariationKey);        
+    }
+
+    // test that all the logs in setForcedVariation are getting called
+    public function testSetForcedVariationLogs()
+    {
+        $userId = 'test_user'; 
+        $experimentKey = 'test_experiment';
+        $experimentId = '7716830082';
+        $invalidExperimentKey = 'invalid_experiment';        
+        $variationKey = 'control';
+        $variationId = '7722370027';
+        $invalidVariationKey = 'invalid_variation';
+        $callIndex = 0;
+
+        $this->loggerMock->expects($this->exactly(4))
+            ->method('log');                 
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed.', $experimentKey));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('No variation key "%s" defined in datafile for experiment "%s".', $invalidVariationKey, $experimentKey));     
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the preferred variation map.', $variationId, $experimentId, $userId));  
+
+        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+
+        $optlyObject->setForcedVariation($invalidExperimentKey, $userId, $variationKey);
+        $optlyObject->setForcedVariation($experimentKey, $userId, null);
+        $optlyObject->setForcedVariation($experimentKey, $userId, $invalidVariationKey );
+        $optlyObject->setForcedVariation($experimentKey, $userId, $variationKey);
+    }
+
+    // test that all the logs in getForcedVariation are getting called
+    public function testGetForcedVariationLogs()
+    {
+        $userId = 'test_user'; 
+        $invalidUserId = 'invalid_user'; 
+        $experimentKey = 'test_experiment';
+        $experimentId = '7716830082';
+        $invalidExperimentKey = 'invalid_experiment';        
+        $variationKey = 'control';
+        $variationId = '7722370027';
+        $invalidVariationKey = 'invalid_variation';
+        $callIndex = 0;
+
+        $this->loggerMock->expects($this->exactly(4))
+            ->method('log');    
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the preferred variation map.', $variationId, $experimentId, $userId));   
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('User "%s" is not in the preferred variation map.', $invalidUserId));            
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the preferred variation map', $variationKey, $experimentKey, $userId));  
+
+        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+
+        $optlyObject->setForcedVariation($experimentKey, $userId, $variationKey);
+
+        $optlyObject->getForcedVariation($experimentKey, $invalidUserId);
+        $optlyObject->getForcedVariation($invalidExperimentKey, $userId);
+        $optlyObject->getForcedVariation($experimentKey, $userId);
+    }    
 }

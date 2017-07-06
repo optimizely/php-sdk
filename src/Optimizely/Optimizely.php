@@ -370,4 +370,22 @@ class Optimizely
     {
         return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
     }
+
+    /**
+    * Gets the forced variation for a given user and experiment.
+    *
+    * @param $experimentKey string Key identifying the experiment.
+    * @param $userId string The user ID to be used for bucketing. 
+    *
+    * @return string|null The forced variation key.
+    */
+    public function getForcedVariation($experimentKey, $userId)
+    {
+        $forcedVariation = $this->_config->getForcedVariation($experimentKey, $userId);
+        if (isset($forcedVariation)) {
+            return $forcedVariation->getKey();
+        } else {
+            return null;
+        }
+    }    
 }
