@@ -116,7 +116,7 @@ class ProjectConfig
      * @var array Associative array of user IDs to an associative array 
      * of experiments to variations.
      */
-    private $_preferredVariationMap;
+    private $_forcedVariationMap;
 
     /**
      * ProjectConfig constructor to load and set project configuration data.
@@ -134,7 +134,7 @@ class ProjectConfig
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
         $this->_revision = $config['revision'];
-        $this->_preferredVariationMap = [];        
+        $this->_forcedVariationMap = [];
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
@@ -357,12 +357,12 @@ class ProjectConfig
      */
     public function getForcedVariation($experimentKey, $userId)
     {
-        if (!isset($this->_preferredVariationMap[$userId])) {
+        if (!isset($this->_forcedVariationMap[$userId])) {
             $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the preferred variation map.', $userId));
             return null;
         }
 
-        $experimentToVariationMap = $this->_preferredVariationMap[$userId];
+        $experimentToVariationMap = $this->_forcedVariationMap[$userId];
         $experimentId = $this -> getExperimentFromKey($experimentKey) -> getId();
         if (empty($experimentId)) {
             return null;
@@ -404,7 +404,7 @@ class ProjectConfig
         }
 
         if (empty($variationKey)) {
-            unset($this->_preferredVariationMap[$userId]);
+            unset($this->_forcedVariationMap[$userId]);
             $this->_logger->log(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed.', $experimentKey));
             return TRUE;
         }
@@ -414,7 +414,7 @@ class ProjectConfig
             return FALSE;
         }
 
-        $this->_preferredVariationMap[$userId] = array($experimentId => $variationId);
+        $this->_forcedVariationMap[$userId] = array($experimentId => $variationId);
         $this->_logger->log(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the preferred variation map.', $variationId, $experimentId, $userId));   
 
         return TRUE;   
