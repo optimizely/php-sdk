@@ -630,12 +630,9 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $userId = 'test_user';
         $invalidUserId = 'invalid_user';
         $experimentKey = 'test_experiment';
-        $experimentId = '7716830082';
         $invalidExperimentKey = 'invalid_experiment';        
         $variationKey = 'control';
-        $variationId = '7722370027';
         $invalidVariationKey = 'invalid_variation';
-        $callIndex = 0;         
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
         $userAttributes = [

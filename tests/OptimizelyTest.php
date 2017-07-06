@@ -1311,7 +1311,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $invalidExperimentKey = 'invalid_experiment';        
         $variationKey = 'control';
         $variationId = '7722370027';
-        $invalidVariationKey = 'invalid_variation';
         $callIndex = 0;
 
         $this->loggerMock->expects($this->exactly(4))
