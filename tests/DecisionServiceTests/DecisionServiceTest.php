@@ -24,6 +24,7 @@ use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\Optimizely;
 use Optimizely\ProjectConfig;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 
@@ -485,5 +486,27 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
+    }
+
+    public function testGetVariationUserWithSetForcedVariation()
+    {
+        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'location' => 'San Francisco'
+        ];
+
+        $optlyObject->activate('test_experiment', 'test_user', $userAttributes);
+
+        // test valid experiment
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'variation'), 'Set variation to "variation" failed.');
+        $forcedVariationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
+        $this->assertEquals('variation', $forcedVariationKey);
+
+        // check that a paused experiment returns null
+        $this->assertTrue($optlyObject->setForcedVariation('paused_experiment', 'test_user', 'variation'), 'Set variation to "variation" failed.');
+        $forcedVariationKey = $optlyObject->getVariation('paused_experiment', 'test_user', $userAttributes);
+        $this->assertNull($forcedVariationKey);
     }
 }

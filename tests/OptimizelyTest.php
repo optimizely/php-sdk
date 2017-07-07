@@ -1260,10 +1260,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('variation', $forcedVariationKey);
         // call getForcedVariation with invalid experiment and valid userID
         $forcedVariationKey = $optlyObject->getForcedVariation('invalid_experiment', 'test_user');
-        $this->assertEquals(null, $forcedVariationKey);
+        $this->assertNull($forcedVariationKey);
         // call getForcedVariation with valid experiment and invalid userID
         $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', 'invalid_user');
-        $this->assertEquals(null, $forcedVariationKey);        
+        $this->assertNull($forcedVariationKey);
+        // call getForcedVariation with an experiment that's not running
+        $this->assertTrue($optlyObject->setForcedVariation('paused_experiment', 'test_user2', 'variation'), 'Set variation to "variation" failed.');
+        $forcedVariationKey = $optlyObject->getForcedVariation('paused_experiment', 'test_user2');
+        $this->assertEquals('variation', $forcedVariationKey);
+        // confirm that the second setForcedVariation call did not invalidate the first call to that method
+        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', 'test_user');
+        $this->assertEquals('variation', $forcedVariationKey);
     }
 
     // test that all the logs in setForcedVariation are getting called
@@ -1331,7 +1338,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
 
         $optlyObject->setForcedVariation($experimentKey, $userId, $variationKey);
-
         $optlyObject->getForcedVariation($experimentKey, $invalidUserId);
         $optlyObject->getForcedVariation($invalidExperimentKey, $userId);
         $optlyObject->getForcedVariation($experimentKey, $userId);

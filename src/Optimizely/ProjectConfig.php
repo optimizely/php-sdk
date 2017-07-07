@@ -368,6 +368,11 @@ class ProjectConfig
             return null;
         }
 
+        if (!isset($experimentToVariationMap[$experimentId])) {
+            $this->_logger->log(Logger::DEBUG, sprintf('No experiment "%s" mapped to user "%s" in the preferred variation map.', $experimentKey, $userId));
+            return null;
+        }
+
         $variationId = $experimentToVariationMap[$experimentId];
         if (empty($variationId)) {
             $this->_logger->log(Logger::DEBUG, sprintf('No variation mapped to experiment "%s" in the preferred variation map.', $experimentKey));

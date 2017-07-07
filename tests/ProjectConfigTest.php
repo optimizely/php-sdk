@@ -707,12 +707,13 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $invalidUserId = 'invalid_user'; 
         $experimentKey = 'test_experiment';
         $experimentId = '7716830082';
-        $invalidExperimentKey = 'invalid_experiment';        
+        $invalidExperimentKey = 'invalid_experiment';
+        $pausedExperimentKey = 'paused_experiment';
         $variationKey = 'control';
         $variationId = '7722370027';
         $callIndex = 0;
 
-        $this->loggerMock->expects($this->exactly(4))
+        $this->loggerMock->expects($this->exactly(5))
             ->method('log');    
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
@@ -725,14 +726,17 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
+            ->with(Logger::DEBUG, sprintf('No experiment "%s" mapped to user "%s" in the preferred variation map.', $pausedExperimentKey, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
             ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the preferred variation map', $variationKey, $experimentKey, $userId));  
 
         $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
 
         $this->config->setForcedVariation($experimentKey, $userId, $variationKey);
-
         $this->config->getForcedVariation($experimentKey, $invalidUserId);
         $this->config->getForcedVariation($invalidExperimentKey, $userId);
+        $this->config->getForcedVariation($pausedExperimentKey, $userId);
         $this->config->getForcedVariation($experimentKey, $userId);
     }
 
