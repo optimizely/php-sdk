@@ -113,7 +113,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket');
          $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "user1" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "user1" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "user1" is forced in variation "control" of experiment "test_experiment".');
@@ -141,7 +141,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket');
          $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "user1" is not in the preferred variation map.');                   
+            ->with(Logger::DEBUG, 'User "user1" is not in the forced variation map.');                   
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "user1" is forced in variation "group_exp_1_var_1" of experiment "group_experiment_1".');
@@ -265,7 +265,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket');
          $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "not_whitelisted_user" is not in the preferred variation map.');  
+            ->with(Logger::DEBUG, 'User "not_whitelisted_user" is not in the forced variation map.');  
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'Returning previously activated variation "control" of experiment "test_experiment" for user "not_whitelisted_user" from user profile.');
@@ -303,7 +303,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn($expectedVariation);
          $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the preferred variation map.', $userId));  
+            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));  
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'No previously activated variation of experiment "test_experiment" for user "testUserId" found in user profile.');
@@ -351,7 +351,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn($expectedVariation);
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the preferred variation map.', $userId));  
+            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));  
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" was previously bucketed into variation with ID "invalid" for experiment "test_experiment", but no matching variation was found for that user. We will re-bucket the user.');
@@ -403,7 +403,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn($expectedVariation);
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the preferred variation map.', $userId)); 
+            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId)); 
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::ERROR, 'The User Profile Service lookup method failed: I am error.');
@@ -455,7 +455,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn($expectedVariation);
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the preferred variation map.', $userId)); 
+            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId)); 
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'No user profile found for user with ID "testUserId".');
@@ -490,6 +490,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationUserWithSetForcedVariation()
     {
+        $experimentKey = 'test_experiment';
+        $pausedExperimentKey = 'paused_experiment';
+        $userId = 'test_user';
+        $forcedVariationKey = 'variation';
+        $bucketedVariationKey = 'control';
+
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
 
         $userAttributes = [
@@ -497,16 +503,25 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             'location' => 'San Francisco'
         ];
 
-        $optlyObject->activate('test_experiment', 'test_user', $userAttributes);
+        $optlyObject->activate($experimentKey, $userId, $userAttributes);
+
+        // confirm normal bucketing occurs before setting the forced variation
+        $forcedVariationKey = $optlyObject->getVariation($experimentKey, $userId, $userAttributes);
+        $this->assertEquals($bucketedVariationKey, $forcedVariationKey);
 
         // test valid experiment
-        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'variation'), 'Set variation to "variation" failed.');
-        $forcedVariationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
-        $this->assertEquals('variation', $forcedVariationKey);
+        $this->assertTrue($optlyObject->setForcedVariation($experimentKey, $userId, $forcedVariationKey), sprintf('Set variation to "%s" failed.', $forcedVariationKey));
+        $forcedVariationKey = $optlyObject->getVariation($experimentKey, $userId, $userAttributes);
+        $this->assertEquals($forcedVariationKey, $forcedVariationKey);
+
+        // clear forced variation and confirm that normal bucketing occurs
+        $this->assertTrue($optlyObject->setForcedVariation($experimentKey, $userId, null), sprintf('Set variation to "%s" failed.', $forcedVariationKey));
+        $forcedVariationKey = $optlyObject->getVariation($experimentKey, $userId, $userAttributes);
+        $this->assertEquals($bucketedVariationKey, $forcedVariationKey);
 
         // check that a paused experiment returns null
-        $this->assertTrue($optlyObject->setForcedVariation('paused_experiment', 'test_user', 'variation'), 'Set variation to "variation" failed.');
-        $forcedVariationKey = $optlyObject->getVariation('paused_experiment', 'test_user', $userAttributes);
+        $this->assertTrue($optlyObject->setForcedVariation($pausedExperimentKey, $userId, 'variation'), sprintf('Set variation to "%s" failed.', $forcedVariationKey));
+        $forcedVariationKey = $optlyObject->getVariation($pausedExperimentKey, $userId, $userAttributes);
         $this->assertNull($forcedVariationKey);
     }
 }

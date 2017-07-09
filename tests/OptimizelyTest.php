@@ -205,7 +205,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
          $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "not_in_variation_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "not_in_variation_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 8495 to user "not_in_variation_user".');
@@ -246,7 +246,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "user_1" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "user_1" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 1922 to user "user_1".');
@@ -290,7 +290,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
          $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -330,7 +330,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
          $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
@@ -416,7 +416,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
@@ -442,7 +442,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');           
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');           
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -466,7 +466,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "user1" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "user1" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "user1" is forced in variation "control" of experiment "test_experiment".');
@@ -486,7 +486,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -501,7 +501,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
@@ -566,7 +566,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -576,7 +576,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "test_experiment".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
@@ -591,7 +591,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
@@ -663,7 +663,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
@@ -673,7 +673,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'User "test_user" is in variation control of experiment test_experiment.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
@@ -688,7 +688,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
@@ -755,7 +755,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Event value is deprecated in track call. Use event tags to pass in revenue value instead.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -765,7 +765,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "test_experiment".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
@@ -780,7 +780,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
@@ -843,7 +843,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -853,7 +853,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "test_experiment".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');                               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                               
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,'Assigned bucket 4517 to user "test_user".'); 
@@ -867,7 +867,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
@@ -930,7 +930,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');                 
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                 
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -939,7 +939,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::INFO, 'Not tracking user "test_user" for experiment "test_experiment".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user".');
@@ -951,7 +951,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::INFO, 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user".');
@@ -1019,7 +1019,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Event value is deprecated in track call. Use event tags to pass in revenue value instead.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');                       
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                       
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
@@ -1029,7 +1029,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'User "test_user" is in variation control of experiment test_experiment.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
@@ -1044,7 +1044,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
@@ -1117,7 +1117,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');       
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
@@ -1127,7 +1127,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'User "test_user" is in variation control of experiment test_experiment.');                            
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');                               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                               
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,
@@ -1142,7 +1142,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "group_experiment_1".');                            
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the preferred variation map.');                               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                               
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,
@@ -1298,7 +1298,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::ERROR, sprintf('No variation key "%s" defined in datafile for experiment "%s".', $invalidVariationKey, $experimentKey));     
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the preferred variation map.', $variationId, $experimentId, $userId));  
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));  
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1324,16 +1324,16 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');    
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the preferred variation map.', $variationId, $experimentId, $userId));   
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));   
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the preferred variation map.', $invalidUserId));            
+            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $invalidUserId));            
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the preferred variation map', $variationKey, $experimentKey, $userId));  
+            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));  
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
 
