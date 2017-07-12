@@ -365,6 +365,7 @@ class ProjectConfig
         $experimentToVariationMap = $this->_forcedVariationMap[$userId];
         $experimentId = $this->getExperimentFromKey($experimentKey)->getId();
         if (empty($experimentId)) {
+            // this case is logged in getExperimentFromKey
             return null;
         }
 
@@ -381,6 +382,7 @@ class ProjectConfig
 
         $variationKey = $this->getVariationFromId($experimentKey, $variationId)->getKey();
         if (empty($variationKey)) {
+            // this case is logged in getVariationFromKey
             return null;
         }
 
@@ -396,8 +398,7 @@ class ProjectConfig
      * 
      * @param $experimentKey string Key for experiment.
      * @param $userId string The user Id.
-     * @param $variationKey string Key for variation. If null, then clear the 
-     * existing experiment-to-variation mapping.
+     * @param $variationKey string Key for variation. If null, then clear the existing experiment-to-variation mapping.
      *
      * @return boolean A boolean value that indicates if the set completed successfully. 
      */
@@ -405,6 +406,7 @@ class ProjectConfig
     {
         $experimentId = $this->getExperimentFromKey($experimentKey)->getId();
         if (empty($experimentId)) {
+            // this case is logged in getExperimentFromKey
             return FALSE;
         }
 
@@ -416,6 +418,7 @@ class ProjectConfig
 
         $variationId = $this->getVariationFromKey($experimentKey, $variationKey)->getId();
         if (empty($variationId)) {
+            // this case is logged in getVariationFromKey
             return FALSE;
         }
 

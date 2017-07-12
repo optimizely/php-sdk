@@ -365,7 +365,7 @@ class Optimizely
 	 * will be forced into. If null, then clear the existing experiment-to-variation mapping.
 	 *
      * @return boolean A boolean value that indicates if the set completed successfully.
-	*/
+	 */
 	public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
         return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
