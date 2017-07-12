@@ -412,7 +412,7 @@ class ProjectConfig
 
         if (empty($variationKey)) {
             unset($this->_forcedVariationMap[$userId]);
-            $this->_logger->log(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed.', $experimentKey));
+            $this->_logger->log(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
             return TRUE;
         }
 
