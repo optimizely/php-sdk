@@ -207,7 +207,7 @@ class Optimizely
      * @param $userId string ID for user.
      * @param $attributes array Attributes of the user.
      *
-     * @return null|string Representing variation.
+     * @return null|string Representing the variation key.
      */
     public function activate($experimentKey, $userId, $attributes = null)
     {
@@ -329,7 +329,7 @@ class Optimizely
      * @param $userId string ID for user.
      * @param $attributes array Attributes of the user.
      *
-     * @return null|string Representing variation.
+     * @return null|string Representing the variation key.
      */
     public function getVariation($experimentKey, $userId, $attributes = null)
     {
@@ -354,5 +354,38 @@ class Optimizely
         }
 
         return $variation->getKey();
+    }
+
+    /**
+	 * Force a user into a variation for a given experiment.
+	 *
+	 * @param $experimentKey string Key identifying the experiment.
+	 * @param $userId string The user ID to be used for bucketing.
+	 * @param $variationKey string The variation key specifies the variation which the user
+	 * will be forced into. If null, then clear the existing experiment-to-variation mapping.
+	 *
+     * @return boolean A boolean value that indicates if the set completed successfully.
+	 */
+	public function setForcedVariation($experimentKey, $userId, $variationKey)
+    {
+        return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
+    }
+
+    /**
+     * Gets the forced variation for a given user and experiment.
+     *
+     * @param $experimentKey string Key identifying the experiment.
+     * @param $userId string The user ID to be used for bucketing.
+     *
+     * @return string|null The forced variation key.
+    */
+    public function getForcedVariation($experimentKey, $userId)
+    {
+        $forcedVariation = $this->_config->getForcedVariation($experimentKey, $userId);
+        if (isset($forcedVariation)) {
+            return $forcedVariation->getKey();
+        } else {
+            return null;
+        }
     }
 }

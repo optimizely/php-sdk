@@ -92,6 +92,13 @@ class DecisionService
       return null;
     }
 
+    // check if a forced variation is set
+    $forcedVariation = $this->_projectConfig->getForcedVariation($experiment->getKey(), $userId);
+    if (!is_null($forcedVariation)) {
+      return $forcedVariation;
+    } 
+
+    // check if the user has been whitelisted
     $variation = $this->getWhitelistedVariation($experiment, $userId);
     if (!is_null($variation)) {
       return $variation;

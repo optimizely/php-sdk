@@ -32,7 +32,9 @@ use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
 use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidVariationException;
+use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\Optimizely;
 use Optimizely\ProjectConfig;
 
 class ProjectConfigTest extends \PHPUnit_Framework_TestCase
@@ -618,4 +620,124 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->config->isVariationIdValid('test_experiment', '7722370027'));
         $this->assertFalse($this->config->isVariationIdValid('test_experiment', 'invalid'));
     }
+
+    // test set/get forced variation for the following cases:
+    //      - valid and invalid user ID
+    //      - valid and invalid experiment key
+    //      - valid and invalid variation key, null variation key
+    public function testSetGetForcedVariation()
+    {
+        $userId = 'test_user';
+        $invalidUserId = 'invalid_user';
+        $experimentKey = 'test_experiment';
+        $invalidExperimentKey = 'invalid_experiment';        
+        $variationKey = 'control';
+        $invalidVariationKey = 'invalid_variation';
+
+        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'location' => 'San Francisco'
+        ];
+
+        $optlyObject->activate('test_experiment', 'test_user', $userAttributes);
+
+        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
+
+        // invalid experiment key should return a null variation
+        $this->assertFalse($this->config->setForcedVariation($invalidExperimentKey, $userId, $variationKey));
+        $this->assertNull($this->config->getForcedVariation($invalidExperimentKey, $userId));
+
+        // setting a null variation should return a null variation
+        $this->assertTrue($this->config->setForcedVariation($experimentKey, $userId, null));
+        $this->assertNull($this->config->getForcedVariation($experimentKey, $userId));
+
+        // setting an invalid variation should return a null variation
+        $this->assertFalse($this->config->setForcedVariation($experimentKey, $userId, $invalidVariationKey));
+        $this->assertNull($this->config->getForcedVariation($experimentKey, $userId));
+
+        // confirm the forced variation is returned after a set
+        $this->assertTrue($this->config->setForcedVariation($experimentKey, $userId, $variationKey));
+        $forcedVariation = $this->config->getForcedVariation($experimentKey, $userId);
+        $this->assertEquals($variationKey, $forcedVariation->getKey());
+
+        // an invalid user ID should return a null variation
+        $this->assertNull($this->config->getForcedVariation($experimentKey, $invalidUserId));
+    }
+
+    // test that all the logs in setForcedVariation are getting called
+    public function testSetForcedVariationLogs()
+    {
+        $userId = 'test_user'; 
+        $experimentKey = 'test_experiment';
+        $experimentId = '7716830082';
+        $invalidExperimentKey = 'invalid_experiment';        
+        $variationKey = 'control';
+        $variationId = '7722370027';
+        $invalidVariationKey = 'invalid_variation';
+        $callIndex = 0;
+
+        $this->loggerMock->expects($this->exactly(4))
+            ->method('log');                 
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('No variation key "%s" defined in datafile for experiment "%s".', $invalidVariationKey, $experimentKey));     
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));  
+
+        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
+
+        $this->config->setForcedVariation($invalidExperimentKey, $userId, $variationKey);
+        $this->config->setForcedVariation($experimentKey, $userId, null);
+        $this->config->setForcedVariation($experimentKey, $userId, $invalidVariationKey );
+        $this->config->setForcedVariation($experimentKey, $userId, $variationKey);
+    }
+
+    // test that all the logs in getForcedVariation are getting called
+    public function testGetForcedVariationLogs()
+    {
+        $userId = 'test_user'; 
+        $invalidUserId = 'invalid_user'; 
+        $experimentKey = 'test_experiment';
+        $experimentId = '7716830082';
+        $invalidExperimentKey = 'invalid_experiment';
+        $pausedExperimentKey = 'paused_experiment';
+        $variationKey = 'control';
+        $variationId = '7722370027';
+        $callIndex = 0;
+
+        $this->loggerMock->expects($this->exactly(5))
+            ->method('log');    
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));   
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $invalidUserId));            
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('No experiment "%s" mapped to user "%s" in the forced variation map.', $pausedExperimentKey, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));  
+
+        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
+
+        $this->config->setForcedVariation($experimentKey, $userId, $variationKey);
+        $this->config->getForcedVariation($experimentKey, $invalidUserId);
+        $this->config->getForcedVariation($invalidExperimentKey, $userId);
+        $this->config->getForcedVariation($pausedExperimentKey, $userId);
+        $this->config->getForcedVariation($experimentKey, $userId);
+    }
+
 }
