@@ -621,7 +621,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->config->isVariationIdValid('test_experiment', 'invalid'));
     }
 
-    // test set/get  forced variation for the following cases:
+    // test set/get forced variation for the following cases:
     //      - valid and invalid user ID
     //      - valid and invalid experiment key
     //      - valid and invalid variation key, null variation key
