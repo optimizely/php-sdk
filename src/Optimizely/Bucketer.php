@@ -64,25 +64,25 @@ class Bucketer
     /**
      * Generate a hash value to be used in determining which variation the user will be put in.
      *
-     * @param $bucketingId string ID to be used to bucket the user in the experiment.
+     * @param $bucketingKey string Value used for the key of the murmur hash.
      *
      * @return integer Unsigned value denoting the hash value for the user.
      */
-    private function generateHashCode($bucketingId)
+    private function generateHashCode($bucketingKey)
     {
-        return murmurhash3_int($bucketingId, Bucketer::$HASH_SEED) & Bucketer::$UNSIGNED_MAX_32_BIT_VALUE;
+        return murmurhash3_int($bucketingKey, Bucketer::$HASH_SEED) & Bucketer::$UNSIGNED_MAX_32_BIT_VALUE;
     }
 
     /**
      * Generate an integer to be used in bucketing user to a particular variation.
      *
-     * @param $bucketingId string ID to be used to bucket the user in the experiment.
+     * @param $bucketingKey string Value used for the key of the murmur hash.
      *
      * @return integer Value in the closed range [0, 9999] denoting the bucket the user belongs to.
      */
-    protected function generateBucketValue($bucketingId)
+    protected function generateBucketValue($bucketingKey)
     {
-        $hashCode = $this->generateHashCode($bucketingId);
+        $hashCode = $this->generateHashCode($bucketingKey);
         $ratio = $hashCode / Bucketer::$MAX_HASH_VALUE;
         return floor($ratio * Bucketer::$MAX_TRAFFIC_VALUE);
     }
@@ -96,9 +96,9 @@ class Bucketer
      */
     private function findBucket($userId, $parentId, $trafficAllocations)
     {
-        // Generate bucketing ID based on combination of user ID and experiment ID or group ID.
-        $bucketingId = $userId.$parentId;
-        $bucketingNumber = $this->generateBucketValue($bucketingId);
+        // Generate the bucketing key based on combination of user ID and experiment ID or group ID.
+        $bucketingKey = $userId.$parentId;
+        $bucketingNumber = $this->generateBucketValue($bucketingKey);
         $this->_logger->log(Logger::DEBUG, sprintf('Assigned bucket %s to user "%s".', $bucketingNumber, $userId));
 
         forEach ($trafficAllocations as $trafficAllocation)
