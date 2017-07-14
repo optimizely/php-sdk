@@ -88,18 +88,19 @@ class Bucketer
     }
 
     /**
+     * @param $bucketingId string A customer-assigned value used to create the key for the murmur hash.
      * @param $userId string ID for user.
      * @param $parentId mixed ID representing Experiment or Group.
      * @param $trafficAllocations array Traffic allocations for variation or experiment.
      *
      * @return string ID representing experiment or variation.
      */
-    private function findBucket($userId, $parentId, $trafficAllocations)
+    private function findBucket($bucketingId, $userId, $parentId, $trafficAllocations)
     {
         // Generate the bucketing key based on combination of user ID and experiment ID or group ID.
-        $bucketingKey = $userId.$parentId;
+        $bucketingKey = $bucketingId.$parentId;
         $bucketingNumber = $this->generateBucketValue($bucketingKey);
-        $this->_logger->log(Logger::DEBUG, sprintf('Assigned bucket %s to user "%s".', $bucketingNumber, $userId));
+        $this->_logger->log(Logger::DEBUG, sprintf('Assigned bucket %s to user "%s" with bucketing ID "%s".', $bucketingNumber, $userId, $bucketingId));
 
         forEach ($trafficAllocations as $trafficAllocation)
         {
@@ -117,11 +118,12 @@ class Bucketer
      *
      * @param $config ProjectConfig Configuration for the project.
      * @param $experiment Experiment Experiment in which user is to be bucketed.
+     * @param $bucketingId string A customer-assigned value used to create the key for the murmur hash.
      * @param $userId string User identifier.
      *
      * @return Variation Variation which will be shown to the user.
      */
-    public function bucket(ProjectConfig $config, Experiment $experiment, $userId)
+    public function bucket(ProjectConfig $config, Experiment $experiment, $bucketingId, $userId)
     {
         if (is_null($experiment->getKey())) {
             return new Variation();
@@ -135,7 +137,7 @@ class Bucketer
                 return new Variation();
             }
 
-            $userExperimentId = $this->findBucket($userId, $group->getId(), $group->getTrafficAllocation());
+            $userExperimentId = $this->findBucket($bucketingId, $userId, $group->getId(), $group->getTrafficAllocation());
             if (empty($userExperimentId)) {
                 $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no experiment.', $userId));
                 return new Variation();
@@ -157,7 +159,7 @@ class Bucketer
         }
 
         // Bucket user if not in whitelist and in group (if any).
-        $variationId = $this->findBucket($userId, $experiment->getId(), $experiment->getTrafficAllocation());
+        $variationId = $this->findBucket($bucketingId, $userId, $experiment->getId(), $experiment->getTrafficAllocation());
         if (!empty($variationId)) {
             $variation = $config->getVariationFromId($experiment->getKey(), $variationId);
             $this->_logger->log(Logger::INFO,

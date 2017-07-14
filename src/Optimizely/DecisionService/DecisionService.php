@@ -79,9 +79,9 @@ class DecisionService
   /**
    * Determine which variation to show the user.
    *
-   * @param  $experiment Experiment Experiment to get the variation for.
-   * @param  $userId     string     User identifier.
-   * @param  $attributes array      Attributes of the user.
+   * @param  $experiment  Experiment Experiment to get the variation for.
+   * @param  $userId      string     User identifier.
+   * @param  $attributes  array      Attributes of the user.
    *
    * @return Variation   Variation  which the user is bucketed into.
    */
@@ -125,7 +125,7 @@ class DecisionService
         return null;
     }
 
-    $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $userId);
+    $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketingId, $userId);
     if (!is_null($variation)) {
         $this->saveVariation($experiment, $variation, $userProfile);
     }
