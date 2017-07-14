@@ -93,8 +93,8 @@ class DecisionService
     $bucketingId = $userId;
 
     // If the bucketing ID key is defined in attributes, than use that in place of the userID for the murmur hash key
-    if (!$attributes->isEmpty()) {
-        if (!isEmpty($attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID])) {
+    if (!empty($attributes)) {
+        if (!empty($attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID])) {
             $bucketingId = $attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
             $this->_logger->log(Logger::DEBUG, sprintf('Setting the bucketing ID to "%s".', $bucketingId));
         }

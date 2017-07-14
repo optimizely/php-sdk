@@ -208,7 +208,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "not_in_variation_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 8495 to user "not_in_variation_user".');
+            ->with(Logger::DEBUG, 'Assigned bucket 8495 to user "not_in_variation_user" with bucketing ID "not_in_variation_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -249,7 +249,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "user_1" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 1922 to user "user_1".');
+            ->with(Logger::DEBUG, 'Assigned bucket 1922 to user "user_1" with bucketing ID "user_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -257,7 +257,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 9525 to user "user_1".');
+                'Assigned bucket 9525 to user "user_1" with bucketing ID "user_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -333,7 +333,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -419,7 +419,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -504,7 +504,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" is in variation control of experiment test_experiment.');
@@ -580,7 +580,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -595,7 +595,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -603,7 +603,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user".');
+                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -666,7 +666,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -677,7 +677,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -692,7 +692,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -700,7 +700,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user".');
+                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -769,7 +769,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -784,7 +784,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -792,7 +792,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user".');
+                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -856,7 +856,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                               
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG,'Assigned bucket 4517 to user "test_user".'); 
+            ->with(Logger::DEBUG,'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'); 
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -871,7 +871,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -879,7 +879,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user".');
+                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -942,7 +942,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user".');
+            ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.');
@@ -954,13 +954,13 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user".');
+            ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" is in experiment group_experiment_2 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 9871 to user "test_user".');
+            ->with(Logger::DEBUG, 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.');
@@ -1022,7 +1022,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                       
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -1033,7 +1033,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -1048,7 +1048,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -1056,7 +1056,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user".');
+                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
                 ->method('log')
             ->with(Logger::INFO,
@@ -1120,7 +1120,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user".');
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -1131,7 +1131,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');             
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');             
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -1146,7 +1146,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user".');          
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');          
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -1154,7 +1154,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user".');
+                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,

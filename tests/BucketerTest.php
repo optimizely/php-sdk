@@ -27,12 +27,14 @@ use Optimizely\ProjectConfig;
 
 class BucketerTest extends \PHPUnit_Framework_TestCase
 {
+    private $testBucketingId;
     private $testUserId;
     private $config;
     private $loggerMock;
 
     public function setUp()
     {
+        $this->testBucketingId = 'testBucketingId';
         $this->testUserId = 'testUserId';
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
@@ -41,9 +43,9 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
     }
 
-    private function getBucketingId($userId, $experimentId)
+    private function getBucketingKey($bucketingId, $experimentId)
     {
-        return $userId.$experimentId;
+        return $bucketingId.$experimentId;
     }
 
     public function testGenerateBucketValue()
@@ -53,25 +55,25 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             5254,
-            $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingId('ppid1', '1886780721'))
+            $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingKey('ppid1', '1886780721'))
         );
         $this->assertEquals(
             4299,
-            $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingId('ppid2', '1886780721'))
+            $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingKey('ppid2', '1886780721'))
         );
         $this->assertEquals(
             2434,
-            $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingId('ppid2', '1886780722'))
+            $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingKey('ppid2', '1886780722'))
         );
         $this->assertEquals(
             5439,
-            $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingId('ppid3', '1886780721'))
+            $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingKey('ppid3', '1886780721'))
         );
         $this->assertEquals(
             6128,
             $generateBucketValueMethod->invoke(
                 new Bucketer($this->loggerMock),
-                $this->getBucketingId(
+                $this->getBucketingKey(
                     'a very very very very very very very very very very very very very very very long ppd string',
                     '1886780721'
                 )
@@ -90,7 +92,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         // No variation (empty entity ID)
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 1000 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 1000 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no variation.');
@@ -100,6 +102,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('test_experiment'),
+                $this->testBucketingId,
                 $this->testUserId
             )
         );
@@ -107,7 +110,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         // control
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 3000 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 3000 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO,
@@ -118,6 +121,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('test_experiment'),
+                $this->testBucketingId,
                 $this->testUserId
             )
         );
@@ -125,7 +129,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         // variation
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 7000 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 7000 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO,
@@ -136,6 +140,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('test_experiment'),
+                $this->testBucketingId,
                 $this->testUserId
             )
         );
@@ -143,7 +148,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         // No variation
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 9000 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 9000 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no variation.');
@@ -153,6 +158,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('test_experiment'),
+                $this->testBucketingId,
                 $this->testUserId
             )
         );
@@ -170,13 +176,13 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $bucketer->setBucketValues([1000, 4000]);
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 1000 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 1000 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in experiment group_experiment_1 of group 7722400015.');
         $this->loggerMock->expects($this->at(2))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 4000 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 4000 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(3))
             ->method('log')
             ->with(Logger::INFO,
@@ -187,6 +193,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_1'),
+                $this->testBucketingId,
                 $this->testUserId
             )
         );
@@ -195,13 +202,13 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $bucketer->setBucketValues([1500, 7000]);
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 1500 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 1500 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in experiment group_experiment_1 of group 7722400015.');
         $this->loggerMock->expects($this->at(2))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 7000 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 7000 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(3))
             ->method('log')
             ->with(Logger::INFO,
@@ -212,6 +219,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_1'),
+                $this->testBucketingId,
                 $this->testUserId
             )
         );
@@ -220,7 +228,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $bucketer->setBucketValues([5000, 7000]);
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 5000 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 5000 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is not in experiment group_experiment_1 of group 7722400015.');
@@ -230,6 +238,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_1'),
+                $this->testBucketingId,
                 $this->testUserId
             )
         );
@@ -238,7 +247,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $bucketer->setBucketValues([400]);
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 400 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 400 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
@@ -248,6 +257,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_1'),
+                $this->testBucketingId,
                 $this->testUserId
             )
         );
@@ -256,7 +266,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $bucketer->setBucketValues([9000]);
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 9000 to user "testUserId".');
+            ->with(Logger::DEBUG, 'Assigned bucket 9000 to user "testUserId" with bucketing ID "testBucketingId".');
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
@@ -265,6 +275,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_1'),
+                $this->testBucketingId,
                 $this->testUserId
             )
         );
@@ -278,7 +289,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             new Variation(),
-            $bucketer->bucket($this->config, new Experiment(), $this->testUserId)
+            $bucketer->bucket($this->config, new Experiment(), $this->testBucketingId, $this->testUserId)
         );
     }
 }
