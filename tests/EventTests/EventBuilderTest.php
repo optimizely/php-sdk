@@ -17,6 +17,7 @@
 
 namespace Optimizely\Tests;
 use Optimizely\Bucketer;
+use Optimizely\DecisionService\DecisionService;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Event\LogEvent;
@@ -401,6 +402,55 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'revenue' => '42',
                 'non-revenue' => 'definitely'
             )
+        );
+
+        $this->assertEquals($expectedLogEvent, $logEvent);
+    }
+
+
+    // since bucketing ID does not exist in our datafile, it shouldn't be sent as an impression event
+    public function testCreateImpressionEventWithBucketingIDAttribute()
+    {
+        $expectedLogEvent = new LogEvent(
+            'https://logx.optimizely.com/log/decision',
+            [
+                'projectId' => '7720880029',
+                'accountId' => '1592310167',
+                'revision' => '15',
+                'layerId' => '7719770039',
+                'visitorId' => 'testUserId',
+                'clientEngine' => 'php-sdk',
+                'clientVersion' => '1.2.0',
+                'timestamp' => time() * 1000,
+                'isGlobalHoldback' => false,
+                'userFeatures' => [[
+                    'id' => '7723280020',
+                    'name' => 'device_type',
+                    'type' => 'custom',
+                    'value' => 'iPhone',
+                    'shouldIndex' => true
+                ]],
+                'decision' => [
+                    'experimentId' => '7716830082',
+                    'variationId' => '7721010009',
+                    'isLayerHoldback' => false
+                ]
+            ],
+            'POST',
+            ['Content-Type' => 'application/json']
+        );
+
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            RESERVED_ATTRIBUTE_KEY_BUCKETING_ID => 'variation'
+        ];
+        $logEvent = $this->eventBuilder->createImpressionEvent(
+            $this->config,
+            'test_experiment',
+            'variation',
+            $this->testUserId,
+            $userAttributes
         );
 
         $this->assertEquals($expectedLogEvent, $logEvent);

@@ -561,7 +561,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $variationKey = $optlyObject->getVariation($this->experimentKey, $userId, $invalidUserAttributesWithBucketingId);
         $this->assertEquals(null, $variationKey);
 
-        // test experiment that's not running returns a null variation
+        // test that an experiment that's not running returns a null variation
         $variationKey = $optlyObject->getVariation($pausedExperimentKey, $userId, $userAttributesWithBucketingId);
         $this->assertEquals(null, $variationKey);
 
