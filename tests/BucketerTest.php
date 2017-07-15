@@ -328,7 +328,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     // null variation should be returned
     public function testBucketVariationInvalidExperimentsWithBucketingId()
     {
-        $bucketer = new Bucketer(new DefaultLogger(Logger::DEBUG));
+        $bucketer = new Bucketer($this->loggerMock);
 
         $this->assertEquals(
             new Variation(),
@@ -344,7 +344,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     // make sure that bucketing works with experiments in group
     public function testBucketVariationGroupedExperimentsWithBucketingId()
     {
-        $bucketer = new Bucketer(new DefaultLogger(Logger::DEBUG));
+        $bucketer = new Bucketer($this->loggerMock);
 
         $this->assertEquals(
             new Variation('7725250007', 'group_exp_2_var_2'),
