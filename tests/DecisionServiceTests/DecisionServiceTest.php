@@ -41,6 +41,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->testUserId = 'testUserId';
+        $this->testUserIdWhitelisted = 'user1';
+        $this->experimentKey = 'test_experiment';
+        $this->testBucketingIdControl = 'testBucketingIdControl!';  // generates bucketing number 3741
+        $this->testBucketingIdVariation = '123456789'; // generates bucketing number 4567
+        $this->variationKeyControl = 'control';
+        $this->variationKeyVariation = 'variation';
         $this->testUserAttributes = [
             'device_type' => 'iPhone',
             'company' => 'Optimizely',
@@ -493,7 +499,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experimentKey = 'test_experiment';
         $pausedExperimentKey = 'paused_experiment';
         $userId = 'test_user';
-        $forcedVariationKey = 'variation';
         $bucketedVariationKey = 'control';
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
@@ -523,5 +528,72 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($optlyObject->setForcedVariation($pausedExperimentKey, $userId, 'variation'), sprintf('Set variation to "%s" failed.', $forcedVariationKey));
         $forcedVariationKey = $optlyObject->getVariation($pausedExperimentKey, $userId, $userAttributes);
         $this->assertNull($forcedVariationKey);
+    }
+
+    public function testGetVariationWithBucketingId()
+    {
+        $pausedExperimentKey = 'paused_experiment';
+        $userId = 'test_user';
+
+        $userAttributesWithBucketingId = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco',
+            RESERVED_ATTRIBUTE_KEY_BUCKETING_ID => $this->testBucketingIdVariation
+        ];
+
+        $invalidUserAttributesWithBucketingId = [
+            'company' => 'Optimizely',
+            RESERVED_ATTRIBUTE_KEY_BUCKETING_ID => $this->testBucketingIdControl
+        ];
+
+        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+
+        // confirm normal bucketing occurs before setting the bucketing ID
+        $variationKey = $optlyObject->getVariation($this->experimentKey, $userId, $this->testUserAttributes);
+        $this->assertEquals($this->variationKeyControl, $variationKey);
+
+        // confirm valid bucketing with bucketing ID set in attributes
+        $variationKey = $optlyObject->getVariation($this->experimentKey, $userId, $userAttributesWithBucketingId);
+        $this->assertEquals($this->variationKeyVariation, $variationKey);
+
+        // check invalid audience with bucketing Id
+        $variationKey = $optlyObject->getVariation($this->experimentKey, $userId, $invalidUserAttributesWithBucketingId);
+        $this->assertEquals(null, $variationKey);
+
+        // test experiment that's not running returns a null variation
+        $variationKey = $optlyObject->getVariation($pausedExperimentKey, $userId, $userAttributesWithBucketingId);
+        $this->assertEquals(null, $variationKey);
+
+        // check forced variation
+        $this->assertTrue($optlyObject->setForcedVariation($this->experimentKey, $userId, $this->variationKeyControl), sprintf('Set variation to "%s" failed.', $this->variationKeyControl));
+        $variationKey = $optlyObject->getVariation($this->experimentKey, $userId, $userAttributesWithBucketingId);
+        $this->assertEquals( $this->variationKeyControl, $variationKey);
+
+        // check whitelisted variation
+        $variationKey = $optlyObject->getVariation($this->experimentKey, $this->testUserIdWhitelisted, $userAttributesWithBucketingId);
+        $this->assertEquals( $this->variationKeyControl, $variationKey);
+
+        // check user profile
+        $storedUserProfile = array(
+            'user_id' => $userId,
+            'experiment_bucket_map' => array(
+                '7716830082' => array(
+                    'variation_id' => '7722370027'
+                )
+            )
+        );
+        $this->userProvideServiceMock
+            ->method('lookup')
+            ->willReturn($storedUserProfile);
+
+        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+
+        $variationKey = $optlyObject->getVariation($this->experimentKey, $userId, $userAttributesWithBucketingId);
+        $this->assertEquals($this->variationKeyControl, $variationKey, sprintf('Variation "%s" does not match expected user profile variation "%s".', $variationKey, $this->variationKeyControl));
+
     }
 }
