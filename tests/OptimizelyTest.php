@@ -41,6 +41,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->datafile = DATAFILE;
+        $this->testBucketingIdControl = 'testBucketingIdControl!';  // generates bucketing number 3741
+        $this->testBucketingIdVariation = '123456789'; // generates bucketing number 4567
+        $this->variationKeyControl = 'control';
+        $this->variationKeyVariation = 'variation';
+        $this->userId = 'test_user';
+        $this->experimentKey = 'test_experiment';
 
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
@@ -1341,5 +1347,40 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject->getForcedVariation($experimentKey, $invalidUserId);
         $optlyObject->getForcedVariation($invalidExperimentKey, $userId);
         $optlyObject->getForcedVariation($experimentKey, $userId);
-    }    
+    }
+
+    public function testGetVariationBucketingIdAttribute()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco',
+        ];
+
+        $userAttributesWithBucketingId = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco',
+            RESERVED_ATTRIBUTE_KEY_BUCKETING_ID => $this->testBucketingIdVariation
+        ];
+
+        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+
+        // confirm that a valid variation is bucketed without the bucketing ID
+        $variationKey = $optlyObject->getVariation($this->experimentKey, $this->userId, $userAttributes);
+        $this->assertEquals($this->variationKeyControl, $variationKey, sprintf('Invalid variation key "%s" for getVariation.', $variationKey));
+
+        // confirm that invalid audience returns null
+        $variationKey = $optlyObject->getVariation($this->experimentKey, $this->userId);
+        $this->assertEquals(null, $variationKey, sprintf('Invalid variation key "%s" for getVariation with bucketing ID "%s".', $variationKey, $this->testBucketingIdControl));
+
+        // confirm that a valid variation is bucketed with the bucketing ID
+        $variationKey = $optlyObject->getVariation($this->experimentKey, $this->userId, $userAttributesWithBucketingId);
+        $this->assertEquals($this->variationKeyVariation, $variationKey, sprintf('Invalid variation key "%s" for getVariation with bucketing ID "%s".', $variationKey, $this->testBucketingIdVariation));
+
+        // confirm that invalid experiment returns null
+        $variationKey = $optlyObject->getVariation("invalidExperimentKey", $this->userId);
+        $this->assertEquals(null, $variationKey, sprintf('Invalid variation key "%s" for getVariation with bucketing ID "%s".', $variationKey, $this->testBucketingIdControl));
+    }
+
 }
