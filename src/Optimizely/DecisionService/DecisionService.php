@@ -29,7 +29,7 @@ use Optimizely\UserProfile\UserProfile;
 use Optimizely\UserProfile\UserProfileUtils;
 use Optimizely\Utils\Validator;
 
-define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID",     "Optimizely Bucketing Id");
+define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID",     "Optimizely Bucketing ID");
 
 /**
  * Optimizely's decision service that determines which variation of an experiment the user will be allocated to.
