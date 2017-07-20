@@ -92,12 +92,10 @@ class DecisionService
     // by default, the bucketing ID should be the user ID
     $bucketingId = $userId;
 
-    // If the bucketing ID key is defined in attributes, than use that in place of the userID for the murmur hash key
-    if (!empty($attributes)) {
-        if (!empty($attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID])) {
-            $bucketingId = $attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
-            $this->_logger->log(Logger::DEBUG, sprintf('Setting the bucketing ID to "%s".', $bucketingId));
-        }
+    // If the bucketing ID key is defined in attributes, then use that in place of the userID for the murmur hash key
+    if (!empty($attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID])) {
+        $bucketingId = $attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
+        $this->_logger->log(Logger::DEBUG, sprintf('Setting the bucketing ID to "%s".', $bucketingId));
     }
 
     if (!$experiment->isExperimentRunning()) {
@@ -109,7 +107,7 @@ class DecisionService
     $forcedVariation = $this->_projectConfig->getForcedVariation($experiment->getKey(), $userId);
     if (!is_null($forcedVariation)) {
       return $forcedVariation;
-    } 
+    }
 
     // check if the user has been whitelisted
     $variation = $this->getWhitelistedVariation($experiment, $userId);
