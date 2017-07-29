@@ -423,13 +423,21 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'clientVersion' => '1.2.0',
                 'timestamp' => time() * 1000,
                 'isGlobalHoldback' => false,
-                'userFeatures' => [[
-                    'id' => '7723280020',
-                    'name' => 'device_type',
-                    'type' => 'custom',
-                    'value' => 'iPhone',
-                    'shouldIndex' => true
-                ]],
+                'userFeatures' => [
+                    [
+                        'id' => '7723280020',
+                        'name' => 'device_type',
+                        'type' => 'custom',
+                        'value' => 'iPhone',
+                        'shouldIndex' => true
+                    ],
+                    [
+                        'name' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
+                        'type' => 'custom',
+                        'value' => 'variation',
+                        'shouldIndex' => true
+                    ]
+                ],
                 'decision' => [
                     'experimentId' => '7716830082',
                     'variationId' => '7721010009',
