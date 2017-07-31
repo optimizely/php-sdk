@@ -29,6 +29,8 @@ use Optimizely\UserProfile\UserProfile;
 use Optimizely\UserProfile\UserProfileUtils;
 use Optimizely\Utils\Validator;
 
+define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID",     "Optimizely Bucketing ID");
+
 /**
  * Optimizely's decision service that determines which variation of an experiment the user will be allocated to.
  *
@@ -79,14 +81,23 @@ class DecisionService
   /**
    * Determine which variation to show the user.
    *
-   * @param  $experiment Experiment Experiment to get the variation for.
-   * @param  $userId     string     User identifier.
-   * @param  $attributes array      Attributes of the user.
+   * @param  $experiment  Experiment Experiment to get the variation for.
+   * @param  $userId      string     User identifier.
+   * @param  $attributes  array      Attributes of the user.
    *
    * @return Variation   Variation  which the user is bucketed into.
    */
   public function getVariation(Experiment $experiment, $userId, $attributes = null)
   {
+    // by default, the bucketing ID should be the user ID
+    $bucketingId = $userId;
+
+    // If the bucketing ID key is defined in attributes, then use that in place of the userID for the murmur hash key
+    if (!empty($attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID])) {
+        $bucketingId = $attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
+        $this->_logger->log(Logger::DEBUG, sprintf('Setting the bucketing ID to "%s".', $bucketingId));
+    }
+
     if (!$experiment->isExperimentRunning()) {
       $this->_logger->log(Logger::INFO, sprintf('Experiment "%s" is not running.', $experiment->getKey()));
       return null;
@@ -96,7 +107,7 @@ class DecisionService
     $forcedVariation = $this->_projectConfig->getForcedVariation($experiment->getKey(), $userId);
     if (!is_null($forcedVariation)) {
       return $forcedVariation;
-    } 
+    }
 
     // check if the user has been whitelisted
     $variation = $this->getWhitelistedVariation($experiment, $userId);
@@ -125,7 +136,7 @@ class DecisionService
         return null;
     }
 
-    $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $userId);
+    $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketingId, $userId);
     if (!is_null($variation)) {
         $this->saveVariation($experiment, $variation, $userProfile);
     }

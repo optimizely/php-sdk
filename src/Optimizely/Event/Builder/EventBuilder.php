@@ -23,6 +23,8 @@ use Optimizely\Event\LogEvent;
 use Optimizely\ProjectConfig;
 use Optimizely\Utils\EventTagUtils;
 
+define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY",     "optimizely_bucketing_id");
+
 class EventBuilder
 {
     /**
@@ -102,15 +104,25 @@ class EventBuilder
 
         forEach ($attributes as $attributeKey => $attributeValue) {
             if ($attributeValue) {
-                $attributeEntity = $config->getAttribute($attributeKey);
-                if (!is_null($attributeEntity->getKey())) {
+                // check for reserved attributes
+                if (strcmp($attributeKey , RESERVED_ATTRIBUTE_KEY_BUCKETING_ID) == 0) {
                     array_push($this->_eventParams[USER_FEATURES], [
-                        'id' => $attributeEntity->getId(),
-                        'name' => $attributeKey,
+                        'name' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
                         'type' => 'custom',
                         'value' => $attributeValue,
                         'shouldIndex' => true
                     ]);
+                } else {
+                    $attributeEntity = $config->getAttribute($attributeKey);
+                    if (!is_null($attributeEntity->getKey())) {
+                        array_push($this->_eventParams[USER_FEATURES], [
+                            'id' => $attributeEntity->getId(),
+                            'name' => $attributeKey,
+                            'type' => 'custom',
+                            'value' => $attributeValue,
+                            'shouldIndex' => true
+                        ]);
+                    }
                 }
             }
         }
