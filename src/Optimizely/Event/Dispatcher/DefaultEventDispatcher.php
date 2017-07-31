@@ -47,8 +47,7 @@ class DefaultEventDispatcher implements EventDispatcherInterface
             'headers' => $event->getHeaders(),
             'json' => $event->getParams(),
             'timeout' => DefaultEventDispatcher::TIMEOUT,
-            'connect_timeout' => DefaultEventDispatcher::TIMEOUT,
-            'proxy' => 'tcp://localhost:8888'
+            'connect_timeout' => DefaultEventDispatcher::TIMEOUT
         ];
 
         $this->httpClient->request($event->getHttpVerb(), $event->getUrl(), $options);
