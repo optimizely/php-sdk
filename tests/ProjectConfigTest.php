@@ -630,8 +630,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $userId = 'test_user';
         $invalidUserId = 'invalid_user';
         $experimentKey = 'test_experiment';
+        $experimentKey2 = 'group_experiment_1';
         $invalidExperimentKey = 'invalid_experiment';        
         $variationKey = 'control';
+        $variationKey2 = 'group_exp_1_var_1';
         $invalidVariationKey = 'invalid_variation';
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
@@ -659,6 +661,12 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         // confirm the forced variation is returned after a set
         $this->assertTrue($this->config->setForcedVariation($experimentKey, $userId, $variationKey));
         $forcedVariation = $this->config->getForcedVariation($experimentKey, $userId);
+        $this->assertEquals($variationKey, $forcedVariation->getKey());
+
+        // check multiple sets
+        $this->assertTrue($this->config->setForcedVariation($experimentKey2, $userId, $variationKey2));
+        $forcedVariation = $this->config->getForcedVariation($experimentKey2, $userId);
+        $this->assertEquals($variationKey2, $forcedVariation->getKey());
         $this->assertEquals($variationKey, $forcedVariation->getKey());
 
         // an invalid user ID should return a null variation
