@@ -635,8 +635,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $variationKey = 'control';
         $variationKey2 = 'group_exp_1_var_1';
         $invalidVariationKey = 'invalid_variation';
-
-        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+        
+        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock );
         $userAttributes = [
             'device_type' => 'iPhone',
             'location' => 'San Francisco'
@@ -665,8 +665,15 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
         // check multiple sets
         $this->assertTrue($this->config->setForcedVariation($experimentKey2, $userId, $variationKey2));
-        $forcedVariation = $this->config->getForcedVariation($experimentKey2, $userId);
-        $this->assertEquals($variationKey2, $forcedVariation->getKey());
+        $forcedVariation2 = $this->config->getForcedVariation($experimentKey2, $userId);
+        $this->assertEquals($variationKey2, $forcedVariation2->getKey());
+        // make sure the second set does not overwrite the first set
+        $forcedVariation = $this->config->getForcedVariation($experimentKey, $userId);
+        $this->assertEquals($variationKey, $forcedVariation->getKey());
+        // make sure unsetting the second experiment-to-variation mapping does not unset the
+        // first experiment-to-variation mapping
+        $this->assertTrue($this->config->setForcedVariation($experimentKey2, $userId, null));
+        $forcedVariation = $this->config->getForcedVariation($experimentKey, $userId);
         $this->assertEquals($variationKey, $forcedVariation->getKey());
 
         // an invalid user ID should return a null variation
