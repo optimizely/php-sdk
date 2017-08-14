@@ -411,7 +411,7 @@ class ProjectConfig
         }
 
         if (empty($variationKey)) {
-            unset($this->_forcedVariationMap[$userId]);
+            unset($this->_forcedVariationMap[$userId][$experimentId]);
             $this->_logger->log(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
             return TRUE;
         }
@@ -422,7 +422,8 @@ class ProjectConfig
             return FALSE;
         }
 
-        $this->_forcedVariationMap[$userId] = array($experimentId => $variationId);
+        $this->_forcedVariationMap[$userId][$experimentId] = $variationId;
+
         $this->_logger->log(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
 
         return TRUE;   
