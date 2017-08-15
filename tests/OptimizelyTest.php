@@ -71,16 +71,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testInitInvalidEventDispatcher()
     {
         $invalidDispatcher = new InvalidEventDispatcher();
-        try
-        {
+        try {
             $optlyObject = new Optimizely($this->datafile, $invalidDispatcher);
-        }
-        catch (Exception $exception)
-        {
+        } catch (Exception $exception) {
             return;
-        }
-        catch (TypeError $exception)
-        {
+        } catch (TypeError $exception) {
             return;
         }
 
@@ -96,16 +91,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testInitInvalidLogger()
     {
         $invalidLogger = new InvalidLogger();
-        try
-        {
+        try {
             $optlyObject = new Optimizely($this->datafile, null, $invalidLogger);
-        }
-        catch (Exception $exception)
-        {
+        } catch (Exception $exception) {
             return;
-        }
-        catch (TypeError $exception)
-        {
+        } catch (TypeError $exception) {
             return;
         }
 
@@ -121,16 +111,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testInitInvalidErrorHandler()
     {
         $invalidErrorHandler = new InvalidErrorHandler();
-        try
-        {
+        try {
             $optlyObject = new Optimizely($this->datafile, null, null, $invalidErrorHandler);
-        }
-        catch (Exception $exception)
-        {
+        } catch (Exception $exception) {
             return;
-        }
-        catch (TypeError $exception)
-        {
+        } catch (TypeError $exception) {
             return;
         }
 
@@ -144,8 +129,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $validateInputsMethod->invoke(new Optimizely('Random datafile'),
-            'Random datafile',
-            false)
+                'Random datafile',
+                false)
         );
 
         $this->expectOutputRegex('/Provided "datafile" has invalid schema./');
@@ -158,7 +143,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $validateInputsMethod->invoke(new Optimizely('Random datafile', null, null, null, true),
-            'Random datafile', true)
+                'Random datafile', true)
         );
     }
 
@@ -209,9 +194,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $callIndex = 0;
         $this->loggerMock->expects($this->exactly(4))
             ->method('log');
-         $this->loggerMock->expects($this->at($callIndex++))
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "not_in_variation_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "not_in_variation_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 8495 to user "not_in_variation_user" with bucketing ID "not_in_variation_user".');
@@ -243,8 +228,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'group_exp_1_var_2', 'user_1', null
             )
             ->willReturn(new LogEvent(
-                'logx.optimizely.com/decision',
-                ['param1' => 'val1', 'param2' => 'val2'], 'POST', [])
+                    'logx.optimizely.com/decision',
+                    ['param1' => 'val1', 'param2' => 'val2'], 'POST', [])
             );
 
         $callIndex = 0;
@@ -252,7 +237,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "user_1" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "user_1" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 1922 to user "user_1" with bucketing ID "user_1".');
@@ -294,9 +279,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $callIndex = 0;
         $this->loggerMock->expects($this->exactly(3))
             ->method('log');
-         $this->loggerMock->expects($this->at($callIndex++))
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -334,9 +319,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $callIndex = 0;
         $this->loggerMock->expects($this->exactly(5))
             ->method('log');
-         $this->loggerMock->expects($this->at($callIndex++))
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
@@ -422,7 +407,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
@@ -448,7 +433,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');           
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -465,6 +450,28 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($this->optimizelyObject->getVariation('paused_experiment', 'test_user'));
     }
 
+    public function testGetVariationExperimentNotRunningWithSetForceVariation()
+    {
+        $userId = 'test_user';
+        $experimentKey = 'paused_experiment';
+        $experimentId = '7716830585';
+        $variationKey = 'control';
+        $variationId = '7722370427';
+        $callIndex = 0;
+
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO, 'Experiment "paused_experiment" is not running.');
+
+        $this->assertTrue($this->optimizelyObject->setForcedVariation($experimentKey, $userId, $variationKey), 'Set variation for paused experiment should have failed.');
+        $this->assertNull($this->optimizelyObject->getVariation($experimentKey, $userId));
+    }
+
     public function testGetVariationUserInForcedVariationInExperiment()
     {
         $callIndex = 0;
@@ -472,7 +479,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "user1" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "user1" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "user1" is forced in variation "control" of experiment "test_experiment".');
@@ -487,12 +494,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // Last check to happen is the audience condition check so we make sure we get to that check since
         // the user is not whitelisted
-        $callIndex = 0;        
+        $callIndex = 0;
         $this->loggerMock->expects($this->exactly(2))
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -507,7 +514,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
@@ -572,7 +579,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -582,36 +589,36 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "test_experiment".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is in experiment group_experiment_2 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.');
         $this->loggerMock->expects($this->at($callIndex++))
@@ -669,7 +676,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
@@ -679,36 +686,36 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'User "test_user" is in variation control of experiment test_experiment.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is in experiment group_experiment_2 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.');
         $this->loggerMock->expects($this->at($callIndex++))
@@ -754,14 +761,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $callIndex = 0;
         $this->loggerMock->expects($this->exactly(17))
-            ->method('log');   
+            ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::WARNING,
                 'Event value is deprecated in track call. Use event tags to pass in revenue value instead.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -771,36 +778,36 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "test_experiment".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is in experiment group_experiment_2 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.');
         $this->loggerMock->expects($this->at($callIndex++))
@@ -849,7 +856,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -859,35 +866,35 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Not tracking user "test_user" for experiment "test_experiment".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG,'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'); 
+            ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is in experiment group_experiment_2 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.');
         $this->loggerMock->expects($this->at($callIndex++))
@@ -936,7 +943,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                 
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
@@ -945,7 +952,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::INFO, 'Not tracking user "test_user" for experiment "test_experiment".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
@@ -957,7 +964,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::INFO, 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
@@ -978,7 +985,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::INFO, 'Not tracking user "test_user" for experiment "paused_experiment".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::INFO,'Tracking event "purchase" for user "test_user".');
+            ->with(Logger::INFO, 'Tracking event "purchase" for user "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
@@ -1025,7 +1032,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Event value is deprecated in track call. Use event tags to pass in revenue value instead.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                       
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
@@ -1035,36 +1042,36 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'User "test_user" is in variation control of experiment test_experiment.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');              
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is in experiment group_experiment_2 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::DEBUG,
                 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
-                ->method('log')
+            ->method('log')
             ->with(Logger::INFO,
                 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.');
         $this->loggerMock->expects($this->at($callIndex++))
@@ -1120,24 +1127,24 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $callIndex = 0;
         $this->loggerMock->expects($this->exactly(16))
-            ->method('log');       
+            ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
-                'User "test_user" is in variation control of experiment test_experiment.');                            
+                'User "test_user" is in variation control of experiment test_experiment.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');             
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
@@ -1145,18 +1152,18 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
-                'Not tracking user "test_user" for experiment "group_experiment_1".');                            
+                'Not tracking user "test_user" for experiment "group_experiment_1".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');                               
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');          
+                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO,
-                'User "test_user" is in experiment group_experiment_2 of group 7722400015.');          
+                'User "test_user" is in experiment group_experiment_2 of group 7722400015.');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG,
@@ -1215,8 +1222,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('control', $forcedVariationKey, sprintf('Forced variation key should be control, but got "%s".', $forcedVariationKey));
     }
 
-    // check that the forced variation is set correctly 
-    public function testSetForcedVariation()
+    public function testSetForcedVariationWithValidConditions()
     {
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1225,74 +1231,186 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'location' => 'San Francisco'
         ];
 
-        $optlyObject->activate('test_experiment', 'test_user', $userAttributes);
-
-        // test invalid experiment --> normal bucketing should occur
-        $this->assertFalse($optlyObject->setForcedVariation('bad_experiment', 'test_user', 'control'), 'Set variation to "variation" should have failed  because of invalid experiment.');
         $variationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
-        $this->assertEquals('control', $variationKey);
+        $this->assertEquals('control', $variationKey, sprintf('Invalid variation "%s" for baseline check.', $variationKey));
 
-        // test invalid variation --> normal bucketing should occur
-        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', 'test_user', 'bad_variation'), 'Set variation to "bad_variation" should have failed.');
+        // valid experiment, valid variation, valid user ID --> the user should be bucketed to the specified forced variation
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'variation'), 'Set variation for valid conditions should have succeeded.');
         $variationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
-        $this->assertEquals('control', $variationKey);
+        $this->assertEquals('variation', $variationKey, sprintf('Invalid variation "%s" for valid conditions.', $variationKey));
+    }
 
-        // test valid variation --> the user should be bucketed to the specified forced variation
+    public function testSetForcedVariationWithInvalidUserIDs()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'location' => 'San Francisco'
+        ];
+
+        // null user ID --> set should fail, normal bucketing  [TODO (Alda): getVariation on a null userID should return null]
+        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', null, 'bad_variation'), 'Set variation for null user ID should have failed.');
+        $variationKey = $optlyObject->getVariation('test_experiment', null, $userAttributes);
+        $this->assertEquals('variation', $variationKey, sprintf('Invalid variation "%s" for null user ID.', $variationKey));
+        // empty string user ID --> set should fail, normal bucketing [TODO (Alda): getVariation on an empty userID should return null]
+        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', '', 'bad_variation'), 'Set variation for empty string user ID should have failed.');
+        $variationKey = $optlyObject->getVariation('test_experiment', '', $userAttributes);
+        $this->assertEquals('variation', $variationKey, sprintf('Invalid variation "%s" for empty string user ID.', $variationKey));
+    }
+
+    public function testSetForcedVariationWithInvalidExperimentKeys()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'location' => 'San Francisco'
+        ];
+
+        // experiment key not in datafile --> set should fail
+        $this->assertFalse($optlyObject->setForcedVariation('bad_experiment', 'test_user', 'control'), 'Set variation for experiment key not in the datafile should have failed.');
+        $variationKey = $optlyObject->getVariation('bad_experiment', 'test_user', $userAttributes);
+        $this->assertNull($variationKey, sprintf('Invalid variation "%s" for experiment key not in the datafile.', $variationKey));
+        // null experiment key --> set should fail
+        $this->assertFalse($optlyObject->setForcedVariation(null, 'test_user', 'control'), 'Set variation for null experiment key should have failed.');
+        $variationKey = $optlyObject->getVariation(null, 'test_user', $userAttributes);
+        $this->assertNull($variationKey, sprintf('Invalid variation "%s" for null experiment key.', $variationKey));
+        // empty string experiment key --> set should fail
+        $this->assertFalse($optlyObject->setForcedVariation('', 'test_user', 'control'), 'Set variation for empty string experiment key should have failed.');
+        $variationKey = $optlyObject->getVariation('', 'test_user', $userAttributes);
+        $this->assertNull($variationKey, sprintf('Invalid variation "%s" for empty string experiment key.', $variationKey));
+    }
+
+    public function testSetForcedVariationWithInvalidVariationKeys()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'location' => 'San Francisco'
+        ];
+
+        // variation key not in datafile --> set should fail, normal bucketing
+        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', 'test_user', 'bad_variation'), 'Set variation with variation not in datafile should have failed.');
+        $variationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
+        $this->assertEquals('control', $variationKey, sprintf('Invalid variation "%s" for variation key not in datafile.', $variationKey));
+        // null variation key --> set should succeed (the variation is reset), normal bucketing
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', null), 'Set variation with null variation key should have succeeded.');
+        $variationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
+        $this->assertEquals('control', $variationKey, sprintf('Invalid variation "%s" for null variation key.', $variationKey));
+        // empty string variation key --> set should fail, normal bucketing
+        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', 'test_user', ''), 'Set variation with empty string variation key should have failed.');
+        $variationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
+        $this->assertEquals('control', $variationKey, sprintf('Invalid variation "%s" for empty string variation key.', $variationKey));
+    }
+
+    public function testSetForcedVariationWithMultipleSets()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'location' => 'San Francisco'
+        ];
+
+        // same user, same experiment --> set should succeed
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'control'), 'Set variation for multiple sets on same user and same experiment should have succeeded.');
+        $variationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
+        $this->assertEquals('control', $variationKey, sprintf('Invalid variation "%s" for multiple sets on same user and same experiment.', $variationKey));
+        // same user, different experiment --> set should succeed
+        $this->assertTrue($optlyObject->setForcedVariation('group_experiment_1', 'test_user', 'group_exp_1_var_1'), 'Set variation for multiple sets on same user and different experiment have succeeded.');
+        $variationKey = $optlyObject->getVariation('group_experiment_1', 'test_user', $userAttributes);
+        $this->assertEquals('group_exp_1_var_1', $variationKey, sprintf('Invalid variation "%s" for multiple sets on same user and different experiment.', $variationKey));
+        // different user --> set should succeed
+        $this->assertTrue($optlyObject->setForcedVariation('group_experiment_1', 'test_user2', 'group_exp_1_var_1'), 'Set variation for multiple sets on a different user should have succeeded.');
+        $variationKey = $optlyObject->getVariation('group_experiment_1', 'test_user2', $userAttributes);
+        $this->assertEquals('group_exp_1_var_1', $variationKey, sprintf('Invalid variation "%s" for multiple sets on a different user.', $variationKey));
+    }
+
+    public function testGetForcedVariationWithValidConditions()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
         $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'variation'), 'Set variation to "variation" failed.');
-        $forcedVariationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
-        $this->assertEquals('variation', $forcedVariationKey);
-
-        // make sure another setForcedVariation call sets a new forced variation correctly
-        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user2', 'variation'), 'Set variation to "variation" failed.');
-        $forcedVariationKey = $optlyObject->getVariation('test_experiment', 'test_user2', $userAttributes);
+        // call getForcedVariation with valid experiment key and user ID
+        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', 'test_user');
         $this->assertEquals('variation', $forcedVariationKey);
     }
 
-    // check that the get forced variation is correct 
-    public function testGetForcedVariation()
+
+    public function testGetForcedVariationWithInvalidExperimentKeys()
     {
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
-        $userAttributes = [
-            'device_type' => 'iPhone',
-            'location' => 'San Francisco'
-        ];
-
-        $optlyObject->activate('test_experiment', 'test_user', $userAttributes);
-
-        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'variation'), 'Set variation to "variation" failed.');
-        // call getForcedVariation with valid experiment key and valid user ID
-        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', 'test_user');
-        $this->assertEquals('variation', $forcedVariationKey);
-        // call getForcedVariation with invalid experiment and valid userID
+        // call getForcedVariation with invalid experiment
         $forcedVariationKey = $optlyObject->getForcedVariation('invalid_experiment', 'test_user');
         $this->assertNull($forcedVariationKey);
-        // call getForcedVariation with valid experiment and invalid userID
+        // call getForcedVariation with null experiment key
+        $forcedVariationKey = $optlyObject->getForcedVariation(null, 'test_user');
+        $this->assertNull($forcedVariationKey);
+        // call getForcedVariation with empty experiment key
+        $forcedVariationKey = $optlyObject->getForcedVariation('', 'test_user');
+        $this->assertNull($forcedVariationKey);
+    }
+
+    public function testGetForcedVariationWithInvalidUserIDs()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // call getForcedVariation invalid userID
         $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', 'invalid_user');
         $this->assertNull($forcedVariationKey);
+        // call getForcedVariation with null userID
+        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', null);
+        $this->assertNull($forcedVariationKey);
+        // call getForcedVariation with empty userID
+        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', '');
+        $this->assertNull($forcedVariationKey);
+    }
+
+    public function testGetForcedVariationWithExperimentNotRunning()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
         // call getForcedVariation with an experiment that's not running
-        $this->assertTrue($optlyObject->setForcedVariation('paused_experiment', 'test_user2', 'variation'), 'Set variation to "variation" failed.');
-        $forcedVariationKey = $optlyObject->getForcedVariation('paused_experiment', 'test_user2');
+        $this->assertTrue($optlyObject->setForcedVariation('paused_experiment', 'test_user', 'variation'), 'Set variation to "variation" failed.');
+        $forcedVariationKey = $optlyObject->getForcedVariation('paused_experiment', 'test_user');
         $this->assertEquals('variation', $forcedVariationKey);
-        // confirm that the second setForcedVariation call did not invalidate the first call to that method
-        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', 'test_user');
-        $this->assertEquals('variation', $forcedVariationKey);
+    }
+
+    public function testGetForcedVariationWithMultipleSets()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // same user, same experiment --> set should succeed
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'control'), 'Set variation for multiple sets on same user and same experiment should have succeeded.');
+        $variationKey = $optlyObject->getForcedVariation('test_experiment', 'test_user');
+        $this->assertEquals('control', $variationKey, sprintf('Invalid variation "%s" for multiple sets on same user and same experiment.', $variationKey));
+        // same user, different experiment --> set should succeed
+        $this->assertTrue($optlyObject->setForcedVariation('group_experiment_1', 'test_user', 'group_exp_1_var_1'), 'Set variation for multiple sets on same user and different experiment have succeeded.');
+        $variationKey = $optlyObject->getForcedVariation('group_experiment_1', 'test_user');
+        $this->assertEquals('group_exp_1_var_1', $variationKey, sprintf('Invalid variation "%s" for multiple sets on same user and different experiment.', $variationKey));
+        // different user --> set should succeed
+        $this->assertTrue($optlyObject->setForcedVariation('group_experiment_1', 'test_user2', 'group_exp_1_var_1'), 'Set variation for multiple sets on a different user should have succeeded.');
+        $variationKey = $optlyObject->getForcedVariation('group_experiment_1', 'test_user2');
+        $this->assertEquals('group_exp_1_var_1', $variationKey, sprintf('Invalid variation "%s" for multiple sets on a different user.', $variationKey));
     }
 
     // test that all the logs in setForcedVariation are getting called
     public function testSetForcedVariationLogs()
     {
-        $userId = 'test_user'; 
+        $userId = 'test_user';
         $experimentKey = 'test_experiment';
         $experimentId = '7716830082';
-        $invalidExperimentKey = 'invalid_experiment';        
+        $invalidExperimentKey = 'invalid_experiment';
         $variationKey = 'control';
         $variationId = '7722370027';
         $invalidVariationKey = 'invalid_variation';
         $callIndex = 0;
 
-        $this->loggerMock->expects($this->exactly(4))
-            ->method('log');                 
+        $this->loggerMock->expects($this->exactly(5))
+            ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
@@ -1301,10 +1419,13 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::ERROR, sprintf('No variation key "%s" defined in datafile for experiment "%s".', $invalidVariationKey, $experimentKey));     
+            ->with(Logger::ERROR, sprintf('No variation key "%s" defined in datafile for experiment "%s".', $invalidVariationKey, $experimentKey));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));  
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'User ID is invalid');
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1312,34 +1433,38 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject->setForcedVariation($experimentKey, $userId, null);
         $optlyObject->setForcedVariation($experimentKey, $userId, $invalidVariationKey );
         $optlyObject->setForcedVariation($experimentKey, $userId, $variationKey);
+        $optlyObject->setForcedVariation($experimentKey, null, $variationKey);
     }
 
     // test that all the logs in getForcedVariation are getting called
     public function testGetForcedVariationLogs()
     {
-        $userId = 'test_user'; 
-        $invalidUserId = 'invalid_user'; 
+        $userId = 'test_user';
+        $invalidUserId = 'invalid_user';
         $experimentKey = 'test_experiment';
         $experimentId = '7716830082';
-        $invalidExperimentKey = 'invalid_experiment';        
+        $invalidExperimentKey = 'invalid_experiment';
         $variationKey = 'control';
         $variationId = '7722370027';
         $callIndex = 0;
 
-        $this->loggerMock->expects($this->exactly(4))
-            ->method('log');    
+        $this->loggerMock->expects($this->exactly(5))
+            ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));   
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $invalidUserId));            
+            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $invalidUserId));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));  
+            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'User ID is invalid');
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1347,6 +1472,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject->getForcedVariation($experimentKey, $invalidUserId);
         $optlyObject->getForcedVariation($invalidExperimentKey, $userId);
         $optlyObject->getForcedVariation($experimentKey, $userId);
+        $optlyObject->getForcedVariation($experimentKey, null);
+
     }
 
     public function testGetVariationBucketingIdAttribute()

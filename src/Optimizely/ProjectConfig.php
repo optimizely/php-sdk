@@ -113,8 +113,10 @@ class ProjectConfig
     private $_errorHandler;
 
     /**
-     * @var array Associative array of user IDs to an associative array 
-     * of experiments to variations.
+     * @var array Associative array of user IDs to an associative array
+     * of experiments to variations. This contains all the forced variations
+     * set by the user by calling setForcedVariation (it is not the same as the
+     * whitelisting forcedVariations data structure in the Experiments class).
      */
     private $_forcedVariationMap;
 
@@ -348,15 +350,21 @@ class ProjectConfig
     }
 
     /**
-     * Gets the forced variation key for the given user and experiment.  
-     * 
-     * @param $experimentKey string Key for experiment.
-     * @param $userId string The user Id.    
+     * Gets the forced variation key for the given user and experiment.
      *
-     * @return Variation The variation which the given user and experiment should be forced into. 
+     * @param $experimentKey string Key for experiment.
+     * @param $userId string The user Id.
+     *
+     * @return Variation The variation which the given user and experiment should be forced into.
      */
     public function getForcedVariation($experimentKey, $userId)
     {
+
+        if (!isset($userId) || is_null($userId)) {
+            $this->_logger->log(Logger::DEBUG, 'User ID is invalid');
+            return null;
+        }
+
         if (!isset($this->_forcedVariationMap[$userId])) {
             $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
             return null;
@@ -364,7 +372,7 @@ class ProjectConfig
 
         $experimentToVariationMap = $this->_forcedVariationMap[$userId];
         $experimentId = $this->getExperimentFromKey($experimentKey)->getId();
-        if (empty($experimentId)) {
+        if (!isset($experimentId) || is_null($experimentId)) {
             // this case is logged in getExperimentFromKey
             return null;
         }
@@ -375,13 +383,13 @@ class ProjectConfig
         }
 
         $variationId = $experimentToVariationMap[$experimentId];
-        if (empty($variationId)) {
+        if (!isset($variationId) || is_null($variationId)) {
             $this->_logger->log(Logger::DEBUG, sprintf('No variation mapped to experiment "%s" in the forced variation map.', $experimentKey));
             return null;
         }
 
         $variationKey = $this->getVariationFromId($experimentKey, $variationId)->getKey();
-        if (empty($variationKey)) {
+        if (!isset($variationKey) || is_null($variationKey)) {
             // this case is logged in getVariationFromKey
             return null;
         }
@@ -393,31 +401,36 @@ class ProjectConfig
     }
 
     /**
-     * Sets an associative array of user IDs to an associative array of experiments 
-     * to forced variations. 
-     * 
+     * Sets an associative array of user IDs to an associative array of experiments
+     * to forced variations.
+     *
      * @param $experimentKey string Key for experiment.
      * @param $userId string The user Id.
      * @param $variationKey string Key for variation. If null, then clear the existing experiment-to-variation mapping.
      *
-     * @return boolean A boolean value that indicates if the set completed successfully. 
+     * @return boolean A boolean value that indicates if the set completed successfully.
      */
     public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
+        if (!isset($userId) || is_null($userId)) {
+            $this->_logger->log(Logger::DEBUG, 'User ID is invalid');
+            return FALSE;
+        }
+
         $experimentId = $this->getExperimentFromKey($experimentKey)->getId();
-        if (empty($experimentId)) {
+        if (!isset($experimentId) || is_null($experimentId)) {
             // this case is logged in getExperimentFromKey
             return FALSE;
         }
 
-        if (empty($variationKey)) {
+        if (!isset($variationKey) || is_null($variationKey)) {
             unset($this->_forcedVariationMap[$userId][$experimentId]);
             $this->_logger->log(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
             return TRUE;
         }
 
         $variationId = $this->getVariationFromKey($experimentKey, $variationKey)->getId();
-        if (empty($variationId)) {
+        if (!isset($variationId) || is_null($variationId)) {
             // this case is logged in getVariationFromKey
             return FALSE;
         }
@@ -426,7 +439,7 @@ class ProjectConfig
 
         $this->_logger->log(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
 
-        return TRUE;   
+        return TRUE;
     }
 
 }
