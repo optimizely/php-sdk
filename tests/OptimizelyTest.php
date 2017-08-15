@@ -512,7 +512,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
-        
+
         $this->assertTrue($this->optimizelyObject->setForcedVariation($experimentKey, $userId, $variationKey), 'Set variation for paused experiment should have failed.');
         $this->assertEquals($variationKey, $this->optimizelyObject->getVariation($experimentKey, $userId));
     }
@@ -1504,10 +1504,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'location' => 'San Francisco'
         ];
 
-        // same user, same experiment --> set should succeed
-        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'control'), 'Set variation for multiple sets on same user and same experiment should have succeeded.');
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'control'), 'Set variation should have succeeded.');
         $variationKey = $optlyObject->getVariation('test_experiment', 'test_user', $userAttributes);
         $this->assertEquals('control', $variationKey, sprintf('Invalid variation "%s" for multiple sets on same user and same experiment.', $variationKey));
+
+        // same user, same experiment --> set should succeed
+        $this->assertTrue($optlyObject->setForcedVariation('group_experiment_1', 'test_user', 'group_exp_1_var_1'), 'Set variation for multiple sets on same user and same experiment should have succeeded.');
+        $variationKey = $optlyObject->getVariation('group_experiment_1', 'test_user', $userAttributes);
+        $this->assertEquals('group_exp_1_var_1', $variationKey, sprintf('Invalid variation "%s" for multiple sets on same user and same experiment.', $variationKey));
         // same user, different experiment --> set should succeed
         $this->assertTrue($optlyObject->setForcedVariation('group_experiment_1', 'test_user', 'group_exp_1_var_1'), 'Set variation for multiple sets on same user and different experiment have succeeded.');
         $variationKey = $optlyObject->getVariation('group_experiment_1', 'test_user', $userAttributes);
@@ -1573,10 +1577,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
-        // same user, same experiment --> set should succeed
-        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'control'), 'Set variation for multiple sets on same user and same experiment should have succeeded.');
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', 'test_user', 'control'), 'Set variation should have succeeded.');
         $variationKey = $optlyObject->getForcedVariation('test_experiment', 'test_user');
         $this->assertEquals('control', $variationKey, sprintf('Invalid variation "%s" for multiple sets on same user and same experiment.', $variationKey));
+
+        // same user, same experiment --> set should succeed
+        $this->assertTrue($optlyObject->setForcedVariation('group_experiment_1', 'test_user', 'group_exp_1_var_1'), 'Set variation for multiple sets on same user and same experiment should have succeeded.');
+        $variationKey = $optlyObject->getForcedVariation('group_experiment_1', 'test_user');
+        $this->assertEquals('group_exp_1_var_1', $variationKey, sprintf('Invalid variation "%s" for multiple sets on same user and same experiment.', $variationKey));
         // same user, different experiment --> set should succeed
         $this->assertTrue($optlyObject->setForcedVariation('group_experiment_1', 'test_user', 'group_exp_1_var_1'), 'Set variation for multiple sets on same user and different experiment have succeeded.');
         $variationKey = $optlyObject->getForcedVariation('group_experiment_1', 'test_user');
