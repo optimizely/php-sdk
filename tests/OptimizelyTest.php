@@ -581,6 +581,28 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testGetVariationWhitelistedUserAfterSetForcedVariation()
+    {
+        $userId = 'user1';
+        $experimentKey = 'test_experiment';
+        $experimentId = '7716830082';
+        $variationKey = 'variation';
+        $variationId = '7721010009';
+
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map',$variationKey, $experimentKey, $userId));
+
+        $this->assertTrue($this->optimizelyObject->setForcedVariation($experimentKey, $userId, $variationKey), 'Set variation for paused experiment should have passed.');
+        $this->assertEquals($this->optimizelyObject->getVariation($experimentKey, $userId), $variationKey);
+    }
+
     public function testGetVariationUserNotInForcedVariationNotInExperiment()
     {
         // Last check to happen is the audience condition check so we make sure we get to that check since
