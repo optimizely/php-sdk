@@ -26,7 +26,7 @@ public function setForcedVariation($experimentKey, $userId, $variationKey);
 public function getForcedVariation($experimentKey, $userId);
 ```
 
-- Added the bucketing ID feature allows decoupling bucketing from user identification so that a group of users that have the same bucketing ID are put into the same variation. 
+- Added the bucketing ID feature, which allows decoupling bucketing from user identification so that a group of users that have the same bucketing ID are put into the same variation. 
 
 ## 1.2.0
 - Add user profile service.
