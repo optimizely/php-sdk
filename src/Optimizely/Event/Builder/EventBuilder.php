@@ -106,6 +106,8 @@ class EventBuilder
             if ($attributeValue) {
                 // check for reserved attributes
                 if (strcmp($attributeKey , RESERVED_ATTRIBUTE_KEY_BUCKETING_ID) == 0) {
+                    // TODO (Alda): the type for bucketing ID attribute may change so that custom
+                    // attributes are not overloaded
                     array_push($this->_eventParams[USER_FEATURES], [
                         'name' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
                         'type' => 'custom',

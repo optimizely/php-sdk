@@ -29,7 +29,11 @@ use Optimizely\UserProfile\UserProfile;
 use Optimizely\UserProfile\UserProfileUtils;
 use Optimizely\Utils\Validator;
 
-define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID",     "Optimizely Bucketing ID");
+// This value was decided between App Backend, Audience, and Oasis teams, but may possibly change.
+// We decided to prefix the reserved keyword with '$' because it is a symbol that is not
+// allowed in custom attributes.
+// We also thought that the prefix 'opt' makes it apparent to users that the variable belongs to Optimizely.
+define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID",     "\$opt_bucketing_id");
 
 /**
  * Optimizely's decision service that determines which variation of an experiment the user will be allocated to.
