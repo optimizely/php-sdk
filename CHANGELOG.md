@@ -1,5 +1,5 @@
 ## 1.3.0
-- Added the forced bucketing feature allows customers to force users into variations in real time for QA purposes without requiring datafile downloads from the network. The following APIs are introduced:
+- Added the forced bucketing feature, which allows customers to force users into variations in real time for QA purposes without requiring datafile downloads from the network. The following APIs are introduced:
 ```
 /**
 * Force a user into a variation for a given experiment.
