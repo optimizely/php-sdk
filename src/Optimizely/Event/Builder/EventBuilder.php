@@ -23,6 +23,9 @@ use Optimizely\Event\LogEvent;
 use Optimizely\ProjectConfig;
 use Optimizely\Utils\EventTagUtils;
 
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
+
 define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY",     "optimizely_bucketing_id");
 
 class EventBuilder
@@ -38,14 +41,10 @@ class EventBuilder
     const SDK_VERSION = '1.2.0';
 
     /**
-     * @var string URL to send impression event to.
+     * @var string URL to send 
+     * event to.
      */
-    private static $IMPRESSION_ENDPOINT = 'https://logx.optimizely.com/log/decision';
-
-    /**
-     * @var string URL to send conversion event to.
-     */
-    private static $CONVERSION_ENDPOINT = 'https://logx.optimizely.com/log/event';
+    private static $ENDPOINT = 'https://logx.optimizely.com/v1/events';
 
     /**
      * @var string HTTP method to be used when making call to log endpoint.
@@ -60,94 +59,110 @@ class EventBuilder
     ];
 
     /**
-     * @var array Associative array of parameters to be sent for the event.
-     */
-    private $_eventParams;
-
-    /**
-     * Helper function to reset event params.
-     */
-    private function resetParams()
-    {
-        $this->_eventParams = [];
-    }
-
-    /**
-     * @return array Params for the event.
-     */
-    private function getParams()
-    {
-        return $this->_eventParams;
-    }
-
-    /**
-     * Helper function to set parameters common to impression and conversion event.
+     * Helper function to get parameters common to impression and conversion event.
      *
      * @param $config ProjectConfig Configuration for the project.
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.
      */
-    private function setCommonParams($config, $userId, $attributes)
+    private function getCommonParams($config, $userId, $attributes)
     {
-        $this->_eventParams[PROJECT_ID] = $config->getProjectId();
-        $this->_eventParams[ACCOUNT_ID] = $config->getAccountId();
-        $this->_eventParams[REVISION] = $config->getRevision();
-        $this->_eventParams[VISITOR_ID] = $userId;
-        $this->_eventParams[CLIENT_ENGINE] = self::SDK_TYPE;
-        $this->_eventParams[CLIENT_VERSION] = self::SDK_VERSION;
-        $this->_eventParams[USER_FEATURES] = [];
-        $this->_eventParams[IS_GLOBAL_HOLDBACK] = false;
-        $this->_eventParams[TIME] = time()*1000;
-        if (!isset($attributes)) {
-            $attributes = [];
-        }
+        $visitor = [
+            'snapshots'=> [],
+            'visitor_id'=> $userId,
+            'attributes' => []
+        ];
 
-        forEach ($attributes as $attributeKey => $attributeValue) {
+        $commonParams = [
+            ACCOUNT_ID => $config->getAccountId(),
+            PROJECT_ID => $config->getProjectId(),
+            VISITORS => [$visitor],
+            REVISION => $config->getRevision(),
+            CLIENT_ENGINE => self::SDK_TYPE,
+            CLIENT_VERSION => self::SDK_VERSION
+        ];
+
+        if(is_null($attributes))
+            return $commonParams;
+
+        foreach($attributes as $attributeKey => $attributeValue) {
+            $feature = [];
             if ($attributeValue) {
                 // check for reserved attributes
                 if (strcmp($attributeKey , RESERVED_ATTRIBUTE_KEY_BUCKETING_ID) == 0) {
                     // TODO (Alda): the type for bucketing ID attribute may change so that custom
                     // attributes are not overloaded
-                    array_push($this->_eventParams[USER_FEATURES], [
-                        'name' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
-                        'type' => 'custom',
-                        'value' => $attributeValue,
-                        'shouldIndex' => true
-                    ]);
+                   $feature = [
+                        'entity_id' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID,
+                        'key' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
+                        'type' => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
+                        'value' => $attributeValue
+                        ];
+
                 } else {
                     $attributeEntity = $config->getAttribute($attributeKey);
                     if (!is_null($attributeEntity->getKey())) {
-                        array_push($this->_eventParams[USER_FEATURES], [
-                            'id' => $attributeEntity->getId(),
-                            'name' => $attributeKey,
-                            'type' => 'custom',
+                       $feature = [
+                            'entity_id' => $attributeEntity->getId(),
+                            'key' => $attributeKey,
+                            'type' => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
                             'value' => $attributeValue,
-                            'shouldIndex' => true
-                        ]);
+                        ];
                     }
                 }
             }
+
+            if(!empty($feature))
+                $commonParams[VISITORS][0]['attributes'][] = $feature;
         }
+
+        return $commonParams;
     }
 
     /**
-     * Helper function to set parameters specific to impression event.
+     * Helper function to get parameters specific to impression event.
      *
      * @param $experiment Experiment Experiment being activated.
      * @param $variationId string
      */
-    private function setImpressionParams(Experiment $experiment, $variationId)
+    private function getImpressionParams(Experiment $experiment, $variationId)
     {
-        $this->_eventParams[LAYER_ID] = $experiment->getLayerId();
-        $this->_eventParams[DECISION] = [
-            EXPERIMENT_ID => $experiment->getId(),
-            VARIATION_ID => $variationId,
-            IS_LAYER_HOLDBACK => false
+        try {
+            // Generate a version 4 (random) UUID object
+            $uuid4 = Uuid::uuid4();
+            //echo $uuid4->toString() . "\n"; // i.e. 25769c6c-d34d-4bfe-ba98-e0ee856f3e7a
+        } catch (UnsatisfiedDependencyException $e) {
+            // Some dependency was not met. Either the method cannot be called on a
+            // 32-bit system, or it can, but it relies on Moontoast\Math to be present.
+            echo 'Caught exception: ' . $e->getMessage() . "\n";
+        }
+
+        $impressionParams = [
+            'decisions' => [
+                [
+                    'campaign_id' => $experiment->getLayerId(),
+                    'experiment_id' => $experiment->getId(),
+                    'variation_id' => $variationId
+                
+                ]
+            ],
+
+            'events' => [
+                [
+                    'entity_id' => $experiment->getLayerId(),
+                    'timestamp' => time()*1000,
+                    'key' => ACTIVATE_EVENT_KEY,
+                    'uuid' => $uuid4->toString()
+                ]
+            ]
+
         ];
+
+        return $impressionParams;
     }
 
     /**
-     * Helper function to set parameters specific to conversion event.
+     * Helper function to get parameters specific to conversion event.
      *
      * @param $config ProjectConfig Configuration for the project.
      * @param $eventKey string Key representing the event.
@@ -155,52 +170,63 @@ class EventBuilder
      * @param $userId string ID of user.
      * @param $eventTags array Hash representing metadata associated with the event.
      */
-    private function setConversionParams($config, $eventKey, $experimentVariationMap, $userId, $eventTags)
+    private function getConversionParams($config, $eventKey, $experimentVariationMap, $userId, $eventTags)
     {
-        $this->_eventParams[EVENT_FEATURES] = [];
-        $this->_eventParams[EVENT_METRICS] = [];
 
-        if (!is_null($eventTags)) {
-            forEach ($eventTags as $eventTagId => $eventTagValue) {
-                if (is_null($eventTagValue)) {
-                    continue;
-                }
-                $eventFeature = array(
-                    'name' => $eventTagId,
-                    'type' => 'custom',
-                    'value' => $eventTagValue,
-                    'shouldIndex' => false,
-                );
-                array_push($this->_eventParams[EVENT_FEATURES], $eventFeature);
-            }
-            $eventValue = EventTagUtils::getRevenueValue($eventTags);
-            if ($eventValue) {
-                $eventMetric = array(
-                    'name' => EventTagUtils::REVENUE_EVENT_METRIC_NAME,
-                    'value' => $eventValue,
-                );
-                array_push($this->_eventParams[EVENT_METRICS], $eventMetric);
-            }
-        }
-
-        $eventEntity = $config->getEvent($eventKey);
-        $this->_eventParams[EVENT_ID] = $eventEntity->getId();
-        $this->_eventParams[EVENT_NAME] = $eventKey;
-
-        $this->_eventParams[LAYER_STATES] = [];
-        forEach ($experimentVariationMap as $experimentId => $variationId) {
+        $conversionParams = [];
+        foreach($experimentVariationMap as $experimentId => $variationId){
+            $singleSnapshot = [];
             $experiment = $config->getExperimentFromId($experimentId);
-            array_push($this->_eventParams[LAYER_STATES], [
-                LAYER_ID => $experiment->getLayerId(),
-                ACTION_TRIGGERED => true,
-                REVISION => $config->getRevision(),
-                DECISION => [
-                    EXPERIMENT_ID => $experimentId,
-                    VARIATION_ID => $variationId,
-                    IS_LAYER_HOLDBACK => false
+            $eventEntity = $config->getEvent($eventKey);
+            try {
+                // Generate a version 4 (random) UUID object
+                $uuid4 = Uuid::uuid4();
+                //echo $uuid4->toString() . "\n"; // i.e. 25769c6c-d34d-4bfe-ba98-e0ee856f3e7a
+            } catch (UnsatisfiedDependencyException $e) {
+                // Some dependency was not met. Either the method cannot be called on a
+                // 32-bit system, or it can, but it relies on Moontoast\Math to be present.
+                echo 'Caught exception: ' . $e->getMessage() . "\n";
+            }
+
+
+            
+            $singleSnapshot['decisions'] = [
+                [
+                    'campaign_id' => $experiment->getLayerId(),
+                    'experiment_id' => $experimentId,
+                    'variation_id' => $variationId
                 ]
-            ]);
+            ];
+
+            $singleSnapshot['events'] = [
+                [
+                    'entity_id' => $eventEntity->getId(),
+                    'timestamp' => time()*1000,
+                    'uuid' => $uuid4->toString(),
+                    'key' => $eventKey
+
+                ]
+            ];
+
+            if(!is_null($eventTags)){
+                
+                $revenue = EventTagUtils::getRevenueValue($eventTags);
+                if(!is_null($revenue)){
+                    $singleSnapshot['events'][0][EventTagUtils::REVENUE_EVENT_METRIC_NAME] = $revenue;
+                }
+
+                $eventValue = EventTagUtils::getEventValue($eventTags);
+                if(!is_null($eventValue)){
+                    $singleSnapshot['events'][0][EventTagUtils::NUMERIC_EVENT_METRIC_NAME] = $eventValue;
+                }
+
+                 $singleSnapshot['events'][0]['tags'] = $eventTags;
+            }
+
+            $conversionParams [] = $singleSnapshot;
         }
+
+        return $conversionParams;
     }
 
     /**
@@ -216,14 +242,15 @@ class EventBuilder
      */
     public function createImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes)
     {
-        $this->resetParams();
-        $this->setCommonParams($config, $userId, $attributes);
+        $eventParams = $this->getCommonParams($config, $userId, $attributes);
 
         $experiment = $config->getExperimentFromKey($experimentKey);
         $variation = $config->getVariationFromKey($experimentKey, $variationKey);
-        $this->setImpressionParams($experiment, $variation->getId());
+        $impressionParams = $this->getImpressionParams($experiment, $variation->getId());
 
-        return new LogEvent(self::$IMPRESSION_ENDPOINT, $this->getParams(), self::$HTTP_VERB, self::$HTTP_HEADERS);
+        $eventParams[VISITORS][0]['snapshots'][] = $impressionParams;
+
+        return new LogEvent(self::$ENDPOINT, $eventParams, self::$HTTP_VERB, self::$HTTP_HEADERS);
     }
 
     /**
@@ -240,10 +267,11 @@ class EventBuilder
      */
     public function createConversionEvent($config, $eventKey, $experimentVariationMap, $userId, $attributes, $eventTags)
     {
-        $this->resetParams();
-        $this->setCommonParams($config, $userId, $attributes);
-        $this->setConversionParams($config, $eventKey, $experimentVariationMap, $userId, $eventTags);
 
-        return new LogEvent(self::$CONVERSION_ENDPOINT, $this->getParams(), self::$HTTP_VERB, self::$HTTP_HEADERS);
+        $eventParams = $this->getCommonParams($config, $userId, $attributes);
+        $conversionParams = $this->getConversionParams($config, $eventKey, $experimentVariationMap, $userId, $eventTags);
+
+        $eventParams[VISITORS][0]['snapshots'] = $conversionParams;
+        return new LogEvent(self::$ENDPOINT, $eventParams, self::$HTTP_VERB, self::$HTTP_HEADERS);
     }
 }
