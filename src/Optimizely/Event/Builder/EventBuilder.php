@@ -82,9 +82,10 @@ class EventBuilder
             CLIENT_VERSION => self::SDK_VERSION
         ];
 
+        if(is_null($attributes))
+            return $commonParams;
 
-
-        forEach ($attributes as $attributeKey => $attributeValue) {
+        foreach($attributes as $attributeKey => $attributeValue) {
             $feature = [];
             if ($attributeValue) {
                 // check for reserved attributes
@@ -129,7 +130,7 @@ class EventBuilder
         try {
             // Generate a version 4 (random) UUID object
             $uuid4 = Uuid::uuid4();
-            echo $uuid4->toString() . "\n"; // i.e. 25769c6c-d34d-4bfe-ba98-e0ee856f3e7a
+            //echo $uuid4->toString() . "\n"; // i.e. 25769c6c-d34d-4bfe-ba98-e0ee856f3e7a
         } catch (UnsatisfiedDependencyException $e) {
             // Some dependency was not met. Either the method cannot be called on a
             // 32-bit system, or it can, but it relies on Moontoast\Math to be present.
@@ -151,7 +152,7 @@ class EventBuilder
                     'entity_id' => $experiment->getLayerId(),
                     'timestamp' => time()*1000,
                     'key' => ACTIVATE_EVENT_KEY,
-                    'uuid' => $uuid4
+                    'uuid' => $uuid4->toString()
                 ]
             ]
 
@@ -180,7 +181,7 @@ class EventBuilder
             try {
                 // Generate a version 4 (random) UUID object
                 $uuid4 = Uuid::uuid4();
-                echo $uuid4->toString() . "\n"; // i.e. 25769c6c-d34d-4bfe-ba98-e0ee856f3e7a
+                //echo $uuid4->toString() . "\n"; // i.e. 25769c6c-d34d-4bfe-ba98-e0ee856f3e7a
             } catch (UnsatisfiedDependencyException $e) {
                 // Some dependency was not met. Either the method cannot be called on a
                 // 32-bit system, or it can, but it relies on Moontoast\Math to be present.
@@ -201,7 +202,7 @@ class EventBuilder
                 [
                     'entity_id' => $eventEntity->getId(),
                     'timestamp' => time()*1000,
-                    'uuid' => $uuid4,
+                    'uuid' => $uuid4->toString(),
                     'key' => $eventKey
 
                 ]
@@ -224,6 +225,8 @@ class EventBuilder
 
             $conversionParams [] = $singleSnapshot;
         }
+
+        return $conversionParams;
     }
 
     /**
@@ -245,7 +248,7 @@ class EventBuilder
         $variation = $config->getVariationFromKey($experimentKey, $variationKey);
         $impressionParams = $this->getImpressionParams($experiment, $variation->getId());
 
-        $eventParams[VISITORS][0].['snapshots'][] = $impressionParams;
+        $eventParams[VISITORS][0]['snapshots'][] = $impressionParams;
 
         return new LogEvent(self::$ENDPOINT, $eventParams, self::$HTTP_VERB, self::$HTTP_HEADERS);
     }
@@ -268,7 +271,7 @@ class EventBuilder
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
         $conversionParams = $this->getConversionParams($config, $eventKey, $experimentVariationMap, $userId, $eventTags);
 
-        $eventParams[VISITORS][0].['snapshots'][] = $conversionParams;
+        $eventParams[VISITORS][0]['snapshots'] = $conversionParams;
         return new LogEvent(self::$ENDPOINT, $eventParams, self::$HTTP_VERB, self::$HTTP_HEADERS);
     }
 }

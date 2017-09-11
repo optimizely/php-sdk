@@ -41,6 +41,4 @@ define('ACTION_TRIGGERED', 'actionTriggered');
 define('IS_GLOBAL_HOLDBACK', 'isGlobalHoldback');
 define('IS_LAYER_HOLDBACK', 'isLayerHoldback');
 define('CUSTOM_ATTRIBUTE_FEATURE_TYPE','custom');
-define('REVENUE_EVENT_METRIC_NAME','revenue');
 define('ACTIVATE_EVENT_KEY','campaign_activated');
-define('VISITORS','visitors');
