@@ -24,6 +24,8 @@ class EventTagUtils
      */
     const REVENUE_EVENT_METRIC_NAME = 'revenue';
 
+    const NUMERIC_EVENT_METRIC_NAME = 'value';
+
     /**
      * Grab the revenue value from the event tags. "revenue" is a reserved keyword.
      *
@@ -44,6 +46,27 @@ class EventTagUtils
 
         $raw_value = $eventTags[self::REVENUE_EVENT_METRIC_NAME];
         if (!is_int($raw_value)) {
+            return null;
+        }
+
+        return $raw_value;
+    }
+
+
+    public static function getEventValue($eventTags){
+        if (!$eventTags) {
+            return null;
+        }
+        if (!is_array($eventTags)) {
+            return null;
+        }
+
+        if (!isset($eventTags[self::NUMERIC_EVENT_METRIC_NAME]) or !$eventTags[self::NUMERIC_EVENT_METRIC_NAME]) {
+            return null;
+        }
+
+        $raw_value = $eventTags[self::NUMERIC_EVENT_METRIC_NAME];
+        if (!is_numeric($raw_value)) {
             return null;
         }
 
