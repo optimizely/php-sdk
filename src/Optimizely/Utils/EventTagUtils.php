@@ -24,9 +24,11 @@ class EventTagUtils
      */
     const REVENUE_EVENT_METRIC_NAME = 'revenue';
 
+    const NUMERIC_EVENT_METRIC_NAME = 'value';
+
     /**
      * Grab the revenue value from the event tags. "revenue" is a reserved keyword.
-     *
+     * The revenue value must be an integer, not  a numeric string.   
      * @param $eventTags array Representing metadata associated with the event.
      * @return integer Revenue value as an integer number or null if revenue can't be retrieved from the event tags
      */
@@ -38,7 +40,7 @@ class EventTagUtils
             return null;
         }
 
-        if (!isset($eventTags[self::REVENUE_EVENT_METRIC_NAME]) or !$eventTags[self::REVENUE_EVENT_METRIC_NAME]) {
+        if (!isset($eventTags[self::REVENUE_EVENT_METRIC_NAME])) {
             return null;
         }
 
@@ -48,5 +50,60 @@ class EventTagUtils
         }
 
         return $raw_value;
+    }
+
+    /**
+     * Grab the numeric event value from the event tags. "value" is a reserved keyword.
+     * The value of 'value' can be a float or a numeric string
+     * @param $eventTags array Representing metadata associated with the event.
+     * @return float value of 'value' or null
+     */
+    public static function getNumericValue($eventTags, LoggerInterface $logger = null){
+
+        $debugMsg = "";
+        $isValid = true;
+
+        if (!$eventTags) {
+            $debugMsg = 'Event tags is undefined.';
+            $isValid = false;
+        }
+        else if (!is_array($eventTags)) {
+            $debugMsg = 'Event tags is not a dictionary.';
+            $isValid = false;
+        }
+
+        else if (!isset($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
+            $debugMsg = 'The numeric metric key is not in event tags or is null.';
+            $isValid = false;
+        }
+
+        else if (!is_numeric($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
+            $debugMsg = 'Numeric metric value is not in integer or float form, or is not a numeric string';
+            $isValid = false;
+        }
+
+        else if(is_nan($eventTags[self::NUMERIC_EVENT_METRIC_NAME]) || is_infinite(floatval($eventTags[self::NUMERIC_EVENT_METRIC_NAME]))){
+            $debugMsg = 'Provided numeric value is in an invalid format.';
+            $isValid = false;
+        }
+
+        // Log all potential debug messages
+        if($logger && $debugMsg){
+            $logger->log(Logger::DEBUG,$debugMsg);
+        }
+
+        $rawValue = $isValid? $eventTags[self::NUMERIC_EVENT_METRIC_NAME]: null;
+
+        // # Log the final numeric metric value
+        if($logger){
+            if($isValid){
+                $logger->log(Logger::INFO,"The numeric metric value {$rawValue} will be sent to results.");
+            } 
+            else{
+                $logger->log(Logger::WARNING,"The provided numeric metric value {$rawValue} is in an invalid format and will not be sent to results.");
+            } 
+        }
+
+        return $isValid? floatval($rawValue): null;
     }
 }
