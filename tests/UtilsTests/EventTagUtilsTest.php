@@ -51,9 +51,9 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testGetRevenueValueWithRevenueTag() {
-        $this->assertSame(65536, EventTagUtils::getRevenueValue(array('revenue' => 65536)));
-        $this->assertSame(9223372036854775807, EventTagUtils::getRevenueValue(array('revenue' => 9223372036854775807)));
-        $this->assertSame(0, EventTagUtils::getRevenueValue(array('revenue' => 0)));
+        $this->assertEquals(65536, EventTagUtils::getRevenueValue(array('revenue' => 65536)));
+        $this->assertEquals(9223372036854775807, EventTagUtils::getRevenueValue(array('revenue' => 9223372036854775807)));
+        $this->assertEquals(0, EventTagUtils::getRevenueValue(array('revenue' => 0)));
     }
 
     public function testGetNumericValueInvalidArgs() {
@@ -72,17 +72,10 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testGetNumericValueWithInvalidValueTag() {
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => null)));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => 'abcd')));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => true)));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => false)));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => array(1, 2, 3))));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => array())));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => '1,234')));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => floatval(NAN))));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => (self::max_float*10))));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => floatval(INF))));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('value' => floatval(-INF))));
+        $this->assertNull(EventTagUtils::getNumericValue(array('non-value' => null)));
+        $this->assertNull(EventTagUtils::getNumericValue(array('non-value' => 'abcd')));
+        $this->assertNull(EventTagUtils::getNumericValue(array('non-value' => true)));
+        $this->assertNull(EventTagUtils::getNumericValue(array('non-value' => array(1, 2, 3))));
     }
 
     // Test that the correct numeric value is returned
@@ -93,13 +86,29 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
         # A string should be cast to a float
         $this->assertSame(12345.0, EventTagUtils::getNumericValue(array('value' => '12345'))); 
 
-        $this->assertSame(0.0, EventTagUtils::getNumericValue(array('value' => 0.0)));
-
         $this->assertSame(1.2345, EventTagUtils::getNumericValue(array('value' => 1.2345))); 
 
         $this->assertSame(self::max_float, EventTagUtils::getNumericValue(array('value' => self::max_float)));
 
         $this->assertSame(self::min_float, EventTagUtils::getNumericValue(array('value' => self::min_float)));
+
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => false)));
+
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => floatval(NAN))));
+
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => array())));
+
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => null)));
+
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => '1,234')));
+
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => (self::max_float*10))));
+
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => floatval(INF))));
+
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => floatval(-INF))));
+
+        $this->assertSame(0.0, EventTagUtils::getNumericValue(array('value' => 0.0)));
     }
 
 }

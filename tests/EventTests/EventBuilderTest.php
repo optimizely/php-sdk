@@ -590,6 +590,67 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedLogEvent, $logEvent);
     }
 
+    public function testCreateConversionEventWithAttributesWithNumericTag()
+    {
+         $expectedLogEvent = new LogEvent(
+            'https://logx.optimizely.com/v1/events',
+            [
+                'project_id' => '7720880029',
+                'account_id' => '1592310167',
+                'revision' => '15',
+                'client_name' => 'php-sdk',
+                'client_version' => '1.2.0',
+                'visitors'=> [[
+                  'attributes'=> [[
+                    'entity_id' => '7723280020',
+                    'key' => 'device_type',
+                    'type' => 'custom',
+                    'value' => 'iPhone'
+                   ]],
+                  'visitor_id'=> 'testUserId',
+                  'snapshots'=> [[
+                    'decisions'=> [[
+                      'variation_id'=> '7722370027',
+                      'experiment_id'=> '7716830082',
+                      'campaign_id'=> '7719770039'
+                    ]],
+                    'events'=> [[
+                      'timestamp'=> $this->timestamp,
+                      'entity_id'=> '7718020063',
+                      'uuid'=> $this->uuid,
+                      'key'=> 'purchase',
+                      'value' => 13.37,
+                      'tags' => [
+                        'value'=> '13.37'
+                      ]
+                    ]
+                  ]]
+                ]],
+                ]
+            ],
+            'POST',
+            ['Content-Type' => 'application/json']
+        );
+        
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely'
+        ];
+        $logEvent = $this->eventBuilder->createConversionEvent(
+            $this->config,
+            'purchase',
+            ['7716830082' => '7722370027'],
+            $this->testUserId,
+            $userAttributes,
+            array(
+                'value'=> '13.37'
+            )
+        );
+       
+        $logEvent = $this->fakeParamsToReconcile($logEvent);
+        $this->assertEquals($expectedLogEvent, $logEvent);
+    }
+
     public function testCreateConversionEventNoAttributesWithInvalidValue()
     {
         $expectedLogEvent = new LogEvent(
