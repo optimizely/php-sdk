@@ -32,7 +32,6 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
         $this->logger = new DefaultLogger();
     }
 
-
     public function testGetRevenueValueInvalidArgs() {
         $this->assertNull(EventTagUtils::getRevenueValue(null));
         $this->assertNull(EventTagUtils::getRevenueValue(0.5));

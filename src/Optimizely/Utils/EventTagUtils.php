@@ -86,7 +86,6 @@ class EventTagUtils
         }
 
         $rawValue = $eventTags[self::NUMERIC_EVENT_METRIC_NAME];
-
         // # Log the final numeric metric value
         if($logger){
             $logger->log(Logger::INFO,"The numeric metric value {$rawValue} will be sent to results.");
