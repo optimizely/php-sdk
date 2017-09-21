@@ -130,8 +130,7 @@ class EventBuilder
                 [
                     CAMPAIGN_ID => $experiment->getLayerId(),
                     EXPERIMENT_ID => $experiment->getId(),
-                    VARIATION_ID => $variationId
-                
+                    VARIATION_ID => $variationId                
                 ]
             ],
 
@@ -181,12 +180,10 @@ class EventBuilder
                     TIMESTAMP => time()*1000,
                     UUID => GeneratorUtils::getRandomUuid(),
                     KEY => $eventKey
-
                 ]
             ];
 
             if(!is_null($eventTags)){
-                
                 $revenue = EventTagUtils::getRevenueValue($eventTags);
                 if(!is_null($revenue)){
                     $singleSnapshot[EVENTS][0][EventTagUtils::REVENUE_EVENT_METRIC_NAME] = $revenue;
