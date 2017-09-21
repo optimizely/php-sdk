@@ -17,6 +17,9 @@
 
 namespace Optimizely\Utils;
 
+use Optimizely\Logger\LoggerInterface;
+use Monolog\Logger;
+
 class EventTagUtils
 {
     /**
@@ -60,50 +63,34 @@ class EventTagUtils
      */
     public static function getNumericValue($eventTags, LoggerInterface $logger = null){
 
-        $debugMsg = "";
-        $isValid = true;
-
         if (!$eventTags) {
-            $debugMsg = 'Event tags is undefined.';
-            $isValid = false;
-        }
-        else if (!is_array($eventTags)) {
-            $debugMsg = 'Event tags is not a dictionary.';
-            $isValid = false;
-        }
-
-        else if (!isset($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
-            $debugMsg = 'The numeric metric key is not in event tags or is null.';
-            $isValid = false;
-        }
-
-        else if (!is_numeric($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
-            $debugMsg = 'Numeric metric value is not in integer or float form, or is not a numeric string';
-            $isValid = false;
-        }
-
-        else if(is_nan($eventTags[self::NUMERIC_EVENT_METRIC_NAME]) || is_infinite(floatval($eventTags[self::NUMERIC_EVENT_METRIC_NAME]))){
-            $debugMsg = 'Provided numeric value is in an invalid format.';
-            $isValid = false;
+            if($logger)
+                $logger->log(Logger::DEBUG,"Event tags is undefined.");
+            return null;
+        } else if (!is_array($eventTags)) {
+            if($logger)
+                $logger->log(Logger::DEBUG,"Event tags is not a dictionary.");
+            return null;
+        } else if (!isset($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
+            if($logger)
+                $logger->log(Logger::DEBUG,"The numeric metric key is not defined in the event tags or is null.");
+            return null;
+        } else if (!is_numeric($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
+            if($logger)
+                $logger->log(Logger::DEBUG,"Numeric metric value is not an integer or float, or is not a numeric string.");
+            return null;
+        } else if(is_nan($eventTags[self::NUMERIC_EVENT_METRIC_NAME]) || is_infinite(floatval($eventTags[self::NUMERIC_EVENT_METRIC_NAME]))){
+            if($logger)
+                $logger->log(Logger::DEBUG,"Provided numeric value is in an invalid format.");
+            return null;
         }
 
-        // Log all potential debug messages
-        if($logger && $debugMsg){
-            $logger->log(Logger::DEBUG,$debugMsg);
-        }
-
-        $rawValue = $isValid? $eventTags[self::NUMERIC_EVENT_METRIC_NAME]: null;
-
+        $rawValue = $eventTags[self::NUMERIC_EVENT_METRIC_NAME];
         // # Log the final numeric metric value
         if($logger){
-            if($isValid){
-                $logger->log(Logger::INFO,"The numeric metric value {$rawValue} will be sent to results.");
-            } 
-            else{
-                $logger->log(Logger::WARNING,"The provided numeric metric value {$rawValue} is in an invalid format and will not be sent to results.");
-            } 
-        }
+            $logger->log(Logger::INFO,"The numeric metric value {$rawValue} will be sent to results.");
+        } 
 
-        return $isValid? floatval($rawValue): null;
+        return floatval($rawValue);
     }
 }
