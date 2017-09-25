@@ -1,3 +1,7 @@
+## 1.4.0
+- Added support for Numeric Metrics.
+- Switched to new event API.
+
 ## 1.3.0
 - Added the forced bucketing feature, which allows customers to force users into variations in real time for QA purposes without requiring datafile downloads from the network. The following APIs are introduced:
 ```
