@@ -76,7 +76,8 @@ class EventBuilder
             VISITORS => [$visitor],
             REVISION => $config->getRevision(),
             CLIENT_ENGINE => self::SDK_TYPE,
-            CLIENT_VERSION => self::SDK_VERSION
+            CLIENT_VERSION => self::SDK_VERSION,
+            ANONYMIZE_IP => $config->getShouldAnonymizeIP()
         ];
 
         if(is_null($attributes))
