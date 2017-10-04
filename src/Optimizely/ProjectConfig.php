@@ -61,7 +61,7 @@ class ProjectConfig
      * @var boolean denotes if Optimizely should remove the 
      * last block of visitors' IP address before storing event data
      */
-    private $_shouldAnonymizeIP;
+    private $_anonymizeIP;
 
     /**
      * @var string Revision of the datafile.
@@ -141,7 +141,7 @@ class ProjectConfig
         $this->_version = $config['version'];
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
-        $this->_shouldAnonymizeIP = $config['anonymizeIP'];
+        $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
         $this->_revision = $config['revision'];
         $this->_forcedVariationMap = [];
 
@@ -204,9 +204,9 @@ class ProjectConfig
      * @return boolean Flag denoting if Optimizely should remove last block
      * of visitors' IP address before storing event data
      */
-    public function getShouldAnonymizeIP()
+    public function getAnonymizeIP()
     {
-        return $this->_shouldAnonymizeIP;
+        return $this->_anonymizeIP;
     }
 
     /**
