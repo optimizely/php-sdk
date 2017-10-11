@@ -65,19 +65,19 @@ class EventBuilder
     private function getCommonParams($config, $userId, $attributes)
     {
         $visitor = [
-            SNAPSHOTS=> [],
+            ATTRIBUTES => [],
             VISITOR_ID => $userId,
-            ATTRIBUTES => []
+            SNAPSHOTS=> []
         ];
 
         $commonParams = [
-            ACCOUNT_ID => $config->getAccountId(),
             PROJECT_ID => $config->getProjectId(),
-            VISITORS => [$visitor],
+            ACCOUNT_ID => $config->getAccountId(),
+            ANONYMIZE_IP => $config->getAnonymizeIP(),
             REVISION => $config->getRevision(),
             CLIENT_ENGINE => self::SDK_TYPE,
             CLIENT_VERSION => self::SDK_VERSION,
-            ANONYMIZE_IP => $config->getAnonymizeIP()
+            VISITORS => [$visitor]
         ];
 
         if(is_null($attributes))
@@ -105,7 +105,7 @@ class EventBuilder
                             ENTITY_ID => $attributeEntity->getId(),
                             KEY => $attributeKey,
                             TYPE => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
-                            VALUE => $attributeValue,
+                            VALUE => $attributeValue
                         ];
                     }
                 }
@@ -129,18 +129,19 @@ class EventBuilder
         $impressionParams = [
             DECISIONS => [
                 [
-                    CAMPAIGN_ID => $experiment->getLayerId(),
-                    EXPERIMENT_ID => $experiment->getId(),
-                    VARIATION_ID => $variationId                
+                    VARIATION_ID => $variationId,
+                    EXPERIMENT_ID => $experiment->getId(),  
+                    CAMPAIGN_ID => $experiment->getLayerId()                   
+              
                 ]
             ],
 
             EVENTS => [
                 [
-                    ENTITY_ID => $experiment->getLayerId(),
                     TIMESTAMP => time()*1000,
-                    KEY => ACTIVATE_EVENT_KEY,
-                    UUID => GeneratorUtils::getRandomUuid()
+                    ENTITY_ID => $experiment->getLayerId(),
+                    UUID => GeneratorUtils::getRandomUuid(),
+                    KEY => ACTIVATE_EVENT_KEY                    
                 ]
             ]
 
@@ -169,16 +170,16 @@ class EventBuilder
                         
             $singleSnapshot[DECISIONS] = [
                 [
-                    CAMPAIGN_ID => $experiment->getLayerId(),
+                    VARIATION_ID => $variationId,
                     EXPERIMENT_ID => $experimentId,
-                    VARIATION_ID => $variationId
+                    CAMPAIGN_ID => $experiment->getLayerId()
                 ]
             ];
 
             $singleSnapshot[EVENTS] = [
                 [
-                    ENTITY_ID => $eventEntity->getId(),
                     TIMESTAMP => time()*1000,
+                    ENTITY_ID => $eventEntity->getId(),
                     UUID => GeneratorUtils::getRandomUuid(),
                     KEY => $eventKey
                 ]

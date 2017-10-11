@@ -23,6 +23,8 @@ use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Event\LogEvent;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
+use Icecave\Parity\Parity;
+use SebastianBergmann\Diff\Differ;
 
 class EventBuilderTest extends \PHPUnit_Framework_TestCase
 {
@@ -41,6 +43,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->eventBuilder = new EventBuilder();
         $this->timestamp = time()*1000;
         $this->uuid = 'a68cf1ad-0393-4e18-af87-efe8f01a7c9c';
+        $this->differ = new Differ;
     }
 
     /**
