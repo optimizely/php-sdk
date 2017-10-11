@@ -29,7 +29,10 @@ use Optimizely\ProjectConfig;
 class BucketerTest extends \PHPUnit_Framework_TestCase
 {
     private $testBucketingIdControl;
+    private $testBucketingIdGroupExp2Var2;
     private $testUserId;
+    private $testUserIdBucketsToVariation;
+    private $testUserIdBucketsToNoGroup;
     private $config;
     private $loggerMock;
 
@@ -37,7 +40,10 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     {
         $this->testBucketingIdControl = 'testBucketingIdControl!';  // generates bucketing number 3741
         $this->testBucketingIdVariation = '123456789'; // generates bucketing number 4567
+        $this->testBucketingIdGroupExp2Var2 = '123456789'; // group_exp_2_var_2
         $this->testUserId = 'testUserId';
+        $this->testUserIdBucketsToVariation = 'bucketsToVariation!';
+        $this->testUserIdBucketsToNoGroup = 'testUserId';
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))
@@ -300,26 +306,15 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $bucketer = new Bucketer($this->loggerMock);
         $experiment = $this->config->getExperimentFromKey('test_experiment');
 
-        // check that a non null bucketing ID should bucket to a variation
-        // different than the one expected with the userId
+        // make sure that the bucketing ID is used for the variation
+        // bucketing and not the user ID
         $this->assertEquals(
             new Variation('7722370027', 'control'),
             $bucketer->bucket(
                 $this->config,
                 $experiment,
                 $this->testBucketingIdControl,
-                $this->testUserId
-            )
-        );
-
-        // check that the null bucketing ID defaults to bucketing with the userId
-        $this->assertEquals(
-            new Variation('7721010009', 'variation'),
-            $bucketer->bucket(
-                $this->config,
-                $experiment,
-                null,
-                $this->testUserId
+                $this->testUserIdBucketsToVariation
             )
         );
     }
@@ -328,7 +323,8 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     // null variation should be returned
     public function testBucketVariationInvalidExperimentsWithBucketingId()
     {
-        $bucketer = new Bucketer($this->loggerMock);
+        $bucketer = new TestBucketer($this->loggerMock);
+        $bucketer->setBucketValues([1000, 3000, 7000, 9000]);
 
         $this->assertEquals(
             new Variation(),
@@ -341,7 +337,8 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    // make sure that bucketing works with experiments in group
+    // make sure that the bucketing ID is used to bucket the user into a group
+    // and not the user ID
     public function testBucketVariationGroupedExperimentsWithBucketingId()
     {
         $bucketer = new Bucketer($this->loggerMock);
@@ -351,38 +348,8 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_2'),
-                $this->testBucketingIdVariation,
-                $this->testUserId
-            )
-        );
-
-        $this->assertEquals(
-            new Variation(),
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('group_experiment_1'),
-                $this->testBucketingIdVariation,
-                $this->testUserId
-            )
-        );
-
-        $this->assertEquals(
-            new Variation('7725250007', 'group_exp_2_var_2'),
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('group_experiment_2'),
-                null,
-                $this->testUserId
-            )
-        );
-
-        $this->assertEquals(
-            new Variation(),
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('group_experiment_1'),
-                null,
-                $this->testUserId
+                $this->testBucketingIdGroupExp2Var2,
+                $this->testUserIdBucketsToNoGroup
             )
         );
     }
