@@ -84,7 +84,7 @@ class Bucketer
     {
         $hashCode = $this->generateHashCode($bucketingKey);
         $ratio = $hashCode / Bucketer::$MAX_HASH_VALUE;
-        return floor($ratio * Bucketer::$MAX_TRAFFIC_VALUE);
+        return intval(floor($ratio * Bucketer::$MAX_TRAFFIC_VALUE));
     }
 
     /**

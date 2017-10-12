@@ -171,7 +171,7 @@ class EventBuilder
             $singleSnapshot[DECISIONS] = [
                 [
                     VARIATION_ID => $variationId,
-                    EXPERIMENT_ID => $experimentId,
+                    EXPERIMENT_ID => $experiment->getId(),
                     CAMPAIGN_ID => $experiment->getLayerId()
                 ]
             ];

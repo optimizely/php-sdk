@@ -55,23 +55,23 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $generateBucketValueMethod = new \ReflectionMethod(Bucketer::class, 'generateBucketValue');
         $generateBucketValueMethod->setAccessible(true);
 
-        $this->assertEquals(
+        $this->assertSame(
             5254,
             $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingKey('ppid1', '1886780721'))
         );
-        $this->assertEquals(
+        $this->assertSame(
             4299,
             $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingKey('ppid2', '1886780721'))
         );
-        $this->assertEquals(
+        $this->assertSame(
             2434,
             $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingKey('ppid2', '1886780722'))
         );
-        $this->assertEquals(
+        $this->assertSame(
             5439,
             $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), $this->getBucketingKey('ppid3', '1886780721'))
         );
-        $this->assertEquals(
+        $this->assertSame(
             6128,
             $generateBucketValueMethod->invoke(
                 new Bucketer($this->loggerMock),
