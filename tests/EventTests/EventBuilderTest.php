@@ -121,7 +121,6 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
-
         $result = $this->areLogEventsEqual($expectedLogEvent,$logEvent);
         $this->assertTrue($result[0],$result[1]);
     }
