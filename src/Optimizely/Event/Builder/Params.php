@@ -37,3 +37,4 @@ define('KEY', 'key');
 define('TYPE', 'type');
 define('VALUE', 'value');
 define('UUID', 'uuid');
+define('ANONYMIZE_IP', 'anonymize_ip');
