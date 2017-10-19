@@ -30,12 +30,13 @@ class Validator
      */
     public static function validateJsonSchema($datafile)
     {
-        $jsonSchemaObject = json_decode(file_get_contents(__DIR__.'/schema.json'));
-        $datafileJson = json_decode($datafile);
+        $data = json_decode($datafile);
 
-        $jsonValidator = new JsonSchema\Validator;
-        $jsonValidator->check($datafileJson, $jsonSchemaObject);
-        return $jsonValidator->isValid() ?  true : false;
+        // Validate
+        $validator = new JsonSchema\Validator;
+        $validator->validate($data, (object)['$ref' => 'file://' . __DIR__.'/schema.json']);
+
+        return $validator->isValid();
     }
 
     /**

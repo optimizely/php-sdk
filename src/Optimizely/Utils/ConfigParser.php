@@ -32,15 +32,16 @@ class ConfigParser
         $entityMap = [];
         forEach ($entities as $entity)
         {
-            $entityObject = new $entityClass;
-            forEach ($entity as $key => $value)
-            {
-                $propSetter = 'set'.ucfirst($key);
-                if (method_exists($entityObject, $propSetter)) {
-                    $entityObject->$propSetter($value);
+            if(!($entity instanceof $entityClass)){
+                $entityObject = new $entityClass;
+                forEach ($entity as $key => $value)
+                {
+                    $propSetter = 'set'.ucfirst($key);
+                    if (method_exists($entityObject, $propSetter)) {
+                        $entityObject->$propSetter($value);
+                    }
                 }
             }
-
             if (is_null($entityId)) {
                 array_push($entityMap, $entityObject);
             } else {

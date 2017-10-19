@@ -139,7 +139,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationReturnsWhitelistedVariationForGroupedExperiment()
     {
-        $expectedVariation = new Variation('7722260071', 'group_exp_1_var_1');
+        $expectedVariation = new Variation('7722260071', 'group_exp_1_var_1',[
+                [
+                  "id" => "155563",
+                  "value" => "groupie_1_v1"
+                ]
+          ]);
         $runningExperiment = $this->config->getExperimentFromKey('group_experiment_1');
 
         $callIndex = 0;
