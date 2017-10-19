@@ -19,6 +19,8 @@ namespace Optimizely\Utils;
 use JsonSchema;
 use Optimizely\Entity\Experiment;
 use Optimizely\ProjectConfig;
+use Optimizely\Logger\LoggerInterface;
+use Monolog\Logger;
 
 
 class Validator
@@ -28,7 +30,7 @@ class Validator
      *
      * @return boolean Representing whether schema is valid or not.
      */
-    public static function validateJsonSchema($datafile)
+    public static function validateJsonSchema($datafile, LoggerInterface $logger = null)
     {
         $data = json_decode($datafile);
 
@@ -36,8 +38,19 @@ class Validator
         $validator = new JsonSchema\Validator;
         $validator->validate($data, (object)['$ref' => 'file://' . __DIR__.'/schema.json']);
 
-        return $validator->isValid();
-    }
+        if ($validator->isValid()) {
+            return true;
+        } else {
+            if($logger){
+                $logger->log(Logger::DEBUG,"JSON does not validate. Violations:\n");;
+                foreach ($validator->getErrors() as $error) {
+                 $logger->log(Logger::DEBUG,"[%s] %s\n", $error['property'], $error['message']);
+             }
+         }
+
+         return false;
+     }
+ }
 
     /**
      * @param $attributes mixed Attributes of the user.

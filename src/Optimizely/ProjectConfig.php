@@ -308,6 +308,10 @@ class ProjectConfig
         return new Experiment();
     }
 
+    /**
+     * @param  String $featureKey 
+     * @return FeatureFlag
+     */
     public function getFeatureFlagFromKey($featureKey)
     {
         if(isset($this->_featureKeyMap[$featureKey])){
@@ -319,6 +323,11 @@ class ProjectConfig
         return new FeatureFlag();        
     }
 
+    /**
+     * @param  String $rolloutId 
+     * @return Rollout
+     * 
+     */
     public function getRolloutFromId($rolloutId)
     {
         if (isset($this->_rolloutIdMap[$rolloutId])) {
