@@ -23,6 +23,8 @@ use Optimizely\Entity\Attribute;
 use Optimizely\Entity\Audience;
 use Optimizely\Entity\Event;
 use Optimizely\Entity\Experiment;
+use Optimizely\Entity\FeatureFlag;
+use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Group;
 use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
@@ -30,6 +32,8 @@ use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
 use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
+use Optimizely\Exceptions\InvalidFeatureFlagException;
+use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\DefaultLogger;
@@ -313,6 +317,30 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->with(new InvalidExperimentException('Provided experiment is not in datafile.'));
 
         $this->assertEquals(new Experiment(), $this->config->getExperimentFromId('42'));
+    }
+
+    public function testGetFeatureFlagInvalidKey()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'FeatureFlag Key "42" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidFeatureFlagException('Provided feature flag is not in datafile.'));
+
+        $this->assertEquals(new FeatureFlag(), $this->config->getFeatureFlagFromKey('42'));
+    }
+
+        public function testGetRolloutInvalidId()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Rollout ID "42" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidRolloutException('Provided rollout is not in datafile.'));
+
+        $this->assertEquals(new Rollout(), $this->config->getRolloutFromId('42'));
     }
 
     public function testGetEventValidKey()
