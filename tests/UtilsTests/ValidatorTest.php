@@ -17,11 +17,11 @@
 
 namespace Optimizely\Tests;
 
+use Monolog\Logger;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
 use Optimizely\Utils\Validator;
-use Monolog\Logger;
 
 class ValidatorTest extends \PHPUnit_Framework_TestCase
 {

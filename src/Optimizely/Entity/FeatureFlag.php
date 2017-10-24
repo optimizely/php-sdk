@@ -28,7 +28,7 @@ class FeatureFlag{
 	private $_id;
 
 	/**
-	 * variable to hold feature flag Key
+	 * variable to hold feature flag key
 	 * @var String
 	 */
 	private $_key;
@@ -52,7 +52,7 @@ class FeatureFlag{
 	 */
 	private $_variables;
 
-	public function __construct($id = null,$key = null, $rolloutId = null, $experimentIds = null, $variables = []){
+	public function __construct($id = null, $key = null, $rolloutId = null, $experimentIds = null, $variables = []){
 		$this->_id = $id;
 		$this->_key = $key;
 		$this->_rolloutId = $rolloutId;
@@ -129,5 +129,4 @@ class FeatureFlag{
 	public function setVariables($variables){
 		$this->_variables = ConfigParser::generateMap($variables, null, FeatureVariable::class);
 	}
-
 }
