@@ -102,7 +102,7 @@ class FeatureVariable{
 	 * @param String $type Feature variable primitive type
 	 */
 	public function setType($type){
-		return $this->_type;
+		$this->_type = $type;
 	}
 
 	/**
