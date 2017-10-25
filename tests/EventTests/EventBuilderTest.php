@@ -45,6 +45,35 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->timestamp = time()*1000;
         $this->uuid = 'a68cf1ad-0393-4e18-af87-efe8f01a7c9c';
         $this->differ = new Differ;
+
+        $this->expectedEventUrl = 'https://logx.optimizely.com/v1/events';
+        $this->expectedEventParams = [
+                'account_id' => '1592310167',
+                'project_id' => '7720880029',
+                'visitors'=> [[
+                  'snapshots'=> [[
+                    'decisions'=> [[
+                      'campaign_id'=> '7719770039',
+                      'experiment_id'=> '7716830082',
+                      'variation_id'=> '7721010009'
+                    ]],
+                    'events'=> [[
+                      'entity_id'=> '7719770039',
+                      'timestamp'=> $this->timestamp,
+                      'uuid'=> $this->uuid,
+                      'key'=> 'campaign_activated'
+                    ]]
+                  ]],
+                  'visitor_id'=> 'testUserId',
+                  'attributes'=> []
+                ]],
+                'revision' => '15',
+                'client_name' => 'php-sdk',
+                'client_version' => '1.4.0',
+                'anonymize_ip'=> false,
+            ];
+        $this->expectedEventHttpVerb = 'POST';
+        $this->expectedEventHeaders = ['Content-Type' => 'application/json'];
     }
 
     /**
@@ -81,37 +110,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateImpressionEventNoAttributesNoValue()
     {
-        $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7721010009',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7719770039',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'campaign_activated'
-                    ]
-                  ]]
-                ]],
-            ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $this->expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
+
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
             'test_experiment',
@@ -119,50 +120,22 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->testUserId,
             null
         );
-
+        
         $logEvent = $this->fakeParamsToReconcile($logEvent);
-        $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
+        $result = $this->areLogEventsEqual($this->expectedLogEvent, $logEvent);
         $this->assertTrue($result[0], $result[1]);
     }
 
     public function testCreateImpressionEventWithAttributesNoValue()
     {   
-        $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [[
-                    'entity_id' => '7723280020',
-                    'key' => 'device_type',
-                    'type' => 'custom',
-                    'value' => 'iPhone',
-                  ]],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7721010009',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7719770039',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'campaign_activated'
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $this->expectedEventParams['visitors'][0]['attributes'][] =
+          [ 'entity_id' => '7723280020',
+            'key' => 'device_type',
+            'type' => 'custom',
+            'value' => 'iPhone',
+          ];
+        $this->expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
         
         $userAttributes = [
             'device_type' => 'iPhone',
@@ -177,7 +150,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
-        $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
+        $result = $this->areLogEventsEqual($this->expectedLogEvent, $logEvent);
         $this->assertTrue($result[0], $result[1]);
     }
 
@@ -186,45 +159,16 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateImpressionEventWithFalseAttributesNoValue()
     {   
-        $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [[
-                    'entity_id' => '7723280020',
-                    'key' => 'device_type',
-                    'type' => 'custom',
-                    'value' => false,
-                  ]],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7721010009',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7719770039',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'campaign_activated'
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
-        
+        $this->expectedEventParams['visitors'][0]['attributes'][] =
+          [ 'entity_id' => '7723280020',
+            'key' => 'device_type',
+            'type' => 'custom',
+            'value' => 'false',
+          ];
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);    
         $userAttributes = [
-            'device_type' => false,
+            'device_type' => 'false',
             'company' => 'Optimizely'
         ];
         $logEvent = $this->eventBuilder->createImpressionEvent(
@@ -245,42 +189,14 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateImpressionEventWithZeroAttributesNoValue()
     {   
-        $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [[
-                    'entity_id' => '7723280020',
-                    'key' => 'device_type',
-                    'type' => 'custom',
-                    'value' => 0,
-                  ]],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7721010009',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7719770039',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'campaign_activated'
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $this->expectedEventParams['visitors'][0]['attributes'][] =
+          [ 'entity_id' => '7723280020',
+            'key' => 'device_type',
+            'type' => 'custom',
+            'value' => 0,
+          ];
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);   
         
         $userAttributes = [
             'device_type' => 0,
@@ -304,37 +220,8 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateImpressionEventWithInvalidAttributesNoValue()
     {   
-        $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7721010009',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7719770039',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'campaign_activated'
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
         
         $userAttributes = [
             'invalid_attribute' => 'sorry_not_sorry'
@@ -354,37 +241,16 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventNoAttributesNoValue()
     {
-         $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7721010009',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7718020063',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'purchase'
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
+          [
+            'entity_id'=> '7718020063',
+            'timestamp'=> $this->timestamp,   
+            'uuid'=> $this->uuid,
+            'key'=> 'purchase'
+          ];
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
+
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
@@ -400,42 +266,23 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventWithAttributesNoValue()
     {
-        $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [[
-                    'entity_id' => '7723280020',
-                    'key' => 'device_type',
-                    'type' => 'custom',
-                    'value' => 'iPhone'
-                   ]],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7722370027',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7718020063',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'purchase'
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $this->expectedEventParams['visitors'][0]['attributes'][] =
+          [ 'entity_id' => '7723280020',
+            'key' => 'device_type',
+            'type' => 'custom',
+            'value' => 'iPhone',
+          ];
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
+          [
+            'entity_id'=> '7718020063',
+            'timestamp'=> $this->timestamp,
+            'uuid'=> $this->uuid,
+            'key'=> 'purchase'
+          ];
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
+
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
         
         $userAttributes = [
             'device_type' => 'iPhone',
@@ -458,37 +305,17 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
      //Should not fill in userFeatures for getConversion when attribute is not in the datafile
      public function testCreateConversionEventInvalidAttributesNoValue()
     {
-        $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7722370027',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7718020063',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'purchase'
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
+          [
+            'entity_id'=> '7718020063',
+            'timestamp'=> $this->timestamp,
+            'uuid'=> $this->uuid,
+            'key'=> 'purchase'
+          ];
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
+        
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
         
         $userAttributes = [
             'invalid_attribute'=> 'sorry_not_sorry'
@@ -509,44 +336,24 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventNoAttributesWithValue()
     {
-        $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7722370027',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7718020063',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'purchase',
-                      'revenue' => 42,
-                      'value'=> 13.37,
-                      'tags' => [
-                        'revenue' => 42,
-                        'value' => '13.37'
-                      ]
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
-       
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
+           [
+            'entity_id'=> '7718020063',
+            'timestamp'=> $this->timestamp,  
+            'uuid'=> $this->uuid,
+            'key'=> 'purchase',
+            'revenue' => 42,
+            'value'=> 13.37,
+            'tags' => [
+              'revenue' => 42,
+              'value' => '13.37'
+            ]
+          ];
+
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
+        
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
@@ -563,50 +370,31 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventWithAttributesWithValue()
     {
-         $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [[
-                    'entity_id' => '7723280020',
-                    'key' => 'device_type',
-                    'type' => 'custom',
-                    'value' => 'iPhone'
-                   ]],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7722370027',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7718020063',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'purchase',
-                      'revenue' => 42,
-                      'value' => 13.37,
-                      'tags' => [
-                        'revenue' => 42,
-                        'non-revenue' => 'definitely',
-                        'value'=> '13.37'
-                      ]
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $this->expectedEventParams['visitors'][0]['attributes'][] =
+          [ 'entity_id' => '7723280020',
+            'key' => 'device_type',
+            'type' => 'custom',
+            'value' => 'iPhone',
+          ];
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
+           [
+            'entity_id'=> '7718020063',
+            'timestamp'=> $this->timestamp,
+            'uuid'=> $this->uuid,
+            'key'=> 'purchase',
+            'revenue' => 42,
+            'value'=> 13.37,
+            'tags' => [
+              'revenue' => 42,
+              'non-revenue' => 'definitely',
+              'value' => '13.37'
+            ]
+          ];
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
         
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
+
         $userAttributes = [
             'device_type' => 'iPhone',
             'company' => 'Optimizely'
@@ -631,47 +419,27 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventWithAttributesWithNumericTag()
     {
-         $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [[
-                    'entity_id' => '7723280020',
-                    'key' => 'device_type',
-                    'type' => 'custom',
-                    'value' => 'iPhone'
-                   ]],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7722370027',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7718020063',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'purchase',
-                      'value' => 13.37,
-                      'tags' => [
-                        'value'=> '13.37'
-                      ]
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $this->expectedEventParams['visitors'][0]['attributes'][] =
+          [ 'entity_id' => '7723280020',
+            'key' => 'device_type',
+            'type' => 'custom',
+            'value' => 'iPhone',
+          ];
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
+           [
+            'entity_id'=> '7718020063',
+            'timestamp'=> $this->timestamp,
+            'uuid'=> $this->uuid,
+            'key'=> 'purchase',
+            'value'=> 13.37,
+            'tags' => [
+              'value' => '13.37'
+            ]
+          ];
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
         
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
         $userAttributes = [
             'device_type' => 'iPhone',
             'company' => 'Optimizely'
@@ -694,42 +462,22 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventNoAttributesWithInvalidValue()
     {
-        $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7722370027',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7718020063',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'purchase',
-                      'tags' => [
-                        'revenue' => '42',
-                        'non-revenue' => 'definitely',
-                        'value' => 'invalid value'
-                      ]
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+         $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
+           [
+            'entity_id'=> '7718020063',
+            'timestamp'=> $this->timestamp,
+            'uuid'=> $this->uuid,
+            'key'=> 'purchase',
+            'tags' => [
+              'revenue' => '42',
+              'non-revenue' => 'definitely',
+              'value' => 'invalid value'
+            ]
+          ];
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
+        
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
         
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
@@ -753,47 +501,21 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     // (since this custom attribute entity is not generated by GAE)
     public function testCreateImpressionEventWithBucketingIDAttribute()
     {
-         $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [[
-                    'entity_id' => '7723280020',
-                    'key' => 'device_type',
-                    'type' => 'custom',
-                    'value' => 'iPhone',
-                  ],[
-                    'entity_id' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID,
-                    'key' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
-                    'type' => 'custom',
-                    'value' => 'variation',
-                  ]],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7721010009',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7719770039',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'campaign_activated'
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $this->expectedEventParams['visitors'][0]['attributes'] =
+          [[
+            'entity_id' => '7723280020',
+            'key' => 'device_type',
+            'type' => 'custom',
+            'value' => 'iPhone',
+          ],[
+            'entity_id' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID,
+            'key' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
+            'type' => 'custom',
+            'value' => 'variation',
+          ]];
+
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
 
         $userAttributes = [
             'device_type' => 'iPhone',
@@ -816,47 +538,29 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventWithBucketingIDAttribute()
     {
-        $expectedLogEvent = new LogEvent(
-            'https://logx.optimizely.com/v1/events',
-            [
-                'project_id' => '7720880029',
-                'account_id' => '1592310167',
-                'anonymize_ip'=> false,
-                'revision' => '15',
-                'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
-                'visitors'=> [[
-                  'attributes'=> [[
-                    'entity_id' => '7723280020',
-                    'key' => 'device_type',
-                    'type' => 'custom',
-                    'value' => 'iPhone',
-                  ],[
-                    'entity_id' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID,
-                    'key' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
-                    'type' => 'custom',
-                    'value' => 'variation',
-                  ]],
-                  'visitor_id'=> 'testUserId',
-                  'snapshots'=> [[
-                    'decisions'=> [[
-                      'variation_id'=> '7722370027',
-                      'experiment_id'=> '7716830082',
-                      'campaign_id'=> '7719770039'
-                    ]],
-                    'events'=> [[
-                      'timestamp'=> $this->timestamp,
-                      'entity_id'=> '7718020063',
-                      'uuid'=> $this->uuid,
-                      'key'=> 'purchase'
-                    ]
-                  ]]
-                ]],
-                ]
-            ],
-            'POST',
-            ['Content-Type' => 'application/json']
-        );
+        $this->expectedEventParams['visitors'][0]['attributes'] =
+          [[
+            'entity_id' => '7723280020',
+            'key' => 'device_type',
+            'type' => 'custom',
+            'value' => 'iPhone',
+          ],[
+            'entity_id' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID,
+            'key' => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
+            'type' => 'custom',
+            'value' => 'variation',
+          ]];
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
+           [
+            'entity_id'=> '7718020063',
+            'timestamp'=> $this->timestamp, 
+            'uuid'=> $this->uuid,
+            'key'=> 'purchase'
+          ];
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
+
+        $expectedLogEvent = new LogEvent($this->expectedEventUrl,$this->expectedEventParams,
+                                               $this->expectedEventHttpVerb,$this->expectedEventHeaders);
 
         $userAttributes = [
             'device_type' => 'iPhone',
