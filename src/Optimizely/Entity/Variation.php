@@ -50,7 +50,7 @@ class Variation
         $this->_id = $id;
         $this->_key = $key;
 
-        $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances,null,VariableUsage::class);
+        $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances, null, VariableUsage::class);
 
         if(!empty($this->_variableUsageInstances)){
             foreach(array_values($this->_variableUsageInstances) as $variableUsage){
@@ -96,7 +96,7 @@ class Variation
     }
 
     public function setVariables($variableUsageInstances){
-        $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances,null,VariableUsage::class);
+        $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances, null , VariableUsage::class);
 
         if(!empty($this->_variableUsageInstances)){
             foreach(array_values($this->_variableUsageInstances) as $variableUsage){

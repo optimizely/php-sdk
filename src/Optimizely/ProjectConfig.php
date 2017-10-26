@@ -309,8 +309,8 @@ class ProjectConfig
     }
 
     /**
-     * @param  String $featureKey 
-     * @return FeatureFlag
+     * @param  String $featureKey Key of the feature flag
+     * @return FeatureFlag Entity corresponding to the key.
      */
     public function getFeatureFlagFromKey($featureKey)
     {
@@ -326,7 +326,6 @@ class ProjectConfig
     /**
      * @param  String $rolloutId 
      * @return Rollout
-     * 
      */
     public function getRolloutFromId($rolloutId)
     {

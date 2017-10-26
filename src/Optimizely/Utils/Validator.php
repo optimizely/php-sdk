@@ -17,11 +17,10 @@
 namespace Optimizely\Utils;
 
 use JsonSchema;
-use Optimizely\Entity\Experiment;
-use Optimizely\ProjectConfig;
-use Optimizely\Logger\LoggerInterface;
 use Monolog\Logger;
-
+use Optimizely\Entity\Experiment;
+use Optimizely\Logger\LoggerInterface;
+use Optimizely\ProjectConfig;
 
 class Validator
 {
@@ -42,9 +41,9 @@ class Validator
             return true;
         } else {
             if($logger){
-                $logger->log(Logger::DEBUG,"JSON does not validate. Violations:\n");;
+                $logger->log(Logger::DEBUG, "JSON does not validate. Violations:\n");;
                 foreach ($validator->getErrors() as $error) {
-                   $logger->log(Logger::DEBUG,"[%s] %s\n", $error['property'], $error['message']);
+                   $logger->log(Logger::DEBUG, "[%s] %s\n", $error['property'], $error['message']);
                }
            }
 
