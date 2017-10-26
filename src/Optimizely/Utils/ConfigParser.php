@@ -32,7 +32,9 @@ class ConfigParser
         $entityMap = [];
         forEach ($entities as $entity)
         {
-            if(!($entity instanceof $entityClass)){
+            if($entity instanceof $entityClass){
+                $entityObject = $entity;
+            } else {
                 $entityObject = new $entityClass;
                 forEach ($entity as $key => $value)
                 {
@@ -42,6 +44,7 @@ class ConfigParser
                     }
                 }
             }
+
             if (is_null($entityId)) {
                 array_push($entityMap, $entityObject);
             } else {

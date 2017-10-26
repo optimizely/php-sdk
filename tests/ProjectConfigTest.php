@@ -24,9 +24,10 @@ use Optimizely\Entity\Audience;
 use Optimizely\Entity\Event;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
-use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Group;
+use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
+use Optimizely\Entity\VariableUsage;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
@@ -245,6 +246,16 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             '166661' => $this->config->getRolloutFromId('166661')
         ], $rolloutIdMap->getValue($this->config));
 
+
+        // Check variable usage
+        $variableUsages = [
+            new VariableUsage("155560", "F"),
+            new VariableUsage("155561", "red")
+        ];
+        $expectedVariation = new Variation("122231", "Fred", $variableUsages);
+        $actualVariation = $this->config->getVariationFromKey("test_experiment_multivariate", "Fred");
+
+        $this->assertEquals($expectedVariation, $actualVariation);
     }
 
     public function testGetAccountId()

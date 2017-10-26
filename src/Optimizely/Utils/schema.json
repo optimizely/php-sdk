@@ -1,85 +1,5 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "definitions": {
-    "trafficAllocation": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "entityId": {
-            "type": "string"
-          },
-          "endOfRange": {
-            "type": "integer"
-          }
-        },
-        "required": ["entityId", "endOfRange"]
-      }
-    },
-    "experiments": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "key": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "layerId": {
-            "type": "string"
-          },
-          "variations": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "key": {
-                  "type": "string"
-                },
-                "variables": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "value": {
-                        "type": "string"
-                      }
-                    },
-                    "required": ["id", "value"]
-                  }
-                }
-              },
-              "required": ["id", "key", "variables"]
-            }
-          },
-          "trafficAllocation": {
-            "$ref": "#/definitions/trafficAllocation"
-          },
-          "audienceIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "forcedVariations": {
-            "type": "object"
-          }
-        },
-        "required": ["id", "key", "layerId", "status", "variations", "trafficAllocation", "audienceIds", "forcedVariations"]
-      }
-    }
-  },
   "type": "object",
   "properties": {
     "projectId": {
@@ -87,9 +7,6 @@
     },
     "accountId": {
       "type": "string"
-    },
-    "anonymizeIP": {
-      "type": "boolean"
     },
     "groups": {
       "type": "array",
@@ -103,138 +20,263 @@
             "type": "string"
           },
           "trafficAllocation": {
-            "$ref": "#/definitions/trafficAllocation"
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entityId": {
+                  "type": "string"
+                },
+                "endOfRange": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "entityId",
+                "endOfRange"
+              ]
+            }
           },
           "experiments": {
-            "$ref": "#/definitions/experiments"
-          }
-        },
-        "required": ["id", "policy", "trafficAllocation", "experiments"]
-      },
-      "rollouts": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "experiments": {
-              "$ref": "#/definitions/experiments"
-            }
-          },
-          "required": ["id", "experiments"]
-        }
-      },
-      "experiments": {
-        "$ref": "#/definitions/experiments"
-      },
-      "events": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "key": {
-              "type": "string"
-            },
-            "experimentIds": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "id": {
-              "type": "string"
-            }
-          },
-          "required": ["key", "experimentIds", "id"]
-        }
-      },
-      "featureFlags": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "key": {
-              "type": "string"
-            },
-            "rolloutId": {
-              "type": "string"
-            },
-            "experimentIds": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "variables": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "key": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "type": "string"
-                  },
-                  "defaultValue": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "layerId": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "variations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "key": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "key"
+                    ]
+                  }
+                },
+                "trafficAllocation": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "entityId": {
+                        "type": "string"
+                      },
+                      "endOfRange": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "entityId",
+                      "endOfRange"
+                    ]
+                  }
+                },
+                "audienceIds": {
+                  "type": "array",
+                  "items": {
                     "type": "string"
                   }
                 },
-                "required": ["id", "key", "type", "defaultValue"]
-              }
+                "forcedVariations": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "id",
+                "layerId",
+                "key",
+                "status",
+                "variations",
+                "trafficAllocation",
+                "audienceIds",
+                "forcedVariations"
+              ]
             }
-          },
-          "required": ["id", "key", "rolloutId", "experimentId", "variables"]
-        }
-      },
-      "audiences": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "name": {
-              "type": "string"
-            },
-            "conditions": {
-              "type": "string"
-            }
-          },
-          "required": ["id", "name", "conditions"]
-        }
-      },
-      "attributes": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "key": {
-              "type": "string"
-            }
-          },
-          "required": ["id", "key"]
-        }
-      },
-      "version": {
-        "type": "string"
-      },
-      "revision": {
-        "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "policy",
+          "trafficAllocation",
+          "experiments"
+        ]
       }
+    },
+    "experiments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "layerId": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "variations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "key"
+              ]
+            }
+          },
+          "trafficAllocation": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entityId": {
+                  "type": "string"
+                },
+                "endOfRange": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "entityId",
+                "endOfRange"
+              ]
+            }
+          },
+          "audienceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "forcedVariations": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "layerId",
+          "key",
+          "status",
+          "variations",
+          "trafficAllocation",
+          "audienceIds",
+          "forcedVariations"
+        ]
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "experimentIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "experimentIds",
+          "id"
+        ]
+      }
+    },
+    "audiences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "conditions": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "conditions"
+        ]
+      }
+    },
+    "attributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key"
+        ]
+      }
+    },
+    "version": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "string"
     }
   },
-    "required": ["projectId", "accountId", "groups", "rollouts", "experiments", "featureFlags", "events", "audiences", "attributes", "anonymizeIP", "version", "revision"]
+  "required": [
+    "projectId",
+    "accountId",
+    "groups",
+    "experiments",
+    "events",
+    "audiences",
+    "attributes",
+    "version",
+    "revision"
+  ]
 }

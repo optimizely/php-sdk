@@ -36,7 +36,7 @@ class Validator
 
         // Validate
         $validator = new JsonSchema\Validator;
-        $validator->validate($data, (object)['$ref' => 'file://' . __DIR__.'/schema.json']);
+        $validator->check($data, (object)['$ref' => 'file://' . __DIR__.'/schema.json']);
 
         if ($validator->isValid()) {
             return true;
