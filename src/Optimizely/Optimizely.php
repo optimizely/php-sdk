@@ -379,18 +379,18 @@ class Optimizely
 
         if(!$featureFlagKey){
             $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty");
-            return false;
+            return null;
         }
 
         if(!$userId){
             $this->_logger->log(Logger::ERROR, "User ID cannot be empty");
-            return false;
+            return null;
         }
 
         $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
         if($feature_flag == new FeatureFlag){
             // Error logged in ProjectConfig - getFeatureFlagFromKey
-            return false;
+            return null;
         }
 
         $variation = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
@@ -467,6 +467,34 @@ class Optimizely
                     "returning default value '{$variable_value}.'");
             }
         }
+
+        return $variable_value;
+    }
+
+    public function getFeatureVariableBoolean($featureFlagKey, $variableKey, $userId, $attributes = null){
+        $variable_value = $this->getFeatureVariableValueForType(
+            $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::BOOLEAN_TYPE);
+
+        return $variable_value;
+    }
+
+    public function getFeatureVariableInteger($featureFlagKey, $variableKey, $userId, $attributes = null){
+        $variable_value = $this->getFeatureVariableValueForType(
+            $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::INTEGER_TYPE);
+
+        return $variable_value;
+    }
+
+    public function getFeatureVariableDouble($featureFlagKey, $variableKey, $userId, $attributes = null){
+        $variable_value = $this->getFeatureVariableValueForType(
+            $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::DOUBLE_TYPE);
+
+        return $variable_value;
+    }
+
+    public function getFeatureVariableString($featureFlagKey, $variableKey, $userId, $attributes = null){
+        $variable_value = $this->getFeatureVariableValueForType(
+            $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::STRING_TYPE);
 
         return $variable_value;
     }
