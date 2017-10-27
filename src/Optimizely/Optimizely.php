@@ -34,6 +34,7 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\Validator;
+use Optimizely\Utils\VariableTypeUtils;
 
 /**
  * Class Optimizely
@@ -475,12 +476,18 @@ class Optimizely
         $variable_value = $this->getFeatureVariableValueForType(
             $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::BOOLEAN_TYPE);
 
+        if(!is_null($variable_value))
+            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
+
         return $variable_value;
     }
 
     public function getFeatureVariableInteger($featureFlagKey, $variableKey, $userId, $attributes = null){
         $variable_value = $this->getFeatureVariableValueForType(
             $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::INTEGER_TYPE);
+
+        if(!is_null($variable_value))
+            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
 
         return $variable_value;
     }
@@ -489,12 +496,18 @@ class Optimizely
         $variable_value = $this->getFeatureVariableValueForType(
             $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::DOUBLE_TYPE);
 
+        if(!is_null($variable_value))
+            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
+
         return $variable_value;
     }
 
     public function getFeatureVariableString($featureFlagKey, $variableKey, $userId, $attributes = null){
         $variable_value = $this->getFeatureVariableValueForType(
             $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::STRING_TYPE);
+
+        if(!is_null($variable_value))
+            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
 
         return $variable_value;
     }
