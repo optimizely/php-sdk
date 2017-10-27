@@ -95,6 +95,14 @@ class Variation
         return $this->_variableUsageInstances;
     }
 
+    public function getVariableUsage($variableId){
+        $variable_usage = $_variableIdToVariableUsageInstanceMap[$variableId];
+        if(isset($variable_usage))
+            return $variable_usage;
+        else
+            return null;
+    }
+
     public function setVariables($variableUsageInstances){
         $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances,null,VariableUsage::class);
 

@@ -219,31 +219,11 @@ class Optimizely
         $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
         if (is_null($variationKey)) {
             $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
-            return $variationKey;
+            return null;
         }
 
-        $impressionEvent = $this->_eventBuilder
-            ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
-        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
-        $this->_logger->log(
-            Logger::DEBUG,
-            sprintf('Dispatching impression event to URL %s with params %s.',
-                $impressionEvent->getUrl(), http_build_query($impressionEvent->getParams())
-            )
-        );
-
-        try {
-            $this->_eventDispatcher->dispatchEvent($impressionEvent);
-        }
-        catch (Throwable $exception) {
-            $this->_logger->log(Logger::ERROR, sprintf(
-                'Unable to dispatch impression event. Error %s', $exception->getMessage()));
-        }
-        catch (Exception $exception) {
-            $this->_logger->log(Logger::ERROR, sprintf(
-                'Unable to dispatch impression event. Error %s', $exception->getMessage()));
-        }
-
+        $this->sendImpression($experimentKey, $variationKey, $userId, $attributes);
+        
         return $variationKey;
     }
 
@@ -386,6 +366,132 @@ class Optimizely
             return $forcedVariation->getKey();
         } else {
             return null;
+        }
+    }
+
+
+    public function isFeatureEnabled($featureFlagKey, $userId, $attributes = null){
+
+        if (!$this->_isValid) {
+            $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'");
+            return null;
+        }
+
+        if(!$featureFlagKey){
+            $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty");
+            return false;
+        }
+
+        if(!$userId){
+            $this->_logger->log(Logger::ERROR, "User ID cannot be empty");
+            return false;
+        }
+
+        $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
+        if($feature_flag == new FeatureFlag){
+            // Error logged in ProjectConfig - getFeatureFlagFromKey
+            return false;
+        }
+
+        $variation = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
+        if(!$variation){
+            $this->_logger->log(Logger::INFO,"Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
+            return false;
+        }
+
+        if($variation["experiment"]){
+            $experiment_key = $variation["experiment"]->getKey();
+            $variation_key = $variation["variation"]->getKey();
+
+            $this->sendImpression($experiment_key, $variation_key, $userId, $attributes);
+        } else {
+            $this->_logger->log(Logger::INFO,"The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
+        }
+
+        $this->_logger->log(Logger::INFO,"Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");  
+        return true;      
+    }
+
+    public function getFeatureVariableValueForType($featureFlagKey, $variableKey, $userId, $attributes, $variableType){
+
+        if(!$featureFlagKey){
+            $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty");
+            return null;
+        }
+
+        if(!$variableKey){
+            $this->_logger->log(Logger::ERROR, "Variable key cannot be empty");
+            return null;
+        }
+
+        if(!$userId){
+            $this->_logger->log(Logger::ERROR, "User ID cannot be empty");
+            return null;
+        }
+
+        $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
+        if($feature_flag == new FeatureFlag){
+            // Error logged in ProjectConfig - getFeatureFlagFromKey
+            return null;
+        }
+
+        $variable = $this->_config->getFeatureVariableFromKey($featureFlagKey, $variableKey);
+        if(!$variable){
+            // Error message logged in ProjectConfig- getFeatureVariableFromKey
+            return null;
+        }
+
+        if($variableType != $variable->getType()){
+            $this->_logger->log(
+                Logger::ERROR,"Variable is of type {$variable->getType}, but you requested it as type {$variableType}");
+            return null;
+        }
+
+        $decision = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
+        $variable_value = $variable->getDefaultValue();
+
+        if(!$decision){
+             $this->_logger->log(Logger::INFO,"User '{$userId}'is not in any variation, ".
+                "returning default value'{$variable_value}'.");
+        } else {
+            $variation = $decision['variation'];
+            $variable_usage = $variation->getVariableUsage($variable->getId());
+            if($variable_usage){
+                $variable_value = $variable_usage->getValue();
+                $this->_logger->log(Logger::INFO,
+                    "Returning variable value '{$variable_value}' for variation '{$variation->getKey()}' ".
+                    "of feature flag '{$featureFlagKey}'");
+            } else {
+                $this->_logger->log(Logger::INFO,
+                    "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}, '". 
+                    "returning default value '{$variable_value}.'");
+            }
+        }
+
+        return $variable_value;
+    }
+
+    public function sendImpression($experimentKey, $variationKey, $userId, $attributes){
+        $impressionEvent = $this->_eventBuilder
+            ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
+        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
+        $this->_logger->log(
+            Logger::DEBUG,
+            sprintf('Dispatching impression event to URL %s with params %s.',
+                $impressionEvent->getUrl(), http_build_query($impressionEvent->getParams())
+            )
+        );
+
+        try {
+            $this->_eventDispatcher->dispatchEvent($impressionEvent);
+        }
+        catch (Throwable $exception) {
+            $this->_logger->log(Logger::ERROR, sprintf(
+                'Unable to dispatch impression event. Error %s', $exception->getMessage()));
+        }
+        catch (Exception $exception) {
+            $this->_logger->log(Logger::ERROR, sprintf(
+                'Unable to dispatch impression event. Error %s', $exception->getMessage()));
         }
     }
 }

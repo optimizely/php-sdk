@@ -23,6 +23,7 @@ use Optimizely\Entity\Audience;
 use Optimizely\Entity\Event;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
+use Optimizely\Entity\FeatureVariable;
 use Optimizely\Entity\Group;
 use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
@@ -154,6 +155,8 @@ class ProjectConfig
      */
     private $_rolloutIdMap;
 
+    private $_featureFlagVariableMap;
+
     /**
      * ProjectConfig constructor to load and set project configuration data.
      *
@@ -221,6 +224,13 @@ class ProjectConfig
 
         foreach(array_values($this->_featureFlags) as $featureFlag){
             $this->_featureKeyMap[$featureFlag->getKey()] = $featureFlag;
+        }
+
+        if($this->_featureKeyMap){
+            foreach(array_values($this->_featureKeyMap) as $featureKey => $featureFlag){
+                $this->_featureFlagVariableMap[$featureKey] = ConfigParser::generateMap(
+                    $featureFlag->getVariables(), 'key', FeatureVariable::class);                                                                               
+            }
         }
     }
 
@@ -428,6 +438,24 @@ class ProjectConfig
             'No variation ID "%s" defined in datafile for experiment "%s".', $variationId, $experimentKey));
         $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
         return new Variation();
+    }
+
+    public function getFeatureVariableFromKey($featureFlagKey, $variableKey)
+    {
+        $feature_flag = $this->getFeatureFlagFromKey($featureFlagKey);
+        if($feature_flag == new FeatureFlag())
+            return null;
+
+        if(isset($this->_featureFlagVariableMap[$featureFlagKey]) &&
+            isset($this->_featureFlagVariableMap[$featureFlagKey][$variableKey])) {
+            return $this->_featureFlagVariableMap[$featureFlagKey][$variableKey];
+        }   
+
+        $this->_logger->log(Logger::ERROR, sprintf(
+            'No variable key "%s" defined in datafile for feature flag "%s".', $variableKey, $featureFlagKey));
+        $this->_errorHandler->handleError(
+            new InvalidFeatureVariableException('Provided feature variable is not in datafile.'));
+        return null;
     }
 
     public function isVariationIdValid($experimentKey, $variationId)
