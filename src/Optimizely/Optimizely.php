@@ -394,15 +394,15 @@ class Optimizely
             return null;
         }
 
-        $variation = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
-        if(!$variation){
+        $decision = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
+        if(!$decision){
             $this->_logger->log(Logger::INFO,"Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
             return false;
         }
 
-        if($variation["experiment"]){
-            $experiment_key = $variation["experiment"]->getKey();
-            $variation_key = $variation["variation"]->getKey();
+        if($decision["experiment"]){
+            $experiment_key = $decision["experiment"]->getKey();
+            $variation_key = $decision["variation"]->getKey();
 
             $this->sendImpression($experiment_key, $variation_key, $userId, $attributes);
         } else {
