@@ -1732,10 +1732,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testIsFeatureEnabledGivenInvalidDataFile(){
         $optlyObject = new Optimizely('Random datafile', null, $this->loggerMock);
-        $optlyObject->activate('some_experiment', 'some_user');
 
         $this->expectOutputRegex("/Datafile has invalid format. Failing 'isFeatureEnabled'./");
-         $optlyObject->isFeatureEnabled("boolean_feature", "user_id");
+        $optlyObject->isFeatureEnabled("boolean_feature", "user_id");
     }
 
     public function testIsFeatureEnabledGivenInvalidArguments(){
@@ -1766,8 +1765,105 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::ERROR,  "User ID cannot be empty.");
 
         $this->assertSame($this->optimizelyObject->isFeatureEnabled("boolean_feature", null), null);
+    }
 
+    public function testIsFeatureEnabledGivenFeatureFlagNotFound(){
+        $feature_key = "abcd"; // Any string that is not a feature flag key in the data file
+
+        //should return null and log a message when no feature flag found against a valid feature key
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::ERROR, "FeatureFlag Key \"{$feature_key}\" is not in datafile.");
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled($feature_key, "user_id"), null);
     }
 
 
+    public function testGetFeatureVariableValueForTypeGivenInvalidArguments(){
+        // should return null and log a message when feature flag key is empty
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR,  "Feature Flag key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "", "double_variable", "user_id"), null);
+
+        // should return null and log a message when feature flag key is null
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR,  "Feature Flag key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            null, "double_variable", "user_id"), null);
+
+        // should return null and log a message when variable key is empty
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR,  "Variable key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "boolean_feature", "", "user_id"), null);
+
+        // should return null and log a message when variable key is null
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR,  "Variable key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "boolean_feature", null, "user_id"), null);
+
+        // should return null and log a message when user id is empty
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR,  "User ID cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "boolean_feature", "double_variable", ""), null);
+
+        // should return null and log a message when user id is null
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR,  "User ID cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "boolean_feature", "double_variable", null), null);
+    }
+
+    public function testGetFeatureVariableValueForTypeGivenFeatureFlagNotFound(){
+        $feature_key = "abcd"; // Any string that is not a feature flag key in the data file
+
+        //should return null and log a message when no feature flag found against a valid feature key
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "FeatureFlag Key \"{$feature_key}\" is not in datafile.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            $feature_key , "double_variable", 'user_id'), null);
+    }
+
+    public function testGetFeatureVariableValueForTypeGivenFeatureVariableNotFound(){
+        $feature_key = "boolean_feature"; // Any exisiting feature key in the data file
+        $variable_key = "abcd"; // Any string that is not a variable key in the data file
+
+        //should return null and log a message when no feature flag found against a valid feature key
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "No variable key \"{$variable_key}\" defined in datafile ".
+                "for feature flag \"{$feature_key}\".");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            $feature_key , $variable_key, 'user_id'), null);
+    }
+
+    public function testGetFeatureVariableValueForTypeGivenInvalidFeatureVariableType(){
+        // should return null and log a message when a feature variable does exist but is
+        // called for another type
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "Variable is of type 'double', but you requested it as type 'string'.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "double_single_variable_feature" , "double_variable", "user_id", null, "string")
+        , null);
+
+    }
 }

@@ -33,6 +33,7 @@ use Optimizely\Exceptions\InvalidAudienceException;
 use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
 use Optimizely\Exceptions\InvalidFeatureFlagException;
+use Optimizely\Exceptions\InvalidFeatureVariableException;
 use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidVariationException;
@@ -227,9 +228,9 @@ class ProjectConfig
         }
 
         if($this->_featureKeyMap){
-            foreach(array_values($this->_featureKeyMap) as $featureKey => $featureFlag){
+            foreach($this->_featureKeyMap as $featureKey => $featureFlag){
                 $this->_featureFlagVariableMap[$featureKey] = ConfigParser::generateMap(
-                    $featureFlag->getVariables(), 'key', FeatureVariable::class);                                                                               
+                    $featureFlag->getVariables(), 'key', FeatureVariable::class);                                                                           
             }
         }
     }

@@ -23,6 +23,8 @@ use Throwable;
 use Monolog\Logger;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\Entity\Experiment;
+use Optimizely\Entity\FeatureFlag;
+use Optimizely\Entity\Rollout;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
@@ -413,20 +415,21 @@ class Optimizely
         return true;      
     }
 
-    public function getFeatureVariableValueForType($featureFlagKey, $variableKey, $userId, $attributes, $variableType){
-
+    public function getFeatureVariableValueForType($featureFlagKey, $variableKey, $userId,
+                                                   $attributes = null, $variableType = null)
+    {
         if(!$featureFlagKey){
-            $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty");
+            $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty.");
             return null;
         }
 
         if(!$variableKey){
-            $this->_logger->log(Logger::ERROR, "Variable key cannot be empty");
+            $this->_logger->log(Logger::ERROR, "Variable key cannot be empty.");
             return null;
         }
 
         if(!$userId){
-            $this->_logger->log(Logger::ERROR, "User ID cannot be empty");
+            $this->_logger->log(Logger::ERROR, "User ID cannot be empty.");
             return null;
         }
 
@@ -444,7 +447,7 @@ class Optimizely
 
         if($variableType != $variable->getType()){
             $this->_logger->log(
-                Logger::ERROR,"Variable is of type {$variable->getType}, but you requested it as type {$variableType}");
+                Logger::ERROR,"Variable is of type '{$variable->getType()}', but you requested it as type '{$variableType}'.");
             return null;
         }
 
