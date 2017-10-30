@@ -24,7 +24,10 @@ use Optimizely\Logger\LoggerInterface;
 
 class VariableTypeUtils
 {
-	public static function castStringToType($value, $variableType, $logger = null){
+	public static function castStringToType($value, $variableType, LoggerInterface $logger = null){
+		if($variableType == FeatureVariable::STRING_TYPE)
+			return $value;
+
 		$return_value = null;
 
 		switch($variableType){

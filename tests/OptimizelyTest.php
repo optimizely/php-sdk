@@ -1730,4 +1730,44 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $variationKey, sprintf('Invalid variation key "%s" for getVariation with bucketing ID "%s".', $variationKey, $this->testBucketingIdControl));
     }
 
+    public function testIsFeatureEnabledGivenInvalidDataFile(){
+        $optlyObject = new Optimizely('Random datafile', null, $this->loggerMock);
+        $optlyObject->activate('some_experiment', 'some_user');
+
+        $this->expectOutputRegex("/Datafile has invalid format. Failing 'isFeatureEnabled'./");
+         $optlyObject->isFeatureEnabled("boolean_feature", "user_id");
+    }
+
+    public function testIsFeatureEnabledGivenInvalidArguments(){
+        // should return null and log a message when feature flag key is empty
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR,  "Feature Flag key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled("","user_id"), null);
+
+        // should return null and log a message when feature flag key is null
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR,  "Feature Flag key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled(null,"user_id"), null);
+
+        // should return null and log a message when user id is empty
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR,  "User ID cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled("boolean_feature", ""), null);
+
+        // should return null and log a message when user id is null
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR,  "User ID cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled("boolean_feature", null), null);
+
+    }
+
+
 }

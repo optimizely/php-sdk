@@ -223,7 +223,7 @@ class Optimizely
             return null;
         }
 
-        $this->sendImpression($experimentKey, $variationKey, $userId, $attributes);
+        $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
         
         return $variationKey;
     }
@@ -374,17 +374,17 @@ class Optimizely
     public function isFeatureEnabled($featureFlagKey, $userId, $attributes = null){
 
         if (!$this->_isValid) {
-            $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'");
+            $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'.");
             return null;
         }
 
         if(!$featureFlagKey){
-            $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty");
+            $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty.");
             return null;
         }
 
         if(!$userId){
-            $this->_logger->log(Logger::ERROR, "User ID cannot be empty");
+            $this->_logger->log(Logger::ERROR, "User ID cannot be empty.");
             return null;
         }
 
@@ -404,7 +404,7 @@ class Optimizely
             $experiment_key = $decision["experiment"]->getKey();
             $variation_key = $decision["variation"]->getKey();
 
-            $this->sendImpression($experiment_key, $variation_key, $userId, $attributes);
+            $this->sendImpressionEvent($experiment_key, $variation_key, $userId, $attributes);
         } else {
             $this->_logger->log(Logger::INFO,"The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
         }
@@ -456,7 +456,7 @@ class Optimizely
                 "returning default value'{$variable_value}'.");
         } else {
             $variation = $decision['variation'];
-            $variable_usage = $variation->getVariableUsage($variable->getId());
+            $variable_usage = $variation->getVariableUsageById($variable->getId());
             if($variable_usage){
                 $variable_value = $variable_usage->getValue();
                 $this->_logger->log(Logger::INFO,
@@ -487,7 +487,7 @@ class Optimizely
             $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::INTEGER_TYPE);
 
         if(!is_null($variable_value))
-            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
+            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::INTEGER_TYPE, $this->_logger);
 
         return $variable_value;
     }
@@ -497,7 +497,7 @@ class Optimizely
             $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::DOUBLE_TYPE);
 
         if(!is_null($variable_value))
-            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
+            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::DOUBLE_TYPE, $this->_logger);
 
         return $variable_value;
     }
@@ -506,13 +506,10 @@ class Optimizely
         $variable_value = $this->getFeatureVariableValueForType(
             $featureFlagKey, $variableKey, $userId, $attributes, FeatureVariable::STRING_TYPE);
 
-        if(!is_null($variable_value))
-            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
-
         return $variable_value;
     }
 
-    public function sendImpression($experimentKey, $variationKey, $userId, $attributes){
+    public function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes){
         $impressionEvent = $this->_eventBuilder
             ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
         $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
