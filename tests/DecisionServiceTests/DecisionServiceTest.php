@@ -19,6 +19,7 @@ namespace Optimizely\Tests;
 use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
+use Optimizely\DecisionService\Decision;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
@@ -667,16 +668,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     //  should return the variation when the user is bucketed into a variation for the experiment on the feature flag
     public function testGetVariationForFeatureExperimentGivenNonMutexGroupAndUserIsBucketed(){
         // return the first variation of the `test_experiment_multivariate` experiment, which is attached to the `multi_variate_feature`
+        $experiment = $this->config->getExperimentFromKey('test_experiment_multivariate');
         $variation = $this->config->getVariationFromId('test_experiment_multivariate','122231');
         $this->decisionServiceMock->expects($this->at(0))
         ->method('getVariation')
         ->will($this->returnValue($variation));
         
         $feature_flag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
-        $expected_decision = [
-            'experiment' => $this->config->getExperimentFromKey('test_experiment_multivariate'),
-            'variation' => $this->config->getVariationFromId('test_experiment_multivariate','122231')
-        ];
+        $expected_decision = new Decision($experiment->getId(), $variation->getId(), Decision::DECISION_SOURCE_EXPERIMENT);
 
         $this->loggerMock->expects($this->at(0))
         ->method('log')
@@ -699,10 +698,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
         $variation = $mutex_exp->getVariations()[0];
-        $expected_decision = [
-            'experiment' => $mutex_exp,
-            'variation' => $variation
-        ];
+        $expected_decision = new Decision($mutex_exp->getId(), $variation->getId(), Decision::DECISION_SOURCE_EXPERIMENT);
+
         $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
         $this->loggerMock->expects($this->at(0))
         ->method('log')
@@ -775,10 +772,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment = $rollout->getExperiments()[0];
         $expected_variation = $experiment->getVariations()[0];
-        $expected_decision = [
-            'experiment' => null,
-            'variation' => $expected_variation
-        ];
+        $expected_decision = new Decision(
+            $experiment->getId(), $expected_variation->getId(), Decision::DECISION_SOURCE_ROLLOUT);
 
         $decisionServiceMock
         ->method('getVariationForFeatureExperiment')
@@ -786,7 +781,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $decisionServiceMock
         ->method('getVariationForFeatureRollout')
-        ->will($this->returnValue($expected_variation));
+        ->will($this->returnValue($expected_decision));
 
         $this->loggerMock->expects($this->at(0))
         ->method('log')
@@ -895,7 +890,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $rollout_id = $feature_flag->getRolloutId();
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment = $rollout->getExperiments()[0];
-        $expected_variation = $experiment->getVariations()[0];   
+        $expected_variation = $experiment->getVariations()[0];
+
+        $expected_decision = new Decision(
+            $experiment->getId(), $expected_variation->getId(), Decision::DECISION_SOURCE_ROLLOUT);   
         // Provide attributes such that user qualifies for audience
         $user_attributes = ["browser_type" => "chrome"];
 
@@ -914,7 +912,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes),
-            $expected_variation
+            $expected_decision
         );
     }
 
@@ -927,7 +925,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment0 = $rollout->getExperiments()[0];
         // Everyone Else Rule
         $experiment2 = $rollout->getExperiments()[2];
-        $expected_variation = $experiment2->getVariations()[0];   
+        $expected_variation = $experiment2->getVariations()[0];  
+
+        $expected_decision = new Decision(
+            $experiment2->getId(), $expected_variation->getId(), Decision::DECISION_SOURCE_ROLLOUT); 
 
         // Provide attributes such that user qualifies for audience
         $user_attributes = ["browser_type" => "chrome"];
@@ -956,7 +957,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes),
-            $expected_variation
+            $expected_decision  
         );
     }
 
@@ -1018,7 +1019,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment1 = $rollout->getExperiments()[1];
         // Everyone Else Rule
         $experiment2 = $rollout->getExperiments()[2];   
-        $expected_variation = $experiment2->getVariations()[0];   
+        $expected_variation = $experiment2->getVariations()[0]; 
+
+        $expected_decision = new Decision(
+            $experiment2->getId(), $expected_variation->getId(), Decision::DECISION_SOURCE_ROLLOUT);   
 
         // Provide null attributes so that user does not qualify for audience
         $user_attributes = [];
@@ -1045,7 +1049,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes),
-            $expected_variation
+            $expected_decision
         );
     }
 }
