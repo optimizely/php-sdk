@@ -17,14 +17,24 @@
 
 namespace Optimizely\Tests;
 
+use Monolog\Logger;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
 use Optimizely\Utils\Validator;
 
-
 class ValidatorTest extends \PHPUnit_Framework_TestCase
 {
+    protected $loggerMock;
+
+    protected function setUp()
+    {
+        // Mock Logger
+        $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
+        ->setMethods(array('log'))
+        ->getMock();
+    }
+
     public function testValidateJsonSchemaValidFile()
     {
         $this->assertTrue(Validator::validateJsonSchema(DATAFILE));
@@ -40,6 +50,15 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     {
         $invalidDatafile = 'some random file.';
         $this->assertFalse(Validator::validateJsonSchema($invalidDatafile));
+    }
+
+    public function testValidateJsonSchemaInvalidJsonWithLogger(){
+        $invalidDatafile = '{"key1": "val1"}';
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::DEBUG,"JSON does not validate. Violations:\n");
+        $this->assertFalse(Validator::validateJsonSchema($invalidDatafile, $this->loggerMock));
+        
     }
 
     public function testAreAttributesValidValidAttributes()

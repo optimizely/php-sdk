@@ -155,10 +155,9 @@ class EventBuilder
      * @param $config ProjectConfig Configuration for the project.
      * @param $eventKey string Key representing the event.
      * @param $experimentVariationMap array Map of experiment ID to the ID of the variation that the user is bucketed into.
-     * @param $userId string ID of user.
      * @param $eventTags array Hash representing metadata associated with the event.
      */
-    private function getConversionParams($config, $eventKey, $experimentVariationMap, $userId, $eventTags)
+    private function getConversionParams($config, $eventKey, $experimentVariationMap, $eventTags)
     {
 
         $conversionParams = [];
@@ -244,7 +243,7 @@ class EventBuilder
     {
 
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
-        $conversionParams = $this->getConversionParams($config, $eventKey, $experimentVariationMap, $userId, $eventTags);
+        $conversionParams = $this->getConversionParams($config, $eventKey, $experimentVariationMap, $eventTags);
 
         $eventParams[VISITORS][0][SNAPSHOTS] = $conversionParams;
         return new LogEvent(self::$ENDPOINT, $eventParams, self::$HTTP_VERB, self::$HTTP_HEADERS);
