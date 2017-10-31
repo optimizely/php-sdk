@@ -1778,6 +1778,25 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->optimizelyObject->isFeatureEnabled($feature_key, "user_id"), null);
     }
 
+    public function testIsFeatureEnabledGivenInvalidFeatureFlag(){
+        // Create local config copy for this method to add error
+        $projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
+        $optimizelyObj = new Optimizely($this->datafile);
+
+        $config = new \ReflectionProperty(Optimizely::class, '_config');
+        $config->setAccessible(true);
+        $config->setValue($optimizelyObj, $projectConfig);
+
+        $feature_flag = $projectConfig->getFeatureFlagFromKey('mutex_group_feature');
+        // Add such an experiment to the list of experiment ids, that does not belong to the same mutex group
+        $experimentIds = $feature_flag->getExperimentIds();
+        $experimentIds [] = '122241';
+        $feature_flag->setExperimentIds($experimentIds);
+
+        //should return null when feature flag is invalid
+        $this->assertSame($optimizelyObj->isFeatureEnabled('mutex_group_feature', "user_id"), null);
+    }
+
     public function testIsFeatureEnabledGivenFeatureFlagIsNotEnabledForUser(){
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
             ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))

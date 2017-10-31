@@ -170,4 +170,31 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             ['device_type' => 'Android', 'location' => 'San Francisco']
         ));
     }
+
+    public function testIsFeatureFlagValid(){
+        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $feature_flag_source = $config->getFeatureFlagFromKey('mutex_group_feature');
+
+        // should return true when no experiment ids exist
+        $feature_flag = clone $feature_flag_source;
+        $feature_flag->setExperimentIds([]);
+        $this->assertSame(Validator::isFeatureFlagValid($config, $feature_flag), true);
+
+        // should return true when only 1 experiment id exist
+        $feature_flag = clone $feature_flag_source;
+        $feature_flag->setExperimentIds([]);
+        $this->assertSame(Validator::isFeatureFlagValid($config, $feature_flag), true);
+
+        // should return true when more than 1 experiment ids exist that belong to the same group
+        $feature_flag = clone $feature_flag_source;
+        $this->assertSame(Validator::isFeatureFlagValid($config, $feature_flag), true);
+
+        //should return false when more than 1 experiment ids exist that belong to different group
+        $feature_flag = clone $feature_flag_source;
+        $experimentIds = $feature_flag->getExperimentIds();
+        $experimentIds [] = '122241';
+        $feature_flag->setExperimentIds($experimentIds);
+
+        $this->assertSame(Validator::isFeatureFlagValid($config, $feature_flag), false);
+    }
 }

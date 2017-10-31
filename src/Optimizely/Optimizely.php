@@ -397,6 +397,11 @@ class Optimizely
             return null;
         }
 
+        //validate feature flag
+        if(!Validator::isFeatureFlagValid($this->_config, $feature_flag)){
+            return null;
+        }
+
         $decision = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
         if(!$decision){
             $this->_logger->log(Logger::INFO,"Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
