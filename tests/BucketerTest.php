@@ -197,7 +197,12 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
                 'User "testUserId" is in variation group_exp_1_var_1 of experiment group_experiment_1.');
 
         $this->assertEquals(
-            new Variation('7722260071', 'group_exp_1_var_1'),
+            new Variation('7722260071', 'group_exp_1_var_1',[
+                [
+                  "id" => "155563",
+                  "value" => "groupie_1_v1"
+                ]
+          ]),
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_1'),
@@ -223,7 +228,12 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
                 'User "testUserId" is in variation group_exp_1_var_2 of experiment group_experiment_1.');
 
         $this->assertEquals(
-            new Variation('7722360022', 'group_exp_1_var_2'),
+            new Variation('7722360022', 'group_exp_1_var_2',[
+                [
+                  "id" => "155563",
+                  "value" => "groupie_1_v2"
+                ]
+          ]),
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_1'),
@@ -344,7 +354,12 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $bucketer = new Bucketer($this->loggerMock);
 
         $this->assertEquals(
-            new Variation('7725250007', 'group_exp_2_var_2'),
+            new Variation('7725250007', 'group_exp_2_var_2',[
+                [
+                  "id" => "155563",
+                  "value" => "groupie_2_v1"
+                ]
+          ]),
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_2'),

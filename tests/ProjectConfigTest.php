@@ -23,13 +23,18 @@ use Optimizely\Entity\Attribute;
 use Optimizely\Entity\Audience;
 use Optimizely\Entity\Event;
 use Optimizely\Entity\Experiment;
+use Optimizely\Entity\FeatureFlag;
 use Optimizely\Entity\Group;
+use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
+use Optimizely\Entity\VariableUsage;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
 use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
+use Optimizely\Exceptions\InvalidFeatureFlagException;
+use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\DefaultLogger;
@@ -62,7 +67,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         // Check version
         $version = new \ReflectionProperty(ProjectConfig::class, '_version');
         $version->setAccessible(true);
-        $this->assertEquals('2', $version->getValue($this->config));
+        $this->assertEquals('4', $version->getValue($this->config));
 
         // Check account ID
         $accountId = new \ReflectionProperty(ProjectConfig::class, '_accountId');
@@ -93,7 +98,11 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment' => $this->config->getExperimentFromKey('test_experiment'),
             'paused_experiment' => $this->config->getExperimentFromKey('paused_experiment'),
             'group_experiment_1' => $this->config->getExperimentFromKey('group_experiment_1'),
-            'group_experiment_2' => $this->config->getExperimentFromKey('group_experiment_2')
+            'group_experiment_2' => $this->config->getExperimentFromKey('group_experiment_2'),
+            'test_experiment_multivariate' => $this->config->getExperimentFromKey('test_experiment_multivariate'),
+            'test_experiment_with_feature_rollout' => $this->config->getExperimentFromKey('test_experiment_with_feature_rollout'),
+            'test_experiment_double_feature' =>  $this->config->getExperimentFromKey('test_experiment_double_feature'),
+            'test_experiment_integer_feature' =>  $this->config->getExperimentFromKey('test_experiment_integer_feature')
         ], $experimentKeyMap->getValue($this->config));
 
         // Check experiment ID map
@@ -103,7 +112,11 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             '7716830082' => $this->config->getExperimentFromId('7716830082'),
             '7723330021' => $this->config->getExperimentFromId('7723330021'),
             '7718750065' => $this->config->getExperimentFromId('7718750065'),
-            '7716830585' => $this->config->getExperimentFromId('7716830585')
+            '7716830585' => $this->config->getExperimentFromId('7716830585'),
+            '122230' => $this->config->getExperimentFromId('122230'),
+            '122235' => $this->config->getExperimentFromId('122235'),
+            '122238' => $this->config->getExperimentFromId('122238'),
+            '122241' => $this->config->getExperimentFromId('122241')
         ], $experimentIdMap->getValue($this->config));
 
         // Check event key map
@@ -125,7 +138,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $audienceIdMap = new \ReflectionProperty(ProjectConfig::class, '_audienceIdMap');
         $audienceIdMap->setAccessible(true);
         $this->assertEquals([
-            '7718080042' => $this->config->getAudience('7718080042')
+            '7718080042' => $this->config->getAudience('7718080042'),
+            '11155' => $this->config->getAudience('11155')
         ], $audienceIdMap->getValue($this->config));
 
         // Check variation key map
@@ -147,6 +161,24 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'group_experiment_2' => [
                 'group_exp_2_var_1' => $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_1'),
                 'group_exp_2_var_2' => $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_2')
+            ],
+            'test_experiment_multivariate' => [
+                'Fred' => $this->config->getVariationFromKey('test_experiment_multivariate', 'Fred'),
+                'Feorge' => $this->config->getVariationFromKey('test_experiment_multivariate', 'Feorge'),
+                'Gred' => $this->config->getVariationFromKey('test_experiment_multivariate', 'Gred'),
+                'George' => $this->config->getVariationFromKey('test_experiment_multivariate', 'George')
+            ],
+            'test_experiment_with_feature_rollout' => [
+                'control' => $this->config->getVariationFromKey('test_experiment_with_feature_rollout', 'control'),
+                'variation' => $this->config->getVariationFromKey('test_experiment_with_feature_rollout', 'variation')
+            ],
+            'test_experiment_double_feature' => [
+                'control' => $this->config->getVariationFromKey('test_experiment_double_feature', 'control'),
+                'variation' => $this->config->getVariationFromKey('test_experiment_double_feature', 'variation')
+            ],
+            'test_experiment_integer_feature' => [
+                'control' => $this->config->getVariationFromKey('test_experiment_integer_feature', 'control'),
+                'variation' => $this->config->getVariationFromKey('test_experiment_integer_feature', 'variation')
             ]
         ], $variationKeyMap->getValue($this->config));
 
@@ -169,246 +201,61 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'group_experiment_2' => [
                 '7713030086' => $this->config->getVariationFromId('group_experiment_2', '7713030086'),
                 '7725250007' => $this->config->getVariationFromId('group_experiment_2', '7725250007')
+            ],
+            'test_experiment_multivariate' => [
+                '122231' => $this->config->getVariationFromId('test_experiment_multivariate', '122231'),
+                '122232' => $this->config->getVariationFromId('test_experiment_multivariate', '122232'),
+                '122233' => $this->config->getVariationFromId('test_experiment_multivariate', '122233'),
+                '122234' => $this->config->getVariationFromId('test_experiment_multivariate', '122234')
+            ],
+            'test_experiment_with_feature_rollout' => [
+                '122236' => $this->config->getVariationFromId('test_experiment_with_feature_rollout', '122236'),
+                '122237' => $this->config->getVariationFromId('test_experiment_with_feature_rollout', '122237')
+            ],
+            'test_experiment_double_feature' => [
+                '122239' => $this->config->getVariationFromId('test_experiment_double_feature', '122239'),
+                '122240' => $this->config->getVariationFromId('test_experiment_double_feature', '122240')
+            ],
+            'test_experiment_integer_feature' => [
+                '122242' => $this->config->getVariationFromId('test_experiment_integer_feature', '122242'),
+                '122243' => $this->config->getVariationFromId('test_experiment_integer_feature', '122243')
             ]
         ], $variationIdMap->getValue($this->config));
-    }
 
-    public function testInitWithDatafileV3()
-    {
-        // Init with v3 datafile
-        $this->config = new ProjectConfig(DATAFILE_V3, $this->loggerMock, $this->errorHandlerMock);
 
-        // Check version
-        $version = new \ReflectionProperty(ProjectConfig::class, '_version');
-        $version->setAccessible(true);
-        $this->assertEquals('2', $version->getValue($this->config));
-
-        // Check account ID
-        $accountId = new \ReflectionProperty(ProjectConfig::class, '_accountId');
-        $accountId->setAccessible(true);
-        $this->assertEquals('1592310167', $accountId->getValue($this->config));
-
-        // Check project ID
-        $projectId = new \ReflectionProperty(ProjectConfig::class, '_projectId');
-        $projectId->setAccessible(true);
-        $this->assertEquals('7720880029', $projectId->getValue($this->config));
-
-        // Check revision
-        $revision = new \ReflectionProperty(ProjectConfig::class, '_revision');
-        $revision->setAccessible(true);
-        $this->assertEquals('15', $revision->getValue($this->config));
-
-        // Check group ID map
-        $groupIdMap = new \ReflectionProperty(ProjectConfig::class, '_groupIdMap');
-        $groupIdMap->setAccessible(true);
+        // Check feature flag key map
+        $featureFlagKeyMap = new \ReflectionProperty(ProjectConfig::class, '_featureKeyMap');
+        $featureFlagKeyMap->setAccessible(true);
         $this->assertEquals([
-            '7722400015' => $this->config->getGroup('7722400015')
-        ], $groupIdMap->getValue($this->config));
+            'boolean_feature' => $this->config->getFeatureFlagFromKey('boolean_feature'),
+            'double_single_variable_feature' => $this->config->getFeatureFlagFromKey('double_single_variable_feature'),
+            'integer_single_variable_feature' => $this->config->getFeatureFlagFromKey('integer_single_variable_feature'),
+            'boolean_single_variable_feature' => $this->config->getFeatureFlagFromKey('boolean_single_variable_feature'),
+            'string_single_variable_feature' => $this->config->getFeatureFlagFromKey('string_single_variable_feature'),
+            'multi_variate_feature' => $this->config->getFeatureFlagFromKey('multi_variate_feature'),
+            'mutex_group_feature' => $this->config->getFeatureFlagFromKey('mutex_group_feature'),      
+            'empty_feature' => $this->config->getFeatureFlagFromKey('empty_feature')
+        ], $featureFlagKeyMap->getValue($this->config));
 
-        // Check experiment key map
-        $experimentKeyMap = new \ReflectionProperty(ProjectConfig::class, '_experimentKeyMap');
-        $experimentKeyMap->setAccessible(true);
+
+        // Check rollout id map
+        $rolloutIdMap = new \ReflectionProperty(ProjectConfig::class, '_rolloutIdMap');
+        $rolloutIdMap->setAccessible(true);
         $this->assertEquals([
-            'test_experiment' => $this->config->getExperimentFromKey('test_experiment'),
-            'paused_experiment' => $this->config->getExperimentFromKey('paused_experiment'),
-            'group_experiment_1' => $this->config->getExperimentFromKey('group_experiment_1'),
-            'group_experiment_2' => $this->config->getExperimentFromKey('group_experiment_2')
-        ], $experimentKeyMap->getValue($this->config));
+            '166660' => $this->config->getRolloutFromId('166660'),
+            '166661' => $this->config->getRolloutFromId('166661')
+        ], $rolloutIdMap->getValue($this->config));
 
-        // Check experiment ID map
-        $experimentIdMap = new \ReflectionProperty(ProjectConfig::class, '_experimentIdMap');
-        $experimentIdMap->setAccessible(true);
-        $this->assertEquals([
-            '7716830082' => $this->config->getExperimentFromId('7716830082'),
-            '7723330021' => $this->config->getExperimentFromId('7723330021'),
-            '7718750065' => $this->config->getExperimentFromId('7718750065'),
-            '7716830585' => $this->config->getExperimentFromId('7716830585')
-        ], $experimentIdMap->getValue($this->config));
 
-        // Check event key map
-        $eventKeyMap = new \ReflectionProperty(ProjectConfig::class, '_eventKeyMap');
-        $eventKeyMap->setAccessible(true);
-        $this->assertEquals([
-            'purchase' => $this->config->getEvent('purchase')
-        ], $eventKeyMap->getValue($this->config));
+        // Check variable usage
+        $variableUsages = [
+            new VariableUsage("155560", "F"),
+            new VariableUsage("155561", "red")
+        ];
+        $expectedVariation = new Variation("122231", "Fred", $variableUsages);
+        $actualVariation = $this->config->getVariationFromKey("test_experiment_multivariate", "Fred");
 
-        // Check attribute key map
-        $attributeKeyMap = new \ReflectionProperty(ProjectConfig::class, '_attributeKeyMap');
-        $attributeKeyMap->setAccessible(true);
-        $this->assertEquals([
-            'device_type' => $this->config->getAttribute('device_type'),
-            'location' => $this->config->getAttribute('location')
-        ], $attributeKeyMap->getValue($this->config));
-
-        // Check audience ID map
-        $audienceIdMap = new \ReflectionProperty(ProjectConfig::class, '_audienceIdMap');
-        $audienceIdMap->setAccessible(true);
-        $this->assertEquals([
-            '7718080042' => $this->config->getAudience('7718080042')
-        ], $audienceIdMap->getValue($this->config));
-
-        // Check variation key map
-        $variationKeyMap = new \ReflectionProperty(ProjectConfig::class, '_variationKeyMap');
-        $variationKeyMap->setAccessible(true);
-        $this->assertEquals([
-            'test_experiment' => [
-                'control' => $this->config->getVariationFromKey('test_experiment', 'control'),
-                'variation' => $this->config->getVariationFromKey('test_experiment', 'variation')
-            ],
-            'paused_experiment' => [
-                'control' => $this->config->getVariationFromKey('paused_experiment', 'control'),
-                'variation' => $this->config->getVariationFromKey('paused_experiment', 'variation')
-            ],
-            'group_experiment_1' => [
-                'group_exp_1_var_1' => $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_1'),
-                'group_exp_1_var_2' => $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_2')
-            ],
-            'group_experiment_2' => [
-                'group_exp_2_var_1' => $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_1'),
-                'group_exp_2_var_2' => $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_2')
-            ]
-        ], $variationKeyMap->getValue($this->config));
-
-        // Check variation ID map
-        $variationIdMap = new \ReflectionProperty(ProjectConfig::class, '_variationIdMap');
-        $variationIdMap->setAccessible(true);
-        $this->assertEquals([
-            'test_experiment' => [
-                '7722370027' => $this->config->getVariationFromId('test_experiment', '7722370027'),
-                '7721010009' => $this->config->getVariationFromId('test_experiment', '7721010009')
-            ],
-            'paused_experiment' => [
-                '7722370427' => $this->config->getVariationFromId('paused_experiment', '7722370427'),
-                '7721010509' => $this->config->getVariationFromId('paused_experiment', '7721010509')
-            ],
-            'group_experiment_1' => [
-                '7722260071' => $this->config->getVariationFromId('group_experiment_1', '7722260071'),
-                '7722360022' => $this->config->getVariationFromId('group_experiment_1', '7722360022')
-            ],
-            'group_experiment_2' => [
-                '7713030086' => $this->config->getVariationFromId('group_experiment_2', '7713030086'),
-                '7725250007' => $this->config->getVariationFromId('group_experiment_2', '7725250007')
-            ]
-        ], $variationIdMap->getValue($this->config));
-    }
-
-    public function testInitWithMoreData()
-    {
-        // Init with datafile consisting of more fields
-        $this->config = new ProjectConfig(DATAFILE_MORE_DATA, $this->loggerMock, $this->errorHandlerMock);
-
-        // Check version
-        $version = new \ReflectionProperty(ProjectConfig::class, '_version');
-        $version->setAccessible(true);
-        $this->assertEquals('2', $version->getValue($this->config));
-
-        // Check account ID
-        $accountId = new \ReflectionProperty(ProjectConfig::class, '_accountId');
-        $accountId->setAccessible(true);
-        $this->assertEquals('1592310167', $accountId->getValue($this->config));
-
-        // Check project ID
-        $projectId = new \ReflectionProperty(ProjectConfig::class, '_projectId');
-        $projectId->setAccessible(true);
-        $this->assertEquals('7720880029', $projectId->getValue($this->config));
-
-        // Check revision
-        $revision = new \ReflectionProperty(ProjectConfig::class, '_revision');
-        $revision->setAccessible(true);
-        $this->assertEquals('15', $revision->getValue($this->config));
-
-        // Check group ID map
-        $groupIdMap = new \ReflectionProperty(ProjectConfig::class, '_groupIdMap');
-        $groupIdMap->setAccessible(true);
-        $this->assertEquals([
-            '7722400015' => $this->config->getGroup('7722400015')
-        ], $groupIdMap->getValue($this->config));
-
-        // Check experiment key map
-        $experimentKeyMap = new \ReflectionProperty(ProjectConfig::class, '_experimentKeyMap');
-        $experimentKeyMap->setAccessible(true);
-        $this->assertEquals([
-            'test_experiment' => $this->config->getExperimentFromKey('test_experiment'),
-            'paused_experiment' => $this->config->getExperimentFromKey('paused_experiment'),
-            'group_experiment_1' => $this->config->getExperimentFromKey('group_experiment_1'),
-            'group_experiment_2' => $this->config->getExperimentFromKey('group_experiment_2')
-        ], $experimentKeyMap->getValue($this->config));
-
-        // Check experiment ID map
-        $experimentIdMap = new \ReflectionProperty(ProjectConfig::class, '_experimentIdMap');
-        $experimentIdMap->setAccessible(true);
-        $this->assertEquals([
-            '7716830082' => $this->config->getExperimentFromId('7716830082'),
-            '7723330021' => $this->config->getExperimentFromId('7723330021'),
-            '7718750065' => $this->config->getExperimentFromId('7718750065'),
-            '7716830585' => $this->config->getExperimentFromId('7716830585')
-        ], $experimentIdMap->getValue($this->config));
-
-        // Check event key map
-        $eventKeyMap = new \ReflectionProperty(ProjectConfig::class, '_eventKeyMap');
-        $eventKeyMap->setAccessible(true);
-        $this->assertEquals([
-            'purchase' => $this->config->getEvent('purchase')
-        ], $eventKeyMap->getValue($this->config));
-
-        // Check attribute key map
-        $attributeKeyMap = new \ReflectionProperty(ProjectConfig::class, '_attributeKeyMap');
-        $attributeKeyMap->setAccessible(true);
-        $this->assertEquals([
-            'device_type' => $this->config->getAttribute('device_type'),
-            'location' => $this->config->getAttribute('location')
-        ], $attributeKeyMap->getValue($this->config));
-
-        // Check audience ID map
-        $audienceIdMap = new \ReflectionProperty(ProjectConfig::class, '_audienceIdMap');
-        $audienceIdMap->setAccessible(true);
-        $this->assertEquals([
-            '7718080042' => $this->config->getAudience('7718080042')
-        ], $audienceIdMap->getValue($this->config));
-
-        // Check variation key map
-        $variationKeyMap = new \ReflectionProperty(ProjectConfig::class, '_variationKeyMap');
-        $variationKeyMap->setAccessible(true);
-        $this->assertEquals([
-            'test_experiment' => [
-                'control' => $this->config->getVariationFromKey('test_experiment', 'control'),
-                'variation' => $this->config->getVariationFromKey('test_experiment', 'variation')
-            ],
-            'paused_experiment' => [
-                'control' => $this->config->getVariationFromKey('paused_experiment', 'control'),
-                'variation' => $this->config->getVariationFromKey('paused_experiment', 'variation')
-            ],
-            'group_experiment_1' => [
-                'group_exp_1_var_1' => $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_1'),
-                'group_exp_1_var_2' => $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_2')
-            ],
-            'group_experiment_2' => [
-                'group_exp_2_var_1' => $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_1'),
-                'group_exp_2_var_2' => $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_2')
-            ]
-        ], $variationKeyMap->getValue($this->config));
-
-        // Check variation ID map
-        $variationIdMap = new \ReflectionProperty(ProjectConfig::class, '_variationIdMap');
-        $variationIdMap->setAccessible(true);
-        $this->assertEquals([
-            'test_experiment' => [
-                '7722370027' => $this->config->getVariationFromId('test_experiment', '7722370027'),
-                '7721010009' => $this->config->getVariationFromId('test_experiment', '7721010009')
-            ],
-            'paused_experiment' => [
-                '7722370427' => $this->config->getVariationFromId('paused_experiment', '7722370427'),
-                '7721010509' => $this->config->getVariationFromId('paused_experiment', '7721010509')
-            ],
-            'group_experiment_1' => [
-                '7722260071' => $this->config->getVariationFromId('group_experiment_1', '7722260071'),
-                '7722360022' => $this->config->getVariationFromId('group_experiment_1', '7722360022')
-            ],
-            'group_experiment_2' => [
-                '7713030086' => $this->config->getVariationFromId('group_experiment_2', '7713030086'),
-                '7725250007' => $this->config->getVariationFromId('group_experiment_2', '7725250007')
-            ]
-        ], $variationIdMap->getValue($this->config));
+        $this->assertEquals($expectedVariation, $actualVariation);
     }
 
     public function testGetAccountId()
@@ -481,6 +328,30 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->with(new InvalidExperimentException('Provided experiment is not in datafile.'));
 
         $this->assertEquals(new Experiment(), $this->config->getExperimentFromId('42'));
+    }
+
+    public function testGetFeatureFlagInvalidKey()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'FeatureFlag Key "42" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidFeatureFlagException('Provided feature flag is not in datafile.'));
+
+        $this->assertEquals(new FeatureFlag(), $this->config->getFeatureFlagFromKey('42'));
+    }
+
+        public function testGetRolloutInvalidId()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Rollout ID "42" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidRolloutException('Provided rollout is not in datafile.'));
+
+        $this->assertEquals(new Rollout(), $this->config->getRolloutFromId('42'));
     }
 
     public function testGetEventValidKey()

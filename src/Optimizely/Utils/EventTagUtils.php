@@ -65,30 +65,30 @@ class EventTagUtils
 
         if (!$eventTags) {
             if($logger)
-                $logger->log(Logger::DEBUG,"Event tags is undefined.");
+                $logger->log(Logger::DEBUG, "Event tags is undefined.");
             return null;
         } else if (!is_array($eventTags)) {
             if($logger)
-                $logger->log(Logger::DEBUG,"Event tags is not a dictionary.");
+                $logger->log(Logger::DEBUG, "Event tags is not a dictionary.");
             return null;
         } else if (!isset($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
             if($logger)
-                $logger->log(Logger::DEBUG,"The numeric metric key is not defined in the event tags or is null.");
+                $logger->log(Logger::DEBUG, "The numeric metric key is not defined in the event tags or is null.");
             return null;
         } else if (!is_numeric($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
             if($logger)
-                $logger->log(Logger::DEBUG,"Numeric metric value is not an integer or float, or is not a numeric string.");
+                $logger->log(Logger::DEBUG, "Numeric metric value is not an integer or float, or is not a numeric string.");
             return null;
         } else if(is_nan($eventTags[self::NUMERIC_EVENT_METRIC_NAME]) || is_infinite(floatval($eventTags[self::NUMERIC_EVENT_METRIC_NAME]))){
             if($logger)
-                $logger->log(Logger::DEBUG,"Provided numeric value is in an invalid format.");
+                $logger->log(Logger::DEBUG, "Provided numeric value is in an invalid format.");
             return null;
         }
 
         $rawValue = $eventTags[self::NUMERIC_EVENT_METRIC_NAME];
         // # Log the final numeric metric value
         if($logger){
-            $logger->log(Logger::INFO,"The numeric metric value {$rawValue} will be sent to results.");
+            $logger->log(Logger::INFO, "The numeric metric value {$rawValue} will be sent to results.");
         } 
 
         return floatval($rawValue);

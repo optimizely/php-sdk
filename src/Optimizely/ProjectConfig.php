@@ -22,14 +22,18 @@ use Optimizely\Entity\Attribute;
 use Optimizely\Entity\Audience;
 use Optimizely\Entity\Event;
 use Optimizely\Entity\Experiment;
+use Optimizely\Entity\FeatureFlag;
 use Optimizely\Entity\Group;
+use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
 use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
+use Optimizely\Exceptions\InvalidFeatureFlagException;
 use Optimizely\Exceptions\InvalidGroupException;
+use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Utils\ConditionDecoder;
@@ -127,6 +131,30 @@ class ProjectConfig
     private $_forcedVariationMap;
 
     /**
+     * list of Feature Flags that will be parsed from the datafile.
+     * @var [FeatureFlag]
+     */
+    private $_featureFlags;
+
+    /**
+     * list of Rollouts that will be parsed from the datafile
+     * @var [Rollout]
+     */
+    private $_rollouts;
+
+    /**
+     * internal mapping of feature keys to feature flag models.
+     * @var <String, FeatureFlag>  associative array of feature keys to feature flags
+     */
+    private $_featureKeyMap;
+
+    /**
+     * internal mapping of rollout IDs to Rollout models.
+     * @var <String, Rollout>  associative array of rollout ids to rollouts
+     */
+    private $_rolloutIdMap;
+
+    /**
      * ProjectConfig constructor to load and set project configuration data.
      *
      * @param $datafile string JSON string representing the project.
@@ -150,12 +178,16 @@ class ProjectConfig
         $events = $config['events'] ?: [];
         $attributes = $config['attributes'] ?: [];
         $audiences = $config['audiences'] ?: [];
+        $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
+        $featureFlags = isset($config['featureFlags']) ? $config['featureFlags']: [];
 
         $this->_groupIdMap = ConfigParser::generateMap($groups, 'id', Group::class);
         $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);
         $this->_eventKeyMap = ConfigParser::generateMap($events, 'key', Event::class);
         $this->_attributeKeyMap = ConfigParser::generateMap($attributes, 'key', Attribute::class);
         $this->_audienceIdMap = ConfigParser::generateMap($audiences, 'id', Audience::class);
+        $this->_rollouts = ConfigParser::generateMap($rollouts, null, Rollout::class);
+        $this->_featureFlags = ConfigParser::generateMap($featureFlags, null, FeatureFlag::class);
 
         forEach(array_values($this->_groupIdMap) as $group) {
             $experimentsInGroup = ConfigParser::generateMap($group->getExperiments(), 'key', Experiment::class);
@@ -181,6 +213,14 @@ class ProjectConfig
         forEach(array_values($this->_audienceIdMap) as $audience) {
             $conditionDecoder->deserializeAudienceConditions($audience->getConditions());
             $audience->setConditionsList($conditionDecoder->getConditionsList());
+        }
+
+        foreach(array_values($this->_rollouts) as $rollout){
+            $this->_rolloutIdMap[$rollout->getId()] = $rollout;
+        }
+
+        foreach(array_values($this->_featureFlags) as $featureFlag){
+            $this->_featureKeyMap[$featureFlag->getKey()] = $featureFlag;
         }
     }
 
@@ -266,6 +306,36 @@ class ProjectConfig
         $this->_logger->log(Logger::ERROR, sprintf('Experiment ID "%s" is not in datafile.', $experimentId));
         $this->_errorHandler->handleError(new InvalidExperimentException('Provided experiment is not in datafile.'));
         return new Experiment();
+    }
+
+    /**
+     * @param  String $featureKey Key of the feature flag
+     * @return FeatureFlag Entity corresponding to the key.
+     */
+    public function getFeatureFlagFromKey($featureKey)
+    {
+        if(isset($this->_featureKeyMap[$featureKey])){
+            return $this->_featureKeyMap[$featureKey];
+        }
+
+        $this->_logger->log(Logger::ERROR, sprintf('FeatureFlag Key "%s" is not in datafile.', $featureKey));
+        $this->_errorHandler->handleError(new InvalidFeatureFlagException('Provided feature flag is not in datafile.'));
+        return new FeatureFlag();        
+    }
+
+    /**
+     * @param  String $rolloutId 
+     * @return Rollout
+     */
+    public function getRolloutFromId($rolloutId)
+    {
+        if (isset($this->_rolloutIdMap[$rolloutId])) {
+            return $this->_rolloutIdMap[$rolloutId];
+        }
+
+        $this->_logger->log(Logger::ERROR, sprintf('Rollout ID "%s" is not in datafile.', $rolloutId));
+        $this->_errorHandler->handleError(new InvalidRolloutException('Provided rollout is not in datafile.'));
+        return new Rollout();
     }
 
     /**
