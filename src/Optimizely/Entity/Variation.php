@@ -54,7 +54,7 @@ class Variation
 
         if(!empty($this->_variableUsageInstances)){
             foreach(array_values($this->_variableUsageInstances) as $variableUsage){
-                $_variableIdToVariableUsageInstanceMap[$variableUsage->getId()] = $variableUsage;
+                $this->_variableIdToVariableUsageInstanceMap[$variableUsage->getId()] = $variableUsage;
             }
         }
     }
@@ -96,9 +96,8 @@ class Variation
     }
 
     public function getVariableUsageById($variableId){
-        $variable_usage = $_variableIdToVariableUsageInstanceMap[$variableId];
-        if(isset($variable_usage))
-            return $variable_usage;
+        if(isset($this->_variableIdToVariableUsageInstanceMap[$variableId]))
+            return $this->_variableIdToVariableUsageInstanceMap[$variableId];
         else
             return null;
     }
@@ -108,7 +107,7 @@ class Variation
 
         if(!empty($this->_variableUsageInstances)){
             foreach(array_values($this->_variableUsageInstances) as $variableUsage){
-                $_variableIdToVariableUsageInstanceMap[$variableUsage->getId()] = $variableUsage;
+                $this->_variableIdToVariableUsageInstanceMap[$variableUsage->getId()] = $variableUsage;
             }
         }
     }

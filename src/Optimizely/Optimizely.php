@@ -24,6 +24,7 @@ use Monolog\Logger;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
+use Optimizely\Entity\FeatureVariable;
 use Optimizely\Entity\Rollout;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
@@ -456,7 +457,7 @@ class Optimizely
 
         if(!$decision){
              $this->_logger->log(Logger::INFO,"User '{$userId}'is not in any variation, ".
-                "returning default value'{$variable_value}'.");
+                "returning default value '{$variable_value}'.");
         } else {
             $variation = $decision['variation'];
             $variable_usage = $variation->getVariableUsageById($variable->getId());
@@ -467,8 +468,8 @@ class Optimizely
                     "of feature flag '{$featureFlagKey}'");
             } else {
                 $this->_logger->log(Logger::INFO,
-                    "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}, '". 
-                    "returning default value '{$variable_value}.'");
+                    "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}' ". 
+                    "returning default value '{$variable_value}'.");
             }
         }
 
