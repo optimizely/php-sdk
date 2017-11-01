@@ -96,7 +96,6 @@ class Variation
     }
 
     public function setVariables($variableUsageInstances){
-
         $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances, null , VariableUsage::class);
 
         if(!empty($this->_variableUsageInstances)){
