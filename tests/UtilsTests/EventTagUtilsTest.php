@@ -60,9 +60,9 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testGetRevenueValueWithRevenueTag() {
-        $this->assertEquals(65536, EventTagUtils::getRevenueValue(array('revenue' => 65536)));
-        $this->assertEquals(9223372036854775807, EventTagUtils::getRevenueValue(array('revenue' => 9223372036854775807)));
-        $this->assertEquals(0, EventTagUtils::getRevenueValue(array('revenue' => 0)));
+        $this->assertSame(65536, EventTagUtils::getRevenueValue(array('revenue' => 65536)));
+        $this->assertSame(9223372036854775807, EventTagUtils::getRevenueValue(array('revenue' => 9223372036854775807)));
+        $this->assertSame(0, EventTagUtils::getRevenueValue(array('revenue' => 0)));
     }
 
     public function testGetNumericValueWithUndefinedTags() {
