@@ -105,7 +105,7 @@ class EventBuilder
                             ENTITY_ID => $attributeEntity->getId(),
                             KEY => $attributeKey,
                             TYPE => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
-                            VALUE => $attributeValue,
+                            VALUE => $attributeValue
                         ];
                     }
                 }
@@ -139,8 +139,8 @@ class EventBuilder
                 [
                     ENTITY_ID => $experiment->getLayerId(),
                     TIMESTAMP => time()*1000,
-                    KEY => ACTIVATE_EVENT_KEY,
-                    UUID => GeneratorUtils::getRandomUuid()
+                    UUID => GeneratorUtils::getRandomUuid(),
+                    KEY => ACTIVATE_EVENT_KEY
                 ]
             ]
 
@@ -169,7 +169,7 @@ class EventBuilder
             $singleSnapshot[DECISIONS] = [
                 [
                     CAMPAIGN_ID => $experiment->getLayerId(),
-                    EXPERIMENT_ID => $experimentId,
+                    EXPERIMENT_ID => $experiment->getId(),
                     VARIATION_ID => $variationId
                 ]
             ];

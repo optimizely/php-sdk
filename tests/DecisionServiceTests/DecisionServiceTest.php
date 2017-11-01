@@ -147,7 +147,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationReturnsWhitelistedVariationForGroupedExperiment()
     {
-        $expectedVariation = new Variation('7722260071', 'group_exp_1_var_1',[
+        $expectedVariation = new Variation('7722260071', 'group_exp_1_var_1', [
                 [
                   "id" => "155563",
                   "value" => "groupie_1_v1"
@@ -567,15 +567,15 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         // check invalid audience with bucketing ID
         $variationKey = $optlyObject->getVariation($this->experimentKey, $userId, $invalidUserAttributesWithBucketingId);
-        $this->assertEquals(null, $variationKey);
+        $this->assertNull($variationKey);
 
         // check null audience with bucketing Id
         $variationKey = $optlyObject->getVariation($this->experimentKey, $userId, null);
-        $this->assertEquals(null, $variationKey);
+        $this->assertNull($variationKey);
 
         // test that an experiment that's not running returns a null variation
         $variationKey = $optlyObject->getVariation($pausedExperimentKey, $userId, $userAttributesWithBucketingId);
-        $this->assertEquals(null, $variationKey);
+        $this->assertNull($variationKey);
 
         // check forced variation
         $this->assertTrue($optlyObject->setForcedVariation($this->experimentKey, $userId, $this->variationKeyControl), sprintf('Set variation to "%s" failed.', $this->variationKeyControl));
