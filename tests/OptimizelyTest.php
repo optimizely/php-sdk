@@ -1798,12 +1798,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testIsFeatureEnabledGivenFeatureFlagIsNotEnabledForUser(){
+        // should return false when no variation is returned for user
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
             ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
             ->setMethods(array('sendImpressionEvent'))
             ->getMock();
 
-        // should return false when no variation is returned for user
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
             ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
             ->setMethods(array('getVariationForFeature'))
@@ -1813,10 +1813,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $decisionService->setAccessible(true);
         $decisionService->setValue($optimizelyMock, $decisionServiceMock);
 
+        // mock getVariationForFeature to return null
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')
             ->will($this->returnValue(null));
 
+        // assert that impression event is not sent
         $optimizelyMock->expects($this->never())
             ->method('sendImpressionEvent');
 
@@ -1829,7 +1831,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
              false);
     }
 
-    public function testIsFeatureEnabledGivenFeatureFlagIsEnabledAndUserBeingExperimented(){
+    public function testIsFeatureEnabledGivenFeatureFlagIsEnabledAndUserIsBeingExperimented(){
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
             ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
             ->setMethods(array('sendImpressionEvent'))
@@ -1854,6 +1856,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('getVariationForFeature')
             ->will($this->returnValue($expected_decision));
 
+        // assert that sendImpressionEvent is called with expected params
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
             ->with('test_experiment_double_feature', 'control', 'user_id', []);
@@ -1895,6 +1898,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('getVariationForFeature')
             ->will($this->returnValue($expected_decision));
 
+        // assert that sendImpressionEvent is not called
         $optimizelyMock->expects($this->never())
             ->method('sendImpressionEvent');
 

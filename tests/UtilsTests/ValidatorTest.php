@@ -178,23 +178,23 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         // should return true when no experiment ids exist
         $feature_flag = clone $feature_flag_source;
         $feature_flag->setExperimentIds([]);
-        $this->assertSame(Validator::isFeatureFlagValid($config, $feature_flag), true);
+        $this->assertTrue(Validator::isFeatureFlagValid($config, $feature_flag));
 
-        // should return true when only 1 experiment id exist
+        // should return true when only one experiment id exists
         $feature_flag = clone $feature_flag_source;
-        $feature_flag->setExperimentIds([]);
-        $this->assertSame(Validator::isFeatureFlagValid($config, $feature_flag), true);
+        $feature_flag->setExperimentIds(['122241']);
+        $this->assertTrue(Validator::isFeatureFlagValid($config, $feature_flag));
 
-        // should return true when more than 1 experiment ids exist that belong to the same group
+        // should return true when more than one experiment ids exist that belong to the same group
         $feature_flag = clone $feature_flag_source;
-        $this->assertSame(Validator::isFeatureFlagValid($config, $feature_flag), true);
+        $this->assertTrue(Validator::isFeatureFlagValid($config, $feature_flag));
 
-        //should return false when more than 1 experiment ids exist that belong to different group
+        //should return false when more than one experiment ids exist that belong to different group
         $feature_flag = clone $feature_flag_source;
         $experimentIds = $feature_flag->getExperimentIds();
         $experimentIds [] = '122241';
         $feature_flag->setExperimentIds($experimentIds);
 
-        $this->assertSame(Validator::isFeatureFlagValid($config, $feature_flag), false);
+        $this->assertFalse(Validator::isFeatureFlagValid($config, $feature_flag));
     }
 }

@@ -52,11 +52,7 @@ class Variation
 
         $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances, null, VariableUsage::class);
 
-        if(!empty($this->_variableUsageInstances)){
-            foreach(array_values($this->_variableUsageInstances) as $variableUsage){
-                $this->_variableIdToVariableUsageInstanceMap[$variableUsage->getId()] = $variableUsage;
-            }
-        }
+        $this->generateVariableIdToVariableUsageMap();
     }
 
     /**
@@ -91,10 +87,18 @@ class Variation
         $this->_key = $key;
     }
 
+    /**
+     * @return [VariableUsage] Variable usage instances in this variation
+     */
     public function getVariables(){
         return $this->_variableUsageInstances;
     }
 
+    /**
+     * @param  string Variable ID
+     * 
+     * @return VariableUsage Variable usage instance corresponding to given variable ID
+     */
     public function getVariableUsageById($variableId){
         if(isset($this->_variableIdToVariableUsageInstanceMap[$variableId]))
             return $this->_variableIdToVariableUsageInstanceMap[$variableId];
@@ -102,9 +106,19 @@ class Variation
             return null;
     }
 
+    /**
+     * @param [VariableUsage] array of variable usage instances
+     */
     public function setVariables($variableUsageInstances){
         $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances, null , VariableUsage::class);
+        $this->generateVariableIdToVariableUsageMap();
+    }
 
+    /**
+     * Generates variable ID to Variable usage instance map
+     * from variable usage instances
+     */
+    private function generateVariableIdToVariableUsageMap(){
         if(!empty($this->_variableUsageInstances)){
             foreach(array_values($this->_variableUsageInstances) as $variableUsage){
                 $this->_variableIdToVariableUsageInstanceMap[$variableUsage->getId()] = $variableUsage;
