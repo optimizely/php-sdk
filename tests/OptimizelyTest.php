@@ -18,6 +18,7 @@ namespace Optimizely\Tests;
 
 use Exception;
 use Monolog\Logger;
+use Optimizely\DecisionService\Decision;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
@@ -1847,10 +1848,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $decisionService->setValue($optimizelyMock, $decisionServiceMock);
 
         // Mock getVariationForFeature to return a valid decision with experiment and variation keys
-        $expected_decision = [
-            'experiment' => $this->projectConfig->getExperimentFromKey('test_experiment_double_feature'),
-            'variation' => $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control')
-        ];
+        $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
+        $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
+
+        $expected_decision = new Decision(
+            $experiment->getId(), $variation->getId(), Decision::DECISION_SOURCE_EXPERIMENT);
 
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')
@@ -1889,10 +1891,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $rollout = $this->projectConfig->getRolloutFromId('166660');
         $experiment = $rollout->getExperiments()[0];
         $variation = $experiment->getVariations()[0];
-        $expected_decision = [
-            'experiment' => null,
-            'variation' => $variation
-        ];
+        $expected_decision = new Decision(
+            $experiment->getId(), $variation->getId(), Decision::DECISION_SOURCE_ROLLOUT);
 
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')
@@ -2030,7 +2030,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
              '14.99');
     }
 
-    public function testGetFeatureVariableValueForTypeGivenFeatureFlagIsEnabledForUserAndVaribaleIsInVariation(){
+    public function testGetFeatureVariableValueForTypeGivenFeatureFlagIsEnabledForUserAndVariableIsInVariation(){
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
             ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
@@ -2043,10 +2043,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
-        $expected_decision = [
-            'experiment' => $experiment,
-            'variation' => $variation
-        ];
+        $expected_decision = new Decision(
+            $experiment->getId(), $variation->getId(), Decision::DECISION_SOURCE_EXPERIMENT);
 
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')
@@ -2063,7 +2061,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
              '42.42');
     }
 
-    public function testGetFeatureVariableValueForTypeGivenFeatureFlagIsEnabledForUserAndVaribaleNotInVariation(){
+    public function testGetFeatureVariableValueForTypeGivenFeatureFlagIsEnabledForUserAndVariableNotInVariation(){
         // should return default value
         
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
@@ -2078,10 +2076,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Mock getVariationForFeature to return experiment/variation from a different feature
         $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_integer_feature');
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_integer_feature', 'control');
-        $expected_decision = [
-            'experiment' => $experiment,
-            'variation' => $variation
-        ];
+        $expected_decision = new Decision(
+            $experiment->getId(), $variation->getId(), Decision::DECISION_SOURCE_EXPERIMENT);
 
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')

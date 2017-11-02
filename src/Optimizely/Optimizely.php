@@ -21,6 +21,7 @@ use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
 use Monolog\Logger;
+use Optimizely\DecisionService\Decision;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
@@ -416,11 +417,13 @@ class Optimizely
             return false;
         }
 
-        if($decision["experiment"]){
-            $experiment_key = $decision["experiment"]->getKey();
-            $variation_key = $decision["variation"]->getKey();
+        if($decision->getSource() == Decision::DECISION_SOURCE_EXPERIMENT){
+            $experiment_id = $decision->getExperimentId();
+            $variation_id = $decision->getVariationId();
+            $experiment = $this->_config->getExperimentFromId($experiment_id);
+            $variation = $this->_config->getVariationFromId($experiment->getKey(), $variation_id);
 
-            $this->sendImpressionEvent($experiment_key, $variation_key, $userId, $attributes);
+            $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
         } else {
             $this->_logger->log(Logger::INFO,"The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
         }
@@ -482,7 +485,10 @@ class Optimizely
              $this->_logger->log(Logger::INFO,"User '{$userId}'is not in any variation, ".
                 "returning default value '{$variable_value}'.");
         } else {
-            $variation = $decision['variation'];
+            $experiment_id = $decision->getExperimentId();
+            $variation_id = $decision->getVariationId();
+            $experiment = $this->_config->getExperimentFromId($experiment_id);
+            $variation = $this->_config->getVariationFromId($experiment->getKey(), $variation_id);
             $variable_usage = $variation->getVariableUsageById($variable->getId());
             if($variable_usage){
                 $variable_value = $variable_usage->getValue();
