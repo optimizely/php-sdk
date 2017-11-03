@@ -37,7 +37,6 @@ use Optimizely\Exceptions\InvalidFeatureFlagException;
 use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidVariationException;
-use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Optimizely;
 use Optimizely\ProjectConfig;

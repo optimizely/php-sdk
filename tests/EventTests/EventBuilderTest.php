@@ -44,7 +44,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->eventBuilder = new EventBuilder();
         $this->timestamp = time()*1000;
         $this->uuid = 'a68cf1ad-0393-4e18-af87-efe8f01a7c9c';
-        $this->differ = new Differ;
+        $this->differ = new Differ();
 
         $this->expectedEventUrl = 'https://logx.optimizely.com/v1/events';
         $this->expectedEventParams = [

@@ -18,16 +18,16 @@ namespace Optimizely\Tests;
 
 use Exception;
 use Monolog\Logger;
+use Optimizely\ErrorHandler\DefaultErrorHandler;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
+use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Event\LogEvent;
 use Optimizely\Exceptions\InvalidAttributeException;
+use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\Optimizely;
 use Optimizely\ProjectConfig;
 use TypeError;
-use Optimizely\ErrorHandler\DefaultErrorHandler;
-use Optimizely\Event\Builder\EventBuilder;
-use Optimizely\Logger\DefaultLogger;
-use Optimizely\Optimizely;
 
 
 class OptimizelyTest extends \PHPUnit_Framework_TestCase
