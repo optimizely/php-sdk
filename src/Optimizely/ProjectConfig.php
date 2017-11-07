@@ -156,6 +156,10 @@ class ProjectConfig
      */
     private $_rolloutIdMap;
 
+    /**
+     * Feature Flag key to Feature Variable key to Feature Variable map
+     * @var <String, <String, FeatureVariable>>
+     */
     private $_featureFlagVariableMap;
 
     /**
@@ -443,6 +447,13 @@ class ProjectConfig
         return new Variation();
     }
 
+    /**
+     * Gets the feature variable instance given feature flag key and variable key
+     * @param  string Feature flag key
+     * @param  string Variable key
+     * 
+     * @return FeatureVariable / null
+     */
     public function getFeatureVariableFromKey($featureFlagKey, $variableKey)
     {
         $feature_flag = $this->getFeatureFlagFromKey($featureFlagKey);

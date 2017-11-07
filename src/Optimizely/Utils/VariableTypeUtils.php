@@ -36,7 +36,7 @@ class VariableTypeUtils
 				break;
 
 			case FeatureVariable::INTEGER_TYPE :
-				if(is_numeric($value)){
+				if(ctype_digit($value)){
 					$return_value = (int) $value;
 				}
 				break;

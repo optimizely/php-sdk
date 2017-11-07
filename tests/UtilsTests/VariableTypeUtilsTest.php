@@ -38,25 +38,25 @@ class VariableTypeUtilsTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testValueCastingToBoolean(){
-        $this->assertSame($this->variableUtilObj->castStringToType('true', 'boolean'), true);
-        $this->assertSame($this->variableUtilObj->castStringToType('True', 'boolean'), true);
-        $this->assertSame($this->variableUtilObj->castStringToType('false', 'boolean'), false);
-        $this->assertSame($this->variableUtilObj->castStringToType('somestring', 'boolean'), false);
+        $this->assertTrue($this->variableUtilObj->castStringToType('true', 'boolean'));
+        $this->assertTrue($this->variableUtilObj->castStringToType('True', 'boolean'));
+        $this->assertFalse($this->variableUtilObj->castStringToType('false', 'boolean'));
+        $this->assertFalse($this->variableUtilObj->castStringToType('somestring', 'boolean'));
     }
 
     public function testValueCastingToInteger(){
        $this->assertSame($this->variableUtilObj->castStringToType('1000', 'integer'), 1000);
        $this->assertSame($this->variableUtilObj->castStringToType('123', 'integer'), 123);
 
-       // should return nil and log a message if value can not be casted to an integer
-       $value = 'any-non-numeric-string';
+       // should return nulll and log a message if value can not be casted to an integer
+       $value = '123.5'; // any string with non-decimal digits
        $type = 'integer';     
        $this->loggerMock->expects($this->exactly(1))
             ->method('log')
             ->with(Logger::ERROR, 
             "Unable to cast variable value '{$value}' to type '{$type}'.");
 
-       $this->assertSame($this->variableUtilObj->castStringToType($value, $type, $this->loggerMock), null);
+       $this->assertNull($this->variableUtilObj->castStringToType($value, $type, $this->loggerMock));
    }
 
    public function testValueCastingToDouble(){
@@ -72,7 +72,7 @@ class VariableTypeUtilsTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::ERROR, 
             "Unable to cast variable value '{$value}' to type '{$type}'.");
 
-       $this->assertSame($this->variableUtilObj->castStringToType($value, $type, $this->loggerMock), null);
+       $this->assertNull($this->variableUtilObj->castStringToType($value, $type, $this->loggerMock));
    }
 
    public function testValueCastingToString(){
