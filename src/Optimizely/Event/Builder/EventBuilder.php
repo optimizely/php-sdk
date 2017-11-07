@@ -59,7 +59,7 @@ class EventBuilder
      * Helper function to get parameters common to impression and conversion events.
      *
      * @param $config ProjectConfig Configuration for the project.
-     * @param $userId String ID of user.
+     * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.
      *
      * @return array Hash representing parameters which are common to both impression and conversion events.
