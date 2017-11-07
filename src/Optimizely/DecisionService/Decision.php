@@ -18,51 +18,51 @@ namespace Optimizely\DecisionService;
 
 class Decision
 {
-	const DECISION_SOURCE_EXPERIMENT = 'experiment';
-	const DECISION_SOURCE_ROLLOUT = 'rollout';
+    const DECISION_SOURCE_EXPERIMENT = 'experiment';
+    const DECISION_SOURCE_ROLLOUT = 'rollout';
 
-   /**
-   * @var string The ID experiment in this decision.
-   */
-   private $_experimentId;
+    /**
+    * @var string The ID experiment in this decision.
+    */
+    private $_experimentId;
 
-   /**
-   * @var string The ID variation in this decision.
-   */
-   private $_variationId;
+    /**
+    * @var string The ID variation in this decision.
+    */
+    private $_variationId;
 
-   /**
-   * The source of the decision. Either DECISION_SOURCE_EXPERIMENT or DECISION_SOURCE_ROLLOUT
-   * @var string
-   */
-   private $_source;
+    /**
+    * The source of the decision. Either DECISION_SOURCE_EXPERIMENT or DECISION_SOURCE_ROLLOUT
+    * @var string
+    */
+    private $_source;
 
-   /**
-   * Decision constructor.
-   *
-   * @param $experimentId
-   * @param $variationId
-   * @param $source
-   */
-   public function __construct($experimentId, $variationId, $source)
-   {
-   	$this->_experimentId = $experimentId;
-   	$this->_variationId = $variationId;
-   	$this->_source = $source;
-   }
+    /**
+    * Decision constructor.
+    *
+    * @param $experimentId
+    * @param $variationId
+    * @param $source
+    */
+    public function __construct($experimentId, $variationId, $source)
+    {
+        $this->_experimentId = $experimentId;
+        $this->_variationId = $variationId;
+        $this->_source = $source;
+    }
 
-   public function getExperimentId()
-   {
-   	return $this->_experimentId;
-   }
+    public function getExperimentId()
+    {
+        return $this->_experimentId;
+    }
 
-   public function getVariationId()
-   {
-   	return $this->_variationId;
-   }
+    public function getVariationId()
+    {
+        return $this->_variationId;
+    }
 
-   public function getSource()
-   {
-   	return $this->_source;
-   }
+    public function getSource()
+    {
+        return $this->_source;
+    }
 }

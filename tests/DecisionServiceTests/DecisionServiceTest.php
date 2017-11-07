@@ -637,7 +637,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(1))
         ->method('log')
         ->with(Logger::INFO, 
-            "The user 'user1' is not bucketed into any of the experiments on the feature 'boolean_feature'.");
+            "The user 'user1' is not bucketed into any of the experiments using the feature 'boolean_feature'.");
 
         $this->assertSame(
             $this->decisionService->getVariationForFeatureExperiment($feature_flag,'user1',[]),
@@ -658,7 +658,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
         ->method('log')
         ->with(Logger::INFO, 
-            "The user 'user1' is not bucketed into any of the experiments on the feature 'multi_variate_feature'.");
+            "The user 'user1' is not bucketed into any of the experiments using the feature 'multi_variate_feature'.");
         $feature_flag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
         $this->assertSame(
             $this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user1', []),
@@ -725,7 +725,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
         ->method('log')
         ->with(Logger::INFO, 
-            "The user 'user_1' is not bucketed into any of the experiments on the feature 'boolean_feature'.");
+            "The user 'user_1' is not bucketed into any of the experiments using the feature 'boolean_feature'.");
         $this->assertEquals(
             $this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user_1', []),
             null
@@ -786,7 +786,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
         ->method('log')
         ->with(Logger::INFO, 
-            "User 'user_1' is bucketed into a rollout for feature flag 'string_single_variable_feature'.");
+            "User 'user_1' is bucketed into rollout for feature flag 'string_single_variable_feature'.");
 
         $this->assertEquals(
             $decisionServiceMock->getVariationForFeature($feature_flag, 'user_1', []),
@@ -814,7 +814,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
         ->method('log')
         ->with(Logger::INFO, 
-            "User 'user_1' is not bucketed into a rollout for feature flag 'string_single_variable_feature'.");
+            "User 'user_1' is not bucketed into rollout for feature flag 'string_single_variable_feature'.");
 
         $this->assertEquals(
             $decisionServiceMock->getVariationForFeature($feature_flag, 'user_1', []),
@@ -952,7 +952,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::DEBUG, 
-            "User 'user_1' was excluded due to traffic allocation. Checking 'Eveyrone Else' rule now.");
+            "User 'user_1' was excluded due to traffic allocation. Checking 'Everyone Else' rule now.");
 
 
         $this->assertEquals(
@@ -993,11 +993,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::DEBUG, 
-            "User 'user_1' was excluded due to traffic allocation. Checking 'Eveyrone Else' rule now.");
+            "User 'user_1' was excluded due to traffic allocation. Checking 'Everyone Else' rule now.");
         $this->loggerMock->expects($this->at(2))
             ->method('log')
             ->with(Logger::DEBUG, 
-            "User 'user_1'  was excluded from the 'Everyone Else' rule for feature flag");
+            "User 'user_1' was excluded from the 'Everyone Else' rule for feature flag");
 
         $this->assertEquals(
             $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes),
