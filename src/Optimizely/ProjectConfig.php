@@ -320,8 +320,9 @@ class ProjectConfig
     }
 
     /**
-     * @param  String $featureKey 
-     * @return FeatureFlag
+     * @param  String $featureKey Key of the feature flag
+     * 
+     * @return FeatureFlag Entity corresponding to the key.
      */
     public function getFeatureFlagFromKey($featureKey)
     {
@@ -336,8 +337,8 @@ class ProjectConfig
 
     /**
      * @param  String $rolloutId 
-     * @return Rollout
      * 
+     * @return Rollout
      */
     public function getRolloutFromId($rolloutId)
     {
@@ -346,6 +347,7 @@ class ProjectConfig
         }
 
         $this->_logger->log(Logger::ERROR, sprintf('Rollout with ID "%s" is not in the datafile.', $rolloutId));
+
         $this->_errorHandler->handleError(new InvalidRolloutException('Provided rollout is not in datafile.'));
         return new Rollout();
     }
