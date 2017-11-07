@@ -24,34 +24,36 @@ use Optimizely\Logger\LoggerInterface;
 
 class VariableTypeUtils
 {
-	public static function castStringToType($value, $variableType, LoggerInterface $logger = null){
-		if($variableType == FeatureVariable::STRING_TYPE)
-			return $value;
+    public static function castStringToType($value, $variableType, LoggerInterface $logger = null)
+    {
+        if ($variableType == FeatureVariable::STRING_TYPE) {
+            return $value;
+        }
 
-		$return_value = null;
+        $return_value = null;
 
-		switch($variableType){
-			case FeatureVariable::BOOLEAN_TYPE : 
-				$return_value = strtolower($value) == "true";
-				break;
+        switch ($variableType) {
+            case FeatureVariable::BOOLEAN_TYPE:
+                $return_value = strtolower($value) == "true";
+                break;
 
-			case FeatureVariable::INTEGER_TYPE :
-				if(ctype_digit($value)){
-					$return_value = (int) $value;
-				}
-				break;
+            case FeatureVariable::INTEGER_TYPE:
+                if (ctype_digit($value)) {
+                    $return_value = (int) $value;
+                }
+                break;
 
-			case FeatureVariable::DOUBLE_TYPE :
-				if(is_numeric($value)){
-					$return_value = (float) $value;
-				}
-				break;
-		}
+            case FeatureVariable::DOUBLE_TYPE:
+                if (is_numeric($value)) {
+                    $return_value = (float) $value;
+                }
+                break;
+        }
 
-		if(is_null($return_value) && $logger)
-			$logger->log(Logger::ERROR, "Unable to cast variable value '{$value}' to type '{$variableType}'.");
+        if (is_null($return_value) && $logger) {
+            $logger->log(Logger::ERROR, "Unable to cast variable value '{$value}' to type '{$variableType}'.");
+        }
 
-		return $return_value;
-	}
-
+        return $return_value;
+    }
 }

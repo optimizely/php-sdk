@@ -171,7 +171,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         ));
     }
 
-    public function testIsFeatureFlagValid(){
+    public function testIsFeatureFlagValid()
+    {
         $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $feature_flag_source = $config->getFeatureFlagFromKey('mutex_group_feature');
 

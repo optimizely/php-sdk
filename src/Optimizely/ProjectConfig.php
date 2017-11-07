@@ -457,7 +457,7 @@ class ProjectConfig
     public function getFeatureVariableFromKey($featureFlagKey, $variableKey)
     {
         $feature_flag = $this->getFeatureFlagFromKey($featureFlagKey);
-        if($feature_flag == new FeatureFlag())
+        if($feature_flag && !($feature_flag->getKey()))
             return null;
 
         if(isset($this->_featureFlagVariableMap[$featureFlagKey]) &&
