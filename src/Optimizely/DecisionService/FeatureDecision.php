@@ -16,7 +16,7 @@
  */
 namespace Optimizely\DecisionService;
 
-class Decision
+class FeatureDecision
 {
     const DECISION_SOURCE_EXPERIMENT = 'experiment';
     const DECISION_SOURCE_ROLLOUT = 'rollout';
@@ -38,7 +38,7 @@ class Decision
     private $_source;
 
     /**
-    * Decision constructor.
+    * FeatureDecision constructor.
     *
     * @param $experimentId
     * @param $variationId
