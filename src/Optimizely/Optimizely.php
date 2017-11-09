@@ -22,7 +22,6 @@ use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
 use Monolog\Logger;
 use Optimizely\DecisionService\DecisionService;
-use Optimizely\Entity\Experiment;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
@@ -175,10 +174,10 @@ class Optimizely
      * is one that is in "Running" state and into which the user has been bucketed.
      *
      * @param  $event string Event key representing the event which needs to be recorded.
-     * @param  $user string ID for user.
+     * @param  $userId string ID for user.
      * @param  $attributes array Attributes of the user.
      *
-     * @return Array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
+     * @return array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
      */
     private function getValidExperimentsForEvent($event, $userId, $attributes = null) {
         $validExperiments = [];

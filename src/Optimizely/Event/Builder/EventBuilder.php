@@ -61,6 +61,8 @@ class EventBuilder
      * @param $config ProjectConfig Configuration for the project.
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.
+     *
+     * @return array Hash representing parameters which are common to both impression and conversion events.
      */
     private function getCommonParams($config, $userId, $attributes)
     {
@@ -89,14 +91,12 @@ class EventBuilder
             if (!is_null($attributeValue)) {
                 // check for reserved attributes
                 if (strcmp($attributeKey , RESERVED_ATTRIBUTE_KEY_BUCKETING_ID) == 0) {
-                    // TODO (Alda): the type for bucketing ID attribute may change so that custom
-                    // attributes are not overloaded
                    $feature = [
-                        ENTITY_ID => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID,
-                        KEY => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
-                        TYPE => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
-                        VALUE => $attributeValue
-                        ];
+                       ENTITY_ID => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID,
+                       KEY => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
+                       TYPE => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
+                       VALUE => $attributeValue
+                   ];
 
                 } else {
                     $attributeEntity = $config->getAttribute($attributeKey);
@@ -122,7 +122,9 @@ class EventBuilder
      * Helper function to get parameters specific to impression event.
      *
      * @param $experiment Experiment Experiment being activated.
-     * @param $variationId string
+     * @param $variationId String ID representing the variation for the user.
+     *
+     * @return array Hash representing parameters particular to impression event.
      */
     private function getImpressionParams(Experiment $experiment, $variationId)
     {
@@ -156,6 +158,8 @@ class EventBuilder
      * @param $eventKey string Key representing the event.
      * @param $experimentVariationMap array Map of experiment ID to the ID of the variation that the user is bucketed into.
      * @param $eventTags array Hash representing metadata associated with the event.
+     *
+     * @return array Hash representing parameters particular to conversion event.
      */
     private function getConversionParams($config, $eventKey, $experimentVariationMap, $eventTags)
     {

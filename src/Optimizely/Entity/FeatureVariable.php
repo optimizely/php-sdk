@@ -17,7 +17,8 @@
 
 namespace Optimizely\Entity;
 
-class FeatureVariable{
+class FeatureVariable
+{
 
 	// Feature variable primitive types
 	const BOOLEAN_TYPE = 'boolean';
