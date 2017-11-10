@@ -97,7 +97,8 @@ class DecisionService
       // By default, the bucketing ID should be the user ID
       $bucketingId = $userId;
 
-      // If the bucketing ID key is defined in userAttributes, then use that in place of the userID for the murmur hash key
+      // If the bucketing ID key is defined in userAttributes, then use that in
+      // place of the userID for the murmur hash key
       if (!empty($userAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID])) {
             $bucketingId = $userAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
             $this->_logger->log(Logger::DEBUG, sprintf('Setting the bucketing ID to "%s".', $bucketingId));
@@ -217,7 +218,7 @@ class DecisionService
         $feature_flag_key = $featureFlag->getKey();
         $experimentIds = $featureFlag->getExperimentIds();
 
-        //Check if there are any experiment ids inside feature flag
+        // Check if there are any experiment IDs inside feature flag
         if (empty($experimentIds)) {
             $this->_logger->log(
                 Logger::DEBUG,
@@ -226,7 +227,7 @@ class DecisionService
             return null;
         }
 
-        // Evaluate each experiment id and return the first bucketed experiment variation
+        // Evaluate each experiment ID and return the first bucketed experiment variation
         foreach ($experimentIds as $experiment_id) {
             $experiment = $this->_projectConfig->getExperimentFromId($experiment_id);
             if ($experiment && !($experiment->getKey())) {
@@ -254,7 +255,7 @@ class DecisionService
     }
 
     /**
-    * Get the variation if the user is bucketed into rollout on this feature flag
+    * Get the variation if the user is bucketed into rollout for this feature flag
     * Evaluate the user for rules in priority order by seeing if the user satisfies the audience.
     * Fall back onto the everyone else rule if the user is ever excluded from a rule due to traffic allocation.
     * @param  FeatureFlag $featureFlag The feature flag the user wants to access
