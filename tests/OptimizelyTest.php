@@ -2151,7 +2151,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::INFO,
-                "Variable 'double_variable' is not used in variation 'control' returning default value '14.99'."
+                "Variable 'double_variable' is not used in variation 'control', returning default value '14.99'."
             );
 
         $this->assertSame(

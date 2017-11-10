@@ -206,6 +206,41 @@ class Optimizely
     }
 
     /**
+     * @param  string Experiment key
+     * @param  string Variation key
+     * @param  string User ID
+     * @param  array Associative array of user attributes
+     */
+    protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
+    {
+        $impressionEvent = $this->_eventBuilder
+            ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
+        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
+        $this->_logger->log(
+            Logger::DEBUG,
+            sprintf(
+                'Dispatching impression event to URL %s with params %s.',
+                $impressionEvent->getUrl(),
+                http_build_query($impressionEvent->getParams())
+            )
+        );
+
+        try {
+            $this->_eventDispatcher->dispatchEvent($impressionEvent);
+        } catch (Throwable $exception) {
+            $this->_logger->log(Logger::ERROR, sprintf(
+                'Unable to dispatch impression event. Error %s',
+                $exception->getMessage()
+            ));
+        } catch (Exception $exception) {
+            $this->_logger->log(Logger::ERROR, sprintf(
+                'Unable to dispatch impression event. Error %s',
+                $exception->getMessage()
+            ));
+        }
+    }
+    
+    /**
      * Buckets visitor and sends impression event to Optimizely.
      *
      * @param $experimentKey string Key identifying the experiment.
@@ -465,7 +500,7 @@ class Optimizely
         }
 
         $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
-        if ($feature_flag == new FeatureFlag) {
+        if ($feature_flag && (!$feature_flag->getId())) {
             // Error logged in ProjectConfig - getFeatureFlagFromKey
             return null;
         }
@@ -506,7 +541,7 @@ class Optimizely
             } else {
                 $this->_logger->log(
                     Logger::INFO,
-                    "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}' ".
+                    "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}', ".
                     "returning default value '{$variable_value}'."
                 );
             }
@@ -613,40 +648,5 @@ class Optimizely
         );
 
         return $variable_value;
-    }
-
-    /**
-     * @param  string Experiment key
-     * @param  string Variation key
-     * @param  string User ID
-     * @param  array Associative array of user attributes
-     */
-    public function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
-    {
-        $impressionEvent = $this->_eventBuilder
-            ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
-        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
-        $this->_logger->log(
-            Logger::DEBUG,
-            sprintf(
-                'Dispatching impression event to URL %s with params %s.',
-                $impressionEvent->getUrl(),
-                http_build_query($impressionEvent->getParams())
-            )
-        );
-
-        try {
-            $this->_eventDispatcher->dispatchEvent($impressionEvent);
-        } catch (Throwable $exception) {
-            $this->_logger->log(Logger::ERROR, sprintf(
-                'Unable to dispatch impression event. Error %s',
-                $exception->getMessage()
-            ));
-        } catch (Exception $exception) {
-            $this->_logger->log(Logger::ERROR, sprintf(
-                'Unable to dispatch impression event. Error %s',
-                $exception->getMessage()
-            ));
-        }
     }
 }
