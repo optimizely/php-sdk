@@ -44,7 +44,6 @@ class Validator
                 $logger->log(Logger::DEBUG, "JSON does not validate. Violations:\n");;
                 foreach ($validator->getErrors() as $error) {
                    $logger->log(Logger::DEBUG, "[%s] %s\n", $error['property'], $error['message']);
-
                 }
            }
 

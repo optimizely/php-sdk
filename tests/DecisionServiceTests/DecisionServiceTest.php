@@ -19,8 +19,8 @@ namespace Optimizely\Tests;
 use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
-use Optimizely\DecisionService\Decision;
 use Optimizely\DecisionService\DecisionService;
+use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
@@ -682,7 +682,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         ->will($this->returnValue($variation));
         
         $feature_flag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
-        $expected_decision = new Decision($experiment->getId(), $variation->getId(), Decision::DECISION_SOURCE_EXPERIMENT);
+        $expected_decision = new FeatureDecision($experiment->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_EXPERIMENT);
 
         $this->loggerMock->expects($this->at(0))
         ->method('log')
@@ -708,7 +708,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
         $variation = $mutex_exp->getVariations()[0];
-        $expected_decision = new Decision($mutex_exp->getId(), $variation->getId(), Decision::DECISION_SOURCE_EXPERIMENT);
+        $expected_decision = new FeatureDecision($mutex_exp->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_EXPERIMENT);
 
         $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
         $this->loggerMock->expects($this->at(0))
@@ -787,11 +787,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment = $rollout->getExperiments()[0];
         $expected_variation = $experiment->getVariations()[0];
-        $expected_decision = new Decision(
-            $experiment->getId(),
-            $expected_variation->getId(),
-            Decision::DECISION_SOURCE_ROLLOUT
-        );
+        $expected_decision = new FeatureDecision(
+            $experiment->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);
+
 
         $decisionServiceMock
         ->method('getVariationForFeatureExperiment')
@@ -922,12 +920,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment = $rollout->getExperiments()[0];
         $expected_variation = $experiment->getVariations()[0];
+        $expected_decision = new FeatureDecision(
+            $experiment->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);   
 
-        $expected_decision = new Decision(
-            $experiment->getId(),
-            $expected_variation->getId(),
-            Decision::DECISION_SOURCE_ROLLOUT
-        );
         // Provide attributes such that user qualifies for audience
         $user_attributes = ["browser_type" => "chrome"];
 
@@ -963,12 +958,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         // Everyone Else Rule
         $experiment2 = $rollout->getExperiments()[2];
         $expected_variation = $experiment2->getVariations()[0];
-
-        $expected_decision = new Decision(
-            $experiment2->getId(),
-            $expected_variation->getId(),
-            Decision::DECISION_SOURCE_ROLLOUT
-        );
+        $expected_decision = new FeatureDecision(
+            $experiment2->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT); 
 
         // Provide attributes such that user qualifies for audience
         $user_attributes = ["browser_type" => "chrome"];
@@ -1072,12 +1063,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         // Everyone Else Rule
         $experiment2 = $rollout->getExperiments()[2];
         $expected_variation = $experiment2->getVariations()[0];
-
-        $expected_decision = new Decision(
-            $experiment2->getId(),
-            $expected_variation->getId(),
-            Decision::DECISION_SOURCE_ROLLOUT
-        );
+        $expected_decision = new FeatureDecision(
+            $experiment2->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);   
 
         // Provide null attributes so that user does not qualify for audience
         $user_attributes = [];
