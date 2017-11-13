@@ -21,8 +21,8 @@ use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
 use Monolog\Logger;
-use Optimizely\DecisionService\Decision;
 use Optimizely\DecisionService\DecisionService;
+use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
 use Optimizely\Entity\FeatureVariable;
@@ -452,7 +452,7 @@ class Optimizely
             return false;
         }
 
-        if ($decision->getSource() == Decision::DECISION_SOURCE_EXPERIMENT) {
+        if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
             $experiment_id = $decision->getExperimentId();
             $variation_id = $decision->getVariationId();
             $experiment = $this->_config->getExperimentFromId($experiment_id);

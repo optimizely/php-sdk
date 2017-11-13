@@ -18,8 +18,8 @@ namespace Optimizely\Tests;
 
 use Exception;
 use Monolog\Logger;
-use Optimizely\DecisionService\Decision;
 use Optimizely\DecisionService\DecisionService;
+use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
 use Optimizely\Exceptions\InvalidAttributeException;
@@ -1858,10 +1858,10 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
 
-        $expected_decision = new Decision(
+        $expected_decision = new FeatureDecision(
             $experiment->getId(),
             $variation->getId(),
-            Decision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -1903,10 +1903,10 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $rollout = $this->projectConfig->getRolloutFromId('166660');
         $experiment = $rollout->getExperiments()[0];
         $variation = $experiment->getVariations()[0];
-        $expected_decision = new Decision(
+        $expected_decision = new FeatureDecision(
             $experiment->getId(),
             $variation->getId(),
-            Decision::DECISION_SOURCE_ROLLOUT
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -2097,10 +2097,10 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
-        $expected_decision = new Decision(
+        $expected_decision = new FeatureDecision(
             $experiment->getId(),
             $variation->getId(),
-            Decision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -2137,10 +2137,10 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Mock getVariationForFeature to return experiment/variation from a different feature
         $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_integer_feature');
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_integer_feature', 'control');
-        $expected_decision = new Decision(
+        $expected_decision = new FeatureDecision(
             $experiment->getId(),
             $variation->getId(),
-            Decision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
         );
 
         $decisionServiceMock->expects($this->exactly(1))
