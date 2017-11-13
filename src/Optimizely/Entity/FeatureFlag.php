@@ -19,7 +19,8 @@ namespace Optimizely\Entity;
 
 use Optimizely\Utils\ConfigParser;
 
-class FeatureFlag{
+class FeatureFlag
+{
 
 	/**
 	 * variable to hold feature flag ID

@@ -17,7 +17,8 @@
 
 namespace Optimizely\Entity;
 
-class VariableUsage{
+class VariableUsage
+{
 
 	/**
 	 * The ID of the live variable this usage is modifying
