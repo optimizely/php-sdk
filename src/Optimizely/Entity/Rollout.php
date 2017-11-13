@@ -19,7 +19,8 @@ namespace Optimizely\Entity;
 
 use Optimizely\Utils\ConfigParser;
 
-class Rollout{
+class Rollout
+{
 
 	/**
 	 * The ID of the rollout

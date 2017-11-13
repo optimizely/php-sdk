@@ -29,6 +29,7 @@ use Optimizely\ProjectConfig;
 class BucketerTest extends \PHPUnit_Framework_TestCase
 {
     private $testBucketingIdControl;
+    private $testBucketingIdVariation;
     private $testBucketingIdGroupExp2Var2;
     private $testUserId;
     private $testUserIdBucketsToVariation;
