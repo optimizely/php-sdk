@@ -20,20 +20,23 @@ use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
 use Optimizely\DecisionService\DecisionService;
+use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
+use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Optimizely;
 use Optimizely\ProjectConfig;
 use Optimizely\UserProfile\UserProfileServiceInterface;
-
+use Optimizely\Utils\Validator;
 
 class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 {
     private $bucketerMock;
     private $config;
     private $decisionService;
+    private $decisionServiceMock;
     private $loggerMock;
     private $testUserId;
     private $userProvideServiceMock;
@@ -57,6 +60,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))
             ->getMock();
+
         $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
 
         // Mock bucketer
@@ -68,6 +72,13 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         // Mock user profile service implementation
         $this->userProvideServiceMock = $this->getMockBuilder(UserProfileServiceInterface::class)
             ->getMock();
+
+       $this->decisionService = new DecisionService($this->loggerMock, $this->config); 
+
+       $this->decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->config))
+            ->setMethods(array('getVariation'))
+            ->getMock();
     }
 
     public function testGetVariationReturnsNullWhenExperimentIsNotRunning()
@@ -76,8 +87,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket');
 
         $pausedExperiment = $this->config->getExperimentFromKey('paused_experiment');
-
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
+        
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -96,7 +106,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -124,7 +133,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "user1" is forced in variation "control" of experiment "test_experiment".');
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -157,7 +165,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "user1" is forced in variation "group_exp_1_var_1" of experiment "group_experiment_1".');
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -184,7 +191,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment->setAccessible(true);
         $experiment->setValue($runningExperiment, array());
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -213,7 +219,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             'user_1' => 'invalid'
         ]);
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -235,7 +240,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -255,7 +259,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -603,6 +606,451 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $variationKey = $optlyObject->getVariation($this->experimentKey, $userId, $userAttributesWithBucketingId);
         $this->assertEquals($this->variationKeyControl, $variationKey, sprintf('Variation "%s" does not match expected user profile variation "%s".', $variationKey, $this->variationKeyControl));
+    }
+    
+     //should return nil and log a message when the feature flag's experiment ids array is empty
+    public function testGetVariationForFeatureExperimentGivenNullExperimentIds(){
 
+        $feature_flag = $this->config->getFeatureFlagFromKey('empty_feature');
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::DEBUG, "The feature flag 'empty_feature' is not used in any experiments.");
+
+        $this->assertSame(
+            $this->decisionService->getVariationForFeatureExperiment($feature_flag,'user1',[]),
+            null
+        );
+    }
+
+     //should return nil and log a message when the experiment is not in the datafile 
+    public function testGetVariationForFeatureExperimentGivenExperimentNotInDataFile(){
+
+        $boolean_feature = $this->config->getFeatureFlagFromKey('boolean_feature');
+        $feature_flag = clone $boolean_feature;
+        // Use any string that is not an experiment id in the data file
+        $feature_flag->setExperimentIds(["29039203"]);
+
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::ERROR, 'Experiment ID "29039203" is not in datafile.');
+
+        $this->loggerMock->expects($this->at(1))
+        ->method('log')
+        ->with(Logger::INFO, 
+            "The user 'user1' is not bucketed into any of the experiments using the feature 'boolean_feature'.");
+
+        $this->assertSame(
+            $this->decisionService->getVariationForFeatureExperiment($feature_flag,'user1',[]),
+            null
+        );
+    }
+
+    //should return nil and log when the user is not bucketed into the feature flag's experiments
+    public function testGetVariationForFeatureExperimentGivenNonMutexGroupAndUserNotBucketed(){
+        $multivariate_experiment = $this->config->getExperimentFromKey('test_experiment_multivariate');
+        $map = [ [$multivariate_experiment, 'user1', [], null] ];
+
+        //make sure the user is not bucketed into the feature experiment
+        $this->decisionServiceMock->expects($this->at(0))
+        ->method('getVariation')
+        ->will($this->returnValueMap($map));
+
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::INFO, 
+            "The user 'user1' is not bucketed into any of the experiments using the feature 'multi_variate_feature'.");
+        $feature_flag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
+        $this->assertSame(
+            $this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user1', []),
+            null);
+    }
+
+    //  should return the variation when the user is bucketed into a variation for the experiment on the feature flag
+    public function testGetVariationForFeatureExperimentGivenNonMutexGroupAndUserIsBucketed(){
+        // return the first variation of the `test_experiment_multivariate` experiment, which is attached to the `multi_variate_feature`
+        $experiment = $this->config->getExperimentFromKey('test_experiment_multivariate');
+        $variation = $this->config->getVariationFromId('test_experiment_multivariate','122231');
+        $this->decisionServiceMock->expects($this->at(0))
+        ->method('getVariation')
+        ->will($this->returnValue($variation));
+        
+        $feature_flag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
+        $expected_decision = new FeatureDecision($experiment->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_EXPERIMENT);
+
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::INFO, 
+            "The user 'user1' is bucketed into experiment 'test_experiment_multivariate' of feature 'multi_variate_feature'.");
+
+        $this->assertEquals(
+            $this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user1', []),
+            $expected_decision
+        );
+    }
+
+    // should return the variation the user is bucketed into when the user is bucketed into one of the experiments
+    public function testGetVariationForFeatureExperimentGivenMutexGroupAndUserIsBucketed(){
+        $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
+        $variation = $mutex_exp->getVariations()[0];
+        $this->decisionServiceMock->expects($this->at(0))
+        ->method('getVariation')
+        ->will($this->returnValue($variation));
+
+        $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
+        $variation = $mutex_exp->getVariations()[0];
+        $expected_decision = new FeatureDecision($mutex_exp->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_EXPERIMENT);
+
+        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::INFO, 
+            "The user 'user_1' is bucketed into experiment 'group_experiment_1' of feature 'boolean_feature'.");
+        $this->assertEquals(
+            $this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user_1', []),
+            $expected_decision
+        );
+    }
+
+     // should return nil and log a message when the user is not bucketed into any of the mutex experiments      
+    public function testGetVariationForFeatureExperimentGivenMutexGroupAndUserNotBucketed(){
+        $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
+        $variation = $mutex_exp->getVariations()[0];
+        $this->decisionServiceMock->expects($this->at(0))
+        ->method('getVariation')
+        ->will($this->returnValue(null));
+
+
+        $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
+        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::INFO, 
+            "The user 'user_1' is not bucketed into any of the experiments using the feature 'boolean_feature'.");
+        $this->assertEquals(
+            $this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user_1', []),
+            null
+        );
+    }
+
+    //should return the bucketed experiment and variation
+    public function testGetVariationForFeatureWhenTheUserIsBucketedIntoFeatureExperiment(){
+
+       $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+       ->setConstructorArgs(array($this->loggerMock, $this->config))
+       ->setMethods(array('getVariationForFeatureExperiment'))
+       ->getMock();
+
+       $feature_flag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
+       $expected_experiment_id = $feature_flag->getExperimentIds()[0];
+       $expected_experiment = $this->config->getExperimentFromId($expected_experiment_id);
+       $expected_variation = $expected_experiment->getVariations()[0];
+       $expected_decision = [
+        'experiment' => $expected_experiment,
+        'variation' => $expected_variation
+        ];
+
+        $decisionServiceMock->expects($this->at(0))
+        ->method('getVariationForFeatureExperiment')
+        ->will($this->returnValue($expected_decision));
+
+        $this->assertEquals(
+            $decisionServiceMock->getVariationForFeature($feature_flag, 'user_1', []),
+            $expected_decision
+        );
+    }
+
+    // should return the bucketed variation and null experiment
+    public function testGetVariationForFeatureWhenBucketedToFeatureRollout(){
+
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+        ->setConstructorArgs(array($this->loggerMock, $this->config))
+        ->setMethods(array('getVariationForFeatureExperiment','getVariationForFeatureRollout'))
+        ->getMock();
+
+        $feature_flag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
+        $rollout_id = $feature_flag->getRolloutId();
+        $rollout = $this->config->getRolloutFromId($rollout_id);
+        $experiment = $rollout->getExperiments()[0];
+        $expected_variation = $experiment->getVariations()[0];
+        $expected_decision = new FeatureDecision(
+            $experiment->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);
+
+        $decisionServiceMock
+        ->method('getVariationForFeatureExperiment')
+        ->will($this->returnValue(null));
+
+        $decisionServiceMock
+        ->method('getVariationForFeatureRollout')
+        ->will($this->returnValue($expected_decision));
+
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::INFO, 
+            "User 'user_1' is bucketed into rollout for feature flag 'string_single_variable_feature'.");
+
+        $this->assertEquals(
+            $decisionServiceMock->getVariationForFeature($feature_flag, 'user_1', []),
+            $expected_decision
+        );
+    }
+
+    // should return null
+    public function testGetVariationForFeatureWhenTheUserIsNeitherBucketedIntoFeatureExperimentNorToFeatureRollout(){
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+        ->setConstructorArgs(array($this->loggerMock, $this->config))
+        ->setMethods(array('getVariationForFeatureExperiment','getVariationForFeatureRollout'))
+        ->getMock();
+
+        $feature_flag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
+
+         $decisionServiceMock
+        ->method('getVariationForFeatureExperiment')
+        ->will($this->returnValue(null));
+
+        $decisionServiceMock
+        ->method('getVariationForFeatureRollout')
+        ->will($this->returnValue(null));
+        
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::INFO, 
+            "User 'user_1' is not bucketed into rollout for feature flag 'string_single_variable_feature'.");
+
+        $this->assertEquals(
+            $decisionServiceMock->getVariationForFeature($feature_flag, 'user_1', []),
+            null
+        );
+    }
+
+    // should return null
+    public function testGetVariationForFeatureRolloutWhenNoRolloutIsAssociatedToFeatureFlag(){
+        // No rollout id is associated to boolean_feature
+         $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
+
+         $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::DEBUG, 
+            "Feature flag 'boolean_feature' is not used in a rollout.");
+
+        $this->assertEquals(
+            $this->decisionServiceMock->getVariationForFeatureRollout($feature_flag, 'user_1', []),
+            null
+        );
+    }
+
+    // should return null
+    public function testGetVariationForFeatureRolloutWhenRolloutIsNotInDataFile(){
+         $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
+         $feature_flag = clone $feature_flag;
+         // Set any string which is not a rollout id in the data file
+         $feature_flag->setRolloutId('invalid_rollout_id');
+
+         $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::ERROR, 
+            'Rollout with ID "invalid_rollout_id" is not in the datafile.');
+
+        $this->assertEquals(
+            $this->decisionServiceMock->getVariationForFeatureRollout($feature_flag, 'user_1', []),
+            null
+        );
+    }
+
+    // should return null
+    public function testGetVariationForFeatureRolloutWhenRolloutDoesNotHaveExperiment(){
+        // Mock Project Config
+        $configMock = $this->getMockBuilder(ProjectConfig::class)
+            ->setConstructorArgs(array(DATAFILE, $this->loggerMock, new NoOpErrorHandler()))
+            ->setMethods(array('getRolloutFromId'))
+            ->getMock(); 
+
+        $this->decisionService = new DecisionService($this->loggerMock, $configMock);
+  
+        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $feature_flag->getRolloutId();
+        $rollout = $this->config->getRolloutFromId($rollout_id);
+        $experiment_less_rollout = clone $rollout;
+        $experiment_less_rollout->setExperiments([]);
+
+        $configMock
+        ->method('getRolloutFromId')
+        ->will($this->returnValue($experiment_less_rollout));
+
+        $this->assertEquals(
+            $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', []),
+            null
+        );
+    }
+
+    // ============== when the user qualifies for targeting rule (audience match) ======================
+    
+    //  should return the variation the user is bucketed into when the user is bucketed into the targeting rule
+    public function testGetVariationForFeatureRolloutWhenUserIsBucketedInTheTargetingRule(){
+        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $feature_flag->getRolloutId();
+        $rollout = $this->config->getRolloutFromId($rollout_id);
+        $experiment = $rollout->getExperiments()[0];
+        $expected_variation = $experiment->getVariations()[0];
+
+        $expected_decision = new FeatureDecision(
+            $experiment->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);   
+        // Provide attributes such that user qualifies for audience
+        $user_attributes = ["browser_type" => "chrome"];
+
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+
+        $this->bucketerMock
+            ->method('bucket')
+            ->willReturn($expected_variation);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::DEBUG, 
+            "Attempting to bucket user 'user_1' into rollout rule '{$experiment->getKey()}'.");
+
+        $this->assertEquals(
+            $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes),
+            $expected_decision
+        );
+    }
+
+    // should return the variation the user is bucketed into when the user is bucketed into the "Everyone Else" rule'
+    // and the user is not bucketed into the targeting rule
+    public function testGetVariationForFeatureRolloutWhenUserIsNotBucketedInTheTargetingRuleButBucketedToEveryoneElseRule(){
+        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $feature_flag->getRolloutId();
+        $rollout = $this->config->getRolloutFromId($rollout_id);
+        $experiment0 = $rollout->getExperiments()[0];
+        // Everyone Else Rule
+        $experiment2 = $rollout->getExperiments()[2];
+        $expected_variation = $experiment2->getVariations()[0];  
+
+        $expected_decision = new FeatureDecision(
+            $experiment2->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT); 
+
+        // Provide attributes such that user qualifies for audience
+        $user_attributes = ["browser_type" => "chrome"];
+        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+        // Make bucket return null when called for first targeting rule
+        $this->bucketerMock->expects($this->at(0))
+            ->method('bucket')
+            ->willReturn(null);
+        //Make bucket return expected variation when called second time for everyone else
+        $this->bucketerMock->expects($this->at(1))
+            ->method('bucket')
+            ->willReturn($expected_variation);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::DEBUG, 
+            "Attempting to bucket user 'user_1' into rollout rule '{$experiment0->getKey()}'.");
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::DEBUG, 
+            "User 'user_1' was excluded due to traffic allocation. Checking 'Everyone Else' rule now.");
+
+
+        $this->assertEquals(
+            $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes),
+            $expected_decision  
+        );
+    }
+
+    // should log and return nil when  the user is not bucketed into the targeting rule and 
+    // the user is not bucketed into the "Everyone Else" rule'
+    public function testGetVariationForFeatureRolloutWhenUserIsNeitherBucketedInTheTargetingRuleNorToEveryoneElseRule(){
+        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $feature_flag->getRolloutId();
+        $rollout = $this->config->getRolloutFromId($rollout_id);
+        $experiment0 = $rollout->getExperiments()[0];
+        // Everyone Else Rule
+        $experiment2 = $rollout->getExperiments()[2];
+
+        // Provide attributes such that user qualifies for audience
+        $user_attributes = ["browser_type" => "chrome"];
+        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+        // Make bucket return null when called for first targeting rule
+        $this->bucketerMock->expects($this->at(0))
+            ->method('bucket')
+            ->willReturn(null);
+        //Make bucket return null when called second time for everyone else
+        $this->bucketerMock->expects($this->at(1))
+            ->method('bucket')
+            ->willReturn(null);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::DEBUG, 
+            "Attempting to bucket user 'user_1' into rollout rule '{$experiment0->getKey()}'.");
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::DEBUG, 
+            "User 'user_1' was excluded due to traffic allocation. Checking 'Everyone Else' rule now.");
+        $this->loggerMock->expects($this->at(2))
+            ->method('log')
+            ->with(Logger::DEBUG, 
+            "User 'user_1' was excluded from the 'Everyone Else' rule for feature flag");
+
+        $this->assertEquals(
+            $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes),
+            null
+        );
+    }
+
+    // ============== END of tests - when the user qualifies for targeting rule (audience match) ======================
+    
+    // ===== - when the user does not qualify for the tageting rules (audience mismatch) ======
+    
+    // should return expected variation when the user is attempted to be bucketed into all targeting rules
+    // including Everyone Else rule
+    public function testGetVariationForFeatureRolloutWhenUserDoesNotQualifyForAnyTargetingRule(){
+        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $feature_flag->getRolloutId();
+        $rollout = $this->config->getRolloutFromId($rollout_id);
+        $experiment0 = $rollout->getExperiments()[0];
+        $experiment1 = $rollout->getExperiments()[1];
+        // Everyone Else Rule
+        $experiment2 = $rollout->getExperiments()[2];   
+        $expected_variation = $experiment2->getVariations()[0]; 
+
+        $expected_decision = new FeatureDecision(
+            $experiment2->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);   
+
+        // Provide null attributes so that user does not qualify for audience
+        $user_attributes = [];
+        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+
+        // Expect bucket to be called exactly once for the everyone else/last rule. 
+        // As we ignore Audience check only for thelast rule
+        $this->bucketerMock->expects($this->exactly(1))
+            ->method('bucket')
+            ->willReturn($expected_variation);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::DEBUG, 
+            "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment0->getKey()}'.");
+
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::DEBUG, 
+            "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment1->getKey()}'.");
+
+        $this->assertEquals(
+            $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes),
+            $expected_decision
+        );
     }
 }
+

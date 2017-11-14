@@ -20,6 +20,8 @@ use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
+use Optimizely\Entity\FeatureFlag;
+use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\ProjectConfig;
@@ -37,10 +39,11 @@ define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID",     "\$opt_bucketing_id");
  *
  * The decision service contains all logic around how a user decision is made. This includes all of the following (in order):
  *   1. Checking experiment status.
- *   2. Checking whitelisting.
- *   3. Check sticky bucketing.
- *   4. Checking audience targeting.
- *   5. Using Murmurhash3 to bucket the user.
+ *   2. Checking force bucketing
+ *   3. Checking whitelisting.
+ *   4. Check sticky bucketing.
+ *   5. Checking audience targeting.
+ *   6. Using Murmurhash3 to bucket the user.
  *
  * @package Optimizely
  */
@@ -80,6 +83,28 @@ class DecisionService
   }
 
   /**
+    * Gets the ID for Bucketing
+    * @param  string $userId  user ID
+    * @param  array $userAttributes  user attributes
+    *
+    * @return string  the bucketing ID assigned to user
+    */
+  private function getBucketingId($userId, $userAttributes)
+  {
+      // By default, the bucketing ID should be the user ID
+      $bucketingId = $userId;
+
+      // If the bucketing ID key is defined in userAttributes, then use that in
+      // place of the userID for the murmur hash key
+      if (!empty($userAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID])) {
+            $bucketingId = $userAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
+            $this->_logger->log(Logger::DEBUG, sprintf('Setting the bucketing ID to "%s".', $bucketingId));
+        }
+
+      return $bucketingId;
+  }
+
+  /**
    * Determine which variation to show the user.
    *
    * @param  $experiment  Experiment Experiment to get the variation for.
@@ -90,14 +115,8 @@ class DecisionService
    */
   public function getVariation(Experiment $experiment, $userId, $attributes = null)
   {
-    // by default, the bucketing ID should be the user ID
-    $bucketingId = $userId;
-
-    // If the bucketing ID key is defined in attributes, then use that in place of the userID for the murmur hash key
-    if (!empty($attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID])) {
-        $bucketingId = $attributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
-        $this->_logger->log(Logger::DEBUG, sprintf('Setting the bucketing ID to "%s".', $bucketingId));
-    }
+    
+    $bucketingId = $this->getBucketingId($userId, $attributes);
 
     if (!$experiment->isExperimentRunning()) {
       $this->_logger->log(Logger::INFO, sprintf('Experiment "%s" is not running.', $experiment->getKey()));
@@ -143,6 +162,174 @@ class DecisionService
     }
     return $variation;
   }
+
+    /**
+     * Get the variation the user is bucketed into for the given FeatureFlag
+     * @param  FeatureFlag $featureFlag The feature flag the user wants to access
+     * @param  string      $userId      user ID
+     * @param  array       $userAttributes  user attributes
+     * @return Decision  if getVariationForFeatureExperiment or getVariationForFeatureRollout returns a Decision
+     *         null      otherwise
+     */
+    public function getVariationForFeature(FeatureFlag $featureFlag, $userId, $userAttributes)
+    {
+        //Evaluate in this order:
+        //1. Attempt to bucket user into experiment using feature flag.
+        //2. Attempt to bucket user into rollout using the feature flag.
+
+        // Check if the feature flag is under an experiment and the the user is bucketed into one of these experiments
+        $decision = $this->getVariationForFeatureExperiment($featureFlag, $userId, $userAttributes);
+        if ($decision) {
+            return $decision;
+        }
+
+        // Check if the feature flag has rollout and the user is bucketed into one of it's rules
+        $decision = $this->getVariationForFeatureRollout($featureFlag, $userId, $userAttributes);
+        if ($decision) {
+            $this->_logger->log(
+                Logger::INFO,
+                "User '{$userId}' is bucketed into rollout for feature flag '{$featureFlag->getKey()}'."
+            );
+      
+            return $decision;
+        } 
+            
+        $this->_logger->log(
+          Logger::INFO,
+          "User '{$userId}' is not bucketed into rollout for feature flag '{$featureFlag->getKey()}'."
+        );
+
+        return null;
+    }
+
+    /**
+     * Get the variation if the user is bucketed for one of the experiments on this feature flag
+     * @param  FeatureFlag $featureFlag The feature flag the user wants to access
+     * @param  string      $userId      user id
+     * @param  array       $userAttributes  user userAttributes
+     * @return Decision  if a variation is returned for the user
+     *         null  if feature flag is not used in any experiments or no variation is returned for the user
+     */
+    public function getVariationForFeatureExperiment(FeatureFlag $featureFlag, $userId, $userAttributes)
+    {
+        $feature_flag_key = $featureFlag->getKey();
+        $experimentIds = $featureFlag->getExperimentIds();
+
+        // Check if there are any experiment IDs inside feature flag
+        if (empty($experimentIds)) {
+            $this->_logger->log(
+                Logger::DEBUG,
+                "The feature flag '{$feature_flag_key}' is not used in any experiments."
+            );
+            return null;
+        }
+
+        // Evaluate each experiment ID and return the first bucketed experiment variation
+        foreach ($experimentIds as $experiment_id) {
+            $experiment = $this->_projectConfig->getExperimentFromId($experiment_id);
+            if ($experiment && !($experiment->getKey())) {
+                // Error logged and exception thrown in ProjectConfig-getExperimentFromId
+                continue;
+            }
+
+            $variation = $this->getVariation($experiment, $userId, $userAttributes);
+            if ($variation && $variation->getKey()) {
+                $this->_logger->log(
+                    Logger::INFO,
+                    "The user '{$userId}' is bucketed into experiment '{$experiment->getKey()}' of feature '{$feature_flag_key}'."
+                );
+
+                return new FeatureDecision($experiment->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_EXPERIMENT);
+            }
+        }
+
+        $this->_logger->log(
+            Logger::INFO,
+            "The user '{$userId}' is not bucketed into any of the experiments using the feature '{$feature_flag_key}'."
+        );
+
+        return null;
+    }
+
+    /**
+    * Get the variation if the user is bucketed into rollout for this feature flag
+    * Evaluate the user for rules in priority order by seeing if the user satisfies the audience.
+    * Fall back onto the everyone else rule if the user is ever excluded from a rule due to traffic allocation.
+    * @param  FeatureFlag $featureFlag The feature flag the user wants to access
+    * @param  string      $userId      user id
+    * @param  array       $userAttributes  user userAttributes
+    * @return Decision  if a variation is returned for the user
+    *         null  if feature flag is not used in a rollout or
+    *               no rollout found against the rollout ID or
+    *               no variation is returned for the user
+    */
+    public function getVariationForFeatureRollout(FeatureFlag $featureFlag, $userId, $userAttributes)
+    {
+        $bucketing_id = $this->getBucketingId($userId, $userAttributes);
+        $feature_flag_key = $featureFlag->getKey();
+        $rollout_id = $featureFlag->getRolloutId();
+        if (empty($rollout_id)) {
+            $this->_logger->log(
+                Logger::DEBUG,
+                "Feature flag '{$feature_flag_key}' is not used in a rollout."
+            );
+            return null;
+        }
+        $rollout = $this->_projectConfig->getRolloutFromId($rollout_id);
+        if ($rollout && !($rollout->getId())) {
+            // Error logged and thrown in getRolloutFromId
+            return null;
+        }
+
+        $rolloutRules = $rollout->getExperiments();
+        if (sizeof($rolloutRules) == 0) {
+            return null;
+        }
+
+        // Evaluate all rollout rules except for last one
+        for ($i = 0; $i < sizeof($rolloutRules) - 1; $i++) {
+            $experiment = $rolloutRules[$i];
+
+            // Evaluate if user meets the audience condition of this rollout rule
+            if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes)) {
+                $this->_logger->log(
+                    Logger::DEBUG,
+                    sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey())
+                );
+                // Evaluate this user for the next rule
+                continue;
+            }
+
+            $this->_logger->log(
+                Logger::DEBUG,
+                sprintf("Attempting to bucket user '{$userId}' into rollout rule '%s'.", $experiment->getKey())
+            );
+
+            // Evaluate if user satisfies the traffic allocation for this rollout rule
+            $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketing_id, $userId);
+            if ($variation && $variation->getKey()) {
+                return new FeatureDecision($experiment->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);
+            } else {
+                $this->_logger->log(
+                    Logger::DEBUG,
+                    "User '{$userId}' was excluded due to traffic allocation. Checking 'Everyone Else' rule now."
+                );
+                break;
+            }
+        }
+        // Evaluate Everyone Else Rule / Last Rule now
+        $experiment = $rolloutRules[sizeof($rolloutRules)-1];
+        $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketing_id, $userId);
+        if ($variation && $variation->getKey()) {
+            return new FeatureDecision($experiment->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);
+        } else {
+            $this->_logger->log(
+                Logger::DEBUG,
+                "User '{$userId}' was excluded from the 'Everyone Else' rule for feature flag"
+            );
+            return null;
+        }
+    }
 
   /**
    * Determine variation the user has been forced into.
