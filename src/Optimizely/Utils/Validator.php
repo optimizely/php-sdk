@@ -104,4 +104,36 @@ class Validator
 
         return false;
     }
+
+    /**
+     * Checks that if there are more than one experiment IDs
+     * in the feature flag, they must belong to the same mutex group
+     *
+     * @param  ProjectConfig  $config The project config to verify against
+     * @param  FeatureFlag  $featureFlag The feature to validate
+     *
+     * @return boolean True if feature flag is valid
+     */
+    public static function isFeatureFlagValid($config, $featureFlag)
+    {
+        $experimentIds = $featureFlag->getExperimentIds();
+
+        if (empty($experimentIds)) {
+            return true;
+        }
+        if (sizeof($experimentIds) == 1) {
+            return true;
+        }
+
+        $groupId = $config->getExperimentFromId($experimentIds[0])->getGroupId();
+        foreach ($experimentIds as $id) {
+            $experiment = $config->getExperimentFromId($id);
+            $grpId = $experiment->getGroupId();
+            if ($groupId != $grpId) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

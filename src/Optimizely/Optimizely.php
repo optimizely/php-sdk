@@ -22,6 +22,11 @@ use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
 use Monolog\Logger;
 use Optimizely\DecisionService\DecisionService;
+use Optimizely\DecisionService\FeatureDecision;
+use Optimizely\Entity\Experiment;
+use Optimizely\Entity\FeatureFlag;
+use Optimizely\Entity\FeatureVariable;
+use Optimizely\Entity\Rollout;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
@@ -30,9 +35,12 @@ use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\Notification\NotificationCenter;
+use Optimizely\Notification\NotificationType;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\Validator;
+use Optimizely\Utils\VariableTypeUtils;
 
 /**
  * Class Optimizely
@@ -75,6 +83,11 @@ class Optimizely
      * @var LoggerInterface
      */
     private $_logger;
+
+    /**
+     * @var NotificationCenter
+     */
+    private $_notificationCenter;
 
     /**
      * Optimizely constructor for managing Full Stack PHP projects.
@@ -123,6 +136,7 @@ class Optimizely
 
         $this->_eventBuilder = new EventBuilder();
         $this->_decisionService = new DecisionService($this->_logger, $this->_config, $userProfileService);
+        $this->_notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
     }
 
     /**
@@ -174,10 +188,10 @@ class Optimizely
      * is one that is in "Running" state and into which the user has been bucketed.
      *
      * @param  $event string Event key representing the event which needs to be recorded.
-     * @param  $userId string ID for user.
+     * @param  $user string ID for user.
      * @param  $attributes array Attributes of the user.
      *
-     * @return array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
+     * @return Array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
      */
     private function getValidExperimentsForEvent($event, $userId, $attributes = null) {
         $validExperiments = [];
@@ -200,6 +214,52 @@ class Optimizely
     }
 
     /**
+     * @param  string Experiment key
+     * @param  string Variation key
+     * @param  string User ID
+     * @param  array Associative array of user attributes
+     */
+    protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
+    {
+        $impressionEvent = $this->_eventBuilder
+            ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
+        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
+        $this->_logger->log(
+            Logger::DEBUG,
+            sprintf(
+                'Dispatching impression event to URL %s with params %s.',
+                $impressionEvent->getUrl(),
+                http_build_query($impressionEvent->getParams())
+            )
+        );
+
+        try {
+            $this->_eventDispatcher->dispatchEvent($impressionEvent);
+        } catch (Throwable $exception) {
+            $this->_logger->log(Logger::ERROR, sprintf(
+                'Unable to dispatch impression event. Error %s',
+                $exception->getMessage()
+            ));
+        } catch (Exception $exception) {
+            $this->_logger->log(Logger::ERROR, sprintf(
+                'Unable to dispatch impression event. Error %s',
+                $exception->getMessage()
+            ));
+        }
+
+        $this->_notificationCenter->fireNotifications(
+            NotificationType::DECISION,
+            array(
+                $this->_config->getExperimentFromKey($experimentKey),
+                $userId,
+                $attributes,
+                $this->_config->getVariationFromKey($experimentKey, $variationKey),
+                $impressionEvent
+            )    
+        );          
+    }
+    
+    /**
      * Buckets visitor and sends impression event to Optimizely.
      *
      * @param $experimentKey string Key identifying the experiment.
@@ -218,31 +278,11 @@ class Optimizely
         $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
         if (is_null($variationKey)) {
             $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
-            return $variationKey;
+            return null;
         }
 
-        $impressionEvent = $this->_eventBuilder
-            ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
-        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
-        $this->_logger->log(
-            Logger::DEBUG,
-            sprintf('Dispatching impression event to URL %s with params %s.',
-                $impressionEvent->getUrl(), http_build_query($impressionEvent->getParams())
-            )
-        );
-
-        try {
-            $this->_eventDispatcher->dispatchEvent($impressionEvent);
-        }
-        catch (Throwable $exception) {
-            $this->_logger->log(Logger::ERROR, sprintf(
-                'Unable to dispatch impression event. Error %s', $exception->getMessage()));
-        }
-        catch (Exception $exception) {
-            $this->_logger->log(Logger::ERROR, sprintf(
-                'Unable to dispatch impression event. Error %s', $exception->getMessage()));
-        }
-
+        $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+        
         return $variationKey;
     }
 
@@ -312,6 +352,17 @@ class Optimizely
                 $this->_logger->log(Logger::ERROR, sprintf(
                     'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
             }
+
+            $this->_notificationCenter->fireNotifications(
+                NotificationType::TRACK,
+                array(
+                    $eventKey,
+                    $userId,
+                    $attributes,
+                    $eventTags,
+                    $conversionEvent
+                )
+            );
 
         } else {
             $this->_logger->log(
@@ -386,5 +437,259 @@ class Optimizely
         } else {
             return null;
         }
+    }
+
+    /**
+     * Determine whether a feature is enabled.
+     * Sends an impression event if the user is bucketed into an experiment using the feature.
+     * @param  string Feature flag key
+     * @param  string User ID
+     * @param  array Associative array of user attributes
+     *
+     * @return boolean
+     */
+    public function isFeatureEnabled($featureFlagKey, $userId, $attributes = null)
+    {
+        if (!$this->_isValid) {
+            $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'.");
+            return null;
+        }
+
+        if (!$featureFlagKey) {
+            $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty.");
+            return null;
+        }
+
+        if (!$userId) {
+            $this->_logger->log(Logger::ERROR, "User ID cannot be empty.");
+            return null;
+        }
+
+        $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
+        if ($feature_flag == new FeatureFlag) {
+            // Error logged in ProjectConfig - getFeatureFlagFromKey
+            return null;
+        }
+
+        //validate feature flag
+        if (!Validator::isFeatureFlagValid($this->_config, $feature_flag)) {
+            return null;
+        }
+
+        $decision = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
+        if (!$decision) {
+            $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
+            return false;
+        }
+
+        $experiment_id = $decision->getExperimentId();
+        $variation_id = $decision->getVariationId();
+
+        if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
+            $experiment = $this->_config->getExperimentFromId($experiment_id);
+            $variation = $this->_config->getVariationFromId($experiment->getKey(), $variation_id);
+
+            $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
+        } else {
+            $variation = $this->_config->getVariationFromRolloutExperiment($experiment_id, $variation_id);
+            $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
+        }
+
+        $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
+
+        $this->_notificationCenter->fireNotifications(
+            NotificationType::FEATURE_ACCESSED,
+            array(
+                $featureFlagKey,
+                $userId,
+                $attributes,
+                $variation
+            )
+        );
+
+        return true;
+    }
+
+    /**
+     * Get the string value of the specified variable in the feature flag.
+     * @param  string Feature flag key
+     * @param  string Variable key
+     * @param  string User ID
+     * @param  array  Associative array of user attributes
+     * @param  string Variable type
+     *
+     * @return string Feature variable value / null
+     */
+    public function getFeatureVariableValueForType(
+        $featureFlagKey,
+        $variableKey,
+        $userId,
+        $attributes = null,
+        $variableType = null
+    ) {
+        if (!$featureFlagKey) {
+            $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty.");
+            return null;
+        }
+
+        if (!$variableKey) {
+            $this->_logger->log(Logger::ERROR, "Variable key cannot be empty.");
+            return null;
+        }
+
+        if (!$userId) {
+            $this->_logger->log(Logger::ERROR, "User ID cannot be empty.");
+            return null;
+        }
+
+        $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
+        if ($feature_flag && (!$feature_flag->getId())) {
+            // Error logged in ProjectConfig - getFeatureFlagFromKey
+            return null;
+        }
+
+        $variable = $this->_config->getFeatureVariableFromKey($featureFlagKey, $variableKey);
+        if (!$variable) {
+            // Error message logged in ProjectConfig- getFeatureVariableFromKey
+            return null;
+        }
+
+        if ($variableType != $variable->getType()) {
+            $this->_logger->log(
+                Logger::ERROR,
+                "Variable is of type '{$variable->getType()}', but you requested it as type '{$variableType}'."
+            );
+            return null;
+        }
+
+        $decision = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
+        $variable_value = $variable->getDefaultValue();
+
+        if (!$decision) {
+            $this->_logger->log(Logger::INFO, "User '{$userId}'is not in any variation, ".
+                "returning default value '{$variable_value}'.");
+        } else {
+            $experiment_id = $decision->getExperimentId();
+            $variation_id = $decision->getVariationId();
+            $experiment = $this->_config->getExperimentFromId($experiment_id);
+            $variation = $this->_config->getVariationFromId($experiment->getKey(), $variation_id);
+            $variable_usage = $variation->getVariableUsageById($variable->getId());
+            if ($variable_usage) {
+                $variable_value = $variable_usage->getValue();
+                $this->_logger->log(
+                    Logger::INFO,
+                    "Returning variable value '{$variable_value}' for variation '{$variation->getKey()}' ".
+                    "of feature flag '{$featureFlagKey}'"
+                );
+            } else {
+                $this->_logger->log(
+                    Logger::INFO,
+                    "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}', ".
+                    "returning default value '{$variable_value}'."
+                );
+            }
+        }
+
+        return $variable_value;
+    }
+
+    /**
+     * Get the Boolean value of the specified variable in the feature flag.
+     * @param  string Feature flag key
+     * @param  string Variable key
+     * @param  string User ID
+     * @param  array  Associative array of user attributes
+     *
+     * @return string boolean variable value / null
+     */
+    public function getFeatureVariableBoolean($featureFlagKey, $variableKey, $userId, $attributes = null)
+    {
+        $variable_value = $this->getFeatureVariableValueForType(
+            $featureFlagKey,
+            $variableKey,
+            $userId,
+            $attributes,
+            FeatureVariable::BOOLEAN_TYPE
+        );
+
+        if (!is_null($variable_value)) {
+            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
+        }
+
+        return $variable_value;
+    }
+
+    /**
+     * Get the Integer value of the specified variable in the feature flag.
+     * @param  string Feature flag key
+     * @param  string Variable key
+     * @param  string User ID
+     * @param  array  Associative array of user attributes
+     *
+     * @return string integer variable value / null
+     */
+    public function getFeatureVariableInteger($featureFlagKey, $variableKey, $userId, $attributes = null)
+    {
+        $variable_value = $this->getFeatureVariableValueForType(
+            $featureFlagKey,
+            $variableKey,
+            $userId,
+            $attributes,
+            FeatureVariable::INTEGER_TYPE
+        );
+
+        if (!is_null($variable_value)) {
+            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::INTEGER_TYPE, $this->_logger);
+        }
+
+        return $variable_value;
+    }
+
+    /**
+     * Get the Double value of the specified variable in the feature flag.
+     * @param  string Feature flag key
+     * @param  string Variable key
+     * @param  string User ID
+     * @param  array  Associative array of user attributes
+     *
+     * @return string double variable value / null
+     */
+    public function getFeatureVariableDouble($featureFlagKey, $variableKey, $userId, $attributes = null)
+    {
+        $variable_value = $this->getFeatureVariableValueForType(
+            $featureFlagKey,
+            $variableKey,
+            $userId,
+            $attributes,
+            FeatureVariable::DOUBLE_TYPE
+        );
+
+        if (!is_null($variable_value)) {
+            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::DOUBLE_TYPE, $this->_logger);
+        }
+
+        return $variable_value;
+    }
+
+    /**
+     * Get the String value of the specified variable in the feature flag.
+     * @param  string Feature flag key
+     * @param  string Variable key
+     * @param  string User ID
+     * @param  array  Associative array of user attributes
+     *
+     * @return string variable value / null
+     */
+    public function getFeatureVariableString($featureFlagKey, $variableKey, $userId, $attributes = null)
+    {
+        $variable_value = $this->getFeatureVariableValueForType(
+            $featureFlagKey,
+            $variableKey,
+            $userId,
+            $attributes,
+            FeatureVariable::STRING_TYPE
+        );
+
+        return $variable_value;
     }
 }

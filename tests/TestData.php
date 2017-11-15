@@ -20,6 +20,7 @@ use Exception;
 use Optimizely\Bucketer;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Event\LogEvent;
+use Optimizely\Optimizely;
 
 define('DATAFILE','{
   "experiments": [
@@ -752,6 +753,29 @@ class TestBucketer extends Bucketer
     {
         return array_shift($this->values);
     }
+}
+
+/**
+ * Class OptimizelyTester
+ * Extending Optimizely for the sake of tests.
+ */
+class OptimizelyTester extends Optimizely
+{
+  public function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes){
+    parent::sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+  }
+}
+
+class FireNotificationTester{
+    public function decision_callback_no_args(){}
+
+    public function decision_callback_no_args_2(){}
+
+    public function decision_callback_with_args($anInt, $aDouble, $aString, $anArray, $aFunction){}
+
+    public function decision_callback_with_args_2($anInt, $aDouble, $aString, $anArray, $aFunction){}
+
+    public function track_callback_no_args(){}
 }
 
 
