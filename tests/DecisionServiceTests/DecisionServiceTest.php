@@ -618,7 +618,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             null,
-            $this->decisionService->getVariationForFeatureExperiment($feature_flag, 'user1', [])      
+            $this->decisionService->getVariationForFeatureExperiment($feature_flag, 'user1', [])
         );
     }
 
@@ -642,7 +642,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertSame(
-             null,
+            null,
             $this->decisionService->getVariationForFeatureExperiment($feature_flag, 'user1', [])
         );
     }
@@ -759,10 +759,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expected_experiment_id = $feature_flag->getExperimentIds()[0];
         $expected_experiment = $this->config->getExperimentFromId($expected_experiment_id);
         $expected_variation = $expected_experiment->getVariations()[0];
-        $expected_decision = [
-        'experiment' => $expected_experiment,
-        'variation' => $expected_variation
-        ];
+        $expected_decision = new FeatureDecision(
+            $expected_experiment->getId(),
+            $expected_variation->getId(),
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+        );
 
         $decisionServiceMock->expects($this->at(0))
         ->method('getVariationForFeatureExperiment')
@@ -788,7 +789,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment = $rollout->getExperiments()[0];
         $expected_variation = $experiment->getVariations()[0];
         $expected_decision = new FeatureDecision(
-            $experiment->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);
+            $experiment->getId(),
+            $expected_variation->getId(),
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
 
 
         $decisionServiceMock
@@ -878,7 +882,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertEquals(
-             null,
+            null,
             $this->decisionServiceMock->getVariationForFeatureRollout($feature_flag, 'user_1', [])
         );
     }
@@ -921,7 +925,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment = $rollout->getExperiments()[0];
         $expected_variation = $experiment->getVariations()[0];
         $expected_decision = new FeatureDecision(
-            $experiment->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);   
+            $experiment->getId(),
+            $expected_variation->getId(),
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
 
         // Provide attributes such that user qualifies for audience
         $user_attributes = ["browser_type" => "chrome"];
@@ -959,7 +966,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment2 = $rollout->getExperiments()[2];
         $expected_variation = $experiment2->getVariations()[0];
         $expected_decision = new FeatureDecision(
-            $experiment2->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT); 
+            $experiment2->getId(),
+            $expected_variation->getId(),
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
 
         // Provide attributes such that user qualifies for audience
         $user_attributes = ["browser_type" => "chrome"];
@@ -1064,7 +1074,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment2 = $rollout->getExperiments()[2];
         $expected_variation = $experiment2->getVariations()[0];
         $expected_decision = new FeatureDecision(
-            $experiment2->getId(), $expected_variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);   
+            $experiment2->getId(),
+            $expected_variation->getId(),
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
 
         // Provide null attributes so that user does not qualify for audience
         $user_attributes = [];
