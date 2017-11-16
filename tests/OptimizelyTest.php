@@ -2053,12 +2053,13 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
            'double_single_variable_feature',
            'user_id',
            [],
+           $experiment,
            $variation
         );
 
         $this->notificationCenterMock->expects($this->once())
             ->method('fireNotifications')
-            ->with( NotificationType::FEATURE_ACCESSED, $arrayParam);
+            ->with( NotificationType::FEATURE_EXPERIMENT, $arrayParam);
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -2105,12 +2106,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
            'boolean_single_variable_feature',
            'user_id',
            [],
-           $this->projectConfig->getVariationFromRolloutExperiment($experiment->getId(), $variation->getId())
+           $this->projectConfig->getAudience($experiment->getAudienceIds()[0])
         );
 
         $this->notificationCenterMock->expects($this->once())
             ->method('fireNotifications')
-            ->with( NotificationType::FEATURE_ACCESSED, $arrayParam);
+            ->with( NotificationType::FEATURE_ROLLOUT, $arrayParam);
 
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')
@@ -2539,7 +2540,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->notificationCenterMock->expects($this->once())
             ->method('fireNotifications')
             ->with(
-                NotificationType::DECISION,
+                NotificationType::ACTIVATE,
                 $arrayParam
             );
 
@@ -2597,7 +2598,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->notificationCenterMock->expects($this->once())
             ->method('fireNotifications')
             ->with(
-                NotificationType::DECISION,
+                NotificationType::ACTIVATE,
                 $arrayParam
             );
 

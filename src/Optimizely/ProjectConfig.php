@@ -473,34 +473,26 @@ class ProjectConfig
     }
 
     /**
-     * Gets the variation object from a rollout rule/experiment
+     * Gets the experiment object from a rollout
      * 
-     * Note: This method is needed in the case where we want to fetch a variation inside
-     * a rollout rule/experiment. Other methods getVariationById/Key can't be used because we do
+     * Note: This method is needed in the case where we want to fetch an experiment/rule inside
+     * a rollout. Other methods getExperimentById/Key can't be used because we do
      * not store rollout rules/experiments in our experiment/variation ID maps. 
      * No need to throw an exception, since this method will not be directly called as a result of 
-     * a public API method param and will receive pre-verified experimentId and variationId
+     * a public API method param and will receive pre-verified experimentId
      * 
      * @param  string $experimentId Experiment ID
-     * @param  string $variationId  VariationID
      * 
-     * @return Variation  Variation object corresponding to given experiment and variation IDs
+     * @return Experiment  Experiment object corresponding to given experiment/rollout rule ID
      */
-    public function getVariationFromRolloutExperiment($experimentId, $variationId){
+    public function getRolloutExperimentFromId($experimentId){
         foreach($this->_rollouts as $rollout){
             $experiments = $rollout->getExperiments();
             foreach($experiments as $experiment){
                 if($experiment->getId() == $experimentId)
-                    break 2;
+                    return $experiment;
             }
         }
-
-        $variations = $experiment->getVariations();
-        foreach($variations as $variation){
-            if($variation->getId() == $variationId)
-                return $variation;
-        }
-
         return null;
     }
 

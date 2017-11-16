@@ -248,7 +248,7 @@ class Optimizely
         }
 
         $this->_notificationCenter->fireNotifications(
-            NotificationType::DECISION,
+            NotificationType::ACTIVATE,
             array(
                 $this->_config->getExperimentFromKey($experimentKey),
                 $userId,
@@ -490,22 +490,41 @@ class Optimizely
             $variation = $this->_config->getVariationFromId($experiment->getKey(), $variation_id);
 
             $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
+
+            $this->_notificationCenter->fireNotifications(
+                NotificationType::FEATURE_EXPERIMENT,
+                array(
+                    $featureFlagKey,
+                    $userId,
+                    $attributes,
+                    $experiment,
+                    $variation
+                )
+            );
+
         } else {
-            $variation = $this->_config->getVariationFromRolloutExperiment($experiment_id, $variation_id);
             $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
+
+            $experiment = $this->_config->getRolloutExperimentFromId($experiment_id);
+            $audience = null;
+            if($experiment->getAudienceIds() && !empty($experiment->getAudienceIds())){
+                $audienceId = $experiment->getAudienceIds()[0];
+                $audience = $this->_config->getAudience($audienceId);
+            }
+            
+
+            $this->_notificationCenter->fireNotifications(
+                NotificationType::FEATURE_ROLLOUT,
+                array(
+                    $featureFlagKey,
+                    $userId,
+                    $attributes,
+                    $audience
+                )
+            );
         }
 
         $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
-
-        $this->_notificationCenter->fireNotifications(
-            NotificationType::FEATURE_ACCESSED,
-            array(
-                $featureFlagKey,
-                $userId,
-                $attributes,
-                $variation
-            )
-        );
 
         return true;
     }
