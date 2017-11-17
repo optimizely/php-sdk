@@ -67,7 +67,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->notificationCenterMock = $this->getMockBuilder(NotificationCenter::class)
             ->setConstructorArgs(array($this->loggerMock, new NoOpErrorHandler))
-            ->setMethods(array('fireNotifications'))
+            ->setMethods(array('sendNotifications'))
             ->getMock();
     }
 
@@ -641,9 +641,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
 
-        // Verify that fireNotifications isn't called
+        // Verify that sendNotifications isn't called
         $this->notificationCenterMock->expects($this->never())
-            ->method('fireNotifications');
+            ->method('sendNotifications');
 
         $optlyObject->track('some_event', 'some_user');
         $this->expectOutputRegex('/Datafile has invalid format. Failing "track"./');
@@ -670,9 +670,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
 
-        // Verify that fireNotifications isn't called
+        // Verify that sendNotifications isn't called
         $this->notificationCenterMock->expects($this->never())
-            ->method('fireNotifications');
+            ->method('sendNotifications');
 
         // Call activate
         $this->assertNull($optlyObject->track('purchase', 'test_user', 42));
@@ -762,7 +762,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
 
-        // Verify that fireNotifications is called with expected params
+        // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
             'test_user',
@@ -772,7 +772,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with(
                 NotificationType::TRACK,
                 $arrayParam
@@ -879,7 +879,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
 
-        // Verify that fireNotifications is called with expected params
+        // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
             'test_user',
@@ -889,7 +889,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
         
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with(
                 NotificationType::TRACK,
                 $arrayParam
@@ -998,7 +998,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
 
-        // Verify that fireNotifications is called with expected params
+        // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
             'test_user',
@@ -1008,7 +1008,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
         
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with(
                 NotificationType::TRACK,
                 $arrayParam
@@ -1110,7 +1110,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
 
-        // Verify that fireNotifications is called with expected params
+        // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
             'test_user',
@@ -1120,7 +1120,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
         
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with(
                 NotificationType::TRACK,
                 $arrayParam
@@ -1217,7 +1217,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
 
-        // Verify that fireNotifications is called with expected params
+        // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
             'test_user',
@@ -1227,7 +1227,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
         
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with(
                 NotificationType::TRACK,
                 $arrayParam
@@ -1313,7 +1313,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
 
-        // Verify that fireNotifications is called with expected params
+        // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
             'test_user',
@@ -1323,7 +1323,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
         
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with(
                 NotificationType::TRACK,
                 $arrayParam
@@ -1435,7 +1435,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
 
-        // Verify that fireNotifications is called with expected params
+        // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
             'test_user',
@@ -1445,7 +1445,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
         
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with(
                 NotificationType::TRACK,
                 $arrayParam
@@ -1552,7 +1552,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
 
-        // Verify that fireNotifications is called with expected params
+        // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
             'test_user',
@@ -1562,7 +1562,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
         
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with(
                 NotificationType::TRACK,
                 $arrayParam
@@ -1995,9 +1995,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optimizelyMock, $this->notificationCenterMock);
 
-        // verify that fireNotifications isn't called
+        // verify that sendNotifications isn't called
         $this->notificationCenterMock->expects($this->never())
-            ->method('fireNotifications');
+            ->method('sendNotifications');
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -2048,7 +2048,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optimizelyMock, $this->notificationCenterMock);
 
-        // verify that fireNotifications is called with expected params
+        // verify that sendNotifications is called with expected params
         $arrayParam = array(
            'double_single_variable_feature',
            'user_id',
@@ -2058,7 +2058,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with( NotificationType::FEATURE_EXPERIMENT, $arrayParam);
 
         $this->loggerMock->expects($this->at(0))
@@ -2101,16 +2101,16 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $notificationCenter->setAccessible(true);
         $notificationCenter->setValue($optimizelyMock, $this->notificationCenterMock);
 
-        // verify that fireNotifications is called with expected params
+        // verify that sendNotifications is called with expected params
         $arrayParam = array(
            'boolean_single_variable_feature',
            'user_id',
            [],
-           $this->projectConfig->getAudience($experiment->getAudienceIds()[0])
+           [$this->projectConfig->getAudience($experiment->getAudienceIds()[0])]
         );
 
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with( NotificationType::FEATURE_ROLLOUT, $arrayParam);
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -2526,7 +2526,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                     ['param1' => 'val1', 'param2' => 'val2'], 'POST', [])
             );
 
-        // verify that fireNotifications is called with expected params
+        // verify that sendNotifications is called with expected params
         $arrayParam = array(
             $this->projectConfig->getExperimentFromKey('group_experiment_1'),
             'user_1',
@@ -2538,7 +2538,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with(
                 NotificationType::ACTIVATE,
                 $arrayParam
@@ -2584,7 +2584,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             )
             ->willReturn(new LogEvent('logx.optimizely.com/decision', ['param1' => 'val1'], 'POST', []));
 
-        // verify that fireNotifications is called with expected params
+        // verify that sendNotifications is called with expected params
         $arrayParam = array(
             $this->projectConfig->getExperimentFromKey('test_experiment'),
             'test_user',
@@ -2596,7 +2596,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->notificationCenterMock->expects($this->once())
-            ->method('fireNotifications')
+            ->method('sendNotifications')
             ->with(
                 NotificationType::ACTIVATE,
                 $arrayParam

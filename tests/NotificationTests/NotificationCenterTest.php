@@ -577,7 +577,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $notificationCenterA->cleanAllNotifications();
     }
 
-    public function testFireNotificationsGivenLessThanExpectedNumberOfArguments()
+    public function testsendNotificationsGivenLessThanExpectedNumberOfArguments()
     {
         $clientObj = new FireNotificationTester;
         $this->notificationCenterObj->cleanAllNotifications();
@@ -599,10 +599,10 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::ERROR, "Problem calling notify callback.");
 
-        $this->notificationCenterObj->fireNotifications(NotificationType::ACTIVATE, array("HelloWorld"));
+        $this->notificationCenterObj->sendNotifications(NotificationType::ACTIVATE, array("HelloWorld"));
     }
 
-    public function testFireNotificationsAndVerifyThatAllCallbacksWithoutArgsAreCalled()
+    public function testsendNotificationsAndVerifyThatAllCallbacksWithoutArgsAreCalled()
     {
         $clientMock = $this->getMockBuilder(FireNotificationTester::class)
             ->setMethods(array('decision_callback_no_args', 'decision_callback_no_args_2', 'track_callback_no_args'))
@@ -636,10 +636,10 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $clientMock->expects($this->never())
             ->method('track_callback_no_args');
 
-        $this->notificationCenterObj->fireNotifications(NotificationType::ACTIVATE);
+        $this->notificationCenterObj->sendNotifications(NotificationType::ACTIVATE);
     }
 
-    public function testFireNotificationsAndVerifyThatAllCallbacksWithArgsAreCalled()
+    public function testsendNotificationsAndVerifyThatAllCallbacksWithArgsAreCalled()
     {
         $clientMock = $this->getMockBuilder(FireNotificationTester::class)
             ->setMethods(array('decision_callback_with_args', 'decision_callback_with_args_2', 'track_callback_no_args'))
@@ -676,7 +676,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $clientMock->expects($this->never())
             ->method('track_callback_no_args');
 
-        $this->notificationCenterObj->fireNotifications(
+        $this->notificationCenterObj->sendNotifications(
             NotificationType::ACTIVATE,
             array(5, 5.5, 'string', array(5,6), function () {
             })

@@ -155,7 +155,7 @@ class NotificationCenter
      * @param  array  $args              Array of items to pass as arguments to the callback
      *
      */
-    public function fireNotifications($notification_type, array $args = [])
+    public function sendNotifications($notification_type, array $args = [])
     {
         if (!isset($this->_notifications[$notification_type])) {
             // No exception thrown and error logged since this method will be called from

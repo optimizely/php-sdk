@@ -247,7 +247,7 @@ class Optimizely
             ));
         }
 
-        $this->_notificationCenter->fireNotifications(
+        $this->_notificationCenter->sendNotifications(
             NotificationType::ACTIVATE,
             array(
                 $this->_config->getExperimentFromKey($experimentKey),
@@ -353,7 +353,7 @@ class Optimizely
                     'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
             }
 
-            $this->_notificationCenter->fireNotifications(
+            $this->_notificationCenter->sendNotifications(
                 NotificationType::TRACK,
                 array(
                     $eventKey,
@@ -491,7 +491,7 @@ class Optimizely
 
             $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
 
-            $this->_notificationCenter->fireNotifications(
+            $this->_notificationCenter->sendNotifications(
                 NotificationType::FEATURE_EXPERIMENT,
                 array(
                     $featureFlagKey,
@@ -513,13 +513,13 @@ class Optimizely
             }
             
 
-            $this->_notificationCenter->fireNotifications(
+            $this->_notificationCenter->sendNotifications(
                 NotificationType::FEATURE_ROLLOUT,
                 array(
                     $featureFlagKey,
                     $userId,
                     $attributes,
-                    $audience
+                    [$audience]
                 )
             );
         }
