@@ -18,16 +18,18 @@ namespace Optimizely\Tests;
 
 use Exception;
 use Monolog\Logger;
-use Optimizely\ErrorHandler\DefaultErrorHandler;
+use Optimizely\DecisionService\DecisionService;
+use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
-use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Event\LogEvent;
 use Optimizely\Exceptions\InvalidAttributeException;
-use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\Optimizely;
 use Optimizely\ProjectConfig;
 use TypeError;
+use Optimizely\ErrorHandler\DefaultErrorHandler;
+use Optimizely\Event\Builder\EventBuilder;
+use Optimizely\Logger\DefaultLogger;
+use Optimizely\Optimizely;
 
 
 class OptimizelyTest extends \PHPUnit_Framework_TestCase
@@ -1730,4 +1732,577 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $variationKey, sprintf('Invalid variation key "%s" for getVariation with bucketing ID "%s".', $variationKey, $this->testBucketingIdControl));
     }
 
+    public function testIsFeatureEnabledGivenInvalidDataFile()
+    {
+        $optlyObject = new Optimizely('Random datafile', null, $this->loggerMock);
+
+        $this->expectOutputRegex("/Datafile has invalid format. Failing 'isFeatureEnabled'./");
+        $optlyObject->isFeatureEnabled("boolean_feature", "user_id");
+    }
+
+    public function testIsFeatureEnabledGivenInvalidArguments()
+    {
+        // should return null and log a message when feature flag key is empty
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "Feature Flag key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled("", "user_id"), null);
+
+        // should return null and log a message when feature flag key is null
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "Feature Flag key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled(null, "user_id"), null);
+
+        // should return null and log a message when user id is empty
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "User ID cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled("boolean_feature", ""), null);
+
+        // should return null and log a message when user id is null
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "User ID cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled("boolean_feature", null), null);
+    }
+
+    public function testIsFeatureEnabledGivenFeatureFlagNotFound()
+    {
+        $feature_key = "abcd"; // Any string that is not a feature flag key in the data file
+
+        //should return null and log a message when no feature flag found against a valid feature key
+        $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(Logger::ERROR, "FeatureFlag Key \"{$feature_key}\" is not in datafile.");
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled($feature_key, "user_id"), null);
+    }
+
+    public function testIsFeatureEnabledGivenInvalidFeatureFlag()
+    {
+        // Create local config copy for this method to add error
+        $projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
+        $optimizelyObj = new Optimizely($this->datafile);
+
+        $config = new \ReflectionProperty(Optimizely::class, '_config');
+        $config->setAccessible(true);
+        $config->setValue($optimizelyObj, $projectConfig);
+
+        $feature_flag = $projectConfig->getFeatureFlagFromKey('mutex_group_feature');
+        // Add such an experiment to the list of experiment ids, that does not belong to the same mutex group
+        $experimentIds = $feature_flag->getExperimentIds();
+        $experimentIds [] = '122241';
+        $feature_flag->setExperimentIds($experimentIds);
+
+        //should return null when feature flag is invalid
+        $this->assertSame($optimizelyObj->isFeatureEnabled('mutex_group_feature', "user_id"), null);
+    }
+
+    public function testIsFeatureEnabledGivenFeatureFlagIsNotEnabledForUser()
+    {
+        // should return false when no variation is returned for user
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($optimizelyMock, $decisionServiceMock);
+
+        // mock getVariationForFeature to return null
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue(null));
+
+        // assert that impression event is not sent
+        $optimizelyMock->expects($this->never())
+            ->method('sendImpressionEvent');
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "Feature Flag 'double_single_variable_feature' is not enabled for user 'user_id'.");
+
+        $this->assertSame(
+            $optimizelyMock->isFeatureEnabled('double_single_variable_feature', 'user_id'),
+            false
+        );
+    }
+
+    public function testIsFeatureEnabledGivenFeatureFlagIsEnabledAndUserIsBeingExperimented()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($optimizelyMock, $decisionServiceMock);
+
+        // Mock getVariationForFeature to return a valid decision with experiment and variation keys
+        $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
+        $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
+
+        $expected_decision = new FeatureDecision(
+            $experiment->getId(),
+            $variation->getId(),
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+        );
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expected_decision));
+
+        // assert that sendImpressionEvent is called with expected params
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with('test_experiment_double_feature', 'control', 'user_id', []);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "Feature Flag 'double_single_variable_feature' is enabled for user 'user_id'.");
+
+        $this->assertSame(
+            $optimizelyMock->isFeatureEnabled('double_single_variable_feature', 'user_id', []),
+            true
+        );
+    }
+
+    public function testIsFeatureEnabledGivenFeatureFlagIsEnabledAndUserIsNotBeingExperimented()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($optimizelyMock, $decisionServiceMock);
+
+        // Mock getVariationForFeature to return a valid decision with experiment and variation keys
+        $rollout = $this->projectConfig->getRolloutFromId('166660');
+        $experiment = $rollout->getExperiments()[0];
+        $variation = $experiment->getVariations()[0];
+        $expected_decision = new FeatureDecision(
+            $experiment->getId(),
+            $variation->getId(),
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expected_decision));
+
+        // assert that sendImpressionEvent is not called
+        $optimizelyMock->expects($this->never())
+            ->method('sendImpressionEvent');
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "The user 'user_id' is not being experimented on Feature Flag 'boolean_single_variable_feature'."
+            );
+
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO, "Feature Flag 'boolean_single_variable_feature' is enabled for user 'user_id'.");
+
+        $this->assertSame(
+            $optimizelyMock->isFeatureEnabled('boolean_single_variable_feature', 'user_id', []),
+            true
+        );
+    }
+
+    public function testGetFeatureVariableValueForTypeGivenInvalidArguments()
+    {
+        // should return null and log a message when feature flag key is empty
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "Feature Flag key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "",
+            "double_variable",
+            "user_id"
+        ), null);
+
+        // should return null and log a message when feature flag key is null
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "Feature Flag key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            null,
+            "double_variable",
+            "user_id"
+        ), null);
+
+        // should return null and log a message when variable key is empty
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "Variable key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "boolean_feature",
+            "",
+            "user_id"
+        ), null);
+
+        // should return null and log a message when variable key is null
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "Variable key cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "boolean_feature",
+            null,
+            "user_id"
+        ), null);
+
+        // should return null and log a message when user id is empty
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "User ID cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "boolean_feature",
+            "double_variable",
+            ""
+        ), null);
+
+        // should return null and log a message when user id is null
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "User ID cannot be empty.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "boolean_feature",
+            "double_variable",
+            null
+        ), null);
+    }
+
+    public function testGetFeatureVariableValueForTypeGivenFeatureFlagNotFound()
+    {
+        $feature_key = "abcd"; // Any string that is not a feature flag key in the data file
+
+        //should return null and log a message when no feature flag found against a valid feature key
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "FeatureFlag Key \"{$feature_key}\" is not in datafile.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            $feature_key,
+            "double_variable",
+            'user_id'
+        ), null);
+    }
+
+    public function testGetFeatureVariableValueForTypeGivenFeatureVariableNotFound()
+    {
+        $feature_key = "boolean_feature"; // Any exisiting feature key in the data file
+        $variable_key = "abcd"; // Any string that is not a variable key in the data file
+
+        //should return null and log a message when no feature flag found against a valid feature key
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "No variable key \"{$variable_key}\" defined in datafile ".
+                "for feature flag \"{$feature_key}\".");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            $feature_key,
+            $variable_key,
+            'user_id'
+        ), null);
+    }
+
+    public function testGetFeatureVariableValueForTypeGivenInvalidFeatureVariableType()
+    {
+        // should return null and log a message when a feature variable does exist but is
+        // called for another type
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, "Variable is of type 'double', but you requested it as type 'string'.");
+
+        $this->assertSame($this->optimizelyObject->getFeatureVariableValueForType(
+            "double_single_variable_feature",
+            "double_variable",
+            "user_id",
+            null,
+            "string"
+        ), null);
+    }
+
+    public function testGetFeatureVariableValueForTypeGivenFeatureFlagIsNotEnabledForUser()
+    {
+        // should return default value
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue(null));
+
+        $this->loggerMock->expects($this->exactly(1))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "User 'user_id'is not in any variation, returning default value '14.99'."
+            );
+
+        $this->assertSame(
+            $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', [], 'double'),
+            '14.99'
+        );
+    }
+
+    public function testGetFeatureVariableValueForTypeGivenFeatureFlagIsEnabledForUserAndVariableIsInVariation()
+    {
+        // should return specific value
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+
+        $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
+        $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
+        $expected_decision = new FeatureDecision(
+            $experiment->getId(),
+            $variation->getId(),
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+        );
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expected_decision));
+
+        $this->loggerMock->expects($this->exactly(1))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "Returning variable value '42.42' for variation 'control' ".
+                    "of feature flag 'double_single_variable_feature'"
+            );
+
+        $this->assertSame(
+            $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', [], 'double'),
+            '42.42'
+        );
+    }
+
+    public function testGetFeatureVariableValueForTypeGivenFeatureFlagIsEnabledForUserAndVariableNotInVariation()
+    {
+        // should return default value
+        
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+
+        // Mock getVariationForFeature to return experiment/variation from a different feature
+        $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_integer_feature');
+        $variation = $this->projectConfig->getVariationFromKey('test_experiment_integer_feature', 'control');
+        $expected_decision = new FeatureDecision(
+            $experiment->getId(),
+            $variation->getId(),
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+        );
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expected_decision));
+
+        $this->loggerMock->expects($this->exactly(1))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "Variable 'double_variable' is not used in variation 'control', returning default value '14.99'."
+            );
+
+        $this->assertSame(
+            $this->optimizelyObject->getFeatureVariableValueForType(
+                'double_single_variable_feature',
+                'double_variable',
+                'user_id',
+                [],
+                'double'
+            ),
+            '14.99'
+        );
+    }
+
+
+    public function testGetFeatureVariableBooleanCaseTrue()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('getFeatureVariableValueForType'))
+            ->getMock();
+
+        // assert that getFeatureVariableValueForType is called with expected arguments and mock to return 'true'
+        $map = [['boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean', 'true']];
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('getFeatureVariableValueForType')
+            ->with('boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean')
+            ->will($this->returnValueMap($map));
+
+        $this->assertSame(
+            $optimizelyMock->getFeatureVariableBoolean('boolean_single_variable_feature', 'boolean_variable', 'user_id', []),
+            true
+        );
+    }
+
+    public function testGetFeatureVariableBooleanCaseFalse()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('getFeatureVariableValueForType'))
+            ->getMock();
+
+        // assert that getFeatureVariableValueForType is called with expected arguments and mock to return any string but 'true'
+        $map = [['boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean', '14.33']];
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('getFeatureVariableValueForType')
+            ->with('boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean')
+            ->will($this->returnValueMap($map));
+
+        $this->assertSame(
+            $optimizelyMock->getFeatureVariableBoolean('boolean_single_variable_feature', 'boolean_variable', 'user_id', []),
+            false
+        );
+    }
+
+    public function testGetFeatureVariableIntegerWhenCasted()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('getFeatureVariableValueForType'))
+            ->getMock();
+
+        // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a numeric string
+        $map = [['integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer', '90']];
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('getFeatureVariableValueForType')
+            ->with('integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer')
+            ->will($this->returnValueMap($map));
+
+        $this->assertSame(
+            $optimizelyMock->getFeatureVariableInteger('integer_single_variable_feature', 'integer_variable', 'user_id', []),
+            90
+        );
+    }
+
+    public function testGetFeatureVariableIntegerWhenNotCasted()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('getFeatureVariableValueForType'))
+            ->getMock();
+
+        // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a non-numeric string
+        $map = [['integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer', 'abc90']];
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('getFeatureVariableValueForType')
+            ->with('integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer')
+            ->will($this->returnValueMap($map));
+
+        $this->assertSame(
+            $optimizelyMock->getFeatureVariableInteger('integer_single_variable_feature', 'integer_variable', 'user_id', []),
+            null
+        );
+    }
+
+    public function testGetFeatureVariableDoubleWhenCasted()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('getFeatureVariableValueForType'))
+            ->getMock();
+
+        // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a numeric string
+        $map = [['double_single_variable_feature', 'double_variable', 'user_id', [], 'double', '5.789']];
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('getFeatureVariableValueForType')
+            ->with('double_single_variable_feature', 'double_variable', 'user_id', [], 'double')
+            ->will($this->returnValueMap($map));
+
+        $this->assertSame(
+            $optimizelyMock->getFeatureVariableDouble('double_single_variable_feature', 'double_variable', 'user_id', []),
+            5.789
+        );
+    }
+
+    public function testGetFeatureVariableDoubleWhenNotCasted()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('getFeatureVariableValueForType'))
+            ->getMock();
+
+        // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a non-numeric string
+        $map = [['double_single_variable_feature', 'double_variable', 'user_id', [], 'double', 'abc5.789']];
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('getFeatureVariableValueForType')
+            ->with('double_single_variable_feature', 'double_variable', 'user_id', [], 'double')
+            ->will($this->returnValueMap($map));
+
+        $this->assertSame(
+            $optimizelyMock->getFeatureVariableDouble('double_single_variable_feature', 'double_variable', 'user_id', []),
+            null
+        );
+    }
+
+    public function testGetFeatureVariableString()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('getFeatureVariableValueForType'))
+            ->getMock();
+
+        $map = [['string_single_variable_feature', 'string_variable', 'user_id', [], 'string', '59abc0p']];
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('getFeatureVariableValueForType')
+            ->with('string_single_variable_feature', 'string_variable', 'user_id', [], 'string')
+            ->will($this->returnValueMap($map));
+
+        $this->assertSame(
+            $optimizelyMock->getFeatureVariableString('string_single_variable_feature', 'string_variable', 'user_id', []),
+            '59abc0p'
+        );
+    }
 }
