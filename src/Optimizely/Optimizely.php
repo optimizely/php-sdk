@@ -180,7 +180,7 @@ class Optimizely
      * is one that is in "Running" state and into which the user has been bucketed.
      *
      * @param  $event string Event key representing the event which needs to be recorded.
-     * @param  $user string ID for user.
+     * @param  $userId string ID for user.
      * @param  $attributes array Attributes of the user.
      *
      * @return Array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
@@ -436,7 +436,7 @@ class Optimizely
         }
 
         $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
-        if ($feature_flag == new FeatureFlag) {
+        if ($feature_flag && (!$feature_flag->getId())) {
             // Error logged in ProjectConfig - getFeatureFlagFromKey
             return null;
         }

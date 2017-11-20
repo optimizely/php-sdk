@@ -47,8 +47,8 @@ class VariableTypeUtilsTest extends \PHPUnit_Framework_TestCase
 
     public function testValueCastingToInteger()
     {
-        $this->assertSame($this->variableUtilObj->castStringToType('1000', 'integer'), 1000);
-        $this->assertSame($this->variableUtilObj->castStringToType('123', 'integer'), 123);
+        $this->assertSame(1000, $this->variableUtilObj->castStringToType('1000', 'integer'));
+        $this->assertSame(123, $this->variableUtilObj->castStringToType('123', 'integer'));
 
         // should return nulll and log a message if value can not be casted to an integer
         $value = '123.5'; // any string with non-decimal digits
@@ -65,9 +65,9 @@ class VariableTypeUtilsTest extends \PHPUnit_Framework_TestCase
 
     public function testValueCastingToDouble()
     {
-        $this->assertSame($this->variableUtilObj->castStringToType('1000', 'double'), 1000.0);
-        $this->assertSame($this->variableUtilObj->castStringToType('3.0', 'double'), 3.0);
-        $this->assertSame($this->variableUtilObj->castStringToType('13.37', 'double'), 13.37);
+        $this->assertSame(1000.0, $this->variableUtilObj->castStringToType('1000', 'double'));
+        $this->assertSame(3.0, $this->variableUtilObj->castStringToType('3.0', 'double'));
+        $this->assertSame(13.37, $this->variableUtilObj->castStringToType('13.37', 'double'));
 
         // should return nil and log a message if value can not be casted to a double
         $value = 'any-non-numeric-string';
@@ -84,9 +84,9 @@ class VariableTypeUtilsTest extends \PHPUnit_Framework_TestCase
 
     public function testValueCastingToString()
     {
-        $this->assertSame($this->variableUtilObj->castStringToType('13.37', 'string'), '13.37');
-        $this->assertSame($this->variableUtilObj->castStringToType('a string', 'string'), 'a string');
-        $this->assertSame($this->variableUtilObj->castStringToType('3', 'string'), '3');
-        $this->assertSame($this->variableUtilObj->castStringToType('false', 'string'), 'false');
+        $this->assertSame('13.37', $this->variableUtilObj->castStringToType('13.37', 'string'));
+        $this->assertSame('a string', $this->variableUtilObj->castStringToType('a string', 'string'));
+        $this->assertSame('3', $this->variableUtilObj->castStringToType('3', 'string'));
+        $this->assertSame('false', $this->variableUtilObj->castStringToType('false', 'string'));
     }
 }
