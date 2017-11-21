@@ -239,7 +239,7 @@ class Optimizely
             ));
         }
     }
-    
+
     /**
      * Buckets visitor and sends impression event to Optimizely.
      *
@@ -263,7 +263,7 @@ class Optimizely
         }
 
         $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
-        
+
         return $variationKey;
     }
 
@@ -422,28 +422,28 @@ class Optimizely
     {
         if (!$this->_isValid) {
             $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'.");
-            return null;
+            return false;
         }
 
         if (!$featureFlagKey) {
             $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty.");
-            return null;
+            return false;
         }
 
         if (!$userId) {
             $this->_logger->log(Logger::ERROR, "User ID cannot be empty.");
-            return null;
+            return false;
         }
 
         $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
         if ($feature_flag && (!$feature_flag->getId())) {
             // Error logged in ProjectConfig - getFeatureFlagFromKey
-            return null;
+            return false;
         }
 
         //validate feature flag
         if (!Validator::isFeatureFlagValid($this->_config, $feature_flag)) {
-            return null;
+            return false;
         }
 
         $decision = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
