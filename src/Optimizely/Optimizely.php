@@ -466,7 +466,7 @@ class Optimizely
         }
 
         $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
-        if ($feature_flag == new FeatureFlag) {
+        if ($feature_flag && (!$feature_flag->getId())) {
             // Error logged in ProjectConfig - getFeatureFlagFromKey
             return null;
         }

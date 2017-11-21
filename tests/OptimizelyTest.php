@@ -2620,5 +2620,4 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optlyObject->sendImpressionEvent('test_experiment', 'control', 'test_user', $userAttributes);
     }
-
 }
