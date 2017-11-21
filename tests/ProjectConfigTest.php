@@ -626,4 +626,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->config->getForcedVariation($experimentKey, $userId);
     }
 
+    // Adding for code coverage
+    // Should return null when none of the rollouts has an experiment with the given ID
+    public function testGetRolloutExperimentFromId(){
+        $this->assertNull($this->config->getRolloutExperimentFromId('aabbcc'));
+    }
+
 }
