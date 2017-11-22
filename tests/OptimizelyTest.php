@@ -2044,23 +2044,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with('test_experiment_double_feature', 'control', 'user_id', []);
 
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optimizelyMock, $this->notificationCenterMock);
-
-        // verify that sendNotifications is called with expected params
-        $arrayParam = array(
-           'double_single_variable_feature',
-           'user_id',
-           [],
-           $experiment,
-           $variation
-        );
-
-        $this->notificationCenterMock->expects($this->once())
-            ->method('sendNotifications')
-            ->with( NotificationType::FEATURE_EXPERIMENT, $arrayParam);
-
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::INFO, "Feature Flag 'double_single_variable_feature' is enabled for user 'user_id'.");
@@ -2096,22 +2079,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             $variation->getId(),
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
-
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optimizelyMock, $this->notificationCenterMock);
-
-        // verify that sendNotifications is called with expected params
-        $arrayParam = array(
-           'boolean_single_variable_feature',
-           'user_id',
-           [],
-           [$this->projectConfig->getAudience($experiment->getAudienceIds()[0])]
-        );
-
-        $this->notificationCenterMock->expects($this->once())
-            ->method('sendNotifications')
-            ->with( NotificationType::FEATURE_ROLLOUT, $arrayParam);
 
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')

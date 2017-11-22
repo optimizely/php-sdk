@@ -172,21 +172,6 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
             1,
             sizeof($this->notificationCenterObj->getNotifications()[NotificationType::TRACK])
         );
-
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::INFO, sprintf("Callback added for notification type '%s'.", NotificationType::FEATURE_EXPERIMENT));
-        $this->assertSame(
-            3,
-            $this->notificationCenterObj->addNotificationListener(NotificationType::FEATURE_EXPERIMENT, function () {
-            })
-        );
-
-        // verify that notifications length for NotificationType::FEATURE_EXPERIMENT has incremented by 1
-        $this->assertSame(
-            1,
-            sizeof($this->notificationCenterObj->getNotifications()[NotificationType::FEATURE_EXPERIMENT])
-        );
     }
 
     public function testAddNotificationForMultipleCallbacksForASingleNotificationType()
@@ -515,10 +500,6 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
             0,
             sizeof($notificationCenterA->getNotifications()[NotificationType::TRACK])
         );
-        $this->assertSame(
-            0,
-            sizeof($notificationCenterA->getNotifications()[NotificationType::FEATURE_EXPERIMENT])
-        );
 
         // add a callback for multiple notification types
         $notificationCenterA->addNotificationListener(NotificationType::ACTIVATE, function () {
@@ -533,10 +514,6 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $notificationCenterA->addNotificationListener(NotificationType::TRACK, function () {
         });
 
-        $notificationCenterA->addNotificationListener(NotificationType::FEATURE_EXPERIMENT, function () {
-        });
-
-
         // verify that notifications length for each type reflects the just added callbacks
         $this->assertSame(
             3,
@@ -545,10 +522,6 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             2,
             sizeof($notificationCenterA->getNotifications()[NotificationType::TRACK])
-        );
-        $this->assertSame(
-            1,
-            sizeof($notificationCenterA->getNotifications()[NotificationType::FEATURE_EXPERIMENT])
         );
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -565,10 +538,6 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             0,
             sizeof($notificationCenterA->getNotifications()[NotificationType::TRACK])
-        );
-        $this->assertSame(
-            0,
-            sizeof($notificationCenterA->getNotifications()[NotificationType::FEATURE_EXPERIMENT])
         );
 
         ///////////////////////////////////////////////////////////////////////////////////////

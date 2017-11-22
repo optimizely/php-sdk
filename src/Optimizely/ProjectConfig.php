@@ -472,30 +472,6 @@ class ProjectConfig
         return null;
     }
 
-    /**
-     * Gets the experiment object from a rollout
-     * 
-     * Note: This method is needed in the case where we want to fetch an experiment/rule inside
-     * a rollout. Other methods getExperimentById/Key can't be used because we do
-     * not store rollout rules/experiments in our experiment/variation ID maps. 
-     * No need to throw an exception, since this method will not be directly called as a result of 
-     * a public API method param and will receive pre-verified experimentId
-     * 
-     * @param  string $experimentId Experiment ID
-     * 
-     * @return Experiment  Experiment object corresponding to given experiment/rollout rule ID
-     */
-    public function getRolloutExperimentFromId($experimentId){
-        foreach($this->_rollouts as $rollout){
-            $experiments = $rollout->getExperiments();
-            foreach($experiments as $experiment){
-                if($experiment->getId() == $experimentId)
-                    return $experiment;
-            }
-        }
-        return null;
-    }
-
     public function isVariationIdValid($experimentKey, $variationId)
     {
         return isset($this->_variationIdMap[$experimentKey]) &&
