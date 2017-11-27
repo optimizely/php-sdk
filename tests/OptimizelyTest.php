@@ -1905,44 +1905,44 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testIsFeatureEnabledGivenInvalidArguments()
     {
-        // should return null and log a message when feature flag key is empty
+        // should return false and log a message when feature flag key is empty
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::ERROR, "Feature Flag key cannot be empty.");
 
-        $this->assertSame($this->optimizelyObject->isFeatureEnabled("", "user_id"), null);
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled("", "user_id"), false);
 
-        // should return null and log a message when feature flag key is null
+        // should return false and log a message when feature flag key is null
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::ERROR, "Feature Flag key cannot be empty.");
 
-        $this->assertSame($this->optimizelyObject->isFeatureEnabled(null, "user_id"), null);
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled(null, "user_id"), false);
 
-        // should return null and log a message when user id is empty
+        // should return false and log a message when user id is empty
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::ERROR, "User ID cannot be empty.");
 
-        $this->assertSame($this->optimizelyObject->isFeatureEnabled("boolean_feature", ""), null);
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled("boolean_feature", ""), false);
 
-        // should return null and log a message when user id is null
+        // should return false and log a message when user id is null
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::ERROR, "User ID cannot be empty.");
 
-        $this->assertSame($this->optimizelyObject->isFeatureEnabled("boolean_feature", null), null);
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled("boolean_feature", null), false);
     }
 
     public function testIsFeatureEnabledGivenFeatureFlagNotFound()
     {
         $feature_key = "abcd"; // Any string that is not a feature flag key in the data file
 
-        //should return null and log a message when no feature flag found against a valid feature key
+        //should return false and log a message when no feature flag found against a valid feature key
         $this->loggerMock->expects($this->at(0))
         ->method('log')
         ->with(Logger::ERROR, "FeatureFlag Key \"{$feature_key}\" is not in datafile.");
-        $this->assertSame($this->optimizelyObject->isFeatureEnabled($feature_key, "user_id"), null);
+        $this->assertSame($this->optimizelyObject->isFeatureEnabled($feature_key, "user_id"), false);
     }
 
     public function testIsFeatureEnabledGivenInvalidFeatureFlag()
@@ -1961,8 +1961,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $experimentIds [] = '122241';
         $feature_flag->setExperimentIds($experimentIds);
 
-        //should return null when feature flag is invalid
-        $this->assertSame($optimizelyObj->isFeatureEnabled('mutex_group_feature', "user_id"), null);
+        //should return false when feature flag is invalid
+        $this->assertSame($optimizelyObj->isFeatureEnabled('mutex_group_feature', "user_id"), false);
     }
 
     public function testIsFeatureEnabledGivenFeatureFlagIsNotEnabledForUser()
@@ -2295,7 +2295,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testGetFeatureVariableValueForTypeGivenFeatureFlagIsEnabledForUserAndVariableNotInVariation()
     {
         // should return default value
-        
+
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
             ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
             ->setMethods(array('getVariationForFeature'))
