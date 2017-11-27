@@ -21,8 +21,6 @@ class NotificationType
     // format is EVENT: list of parameters to callback.
     const ACTIVATE = "ACTIVATE:experiment, user_id, attributes, variation, event";
     const TRACK = "TRACK:event_key, user_id, attributes, event_tags, event";
-    const FEATURE_EXPERIMENT = "FEATURE_EXPERIMENT:feature_key, user_id, attributes, experiment, variation";
-    const FEATURE_ROLLOUT = "FEATURE_ROLLOUT:feature_key, user_id, attributes, audience";
 
     public static function isNotificationTypeValid($notification_type)
     {

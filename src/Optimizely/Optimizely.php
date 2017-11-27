@@ -466,7 +466,7 @@ class Optimizely
         }
 
         $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
-        if ($feature_flag == new FeatureFlag) {
+        if ($feature_flag && (!$feature_flag->getId())) {
             // Error logged in ProjectConfig - getFeatureFlagFromKey
             return null;
         }
@@ -491,37 +491,8 @@ class Optimizely
 
             $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
 
-            $this->_notificationCenter->sendNotifications(
-                NotificationType::FEATURE_EXPERIMENT,
-                array(
-                    $featureFlagKey,
-                    $userId,
-                    $attributes,
-                    $experiment,
-                    $variation
-                )
-            );
-
         } else {
             $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
-
-            $experiment = $this->_config->getRolloutExperimentFromId($experiment_id);
-            $audience = null;
-            if($experiment->getAudienceIds() && !empty($experiment->getAudienceIds())){
-                $audienceId = $experiment->getAudienceIds()[0];
-                $audience = $this->_config->getAudience($audienceId);
-            }
-            
-
-            $this->_notificationCenter->sendNotifications(
-                NotificationType::FEATURE_ROLLOUT,
-                array(
-                    $featureFlagKey,
-                    $userId,
-                    $attributes,
-                    [$audience]
-                )
-            );
         }
 
         $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
