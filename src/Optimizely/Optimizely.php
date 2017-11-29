@@ -35,6 +35,8 @@ use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\Notification\NotificationCenter;
+use Optimizely\Notification\NotificationType;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\Validator;
@@ -83,6 +85,11 @@ class Optimizely
     private $_logger;
 
     /**
+     * @var NotificationCenter
+     */
+    private $_notificationCenter;
+
+    /**
      * Optimizely constructor for managing Full Stack PHP projects.
      *
      * @param $datafile string JSON string representing the project.
@@ -129,6 +136,7 @@ class Optimizely
 
         $this->_eventBuilder = new EventBuilder();
         $this->_decisionService = new DecisionService($this->_logger, $this->_config, $userProfileService);
+        $this->_notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
     }
 
     /**
@@ -169,6 +177,7 @@ class Optimizely
                 $this->_errorHandler->handleError(
                     new InvalidEventTagException('Provided event tags are in an invalid format.')
                 );
+                return false;
             }
         }
 
@@ -180,7 +189,7 @@ class Optimizely
      * is one that is in "Running" state and into which the user has been bucketed.
      *
      * @param  $event string Event key representing the event which needs to be recorded.
-     * @param  $userId string ID for user.
+     * @param  $user string ID for user.
      * @param  $attributes array Attributes of the user.
      *
      * @return Array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
@@ -238,6 +247,17 @@ class Optimizely
                 $exception->getMessage()
             ));
         }
+
+        $this->_notificationCenter->sendNotifications(
+            NotificationType::ACTIVATE,
+            array(
+                $this->_config->getExperimentFromKey($experimentKey),
+                $userId,
+                $attributes,
+                $this->_config->getVariationFromKey($experimentKey, $variationKey),
+                $impressionEvent
+            )    
+        );          
     }
 
     /**
@@ -333,6 +353,17 @@ class Optimizely
                 $this->_logger->log(Logger::ERROR, sprintf(
                     'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
             }
+
+            $this->_notificationCenter->sendNotifications(
+                NotificationType::TRACK,
+                array(
+                    $eventKey,
+                    $userId,
+                    $attributes,
+                    $eventTags,
+                    $conversionEvent
+                )
+            );
 
         } else {
             $this->_logger->log(
@@ -452,18 +483,21 @@ class Optimizely
             return false;
         }
 
+        $experiment_id = $decision->getExperimentId();
+        $variation_id = $decision->getVariationId();
+
         if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
-            $experiment_id = $decision->getExperimentId();
-            $variation_id = $decision->getVariationId();
             $experiment = $this->_config->getExperimentFromId($experiment_id);
             $variation = $this->_config->getVariationFromId($experiment->getKey(), $variation_id);
 
             $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
+
         } else {
             $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
         }
 
         $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
+
         return true;
     }
 
