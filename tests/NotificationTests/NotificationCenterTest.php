@@ -606,6 +606,20 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
             ->method('track_callback_no_args');
 
         $this->notificationCenterObj->sendNotifications(NotificationType::ACTIVATE);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // === Verify that none of the callbacks are called given an invalid NotificationType === //
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        
+        $clientMock->expects($this->never())
+            ->method('decision_callback_no_args');
+        $clientMock->expects($this->never())
+            ->method('decision_callback_no_args_2');
+
+        $clientMock->expects($this->never())
+            ->method('track_callback_no_args');
+
+        $this->notificationCenterObj->sendNotifications("abacada");
     }
 
     public function testsendNotificationsAndVerifyThatAllCallbacksWithArgsAreCalled()

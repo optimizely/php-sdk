@@ -23,6 +23,7 @@ use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
 use Optimizely\Exceptions\InvalidAttributeException;
+use Optimizely\Exceptions\InvalidEventTagException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
@@ -674,8 +675,88 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->notificationCenterMock->expects($this->never())
             ->method('sendNotifications');
 
-        // Call activate
+        // Call track
         $this->assertNull($optlyObject->track('purchase', 'test_user', 42));
+    }
+
+    public function testTrackInvalidEventTags()
+    {     
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Provided event tags are in an invalid format.');
+
+        $errorHandlerMock = $this->getMockBuilder(NoOpErrorHandler::class)
+            ->setMethods(array('handleError'))
+            ->getMock();
+        $errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidEventTagException('Provided event tags are in an invalid format.'));
+
+        $optlyObject = new Optimizely(
+            $this->datafile, null, $this->loggerMock, $errorHandlerMock
+        );
+
+       $optlyObject->track('purchase', 'test_user', [], [1=>2]);
+    }
+
+    public function testTrackUnknownEventKey()
+    {
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, 'Event key "unknown_key" is not in datafile.');
+
+
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::ERROR, 'Not tracking user "test_user" for event "unknown_key".');
+
+        $this->optimizelyObject->track('unknown_key', 'test_user');
+    }
+
+    public function testActivateGivenEventKeyWithNoExperiments()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::INFO, 'There are no valid experiments for event "unlinked_event" to track.');
+
+        $this->optimizelyObject->track('unlinked_event', 'test_user');
+    }
+
+    public function testTrackEventDispatchFailure(){
+
+        $eventDispatcherMock = $this->getMockBuilder(DefaultEventDispatcher::class)
+            ->setMethods(array('dispatchEvent'))
+            ->getMock();
+
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfig,
+                'purchase',
+                ["7718750065" => "7725250007"],
+                'test_user',
+                null,
+                null
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $eventDispatcher = new \ReflectionProperty(Optimizely::class, '_eventDispatcher');
+        $eventDispatcher->setAccessible(true);
+        $eventDispatcher->setValue($this->optimizelyObject, $eventDispatcherMock);
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($this->optimizelyObject, $this->eventBuilderMock);
+
+        $eventDispatcherMock->expects($this->once())
+            ->method('dispatchEvent')
+            ->will($this->throwException(new Exception));
+
+        $this->loggerMock->expects($this->at(16))
+            ->method('log')
+            ->with(Logger::ERROR, 'Unable to dispatch conversion event. Error ');
+
+        $this->optimizelyObject->track('purchase', 'test_user');
     }
 
     public function testTrackNoAttributesNoEventValue()
@@ -2477,6 +2558,34 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testGetFeatureVariableMethodsReturnNullWhenGetVariableValueForTypeReturnsNull(){
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('getFeatureVariableValueForType'))
+            ->getMock();
+        $optimizelyMock->expects($this->exactly(4))
+            ->method('getFeatureVariableValueForType')
+            ->willReturn(null);
+
+        $this->assertNull(
+            $optimizelyMock->getFeatureVariableBoolean(
+                'boolean_single_variable_feature', 'boolean_variable', 'user_id', [])
+        );
+        $this->assertNull(
+             $optimizelyMock->getFeatureVariableString(
+                'string_single_variable_feature', 'string_variable', 'user_id', [])
+        );
+        $this->assertNull(
+                $optimizelyMock->getFeatureVariableDouble(
+                    'double_single_variable_feature', 'double_variable', 'user_id', [])
+        );
+        $this->assertNull(
+            $optimizelyMock->getFeatureVariableInteger(
+                'integer_single_variable_feature', 'integer_variable', 'user_id', [])
+        );
+
+    }
+
     public function testSendImpressionEventWithNoAttributes(){
         $optlyObject = new OptimizelyTester($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -2531,7 +2640,29 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject->sendImpressionEvent('group_experiment_1', 'group_exp_1_var_2', 'user_1', null);
     }
 
-    
+    public function testSendImpressionEventDispatchFailure()
+    {
+        $optlyObject = new OptimizelyTester($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $eventDispatcherMock = $this->getMockBuilder(DefaultEventDispatcher::class)
+            ->setMethods(array('dispatchEvent'))
+            ->getMock();
+
+        $eventDispatcher = new \ReflectionProperty(Optimizely::class, '_eventDispatcher');
+        $eventDispatcher->setAccessible(true);
+        $eventDispatcher->setValue($optlyObject, $eventDispatcherMock);
+
+        $eventDispatcherMock->expects($this->once())
+            ->method('dispatchEvent')
+            ->will($this->throwException(new Exception));
+
+        $this->loggerMock->expects($this->at(2))
+            ->method('log')
+            ->with(Logger::ERROR, 'Unable to dispatch impression event. Error ');
+
+        $optlyObject->sendImpressionEvent('test_experiment', 'control', 'test_user', []);
+    }
+
     public function testSendImpressionEventWithAttributes(){
         $optlyObject = new OptimizelyTester($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 

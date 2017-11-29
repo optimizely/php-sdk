@@ -177,6 +177,7 @@ class Optimizely
                 $this->_errorHandler->handleError(
                     new InvalidEventTagException('Provided event tags are in an invalid format.')
                 );
+                return false;
             }
         }
 

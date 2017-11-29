@@ -50,11 +50,6 @@ class NotificationCenter
         $this->_errorHandler = $errorHandler;
     }
 
-    public function getNotificationId()
-    {
-        return $this->_notificationId;
-    }
-
     public function getNotifications()
     {
         return $this->_notifications;
@@ -179,8 +174,6 @@ class NotificationCenter
                 call_user_func_array($callback, $args);
             } catch (ArgumentCountError $e) {
                 $this->reportArgumentCountError();
-            } catch (Throwable $e) {
-                $this->_logger->log(Logger::ERROR, "Problem calling notify callback.");
             } catch (Exception $e) {
                 $this->_logger->log(Logger::ERROR, "Problem calling notify callback.");
             }
