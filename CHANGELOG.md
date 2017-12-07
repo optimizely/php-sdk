@@ -1,3 +1,8 @@
+##1.5.0
+- Notification listeners.
+- Feature flags and rollouts.
+- IP Anonymization.
+
 ## 1.4.0
 - Added support for Numeric Metrics.
 - Switched to new event API.
