@@ -1,6 +1,6 @@
 ## 1.5.0
-- Notification listeners.
-- IP anonymization.
+- Added support for notification listeners.
+- Added support for IP anonymization.
 
 ## 1.4.0
 - Added support for Numeric Metrics.
