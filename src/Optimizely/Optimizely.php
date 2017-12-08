@@ -31,6 +31,8 @@ use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\Notification\NotificationCenter;
+use Optimizely\Notification\NotificationType;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\Validator;
@@ -76,6 +78,11 @@ class Optimizely
      * @var LoggerInterface
      */
     private $_logger;
+
+    /**
+     * @var NotificationCenter
+     */
+    private $_notificationCenter;
 
     /**
      * Optimizely constructor for managing Full Stack PHP projects.
@@ -124,6 +131,7 @@ class Optimizely
 
         $this->_eventBuilder = new EventBuilder();
         $this->_decisionService = new DecisionService($this->_logger, $this->_config, $userProfileService);
+        $this->_notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
     }
 
     /**
@@ -164,6 +172,7 @@ class Optimizely
                 $this->_errorHandler->handleError(
                     new InvalidEventTagException('Provided event tags are in an invalid format.')
                 );
+                return false;
             }
         }
 
@@ -313,6 +322,17 @@ class Optimizely
                 $this->_logger->log(Logger::ERROR, sprintf(
                     'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
             }
+
+            $this->_notificationCenter->sendNotifications(
+                NotificationType::TRACK,
+                array(
+                    $eventKey,
+                    $userId,
+                    $attributes,
+                    $eventTags,
+                    $conversionEvent
+                )
+            );
 
         } else {
             $this->_logger->log(
