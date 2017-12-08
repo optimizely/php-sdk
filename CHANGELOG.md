@@ -1,3 +1,7 @@
+## 1.5.0
+- Notification listeners.
+- IP anonymization.
+
 ## 1.4.0
 - Added support for Numeric Metrics.
 - Switched to new event API.
