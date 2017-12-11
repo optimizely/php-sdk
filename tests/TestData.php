@@ -37,7 +37,7 @@ define('DATAFILE',
     "variations": [{"id": "7713030086", "key": "group_exp_2_var_1"}, {"id": "7725250007", "key": "group_exp_2_var_2"}], "forcedVariations": {}, "id": "7718750065"}], "id": "7722400015"}], 
     "attributes": [{"id": "7723280020", "key": "device_type"}, {"id": "7723340004", "key": "location"}], 
     "projectId": "7720880029", "accountId": "1592310167", 
-    "events": [{"experimentIds": ["7716830082", "7723330021", "7718750065", "7716830585"], "id": "7718020063", "key": "purchase"}],"anonymizeIP": false,
+    "events": [{"experimentIds": ["7716830082", "7723330021", "7718750065", "7716830585"], "id": "7718020063", "key": "purchase"}, {"experimentIds": [], "id": "7718020064", "key": "unlinked_event"}],"anonymizeIP": false,
     "revision": "15"}');
 
 define('DATAFILE_V3',
@@ -99,6 +99,16 @@ class TestBucketer extends Bucketer
     }
 }
 
+/**
+ * Class OptimizelyTester
+ * Extending Optimizely for the sake of tests.
+ */
+class OptimizelyTester extends Optimizely
+{
+  public function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes){
+    parent::sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+  }
+}
 
 class FireNotificationTester{
     public function decision_callback_no_args(){}
