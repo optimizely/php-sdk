@@ -273,6 +273,14 @@ class ProjectConfig
     }
 
     /**
+     * @return array List of feature flags parsed from the datafile
+     */
+    public function getFeatureFlags()
+    {
+        return $this->_featureFlags;
+    }
+
+    /**
      * @param $groupId string ID of the group.
      *
      * @return Group Entity corresponding to the ID.

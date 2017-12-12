@@ -2186,6 +2186,59 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testGetEnabledFeaturesGivenInvalidDataFile()
+    {
+        $optlyObject = new Optimizely('Random datafile');
+
+        $this->expectOutputRegex("/Datafile has invalid format. Failing 'getEnabledFeatures'./");
+
+        $this->assertEmpty($optlyObject->getEnabledFeatures("user_id", []));   
+    }
+
+    public function testGetEnabledFeaturesGivenNoFeatureIsEnabledForUser()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('isFeatureEnabled'))
+            ->getMock();
+
+       // Mock isFeatureEnabled to return false for all calls
+        $optimizelyMock->expects($this->exactly(8))
+            ->method('isFeatureEnabled')
+            ->will($this->returnValue(false));
+
+        $this->assertEmpty($optimizelyMock->getEnabledFeatures("user_id", []));
+    }
+
+    public function testGetEnabledFeaturesGivenFeaturesAreEnabledForUser()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('isFeatureEnabled'))
+            ->getMock();
+
+        $map = [
+            ['boolean_feature','user_id', [], true],
+            ['double_single_variable_feature','user_id', [], false],
+            ['integer_single_variable_feature','user_id', [], false],
+            ['boolean_single_variable_feature','user_id', [], true],
+            ['string_single_variable_feature','user_id', [], false],
+            ['multi_variate_feature','user_id', [], false],
+            ['mutex_group_feature','user_id', [], false],
+            ['empty_feature','user_id', [], true],
+        ];
+
+       // Mock isFeatureEnabled to return specific values
+        $optimizelyMock->expects($this->exactly(8))
+            ->method('isFeatureEnabled')
+            ->will($this->returnValueMap($map));
+
+        $this->assertEquals(
+            ['boolean_feature', 'boolean_single_variable_feature', 'empty_feature'],
+            $optimizelyMock->getEnabledFeatures("user_id", [])
+        );
+    }
+
     public function testGetFeatureVariableValueForTypeGivenInvalidArguments()
     {
         // should return null and log a message when feature flag key is empty

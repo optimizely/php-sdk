@@ -502,6 +502,32 @@ class Optimizely
     }
 
     /**
+     * Get keys of all feature flags which are enabled for the user
+     * @param  string User ID
+     * @param  array Associative array of user attributes
+     * @return array List of feature flag keys
+     */
+    public function getEnabledFeatures($userId, $attributes = null)
+    {
+        $enabled_feature_keys = [];
+
+        if (!$this->_isValid) {
+            $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'.");
+            return $enabled_feature_keys;
+        }
+
+        $feature_flags = $this->_config->getFeatureFlags();
+        foreach ($feature_flags as $feature){
+            $feature_key = $feature->getKey();
+            if ($this->isFeatureEnabled($feature_key, $userId, $attributes) === true) {
+                $enabled_feature_keys[] = $feature_key;
+            }
+        }
+
+        return $enabled_feature_keys;
+    }
+
+    /**
      * Get the string value of the specified variable in the feature flag.
      * @param  string Feature flag key
      * @param  string Variable key
