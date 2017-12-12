@@ -665,13 +665,10 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         $optlyObject = new Optimizely('Random datafile');
 
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
-
         // Verify that sendNotifications isn't called
         $this->notificationCenterMock->expects($this->never())
             ->method('sendNotifications');
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $optlyObject->track('some_event', 'some_user');
         $this->expectOutputRegex('/Datafile has invalid format. Failing "track"./');
@@ -697,13 +694,10 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             $errorHandlerMock
         );
 
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
-
         // Verify that sendNotifications isn't called
         $this->notificationCenterMock->expects($this->never())
             ->method('sendNotifications');
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         // Call track
         $this->assertNull($optlyObject->track('purchase', 'test_user', 42));
@@ -896,10 +890,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
-
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -915,6 +905,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 NotificationType::TRACK,
                 $arrayParam
             );
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -1035,12 +1026,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.'
             );
 
-        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
-
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
-
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);      
+       
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -1056,6 +1043,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 NotificationType::TRACK,
                 $arrayParam
             );
+         $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $this->assertTrue($this->optimizelyObject->setForcedVariation($experimentKey, $userId, $variationKey), 'Set variation for paused experiment should have failed.');
 
@@ -1180,10 +1168,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
-
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -1199,6 +1183,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 NotificationType::TRACK,
                 $arrayParam
             );
+
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -1318,10 +1304,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
-
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -1337,6 +1319,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 NotificationType::TRACK,
                 $arrayParam
             );
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -1446,11 +1429,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
-
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
-
+        
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -1466,6 +1445,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 NotificationType::TRACK,
                 $arrayParam
             );
+
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -1543,10 +1524,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
-
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -1562,6 +1539,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 NotificationType::TRACK,
                 $arrayParam
             );
+
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -1690,11 +1669,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
-
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
-
+        
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -1710,6 +1685,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 NotificationType::TRACK,
                 $arrayParam
             );
+
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -1831,11 +1808,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
-
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
-
+        
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -1851,6 +1824,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 NotificationType::TRACK,
                 $arrayParam
             );
+
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -2178,8 +2153,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $variationKey, sprintf('Invalid variation key "%s" for getVariation with bucketing ID "%s".', $variationKey, $this->testBucketingIdControl));
     }
 
-    public function testSendImpressionEventWithNoAttributes()
-    {
+    public function testSendImpressionEventWithNoAttributes() {
         $optlyObject = new OptimizelyTester($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
         // verify that createImpressionEvent is called
@@ -2226,9 +2200,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $eventBuilder->setAccessible(true);
         $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
 
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -2326,9 +2298,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $eventBuilder->setAccessible(true);
         $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
 
-        $notificationCenter = new \ReflectionProperty(Optimizely::class, '_notificationCenter');
-        $notificationCenter->setAccessible(true);
-        $notificationCenter->setValue($optlyObject, $this->notificationCenterMock);
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $optlyObject->sendImpressionEvent('test_experiment', 'control', 'test_user', $userAttributes);
     }
