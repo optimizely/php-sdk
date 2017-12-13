@@ -87,7 +87,7 @@ class Optimizely
     /**
      * @var NotificationCenter
      */
-    private $_notificationCenter;
+    public $notificationCenter;
 
     /**
      * Optimizely constructor for managing Full Stack PHP projects.
@@ -136,7 +136,7 @@ class Optimizely
 
         $this->_eventBuilder = new EventBuilder();
         $this->_decisionService = new DecisionService($this->_logger, $this->_config, $userProfileService);
-        $this->_notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
+        $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
     }
 
     /**
@@ -248,7 +248,7 @@ class Optimizely
             ));
         }
 
-        $this->_notificationCenter->sendNotifications(
+        $this->notificationCenter->sendNotifications(
             NotificationType::ACTIVATE,
             array(
                 $this->_config->getExperimentFromKey($experimentKey),
@@ -354,7 +354,7 @@ class Optimizely
                     'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
             }
 
-            $this->_notificationCenter->sendNotifications(
+            $this->notificationCenter->sendNotifications(
                 NotificationType::TRACK,
                 array(
                     $eventKey,
