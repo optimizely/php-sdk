@@ -296,4 +296,20 @@ class Experiment
         $forcedVariations = $this->getForcedVariations();
         return !is_null($forcedVariations) && isset($forcedVariations[$userId]);
     }
+
+    /**
+     * Returns Variation corresponding to given ID
+     * @param  string $id
+     * @return Variation
+     */
+    public function getVariationFromId($id)
+    {
+        foreach ($this->_variations as $variation) {
+            if ($variation->getId() == $id) {
+                return $variation;
+            }
+        }
+
+        return null;
+    }
 }
