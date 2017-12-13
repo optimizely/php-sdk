@@ -20,6 +20,7 @@ namespace Optimizely\Tests;
 use Monolog\Logger;
 use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
+use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\DefaultLogger;
@@ -366,6 +367,41 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
                 $this->config->getExperimentFromKey('group_experiment_2'),
                 $this->testBucketingIdGroupExp2Var2,
                 $this->testUserIdBucketsToNoGroup
+            )
+        );
+    }
+
+    public function testBucketWithRolloutRule()
+    {
+        $bucketer = new Bucketer($this->loggerMock);
+
+        $rollout = $this->config->getRolloutFromId('166660');
+        $rollout_rule = null;
+        $rollout_rules = $rollout->getExperiments();
+        foreach ($rollout_rules as $rule) {
+            if ($rule->getKey() == '177776') {
+                $rollout_rule = $rule;
+            }
+        }
+
+        $expectedVariation = new Variation(
+            '177778',
+            '177778',
+            [
+                [
+                  "id"=> "155556",
+                  "value"=> "false"
+                ]
+              ]
+        );
+
+        $this->assertEquals(
+            $expectedVariation,
+            $bucketer->bucket(
+                $this->config,
+                $rollout_rule,
+                'bucketingId',
+                'userId'
             )
         );
     }
