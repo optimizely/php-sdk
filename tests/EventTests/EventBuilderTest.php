@@ -383,7 +383,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'anonymize_ip'=> false,
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
+                'client_version' => '1.5.0',
                 'visitors'=> [[
                   'attributes'=> [[
                     'entity_id' => '7723280020',
@@ -440,7 +440,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'anonymize_ip'=> false,
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
+                'client_version' => '1.5.0',
                 'visitors'=> [[
                   'attributes'=> [],
                   'visitor_id'=> 'testUserId',
@@ -490,7 +490,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'anonymize_ip'=> false,
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
+                'client_version' => '1.5.0',
                 'visitors'=> [[
                   'attributes'=> [],
                   'visitor_id'=> 'testUserId',
@@ -543,7 +543,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'anonymize_ip'=> false,
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
+                'client_version' => '1.5.0',
                 'visitors'=> [[
                   'attributes'=> [[
                     'entity_id' => '7723280020',
@@ -610,7 +610,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'anonymize_ip'=> false,
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
+                'client_version' => '1.5.0',
                 'visitors'=> [[
                   'attributes'=> [[
                     'entity_id' => '7723280020',
@@ -672,7 +672,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'anonymize_ip'=> false,
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
+                'client_version' => '1.5.0',
                 'visitors'=> [[
                   'attributes'=> [],
                   'visitor_id'=> 'testUserId',
@@ -730,7 +730,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'anonymize_ip'=> false,
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
+                'client_version' => '1.5.0',
                 'visitors'=> [[
                   'attributes'=> [[
                     'entity_id' => '7723280020',
@@ -792,7 +792,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'anonymize_ip'=> false,
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '1.4.0',
+                'client_version' => '1.5.0',
                 'visitors'=> [[
                   'attributes'=> [[
                     'entity_id' => '7723280020',
