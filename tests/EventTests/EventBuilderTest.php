@@ -69,7 +69,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 ]],
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => EventBuilder::SDK_VERSION,
+                'client_version' => '1.5.0',
                 'anonymize_ip'=> false,
             ];
         $this->expectedEventHttpVerb = 'POST';
