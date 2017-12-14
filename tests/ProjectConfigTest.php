@@ -145,6 +145,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         // Check variation key map
         $variationKeyMap = new \ReflectionProperty(ProjectConfig::class, '_variationKeyMap');
         $variationKeyMap->setAccessible(true);
+
         $this->assertEquals([
             'test_experiment' => [
                 'control' => $this->config->getVariationFromKey('test_experiment', 'control'),
@@ -179,6 +180,21 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_integer_feature' => [
                 'control' => $this->config->getVariationFromKey('test_experiment_integer_feature', 'control'),
                 'variation' => $this->config->getVariationFromKey('test_experiment_integer_feature', 'variation')
+            ],
+            '177770' => [
+                '177771' => $this->config->getVariationFromKey('177770', '177771')
+            ],
+            '177772' => [
+                '177773' => $this->config->getVariationFromKey('177772', '177773')
+            ],
+            '177776' => [
+                '177778' => $this->config->getVariationFromKey('177776', '177778')
+            ],
+            '177774' => [
+                '177775' => $this->config->getVariationFromKey('177774', '177775')
+            ],
+            '177779' => [
+                '177780' => $this->config->getVariationFromKey('177779', '177780')
             ]
         ], $variationKeyMap->getValue($this->config));
 
@@ -219,6 +235,21 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_integer_feature' => [
                 '122242' => $this->config->getVariationFromId('test_experiment_integer_feature', '122242'),
                 '122243' => $this->config->getVariationFromId('test_experiment_integer_feature', '122243')
+            ],
+            '177770' => [
+                '177771' => $this->config->getVariationFromId('177770', '177771')
+            ],
+            '177772' => [
+                '177773' => $this->config->getVariationFromId('177772', '177773')
+            ],
+            '177776' => [
+                '177778' => $this->config->getVariationFromId('177776', '177778')
+            ],
+            '177774' => [
+                '177775' => $this->config->getVariationFromId('177774', '177775')
+            ],
+            '177779' => [
+                '177780' => $this->config->getVariationFromId('177779', '177780')
             ]
         ], $variationIdMap->getValue($this->config));
 
