@@ -379,7 +379,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $rollout_rule = null;
         $rollout_rules = $rollout->getExperiments();
         foreach ($rollout_rules as $rule) {
-            if ($rule->getKey() == '177776') {
+            if ($rule->getKey() == 'rollout_1_exp_3') {
                 $rollout_rule = $rule;
             }
         }

@@ -203,7 +203,7 @@ class ProjectConfig
                 $experiment->setGroupId($group->getId());
                 $experiment->setGroupPolicy($group->getPolicy());
             }
-            $this->_experimentKeyMap = $this->_experimentKeyMap + $experimentsInGroup;
+            $this->_experimentKeyMap = array_merge($this->_experimentKeyMap, $experimentsInGroup);
         }
 
         forEach(array_values($this->_experimentKeyMap) as $experiment) {
@@ -241,8 +241,8 @@ class ProjectConfig
         }
 
         // Add variations for rollout experiments to variationIdMap and variationKeyMap
-        $this->_variationIdMap = $this->_variationIdMap + $rolloutVariationIdMap;
-        $this->_variationKeyMap = $this->_variationKeyMap + $rolloutVariationKeyMap;
+        $this->_variationIdMap = array_merge($this->_variationIdMap, $rolloutVariationIdMap);
+        $this->_variationKeyMap = array_merge($this->_variationKeyMap, $rolloutVariationKeyMap);
 
         foreach(array_values($this->_featureFlags) as $featureFlag){
             $this->_featureKeyMap[$featureFlag->getKey()] = $featureFlag;
