@@ -509,22 +509,22 @@ class Optimizely
      */
     public function getEnabledFeatures($userId, $attributes = null)
     {
-        $enabled_feature_keys = [];
+        $enabledFeatureKeys = [];
 
         if (!$this->_isValid) {
             $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'.");
-            return $enabled_feature_keys;
+            return $enabledFeatureKeys;
         }
 
-        $feature_flags = $this->_config->getFeatureFlags();
-        foreach ($feature_flags as $feature){
-            $feature_key = $feature->getKey();
-            if ($this->isFeatureEnabled($feature_key, $userId, $attributes) === true) {
-                $enabled_feature_keys[] = $feature_key;
+        $featureFlags = $this->_config->getFeatureFlags();
+        foreach ($featureFlags as $feature){
+            $featureKey = $feature->getKey();
+            if ($this->isFeatureEnabled($featureKey, $userId, $attributes) === true) {
+                $enabledFeatureKeys[] = $featureKey;
             }
         }
 
-        return $enabled_feature_keys;
+        return $enabledFeatureKeys;
     }
 
     /**
