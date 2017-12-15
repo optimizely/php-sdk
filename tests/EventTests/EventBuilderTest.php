@@ -241,8 +241,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateImpressionEventWithInvalidAttributesNoValue()
     {
-        $expectedLogEvent = new LogEvent(
-   
+        $expectedLogEvent = new LogEvent(   
             $this->expectedEventUrl,
             $this->expectedEventParams,
             $this->expectedEventHttpVerb,
@@ -349,7 +348,6 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
         
         $expectedLogEvent = new LogEvent(
-        
             $this->expectedEventUrl,
             $this->expectedEventParams,
             $this->expectedEventHttpVerb,
@@ -392,7 +390,6 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
         
         $expectedLogEvent = new LogEvent(
-        
             $this->expectedEventUrl,
             $this->expectedEventParams,
             $this->expectedEventHttpVerb,
@@ -437,7 +434,6 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
         
         $expectedLogEvent = new LogEvent(
-        
             $this->expectedEventUrl,
             $this->expectedEventParams,
             $this->expectedEventHttpVerb,
@@ -488,7 +484,6 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
         
         $expectedLogEvent = new LogEvent(
-        
             $this->expectedEventUrl,
             $this->expectedEventParams,
             $this->expectedEventHttpVerb,
@@ -531,7 +526,6 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
         
         $expectedLogEvent = new LogEvent(
-        
             $this->expectedEventUrl,
             $this->expectedEventParams,
             $this->expectedEventHttpVerb,
