@@ -601,7 +601,7 @@ define('DATAFILE','{
       "experiments": [
         {
           "id": "177770",
-          "key": "177770",
+          "key": "rollout_1_exp_1",
           "status": "Running",
           "layerId": "166660",
           "audienceIds": [
@@ -628,7 +628,7 @@ define('DATAFILE','{
         },
         {
           "id": "177772",
-          "key": "177772",
+          "key": "rollout_1_exp_2",
           "status": "Running",
           "layerId": "166660",
           "audienceIds": [
@@ -655,7 +655,7 @@ define('DATAFILE','{
         },
         {
           "id": "177776",
-          "key": "177776",
+          "key": "rollout_1_exp_3",
           "status": "Running",
           "layerId": "166660",
           "audienceIds": [
@@ -676,7 +676,7 @@ define('DATAFILE','{
           "trafficAllocation": [
             {
               "entityId": "177778",
-              "endOfRange": 10000
+              "endOfRange": 5000
             }
           ]
         }
@@ -687,7 +687,7 @@ define('DATAFILE','{
       "experiments": [
         {
           "id": "177774",
-          "key": "177774",
+          "key": "rollout_2_exp_1",
           "status": "Running",
           "layerId": "166661",
           "audienceIds": [
@@ -711,7 +711,7 @@ define('DATAFILE','{
         },
         {
           "id": "177779",
-          "key": "177779",
+          "key": "rollout_2_exp_2",
           "status": "Running",
           "layerId": "166661",
           "audienceIds": [

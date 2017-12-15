@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 namespace Optimizely;
+
 use Monolog\Logger;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
@@ -146,30 +147,45 @@ class Bucketer
             if ($userExperimentId != $experiment->getId()) {
                 $this->_logger->log(
                     Logger::INFO,
-                    sprintf('User "%s" is not in experiment %s of group %s.',
-                        $userId, $experiment->getKey(), $experiment->getGroupId()
-                    ));
+                    sprintf(
+                        'User "%s" is not in experiment %s of group %s.',
+                        $userId,
+                        $experiment->getKey(),
+                        $experiment->getGroupId()
+                    )
+                );
                 return new Variation();
             }
 
-            $this->_logger->log(Logger::INFO,
-                sprintf('User "%s" is in experiment %s of group %s.',
-                    $userId, $experiment->getKey(), $experiment->getGroupId()
-                ));
+            $this->_logger->log(
+                Logger::INFO,
+                sprintf(
+                    'User "%s" is in experiment %s of group %s.',
+                    $userId,
+                    $experiment->getKey(),
+                    $experiment->getGroupId()
+                )
+            );
         }
 
         // Bucket user if not in whitelist and in group (if any).
         $variationId = $this->findBucket($bucketingId, $userId, $experiment->getId(), $experiment->getTrafficAllocation());
         if (!empty($variationId)) {
             $variation = $config->getVariationFromId($experiment->getKey(), $variationId);
-            $this->_logger->log(Logger::INFO,
-                sprintf('User "%s" is in variation %s of experiment %s.',
-                    $userId, $variation->getKey(), $experiment->getKey()
-                ));
+
+            $this->_logger->log(
+                Logger::INFO,
+                sprintf(
+                    'User "%s" is in variation %s of experiment %s.',
+                    $userId,
+                    $variation->getKey(),
+                    $experiment->getKey()
+                )
+            );
             return $variation;
         }
-
-        $this->_logger->log(Logger::INFO,  sprintf('User "%s" is in no variation.', $userId));
+        
+        $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no variation.', $userId));
         return new Variation();
     }
 }
