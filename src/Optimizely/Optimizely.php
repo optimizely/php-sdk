@@ -99,13 +99,14 @@ class Optimizely
      * @param $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
      * @param $userProfileService UserProfileServiceInterface
      */
-    public function __construct($datafile,
-                                EventDispatcherInterface $eventDispatcher = null,
-                                LoggerInterface $logger = null,
-                                ErrorHandlerInterface $errorHandler = null,
-                                $skipJsonValidation = false,
-                                UserProfileServiceInterface $userProfileService = null)
-    {
+    public function __construct(
+        $datafile,
+        EventDispatcherInterface $eventDispatcher = null,
+        LoggerInterface $logger = null,
+        ErrorHandlerInterface $errorHandler = null,
+        $skipJsonValidation = false,
+        UserProfileServiceInterface $userProfileService = null
+    ) {
         $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
         $this->_logger = $logger ?: new NoOpLogger();
@@ -119,15 +120,13 @@ class Optimizely
         }
 
         try {
-          $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
-        }
-        catch (Throwable $exception) {
+            $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
+        } catch (Throwable $exception) {
             $this->_isValid = false;
             $this->_logger = new DefaultLogger();
             $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
             return;
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $this->_isValid = false;
             $this->_logger = new DefaultLogger();
             $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
@@ -157,12 +156,13 @@ class Optimizely
     /**
      * Helper function to validate user inputs into the API methods.
      *
-     * @param  $userId string ID for user.
-     * @param  $eventTags array Hash representing metadata associated with an event.
+     * @param $userId string ID for user.
+     * @param $eventTags array Hash representing metadata associated with an event.
      *
      * @return boolean Representing whether all user inputs are valid.
      */
-    private function validateUserInputs($attributes, $eventTags = null) {
+    private function validateUserInputs($attributes, $eventTags = null)
+    {
         if (!is_null($attributes) && !Validator::areAttributesValid($attributes)) {
             $this->_logger->log(Logger::ERROR, 'Provided attributes are in an invalid format.');
             $this->_errorHandler->handleError(
@@ -188,22 +188,29 @@ class Optimizely
      * Get the experiments that we should be tracking for the given event. A valid experiment
      * is one that is in "Running" state and into which the user has been bucketed.
      *
-     * @param  $event string Event key representing the event which needs to be recorded.
-     * @param  $user string ID for user.
-     * @param  $attributes array Attributes of the user.
+     * @param $event string Event key representing the event which needs to be recorded.
+     * @param $user string ID for user.
+     * @param $attributes array Attributes of the user.
      *
      * @return Array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
      */
-    private function getValidExperimentsForEvent($event, $userId, $attributes = null) {
+    private function getValidExperimentsForEvent($event, $userId, $attributes = null)
+    {
         $validExperiments = [];
-        forEach ($event->getExperimentIds() as $experimentId) {
+        foreach ($event->getExperimentIds() as $experimentId) {
             $experiment = $this->_config->getExperimentFromId($experimentId);
             $experimentKey = $experiment->getKey();
             $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
 
             if (is_null($variationKey)) {
-                $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for experiment "%s".',
-                    $userId, $experimentKey));
+                $this->_logger->log(
+                    Logger::INFO,
+                    sprintf(
+                        'Not tracking user "%s" for experiment "%s".',
+                        $userId,
+                        $experimentKey
+                    )
+                );
                 continue;
             }
 
@@ -237,15 +244,21 @@ class Optimizely
         try {
             $this->_eventDispatcher->dispatchEvent($impressionEvent);
         } catch (Throwable $exception) {
-            $this->_logger->log(Logger::ERROR, sprintf(
-                'Unable to dispatch impression event. Error %s',
-                $exception->getMessage()
-            ));
+            $this->_logger->log(
+                Logger::ERROR,
+                sprintf(
+                    'Unable to dispatch impression event. Error %s',
+                    $exception->getMessage()
+                )
+            );
         } catch (Exception $exception) {
-            $this->_logger->log(Logger::ERROR, sprintf(
-                'Unable to dispatch impression event. Error %s',
-                $exception->getMessage()
-            ));
+            $this->_logger->log(
+                Logger::ERROR,
+                sprintf(
+                    'Unable to dispatch impression event. Error %s',
+                    $exception->getMessage()
+                )
+            );
         }
 
         $this->notificationCenter->sendNotifications(
@@ -256,8 +269,8 @@ class Optimizely
                 $attributes,
                 $this->_config->getVariationFromKey($experimentKey, $variationKey),
                 $impressionEvent
-            )    
-        );          
+            )
+        );
     }
 
     /**
@@ -338,20 +351,31 @@ class Optimizely
             $this->_logger->log(Logger::INFO, sprintf('Tracking event "%s" for user "%s".', $eventKey, $userId));
             $this->_logger->log(
                 Logger::DEBUG,
-                sprintf('Dispatching conversion event to URL %s with params %s.',
-                    $conversionEvent->getUrl(), http_build_query($conversionEvent->getParams())
-                ));
+                sprintf(
+                    'Dispatching conversion event to URL %s with params %s.',
+                    $conversionEvent->getUrl(),
+                    http_build_query($conversionEvent->getParams())
+                )
+            );
 
             try {
                 $this->_eventDispatcher->dispatchEvent($conversionEvent);
-            }
-            catch (Throwable $exception) {
-                $this->_logger->log(Logger::ERROR, sprintf(
-                    'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
-            }
-            catch (Exception $exception) {
-                $this->_logger->log(Logger::ERROR, sprintf(
-                    'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
+            } catch (Throwable $exception) {
+                $this->_logger->log(
+                    Logger::ERROR,
+                    sprintf(
+                        'Unable to dispatch conversion event. Error %s',
+                        $exception->getMessage()
+                    )
+                );
+            } catch (Exception $exception) {
+                $this->_logger->log(
+                    Logger::ERROR,
+                    sprintf(
+                        'Unable to dispatch conversion event. Error %s',
+                        $exception->getMessage()
+                    )
+                );
             }
 
             $this->notificationCenter->sendNotifications(
@@ -364,7 +388,6 @@ class Optimizely
                     $conversionEvent
                 )
             );
-
         } else {
             $this->_logger->log(
                 Logger::INFO,
@@ -408,16 +431,16 @@ class Optimizely
     }
 
     /**
-	 * Force a user into a variation for a given experiment.
-	 *
-	 * @param $experimentKey string Key identifying the experiment.
-	 * @param $userId string The user ID to be used for bucketing.
-	 * @param $variationKey string The variation key specifies the variation which the user
-	 * will be forced into. If null, then clear the existing experiment-to-variation mapping.
-	 *
+     * Force a user into a variation for a given experiment.
+     *
+     * @param $experimentKey string Key identifying the experiment.
+     * @param $userId string The user ID to be used for bucketing.
+     * @param $variationKey string The variation key specifies the variation which the user
+     * will be forced into. If null, then clear the existing experiment-to-variation mapping.
+     *
      * @return boolean A boolean value that indicates if the set completed successfully.
-	 */
-	public function setForcedVariation($experimentKey, $userId, $variationKey)
+     */
+    public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
         return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
     }
@@ -429,7 +452,7 @@ class Optimizely
      * @param $userId string The user ID to be used for bucketing.
      *
      * @return string|null The forced variation key.
-    */
+     */
     public function getForcedVariation($experimentKey, $userId)
     {
         $forcedVariation = $this->_config->getForcedVariation($experimentKey, $userId);
@@ -443,9 +466,10 @@ class Optimizely
     /**
      * Determine whether a feature is enabled.
      * Sends an impression event if the user is bucketed into an experiment using the feature.
-     * @param  string Feature flag key
-     * @param  string User ID
-     * @param  array Associative array of user attributes
+     *
+     * @param string Feature flag key
+     * @param string User ID
+     * @param array Associative array of user attributes
      *
      * @return boolean
      */
@@ -491,7 +515,6 @@ class Optimizely
             $variation = $this->_config->getVariationFromId($experiment->getKey(), $variation_id);
 
             $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
-
         } else {
             $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
         }
@@ -503,6 +526,7 @@ class Optimizely
 
     /**
      * Get keys of all feature flags which are enabled for the user
+     *
      * @param  string User ID
      * @param  array Associative array of user attributes
      * @return array List of feature flag keys
@@ -517,7 +541,7 @@ class Optimizely
         }
 
         $featureFlags = $this->_config->getFeatureFlags();
-        foreach ($featureFlags as $feature){
+        foreach ($featureFlags as $feature) {
             $featureKey = $feature->getKey();
             if ($this->isFeatureEnabled($featureKey, $userId, $attributes) === true) {
                 $enabledFeatureKeys[] = $featureKey;
@@ -529,11 +553,12 @@ class Optimizely
 
     /**
      * Get the string value of the specified variable in the feature flag.
-     * @param  string Feature flag key
-     * @param  string Variable key
-     * @param  string User ID
-     * @param  array  Associative array of user attributes
-     * @param  string Variable type
+     *
+     * @param string Feature flag key
+     * @param string Variable key
+     * @param string User ID
+     * @param array  Associative array of user attributes
+     * @param string Variable type
      *
      * @return string Feature variable value / null
      */
@@ -583,8 +608,11 @@ class Optimizely
         $variable_value = $variable->getDefaultValue();
 
         if (!$decision) {
-            $this->_logger->log(Logger::INFO, "User '{$userId}'is not in any variation, ".
-                "returning default value '{$variable_value}'.");
+            $this->_logger->log(
+                Logger::INFO,
+                "User '{$userId}'is not in any variation, ".
+                "returning default value '{$variable_value}'."
+            );
         } else {
             $experiment_id = $decision->getExperimentId();
             $variation_id = $decision->getVariationId();
@@ -612,10 +640,11 @@ class Optimizely
 
     /**
      * Get the Boolean value of the specified variable in the feature flag.
-     * @param  string Feature flag key
-     * @param  string Variable key
-     * @param  string User ID
-     * @param  array  Associative array of user attributes
+     *
+     * @param string Feature flag key
+     * @param string Variable key
+     * @param string User ID
+     * @param array  Associative array of user attributes
      *
      * @return string boolean variable value / null
      */
@@ -638,10 +667,11 @@ class Optimizely
 
     /**
      * Get the Integer value of the specified variable in the feature flag.
-     * @param  string Feature flag key
-     * @param  string Variable key
-     * @param  string User ID
-     * @param  array  Associative array of user attributes
+     *
+     * @param string Feature flag key
+     * @param string Variable key
+     * @param string User ID
+     * @param array  Associative array of user attributes
      *
      * @return string integer variable value / null
      */
@@ -664,10 +694,11 @@ class Optimizely
 
     /**
      * Get the Double value of the specified variable in the feature flag.
-     * @param  string Feature flag key
-     * @param  string Variable key
-     * @param  string User ID
-     * @param  array  Associative array of user attributes
+     *
+     * @param string Feature flag key
+     * @param string Variable key
+     * @param string User ID
+     * @param array  Associative array of user attributes
      *
      * @return string double variable value / null
      */
@@ -690,10 +721,11 @@ class Optimizely
 
     /**
      * Get the String value of the specified variable in the feature flag.
-     * @param  string Feature flag key
-     * @param  string Variable key
-     * @param  string User ID
-     * @param  array  Associative array of user attributes
+     *
+     * @param string Feature flag key
+     * @param string Variable key
+     * @param string User ID
+     * @param array  Associative array of user attributes
      *
      * @return string variable value / null
      */

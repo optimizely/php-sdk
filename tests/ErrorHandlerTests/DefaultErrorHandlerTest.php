@@ -19,7 +19,6 @@ namespace Optimizely\Tests;
 use Exception;
 use Optimizely\ErrorHandler\DefaultErrorHandler;
 
-
 class DefaultErrorHandlerTest extends \PHPUnit_Framework_TestCase
 {
     /**

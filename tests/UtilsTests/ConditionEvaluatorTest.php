@@ -17,7 +17,6 @@
 
 namespace Optimizely\Tests;
 
-
 use Optimizely\Utils\ConditionDecoder;
 use Optimizely\Utils\ConditionEvaluator;
 

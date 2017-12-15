@@ -147,12 +147,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationReturnsWhitelistedVariationForGroupedExperiment()
     {
-        $expectedVariation = new Variation('7722260071', 'group_exp_1_var_1', [
+        $expectedVariation = new Variation(
+            '7722260071', 'group_exp_1_var_1', [
                 [
                   "id" => "155563",
                   "value" => "groupie_1_v1"
                 ]
-          ]);
+            ]
+        );
         $runningExperiment = $this->config->getExperimentFromKey('group_experiment_1');
 
         $callIndex = 0;
@@ -215,9 +217,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         // modify the forcedVariation to point to invalid variation
         $experiment = new \ReflectionProperty(Experiment::class, '_forcedVariations');
         $experiment->setAccessible(true);
-        $experiment->setValue($runningExperiment, [
+        $experiment->setValue(
+            $runningExperiment, [
             'user_1' => 'invalid'
-        ]);
+            ]
+        );
 
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
@@ -335,14 +339,16 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->userProvideServiceMock->expects($this->once())
             ->method('save')
-            ->with(array(
+            ->with(
+                array(
                 'user_id' => $userId,
                 'experiment_bucket_map' => array(
                     '7716830082' => array(
                         'variation_id' => '7722370027'
                     )
                 )
-            ));
+                )
+            );
 
         $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
@@ -387,14 +393,16 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->userProvideServiceMock->expects($this->once())
             ->method('save')
-            ->with(array(
+            ->with(
+                array(
                 'user_id' => $userId,
                 'experiment_bucket_map' => array(
                     '7716830082' => array(
                         'variation_id' => '7722370027'
                     )
                 )
-            ));
+                )
+            );
 
         $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
@@ -439,14 +447,16 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->userProvideServiceMock->expects($this->once())
             ->method('save')
-            ->with(array(
+            ->with(
+                array(
                 'user_id' => $userId,
                 'experiment_bucket_map' => array(
                     '7716830082' => array(
                         'variation_id' => '7722370027'
                     )
                 )
-            ));
+                )
+            );
 
         $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
@@ -613,8 +623,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     {
         $feature_flag = $this->config->getFeatureFlagFromKey('empty_feature');
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(Logger::DEBUG, "The feature flag 'empty_feature' is not used in any experiments.");
+            ->method('log')
+            ->with(Logger::DEBUG, "The feature flag 'empty_feature' is not used in any experiments.");
 
         $this->assertSame(
             null,
@@ -631,15 +641,15 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $feature_flag->setExperimentIds(["29039203"]);
 
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(Logger::ERROR, 'Experiment ID "29039203" is not in datafile.');
+            ->method('log')
+            ->with(Logger::ERROR, 'Experiment ID "29039203" is not in datafile.');
 
         $this->loggerMock->expects($this->at(1))
-        ->method('log')
-        ->with(
-            Logger::INFO,
-            "The user 'user1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
-        );
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "The user 'user1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
+            );
 
         $this->assertSame(
             null,
@@ -655,15 +665,15 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         // make sure the user is not bucketed into the feature experiment
         $this->decisionServiceMock->expects($this->at(0))
-        ->method('getVariation')
-        ->will($this->returnValueMap($map));
+            ->method('getVariation')
+            ->will($this->returnValueMap($map));
 
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(
-            Logger::INFO,
-            "The user 'user1' is not bucketed into any of the experiments using the feature 'multi_variate_feature'."
-        );
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "The user 'user1' is not bucketed into any of the experiments using the feature 'multi_variate_feature'."
+            );
         $feature_flag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
         $this->assertSame(
             null,
@@ -678,18 +688,18 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment = $this->config->getExperimentFromKey('test_experiment_multivariate');
         $variation = $this->config->getVariationFromId('test_experiment_multivariate', '122231');
         $this->decisionServiceMock->expects($this->at(0))
-        ->method('getVariation')
-        ->will($this->returnValue($variation));
+            ->method('getVariation')
+            ->will($this->returnValue($variation));
         
         $feature_flag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
         $expected_decision = new FeatureDecision($experiment->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_EXPERIMENT);
 
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(
-            Logger::INFO,
-            "The user 'user1' is bucketed into experiment 'test_experiment_multivariate' of feature 'multi_variate_feature'."
-        );
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "The user 'user1' is bucketed into experiment 'test_experiment_multivariate' of feature 'multi_variate_feature'."
+            );
 
         $this->assertEquals(
             $expected_decision,
@@ -703,8 +713,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
         $variation = $mutex_exp->getVariations()[0];
         $this->decisionServiceMock->expects($this->at(0))
-        ->method('getVariation')
-        ->will($this->returnValue($variation));
+            ->method('getVariation')
+            ->will($this->returnValue($variation));
 
         $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
         $variation = $mutex_exp->getVariations()[0];
@@ -712,11 +722,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(
-            Logger::INFO,
-            "The user 'user_1' is bucketed into experiment 'group_experiment_1' of feature 'boolean_feature'."
-        );
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "The user 'user_1' is bucketed into experiment 'group_experiment_1' of feature 'boolean_feature'."
+            );
         $this->assertEquals(
             $expected_decision,
             $this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user_1', [])
@@ -729,18 +739,18 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
         $variation = $mutex_exp->getVariations()[0];
         $this->decisionServiceMock->expects($this->at(0))
-        ->method('getVariation')
-        ->will($this->returnValue(null));
+            ->method('getVariation')
+            ->will($this->returnValue(null));
 
 
         $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
         $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(
-            Logger::INFO,
-            "The user 'user_1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
-        );
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "The user 'user_1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
+            );
         $this->assertEquals(
             null,
             $this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user_1', [])
@@ -751,9 +761,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     public function testGetVariationForFeatureWhenTheUserIsBucketedIntoFeatureExperiment()
     {
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-        ->setConstructorArgs(array($this->loggerMock, $this->config))
-        ->setMethods(array('getVariationForFeatureExperiment'))
-        ->getMock();
+            ->setConstructorArgs(array($this->loggerMock, $this->config))
+            ->setMethods(array('getVariationForFeatureExperiment'))
+            ->getMock();
 
         $feature_flag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
         $expected_experiment_id = $feature_flag->getExperimentIds()[0];
@@ -766,8 +776,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         );
 
         $decisionServiceMock->expects($this->at(0))
-        ->method('getVariationForFeatureExperiment')
-        ->will($this->returnValue($expected_decision));
+            ->method('getVariationForFeatureExperiment')
+            ->will($this->returnValue($expected_decision));
 
         $this->assertEquals(
             $expected_decision,
@@ -779,9 +789,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     public function testGetVariationForFeatureWhenBucketedToFeatureRollout()
     {
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-        ->setConstructorArgs(array($this->loggerMock, $this->config))
-        ->setMethods(array('getVariationForFeatureExperiment','getVariationForFeatureRollout'))
-        ->getMock();
+            ->setConstructorArgs(array($this->loggerMock, $this->config))
+            ->setMethods(array('getVariationForFeatureExperiment','getVariationForFeatureRollout'))
+            ->getMock();
 
         $feature_flag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
         $rollout_id = $feature_flag->getRolloutId();
@@ -796,19 +806,19 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
 
         $decisionServiceMock
-        ->method('getVariationForFeatureExperiment')
-        ->will($this->returnValue(null));
+            ->method('getVariationForFeatureExperiment')
+            ->will($this->returnValue(null));
 
         $decisionServiceMock
-        ->method('getVariationForFeatureRollout')
-        ->will($this->returnValue($expected_decision));
+            ->method('getVariationForFeatureRollout')
+            ->will($this->returnValue($expected_decision));
 
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(
-            Logger::INFO,
-            "User 'user_1' is bucketed into rollout for feature flag 'string_single_variable_feature'."
-        );
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "User 'user_1' is bucketed into rollout for feature flag 'string_single_variable_feature'."
+            );
 
         $this->assertEquals(
             $expected_decision,
@@ -820,26 +830,26 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     public function testGetVariationForFeatureWhenTheUserIsNeitherBucketedIntoFeatureExperimentNorToFeatureRollout()
     {
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-        ->setConstructorArgs(array($this->loggerMock, $this->config))
-        ->setMethods(array('getVariationForFeatureExperiment','getVariationForFeatureRollout'))
-        ->getMock();
+            ->setConstructorArgs(array($this->loggerMock, $this->config))
+            ->setMethods(array('getVariationForFeatureExperiment','getVariationForFeatureRollout'))
+            ->getMock();
 
         $feature_flag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
 
         $decisionServiceMock
-        ->method('getVariationForFeatureExperiment')
-        ->will($this->returnValue(null));
+            ->method('getVariationForFeatureExperiment')
+            ->will($this->returnValue(null));
 
         $decisionServiceMock
-        ->method('getVariationForFeatureRollout')
-        ->will($this->returnValue(null));
+            ->method('getVariationForFeatureRollout')
+            ->will($this->returnValue(null));
         
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(
-            Logger::INFO,
-            "User 'user_1' is not bucketed into rollout for feature flag 'string_single_variable_feature'."
-        );
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "User 'user_1' is not bucketed into rollout for feature flag 'string_single_variable_feature'."
+            );
 
         $this->assertEquals(
             null,
@@ -854,11 +864,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
 
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(
-            Logger::DEBUG,
-            "Feature flag 'boolean_feature' is not used in a rollout."
-        );
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                "Feature flag 'boolean_feature' is not used in a rollout."
+            );
 
         $this->assertEquals(
             null,
@@ -875,11 +885,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $feature_flag->setRolloutId('invalid_rollout_id');
 
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(
-            Logger::ERROR,
-            'Rollout with ID "invalid_rollout_id" is not in the datafile.'
-        );
+            ->method('log')
+            ->with(
+                Logger::ERROR,
+                'Rollout with ID "invalid_rollout_id" is not in the datafile.'
+            );
 
         $this->assertEquals(
             null,
@@ -905,8 +915,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment_less_rollout->setExperiments([]);
 
         $configMock
-        ->method('getRolloutFromId')
-        ->will($this->returnValue($experiment_less_rollout));
+            ->method('getRolloutFromId')
+            ->will($this->returnValue($experiment_less_rollout));
 
         $this->assertEquals(
             null,

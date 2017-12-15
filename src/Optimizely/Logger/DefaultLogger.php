@@ -19,6 +19,7 @@ namespace Optimizely\Logger;
 use Monolog\Logger;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
+
 /**
  * Class DefaultLogger
  *

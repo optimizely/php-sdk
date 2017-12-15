@@ -31,7 +31,7 @@ class CurlEventDispatcher implements EventDispatcherInterface
     {
         $cmd = "curl";
         $cmd.= " -X ".$event->getHttpVerb();
-        foreach($event->getHeaders() as $type => $value) {
+        foreach ($event->getHeaders() as $type => $value) {
             $cmd.= " -H '".$type.": ".$value."'";
         }
         $cmd.= " -d '".json_encode($event->getParams())."'";

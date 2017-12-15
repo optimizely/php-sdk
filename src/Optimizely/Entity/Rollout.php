@@ -22,48 +22,55 @@ use Optimizely\Utils\ConfigParser;
 class Rollout
 {
 
-	/**
-	 * The ID of the rollout
-	 * @var String
-	 */
-	private $_id;
+    /**
+     * The ID of the rollout
+     *
+     * @var String
+     */
+    private $_id;
 
-	/**
-	 * A list of experiments representing the different rules of the rollout
-	 * @var [Experiment]
-	 */
-	private $_experiments;
+    /**
+     * A list of experiments representing the different rules of the rollout
+     *
+     * @var [Experiment]
+     */
+    private $_experiments;
 
-	public function __construct($id = null, $experiments = []){
-		$this->_id = $id;
-		$this->_experiments = ConfigParser::generateMap($experiments, null, Experiment::class);
-	}
+    public function __construct($id = null, $experiments = [])
+    {
+        $this->_id = $id;
+        $this->_experiments = ConfigParser::generateMap($experiments, null, Experiment::class);
+    }
 
-	/**
-	 * @return String ID of the rollout
-	 */
-	public function getId(){
-		return $this->_id;
-	}
+    /**
+     * @return String ID of the rollout
+     */
+    public function getId()
+    {
+        return $this->_id;
+    }
 
-	/**
-	 * @param String $id ID of the rollout
-	 */
-	public function setId($id){
-		$this->_id = $id;
-	}
+    /**
+     * @param String $id ID of the rollout
+     */
+    public function setId($id)
+    {
+        $this->_id = $id;
+    }
 
-	/**
-	 * @return [Experiments] A list of experiments representing the different rules of the rollout
-	 */
-	public function getExperiments(){
-		return $this->_experiments;
-	}
+    /**
+     * @return [Experiments] A list of experiments representing the different rules of the rollout
+     */
+    public function getExperiments()
+    {
+        return $this->_experiments;
+    }
 
-	/**
-	 * @param [Experiments] $experiments A list of experiments representing the different rules of the rollout
-	 */
-	public function setExperiments($experiments){
-		$this->_experiments = ConfigParser::generateMap($experiments, null, Experiment::class);
-	}
+    /**
+     * @param [Experiments] $experiments A list of experiments representing the different rules of the rollout
+     */
+    public function setExperiments($experiments)
+    {
+        $this->_experiments = ConfigParser::generateMap($experiments, null, Experiment::class);
+    }
 }

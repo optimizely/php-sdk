@@ -20,48 +20,55 @@ namespace Optimizely\Entity;
 class VariableUsage
 {
 
-	/**
-	 * The ID of the live variable this usage is modifying
-	 * @var String
-	 */
-	private $_id;
+    /**
+     * The ID of the live variable this usage is modifying
+     *
+     * @var String
+     */
+    private $_id;
 
-	/**
-	 * the variable value for users in this particular variation
-	 * @var String
-	 */
-	private $_value;
+    /**
+     * the variable value for users in this particular variation
+     *
+     * @var String
+     */
+    private $_value;
 
-	public function __construct($id = null, $value = null){
-		$this->_id = $id;
-		$this->_value = $value;
-	}
+    public function __construct($id = null, $value = null)
+    {
+        $this->_id = $id;
+        $this->_value = $value;
+    }
 
-	/**
-	 * @return String ID of the live variable this usage is modifying
-	 */
-	public function getId(){
-		return $this->_id;
-	}
+    /**
+     * @return String ID of the live variable this usage is modifying
+     */
+    public function getId()
+    {
+        return $this->_id;
+    }
 
-	/**
-	 * @param String $id ID of the live variable this usage is modifying
-	 */
-	public function setId($id){
-		$this->_id = $id;
-	}
+    /**
+     * @param String $id ID of the live variable this usage is modifying
+     */
+    public function setId($id)
+    {
+        $this->_id = $id;
+    }
 
-	/**
-	 * @return String variable value for users in this particular variation
-	 */
-	public function getValue(){
-		return $this->_value;
-	}
+    /**
+     * @return String variable value for users in this particular variation
+     */
+    public function getValue()
+    {
+        return $this->_value;
+    }
 
-	/**
-	 * @param String $value variable value for users in this particular variation
-	 */
-	public function setValue($value){
-		$this->_value = $value;
-	}
+    /**
+     * @param String $value variable value for users in this particular variation
+     */
+    public function setValue($value)
+    {
+        $this->_value = $value;
+    }
 }

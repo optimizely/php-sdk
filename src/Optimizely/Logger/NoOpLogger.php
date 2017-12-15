@@ -18,10 +18,12 @@ namespace Optimizely\Logger;
 
 /**
  * Class NoOpLogger
- * 
+ *
  * @package Optimizely\Logger
  */
 class NoOpLogger implements LoggerInterface
 {
-    public function log($logLevel, $logMessage) {}
+    public function log($logLevel, $logMessage)
+    {
+    }
 }

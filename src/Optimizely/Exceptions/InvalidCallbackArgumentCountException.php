@@ -17,7 +17,6 @@
 
 namespace Optimizely\Exceptions;
 
-
 class InvalidCallbackArgumentCountException extends OptimizelyException
 {
 }

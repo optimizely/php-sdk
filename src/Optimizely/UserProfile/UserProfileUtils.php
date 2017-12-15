@@ -28,10 +28,11 @@ class UserProfileUtils
     /**
      * Grab the revenue value from the event tags. "revenue" is a reserved keyword.
      *
-     * @param $userProfileMap array Representing the user profile.
+     * @param  $userProfileMap array Representing the user profile.
      * @return true if the given user profile map is valid, false otherwise.
      */
-    public static function isValidUserProfileMap($userProfileMap) {
+    public static function isValidUserProfileMap($userProfileMap)
+    {
         if (!is_array($userProfileMap)) {
             return false;
         }
@@ -50,8 +51,7 @@ class UserProfileUtils
 
         // validate the experiment bucket map
         $experimentBucketMap = $userProfileMap[self::EXPERIMENT_BUCKET_MAP_KEY];
-        foreach ($experimentBucketMap as $experimentId => $decision)
-        {
+        foreach ($experimentBucketMap as $experimentId => $decision) {
             if (!is_array($decision)) {
                 return false;
             }
@@ -69,7 +69,7 @@ class UserProfileUtils
     /**
      * Convert the given user profile map into a UserProfile object.
      *
-     * @param  $userProfileMap array
+     * @param $userProfileMap array
      *
      * @return UserProfile The user profile object constructed from the given map.
      */
@@ -77,7 +77,7 @@ class UserProfileUtils
     {
         $userId = $userProfileMap[self::USER_ID_KEY];
         $experimentBucketMap = array();
-        foreach($userProfileMap[self::EXPERIMENT_BUCKET_MAP_KEY] as $experimentId => $decisionMap) {
+        foreach ($userProfileMap[self::EXPERIMENT_BUCKET_MAP_KEY] as $experimentId => $decisionMap) {
             $variationId = $decisionMap[self::VARIATION_ID_KEY];
             $experimentBucketMap[$experimentId] = new Decision($variationId);
         }

@@ -16,7 +16,8 @@
  */
 
 namespace Optimizely\Tests;
-include('TestData.php');
+
+require 'TestData.php';
 
 use Monolog\Logger;
 use Optimizely\Entity\Attribute;
@@ -86,14 +87,17 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         // Check group ID map
         $groupIdMap = new \ReflectionProperty(ProjectConfig::class, '_groupIdMap');
         $groupIdMap->setAccessible(true);
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             '7722400015' => $this->config->getGroup('7722400015')
-        ], $groupIdMap->getValue($this->config));
+            ], $groupIdMap->getValue($this->config)
+        );
 
         // Check experiment key map
         $experimentKeyMap = new \ReflectionProperty(ProjectConfig::class, '_experimentKeyMap');
         $experimentKeyMap->setAccessible(true);
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             'test_experiment' => $this->config->getExperimentFromKey('test_experiment'),
             'paused_experiment' => $this->config->getExperimentFromKey('paused_experiment'),
             'group_experiment_1' => $this->config->getExperimentFromKey('group_experiment_1'),
@@ -102,12 +106,14 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_with_feature_rollout' => $this->config->getExperimentFromKey('test_experiment_with_feature_rollout'),
             'test_experiment_double_feature' =>  $this->config->getExperimentFromKey('test_experiment_double_feature'),
             'test_experiment_integer_feature' =>  $this->config->getExperimentFromKey('test_experiment_integer_feature')
-        ], $experimentKeyMap->getValue($this->config));
+            ], $experimentKeyMap->getValue($this->config)
+        );
 
         // Check experiment ID map
         $experimentIdMap = new \ReflectionProperty(ProjectConfig::class, '_experimentIdMap');
         $experimentIdMap->setAccessible(true);
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             '7716830082' => $this->config->getExperimentFromId('7716830082'),
             '7723330021' => $this->config->getExperimentFromId('7723330021'),
             '7718750065' => $this->config->getExperimentFromId('7718750065'),
@@ -116,36 +122,44 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             '122235' => $this->config->getExperimentFromId('122235'),
             '122238' => $this->config->getExperimentFromId('122238'),
             '122241' => $this->config->getExperimentFromId('122241')
-        ], $experimentIdMap->getValue($this->config));
+            ], $experimentIdMap->getValue($this->config)
+        );
 
         // Check event key map
         $eventKeyMap = new \ReflectionProperty(ProjectConfig::class, '_eventKeyMap');
         $eventKeyMap->setAccessible(true);
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             'purchase' => $this->config->getEvent('purchase'),
             'unlinked_event' => $this->config->getEvent('unlinked_event')
-        ], $eventKeyMap->getValue($this->config));
+            ], $eventKeyMap->getValue($this->config)
+        );
 
         // Check attribute key map
         $attributeKeyMap = new \ReflectionProperty(ProjectConfig::class, '_attributeKeyMap');
         $attributeKeyMap->setAccessible(true);
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             'device_type' => $this->config->getAttribute('device_type'),
             'location' => $this->config->getAttribute('location')
-        ], $attributeKeyMap->getValue($this->config));
+            ], $attributeKeyMap->getValue($this->config)
+        );
 
         // Check audience ID map
         $audienceIdMap = new \ReflectionProperty(ProjectConfig::class, '_audienceIdMap');
         $audienceIdMap->setAccessible(true);
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             '7718080042' => $this->config->getAudience('7718080042'),
             '11155' => $this->config->getAudience('11155')
-        ], $audienceIdMap->getValue($this->config));
+            ], $audienceIdMap->getValue($this->config)
+        );
 
         // Check variation key map
         $variationKeyMap = new \ReflectionProperty(ProjectConfig::class, '_variationKeyMap');
         $variationKeyMap->setAccessible(true);
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             'test_experiment' => [
                 'control' => $this->config->getVariationFromKey('test_experiment', 'control'),
                 'variation' => $this->config->getVariationFromKey('test_experiment', 'variation')
@@ -180,12 +194,14 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
                 'control' => $this->config->getVariationFromKey('test_experiment_integer_feature', 'control'),
                 'variation' => $this->config->getVariationFromKey('test_experiment_integer_feature', 'variation')
             ]
-        ], $variationKeyMap->getValue($this->config));
+            ], $variationKeyMap->getValue($this->config)
+        );
 
         // Check variation ID map
         $variationIdMap = new \ReflectionProperty(ProjectConfig::class, '_variationIdMap');
         $variationIdMap->setAccessible(true);
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             'test_experiment' => [
                 '7722370027' => $this->config->getVariationFromId('test_experiment', '7722370027'),
                 '7721010009' => $this->config->getVariationFromId('test_experiment', '7721010009')
@@ -220,31 +236,36 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
                 '122242' => $this->config->getVariationFromId('test_experiment_integer_feature', '122242'),
                 '122243' => $this->config->getVariationFromId('test_experiment_integer_feature', '122243')
             ]
-        ], $variationIdMap->getValue($this->config));
+            ], $variationIdMap->getValue($this->config)
+        );
 
 
         // Check feature flag key map
         $featureFlagKeyMap = new \ReflectionProperty(ProjectConfig::class, '_featureKeyMap');
         $featureFlagKeyMap->setAccessible(true);
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             'boolean_feature' => $this->config->getFeatureFlagFromKey('boolean_feature'),
             'double_single_variable_feature' => $this->config->getFeatureFlagFromKey('double_single_variable_feature'),
             'integer_single_variable_feature' => $this->config->getFeatureFlagFromKey('integer_single_variable_feature'),
             'boolean_single_variable_feature' => $this->config->getFeatureFlagFromKey('boolean_single_variable_feature'),
             'string_single_variable_feature' => $this->config->getFeatureFlagFromKey('string_single_variable_feature'),
             'multi_variate_feature' => $this->config->getFeatureFlagFromKey('multi_variate_feature'),
-            'mutex_group_feature' => $this->config->getFeatureFlagFromKey('mutex_group_feature'),      
+            'mutex_group_feature' => $this->config->getFeatureFlagFromKey('mutex_group_feature'),
             'empty_feature' => $this->config->getFeatureFlagFromKey('empty_feature')
-        ], $featureFlagKeyMap->getValue($this->config));
+            ], $featureFlagKeyMap->getValue($this->config)
+        );
 
 
         // Check rollout id map
         $rolloutIdMap = new \ReflectionProperty(ProjectConfig::class, '_rolloutIdMap');
         $rolloutIdMap->setAccessible(true);
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             '166660' => $this->config->getRolloutFromId('166660'),
             '166661' => $this->config->getRolloutFromId('166661')
-        ], $rolloutIdMap->getValue($this->config));
+            ], $rolloutIdMap->getValue($this->config)
+        );
 
 
         // Check variable usage
@@ -342,7 +363,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(new FeatureFlag(), $this->config->getFeatureFlagFromKey('42'));
     }
 
-        public function testGetRolloutInvalidId()
+    public function testGetRolloutInvalidId()
     {
         $this->loggerMock->expects($this->once())
             ->method('log')
@@ -503,12 +524,12 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $invalidUserId = 'invalid_user';
         $experimentKey = 'test_experiment';
         $experimentKey2 = 'group_experiment_1';
-        $invalidExperimentKey = 'invalid_experiment';        
+        $invalidExperimentKey = 'invalid_experiment';
         $variationKey = 'control';
         $variationKey2 = 'group_exp_1_var_1';
         $invalidVariationKey = 'invalid_variation';
         
-        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock );
+        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
         $userAttributes = [
             'device_type' => 'iPhone',
             'location' => 'San Francisco'
@@ -555,17 +576,17 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
     // test that all the logs in setForcedVariation are getting called
     public function testSetForcedVariationLogs()
     {
-        $userId = 'test_user'; 
+        $userId = 'test_user';
         $experimentKey = 'test_experiment';
         $experimentId = '7716830082';
-        $invalidExperimentKey = 'invalid_experiment';        
+        $invalidExperimentKey = 'invalid_experiment';
         $variationKey = 'control';
         $variationId = '7722370027';
         $invalidVariationKey = 'invalid_variation';
         $callIndex = 0;
 
         $this->loggerMock->expects($this->exactly(4))
-            ->method('log');                 
+            ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
@@ -574,24 +595,24 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::ERROR, sprintf('No variation key "%s" defined in datafile for experiment "%s".', $invalidVariationKey, $experimentKey));     
+            ->with(Logger::ERROR, sprintf('No variation key "%s" defined in datafile for experiment "%s".', $invalidVariationKey, $experimentKey));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));  
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
 
         $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
 
         $this->config->setForcedVariation($invalidExperimentKey, $userId, $variationKey);
         $this->config->setForcedVariation($experimentKey, $userId, null);
-        $this->config->setForcedVariation($experimentKey, $userId, $invalidVariationKey );
+        $this->config->setForcedVariation($experimentKey, $userId, $invalidVariationKey);
         $this->config->setForcedVariation($experimentKey, $userId, $variationKey);
     }
 
     // test that all the logs in getForcedVariation are getting called
     public function testGetForcedVariationLogs()
     {
-        $userId = 'test_user'; 
-        $invalidUserId = 'invalid_user'; 
+        $userId = 'test_user';
+        $invalidUserId = 'invalid_user';
         $experimentKey = 'test_experiment';
         $experimentId = '7716830082';
         $invalidExperimentKey = 'invalid_experiment';
@@ -601,13 +622,13 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $callIndex = 0;
 
         $this->loggerMock->expects($this->exactly(5))
-            ->method('log');    
+            ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));   
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $invalidUserId));            
+            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $invalidUserId));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
@@ -616,7 +637,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, sprintf('No experiment "%s" mapped to user "%s" in the forced variation map.', $pausedExperimentKey, $userId));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));  
+            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
 
         $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
 
@@ -626,5 +647,4 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->config->getForcedVariation($pausedExperimentKey, $userId);
         $this->config->getForcedVariation($experimentKey, $userId);
     }
-
 }

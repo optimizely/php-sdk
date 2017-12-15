@@ -35,7 +35,8 @@ class Event
     private $_experimentIds;
 
 
-    public function __construct($id = null, $key = null, $experimentIds = null) {
+    public function __construct($id = null, $key = null, $experimentIds = null)
+    {
         $this->_id = $id;
         $this->_key = $key;
         $this->_experimentIds = $experimentIds;

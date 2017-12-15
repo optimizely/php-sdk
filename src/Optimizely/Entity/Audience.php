@@ -40,7 +40,8 @@ class Audience
     private $_conditionsList;
 
 
-    public function __construct($id = null, $name = null, $conditions = null) {
+    public function __construct($id = null, $name = null, $conditions = null)
+    {
         $this->_id = $id;
         $this->_name = $name;
         $this->_conditions = $conditions;

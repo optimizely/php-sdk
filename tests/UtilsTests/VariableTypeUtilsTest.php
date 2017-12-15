@@ -31,8 +31,8 @@ class VariableTypeUtilsTest extends \PHPUnit_Framework_TestCase
     {
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
-        ->setMethods(array('log'))
-        ->getMock();
+            ->setMethods(array('log'))
+            ->getMock();
 
         $this->variableUtilObj = new VariableTypeUtils();
     }

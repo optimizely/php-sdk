@@ -18,19 +18,19 @@ namespace Optimizely\UserProfile;
 
 interface UserProfileServiceInterface
 {
-  /**
-   * Fetch the user profile map for the user ID.
-   *
-   * @param $userId      string The ID of the user whose profile will be retrieved.
-   *
-   * @return userProfile array  The user profile.
-   */
-  public function lookup($userId);
+    /**
+     * Fetch the user profile map for the user ID.
+     *
+     * @param $userId      string The ID of the user whose profile will be retrieved.
+     *
+     * @return userProfile array  The user profile.
+     */
+    public function lookup($userId);
 
-  /**
-   * Save the user profile Map sent to this method.
-   *
-   * @param  $userProfile array The user profile to save.
-   */
-  public function save($userProfile);
+    /**
+     * Save the user profile Map sent to this method.
+     *
+     * @param $userProfile array The user profile to save.
+     */
+    public function save($userProfile);
 }

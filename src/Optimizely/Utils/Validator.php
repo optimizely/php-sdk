@@ -40,16 +40,17 @@ class Validator
         if ($validator->isValid()) {
             return true;
         } else {
-            if($logger){
-                $logger->log(Logger::DEBUG, "JSON does not validate. Violations:\n");;
+            if ($logger) {
+                $logger->log(Logger::DEBUG, "JSON does not validate. Violations:\n");
+                ;
                 foreach ($validator->getErrors() as $error) {
-                   $logger->log(Logger::DEBUG, "[%s] %s\n", $error['property'], $error['message']);
+                    $logger->log(Logger::DEBUG, "[%s] %s\n", $error['property'], $error['message']);
                 }
-           }
+            }
 
-           return false;
-       }
-   }
+            return false;
+        }
+    }
 
     /**
      * @param $attributes mixed Attributes of the user.
@@ -94,7 +95,7 @@ class Validator
 
         // Return true if conditions for any audience are met.
         $conditionEvaluator = new ConditionEvaluator();
-        forEach ($audienceIds as $audienceId) {
+        foreach ($audienceIds as $audienceId) {
             $audience = $config->getAudience($audienceId);
             $result = $conditionEvaluator->evaluate($audience->getConditionsList(), $userAttributes);
             if ($result) {
@@ -109,8 +110,8 @@ class Validator
      * Checks that if there are more than one experiment IDs
      * in the feature flag, they must belong to the same mutex group
      *
-     * @param  ProjectConfig  $config The project config to verify against
-     * @param  FeatureFlag  $featureFlag The feature to validate
+     * @param ProjectConfig $config      The project config to verify against
+     * @param FeatureFlag   $featureFlag The feature to validate
      *
      * @return boolean True if feature flag is valid
      */

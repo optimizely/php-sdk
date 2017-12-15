@@ -64,7 +64,7 @@ class ProjectConfig
     private $_projectId;
 
     /**
-     * @var boolean denotes if Optimizely should remove the 
+     * @var boolean denotes if Optimizely should remove the
      * last block of visitors' IP address before storing event data
      */
     private $_anonymizeIP;
@@ -134,30 +134,35 @@ class ProjectConfig
 
     /**
      * list of Feature Flags that will be parsed from the datafile.
+     *
      * @var [FeatureFlag]
      */
     private $_featureFlags;
 
     /**
      * list of Rollouts that will be parsed from the datafile
+     *
      * @var [Rollout]
      */
     private $_rollouts;
 
     /**
      * internal mapping of feature keys to feature flag models.
+     *
      * @var <String, FeatureFlag>  associative array of feature keys to feature flags
      */
     private $_featureKeyMap;
 
     /**
      * internal mapping of rollout IDs to Rollout models.
+     *
      * @var <String, Rollout>  associative array of rollout ids to rollouts
      */
     private $_rolloutIdMap;
 
     /**
      * Feature Flag key to Feature Variable key to Feature Variable map
+     *
      * @var <String, <String, FeatureVariable>>
      */
     private $_featureFlagVariableMap;
@@ -197,44 +202,47 @@ class ProjectConfig
         $this->_rollouts = ConfigParser::generateMap($rollouts, null, Rollout::class);
         $this->_featureFlags = ConfigParser::generateMap($featureFlags, null, FeatureFlag::class);
 
-        forEach(array_values($this->_groupIdMap) as $group) {
+        foreach (array_values($this->_groupIdMap) as $group) {
             $experimentsInGroup = ConfigParser::generateMap($group->getExperiments(), 'key', Experiment::class);
-            forEach(array_values($experimentsInGroup) as $experiment) {
+            foreach (array_values($experimentsInGroup) as $experiment) {
                 $experiment->setGroupId($group->getId());
                 $experiment->setGroupPolicy($group->getPolicy());
             }
             $this->_experimentKeyMap = array_merge($this->_experimentKeyMap, $experimentsInGroup);
         }
 
-        forEach(array_values($this->_experimentKeyMap) as $experiment) {
+        foreach (array_values($this->_experimentKeyMap) as $experiment) {
             $this->_variationKeyMap[$experiment->getKey()] = [];
             $this->_variationIdMap[$experiment->getKey()] = [];
             $this->_experimentIdMap[$experiment->getId()] = $experiment;
 
-            forEach($experiment->getVariations() as $variation) {
+            foreach ($experiment->getVariations() as $variation) {
                 $this->_variationKeyMap[$experiment->getKey()][$variation->getKey()] = $variation;
                 $this->_variationIdMap[$experiment->getKey()][$variation->getId()] = $variation;
             }
         }
 
         $conditionDecoder = new ConditionDecoder();
-        forEach(array_values($this->_audienceIdMap) as $audience) {
+        foreach (array_values($this->_audienceIdMap) as $audience) {
             $conditionDecoder->deserializeAudienceConditions($audience->getConditions());
             $audience->setConditionsList($conditionDecoder->getConditionsList());
         }
 
-        foreach(array_values($this->_rollouts) as $rollout){
+        foreach (array_values($this->_rollouts) as $rollout) {
             $this->_rolloutIdMap[$rollout->getId()] = $rollout;
         }
 
-        foreach(array_values($this->_featureFlags) as $featureFlag){
+        foreach (array_values($this->_featureFlags) as $featureFlag) {
             $this->_featureKeyMap[$featureFlag->getKey()] = $featureFlag;
         }
 
-        if($this->_featureKeyMap){
-            foreach($this->_featureKeyMap as $featureKey => $featureFlag){
+        if ($this->_featureKeyMap) {
+            foreach ($this->_featureKeyMap as $featureKey => $featureFlag) {
                 $this->_featureFlagVariableMap[$featureKey] = ConfigParser::generateMap(
-                    $featureFlag->getVariables(), 'key', FeatureVariable::class);                                                                           
+                    $featureFlag->getVariables(),
+                    'key',
+                    FeatureVariable::class
+                );
             }
         }
     }
@@ -333,23 +341,23 @@ class ProjectConfig
 
     /**
      * @param  String $featureKey Key of the feature flag
-     * 
+     *
      * @return FeatureFlag Entity corresponding to the key.
      */
     public function getFeatureFlagFromKey($featureKey)
     {
-        if(isset($this->_featureKeyMap[$featureKey])){
+        if (isset($this->_featureKeyMap[$featureKey])) {
             return $this->_featureKeyMap[$featureKey];
         }
 
         $this->_logger->log(Logger::ERROR, sprintf('FeatureFlag Key "%s" is not in datafile.', $featureKey));
         $this->_errorHandler->handleError(new InvalidFeatureFlagException('Provided feature flag is not in datafile.'));
-        return new FeatureFlag();        
+        return new FeatureFlag();
     }
 
     /**
-     * @param  String $rolloutId 
-     * 
+     * @param  String $rolloutId
+     *
      * @return Rollout
      */
     public function getRolloutFromId($rolloutId)
@@ -424,13 +432,20 @@ class ProjectConfig
      */
     public function getVariationFromKey($experimentKey, $variationKey)
     {
-        if(isset($this->_variationKeyMap[$experimentKey]) &&
-            isset($this->_variationKeyMap[$experimentKey][$variationKey])) {
+        if (isset($this->_variationKeyMap[$experimentKey])
+            && isset($this->_variationKeyMap[$experimentKey][$variationKey])
+        ) {
             return $this->_variationKeyMap[$experimentKey][$variationKey];
         }
 
-        $this->_logger->log(Logger::ERROR, sprintf(
-            'No variation key "%s" defined in datafile for experiment "%s".', $variationKey, $experimentKey));
+        $this->_logger->log(
+            Logger::ERROR,
+            sprintf(
+                'No variation key "%s" defined in datafile for experiment "%s".',
+                $variationKey,
+                $experimentKey
+            )
+        );
         $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
         return new Variation();
     }
@@ -444,39 +459,56 @@ class ProjectConfig
      */
     public function getVariationFromId($experimentKey, $variationId)
     {
-        if(isset($this->_variationIdMap[$experimentKey]) &&
-            isset($this->_variationIdMap[$experimentKey][$variationId])) {
+        if (isset($this->_variationIdMap[$experimentKey])
+            && isset($this->_variationIdMap[$experimentKey][$variationId])
+        ) {
             return $this->_variationIdMap[$experimentKey][$variationId];
         }
 
-        $this->_logger->log(Logger::ERROR, sprintf(
-            'No variation ID "%s" defined in datafile for experiment "%s".', $variationId, $experimentKey));
+        $this->_logger->log(
+            Logger::ERROR,
+            sprintf(
+                'No variation ID "%s" defined in datafile for experiment "%s".',
+                $variationId,
+                $experimentKey
+            )
+        );
         $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
         return new Variation();
     }
 
     /**
      * Gets the feature variable instance given feature flag key and variable key
-     * @param  string Feature flag key
-     * @param  string Variable key
-     * 
+     *
+     * @param string Feature flag key
+     * @param string Variable key
+     *
      * @return FeatureVariable / null
      */
     public function getFeatureVariableFromKey($featureFlagKey, $variableKey)
     {
         $feature_flag = $this->getFeatureFlagFromKey($featureFlagKey);
-        if($feature_flag && !($feature_flag->getKey()))
+        if ($feature_flag && !($feature_flag->getKey())) {
             return null;
+        }
 
-        if(isset($this->_featureFlagVariableMap[$featureFlagKey]) &&
-            isset($this->_featureFlagVariableMap[$featureFlagKey][$variableKey])) {
+        if (isset($this->_featureFlagVariableMap[$featureFlagKey])
+            && isset($this->_featureFlagVariableMap[$featureFlagKey][$variableKey])
+        ) {
             return $this->_featureFlagVariableMap[$featureFlagKey][$variableKey];
-        }   
+        }
 
-        $this->_logger->log(Logger::ERROR, sprintf(
-            'No variable key "%s" defined in datafile for feature flag "%s".', $variableKey, $featureFlagKey));
+        $this->_logger->log(
+            Logger::ERROR,
+            sprintf(
+                'No variable key "%s" defined in datafile for feature flag "%s".',
+                $variableKey,
+                $featureFlagKey
+            )
+        );
         $this->_errorHandler->handleError(
-            new InvalidFeatureVariableException('Provided feature variable is not in datafile.'));
+            new InvalidFeatureVariableException('Provided feature variable is not in datafile.')
+        );
         return null;
     }
 
@@ -545,7 +577,7 @@ class ProjectConfig
         // check for null and empty string user ID
         if (strlen($userId) == 0) {
             $this->_logger->log(Logger::DEBUG, 'User ID is invalid');
-            return FALSE;
+            return false;
         }
 
         $experiment = $this->getExperimentFromKey($experimentKey);
@@ -553,14 +585,14 @@ class ProjectConfig
         // check if the experiment exists in the datafile (a new experiment is returned if it is not in the datafile)
         if (strlen($experimentId) == 0) {
             // this case is logged in getExperimentFromKey
-            return FALSE;
+            return false;
         }
 
         // clear the forced variation if the variation key is null
         if (is_null($variationKey)) {
             unset($this->_forcedVariationMap[$userId][$experimentId]);
             $this->_logger->log(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
-            return TRUE;
+            return true;
         }
 
         $variation = $this->getVariationFromKey($experimentKey, $variationKey);
@@ -568,13 +600,12 @@ class ProjectConfig
         // check if the variation exists in the datafile (a new variation is returned if it is not in the datafile)
         if (strlen($variationId) == 0) {
             // this case is logged in getVariationFromKey
-            return FALSE;
+            return false;
         }
 
         $this->_forcedVariationMap[$userId][$experimentId] = $variationId;
         $this->_logger->log(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
 
-        return TRUE;
+        return true;
     }
-
 }
