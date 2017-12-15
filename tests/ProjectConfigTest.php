@@ -110,7 +110,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $eventKeyMap = new \ReflectionProperty(ProjectConfig::class, '_eventKeyMap');
         $eventKeyMap->setAccessible(true);
         $this->assertEquals([
-            'purchase' => $this->config->getEvent('purchase')
+            'purchase' => $this->config->getEvent('purchase'),
+            'unlinked_event' => $this->config->getEvent('unlinked_event')
         ], $eventKeyMap->getValue($this->config));
 
         // Check attribute key map

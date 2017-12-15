@@ -31,6 +31,8 @@ use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\Notification\NotificationCenter;
+use Optimizely\Notification\NotificationType;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\Validator;
@@ -78,6 +80,11 @@ class Optimizely
     private $_logger;
 
     /**
+     * @var NotificationCenter
+     */
+    public $notificationCenter;
+
+    /**
      * Optimizely constructor for managing Full Stack PHP projects.
      *
      * @param $datafile string JSON string representing the project.
@@ -87,13 +94,14 @@ class Optimizely
      * @param $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
      * @param $userProfileService UserProfileServiceInterface
      */
-    public function __construct($datafile,
-                                EventDispatcherInterface $eventDispatcher = null,
-                                LoggerInterface $logger = null,
-                                ErrorHandlerInterface $errorHandler = null,
-                                $skipJsonValidation = false,
-                                UserProfileServiceInterface $userProfileService = null)
-    {
+    public function __construct(
+        $datafile,
+        EventDispatcherInterface $eventDispatcher = null,
+        LoggerInterface $logger = null,
+        ErrorHandlerInterface $errorHandler = null,
+        $skipJsonValidation = false,
+        UserProfileServiceInterface $userProfileService = null
+    ) {
         $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
         $this->_logger = $logger ?: new NoOpLogger();
@@ -107,15 +115,13 @@ class Optimizely
         }
 
         try {
-          $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
-        }
-        catch (Throwable $exception) {
+            $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
+        } catch (Throwable $exception) {
             $this->_isValid = false;
             $this->_logger = new DefaultLogger();
             $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
             return;
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             $this->_isValid = false;
             $this->_logger = new DefaultLogger();
             $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
@@ -124,6 +130,7 @@ class Optimizely
 
         $this->_eventBuilder = new EventBuilder();
         $this->_decisionService = new DecisionService($this->_logger, $this->_config, $userProfileService);
+        $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
     }
 
     /**
@@ -149,7 +156,8 @@ class Optimizely
      *
      * @return boolean Representing whether all user inputs are valid.
      */
-    private function validateUserInputs($attributes, $eventTags = null) {
+    private function validateUserInputs($attributes, $eventTags = null)
+    {
         if (!is_null($attributes) && !Validator::areAttributesValid($attributes)) {
             $this->_logger->log(Logger::ERROR, 'Provided attributes are in an invalid format.');
             $this->_errorHandler->handleError(
@@ -164,6 +172,7 @@ class Optimizely
                 $this->_errorHandler->handleError(
                     new InvalidEventTagException('Provided event tags are in an invalid format.')
                 );
+                return false;
             }
         }
 
@@ -180,16 +189,20 @@ class Optimizely
      *
      * @return Array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
      */
-    private function getValidExperimentsForEvent($event, $userId, $attributes = null) {
+    private function getValidExperimentsForEvent($event, $userId, $attributes = null)
+    {
         $validExperiments = [];
-        forEach ($event->getExperimentIds() as $experimentId) {
+        foreach ($event->getExperimentIds() as $experimentId) {
             $experiment = $this->_config->getExperimentFromId($experimentId);
             $experimentKey = $experiment->getKey();
             $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
 
             if (is_null($variationKey)) {
-                $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for experiment "%s".',
-                    $userId, $experimentKey));
+                $this->_logger->log(Logger::INFO, sprintf(
+                    'Not tracking user "%s" for experiment "%s".',
+                    $userId,
+                    $experimentKey
+                ));
                 continue;
             }
 
@@ -198,6 +211,52 @@ class Optimizely
         }
 
         return $validExperiments;
+    }
+
+    /**
+     * @param  string Experiment key
+     * @param  string Variation key
+     * @param  string User ID
+     * @param  array Associative array of user attributes
+     */
+    protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
+    {
+        $impressionEvent = $this->_eventBuilder
+            ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
+        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
+        $this->_logger->log(
+            Logger::DEBUG,
+            sprintf(
+                'Dispatching impression event to URL %s with params %s.',
+                $impressionEvent->getUrl(),
+                http_build_query($impressionEvent->getParams())
+            )
+        );
+
+        try {
+            $this->_eventDispatcher->dispatchEvent($impressionEvent);
+        } catch (Throwable $exception) {
+            $this->_logger->log(Logger::ERROR, sprintf(
+                'Unable to dispatch impression event. Error %s',
+                $exception->getMessage()
+            ));
+        } catch (Exception $exception) {
+            $this->_logger->log(Logger::ERROR, sprintf(
+                'Unable to dispatch impression event. Error %s',
+                $exception->getMessage()
+            ));
+        }
+
+        $this->notificationCenter->sendNotifications(
+            NotificationType::ACTIVATE,
+            array(
+                $this->_config->getExperimentFromKey($experimentKey),
+                $userId,
+                $attributes,
+                $this->_config->getVariationFromKey($experimentKey, $variationKey),
+                $impressionEvent
+            )
+        );
     }
 
     /**
@@ -219,30 +278,10 @@ class Optimizely
         $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
         if (is_null($variationKey)) {
             $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
-            return $variationKey;
+            return null;
         }
 
-        $impressionEvent = $this->_eventBuilder
-            ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
-        $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
-        $this->_logger->log(
-            Logger::DEBUG,
-            sprintf('Dispatching impression event to URL %s with params %s.',
-                $impressionEvent->getUrl(), http_build_query($impressionEvent->getParams())
-            )
-        );
-
-        try {
-            $this->_eventDispatcher->dispatchEvent($impressionEvent);
-        }
-        catch (Throwable $exception) {
-            $this->_logger->log(Logger::ERROR, sprintf(
-                'Unable to dispatch impression event. Error %s', $exception->getMessage()));
-        }
-        catch (Exception $exception) {
-            $this->_logger->log(Logger::ERROR, sprintf(
-                'Unable to dispatch impression event. Error %s', $exception->getMessage()));
-        }
+        $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
 
         return $variationKey;
     }
@@ -298,22 +337,37 @@ class Optimizely
             $this->_logger->log(Logger::INFO, sprintf('Tracking event "%s" for user "%s".', $eventKey, $userId));
             $this->_logger->log(
                 Logger::DEBUG,
-                sprintf('Dispatching conversion event to URL %s with params %s.',
-                    $conversionEvent->getUrl(), http_build_query($conversionEvent->getParams())
-                ));
+                sprintf(
+                    'Dispatching conversion event to URL %s with params %s.',
+                    $conversionEvent->getUrl(),
+                    http_build_query($conversionEvent->getParams())
+                )
+            );
 
             try {
                 $this->_eventDispatcher->dispatchEvent($conversionEvent);
-            }
-            catch (Throwable $exception) {
+            } catch (Throwable $exception) {
                 $this->_logger->log(Logger::ERROR, sprintf(
-                    'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
-            }
-            catch (Exception $exception) {
+                    'Unable to dispatch conversion event. Error %s',
+                    $exception->getMessage()
+                ));
+            } catch (Exception $exception) {
                 $this->_logger->log(Logger::ERROR, sprintf(
-                    'Unable to dispatch conversion event. Error %s', $exception->getMessage()));
+                    'Unable to dispatch conversion event. Error %s',
+                    $exception->getMessage()
+                ));
             }
 
+            $this->notificationCenter->sendNotifications(
+                NotificationType::TRACK,
+                array(
+                    $eventKey,
+                    $userId,
+                    $attributes,
+                    $eventTags,
+                    $conversionEvent
+                )
+            );
         } else {
             $this->_logger->log(
                 Logger::INFO,
@@ -357,16 +411,16 @@ class Optimizely
     }
 
     /**
-	 * Force a user into a variation for a given experiment.
-	 *
-	 * @param $experimentKey string Key identifying the experiment.
-	 * @param $userId string The user ID to be used for bucketing.
-	 * @param $variationKey string The variation key specifies the variation which the user
-	 * will be forced into. If null, then clear the existing experiment-to-variation mapping.
-	 *
+     * Force a user into a variation for a given experiment.
+     *
+     * @param $experimentKey string Key identifying the experiment.
+     * @param $userId string The user ID to be used for bucketing.
+     * @param $variationKey string The variation key specifies the variation which the user
+     * will be forced into. If null, then clear the existing experiment-to-variation mapping.
+     *
      * @return boolean A boolean value that indicates if the set completed successfully.
-	 */
-	public function setForcedVariation($experimentKey, $userId, $variationKey)
+     */
+    public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
         return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
     }

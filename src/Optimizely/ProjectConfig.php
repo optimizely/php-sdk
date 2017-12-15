@@ -58,6 +58,12 @@ class ProjectConfig
     private $_projectId;
 
     /**
+     * @var boolean denotes if Optimizely should remove the 
+     * last block of visitors' IP address before storing event data
+     */
+    private $_anonymizeIP;
+
+    /**
      * @var string Revision of the datafile.
      */
     private $_revision;
@@ -135,6 +141,7 @@ class ProjectConfig
         $this->_version = $config['version'];
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
+        $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
         $this->_revision = $config['revision'];
         $this->_forcedVariationMap = [];
 
@@ -191,6 +198,15 @@ class ProjectConfig
     public function getProjectId()
     {
         return $this->_projectId;
+    }
+
+    /**
+     * @return boolean Flag denoting if Optimizely should remove last block
+     * of visitors' IP address before storing event data
+     */
+    public function getAnonymizeIP()
+    {
+        return $this->_anonymizeIP;
     }
 
     /**
@@ -385,19 +401,8 @@ class ProjectConfig
         }
 
         $variationId = $experimentToVariationMap[$experimentId];
-        // check for null and empty string variation ID
-        if (strlen($variationId) == 0) {
-            $this->_logger->log(Logger::DEBUG, sprintf('No variation mapped to experiment "%s" in the forced variation map.', $experimentKey));
-            return null;
-        }
-
         $variation = $this->getVariationFromId($experimentKey, $variationId);
         $variationKey = $variation->getKey();
-        // check if the variation exists in the datafile (a new variation is returned if it is not in the datafile)
-        if (strlen($variationKey) == 0) {
-            // this case is logged in getVariationFromId
-            return null;
-        }
 
         $this->_logger->log(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
 

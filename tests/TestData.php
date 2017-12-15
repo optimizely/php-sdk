@@ -20,6 +20,7 @@ use Exception;
 use Optimizely\Bucketer;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Event\LogEvent;
+use Optimizely\Optimizely;
 
 define('DATAFILE',
     '{"experiments": [{"status": "Running", "key": "test_experiment", "layerId": "7719770039", 
@@ -36,7 +37,7 @@ define('DATAFILE',
     "variations": [{"id": "7713030086", "key": "group_exp_2_var_1"}, {"id": "7725250007", "key": "group_exp_2_var_2"}], "forcedVariations": {}, "id": "7718750065"}], "id": "7722400015"}], 
     "attributes": [{"id": "7723280020", "key": "device_type"}, {"id": "7723340004", "key": "location"}], 
     "projectId": "7720880029", "accountId": "1592310167", 
-    "events": [{"experimentIds": ["7716830082", "7723330021", "7718750065", "7716830585"], "id": "7718020063", "key": "purchase"}], 
+    "events": [{"experimentIds": ["7716830082", "7723330021", "7718750065", "7716830585"], "id": "7718020063", "key": "purchase"}, {"experimentIds": [], "id": "7718020064", "key": "unlinked_event"}],"anonymizeIP": false,
     "revision": "15"}');
 
 define('DATAFILE_V3',
@@ -73,7 +74,7 @@ define('DATAFILE_MORE_DATA',
     "variations": [{"id": "7713030086", "key": "group_exp_2_var_1"}, {"id": "7725250007", "key": "group_exp_2_var_2"}], "forcedVariations": {}, "id": "7718750065"}], "id": "7722400015"}], 
     "attributes": [{"id": "7723280020", "key": "device_type"}, {"id": "7723340004", "key": "location"}], 
     "projectId": "7720880029", "accountId": "1592310167", 
-    "events": [{"experimentIds": ["7716830082", "7723330021", "7718750065", "7716830585"], "id": "7718020063", "key": "purchase"}], 
+    "events": [{"experimentIds": ["7716830082", "7723330021", "7718750065", "7716830585"], "id": "7718020063", "key": "purchase"}],"anonymizeIP": false, 
     "revision": "15", "random_data_key": [{"key_1": "value_1", "key_2": "value_2"}]}');
 
 /**
@@ -96,6 +97,29 @@ class TestBucketer extends Bucketer
     {
         return array_shift($this->values);
     }
+}
+
+/**
+ * Class OptimizelyTester
+ * Extending Optimizely for the sake of tests.
+ */
+class OptimizelyTester extends Optimizely
+{
+  public function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes){
+    parent::sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+  }
+}
+
+class FireNotificationTester{
+    public function decision_callback_no_args(){}
+
+    public function decision_callback_no_args_2(){}
+
+    public function decision_callback_with_args($anInt, $aDouble, $aString, $anArray, $aFunction){}
+
+    public function decision_callback_with_args_2($anInt, $aDouble, $aString, $anArray, $aFunction){}
+
+    public function track_callback_no_args(){}
 }
 
 

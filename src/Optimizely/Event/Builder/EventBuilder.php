@@ -36,7 +36,7 @@ class EventBuilder
     /**
      * @const string Version of the Optimizely PHP SDK.
      */
-    const SDK_VERSION = '1.4.0';
+    const SDK_VERSION = '1.5.0';
 
     /**
      * @var string URL to send event to.
@@ -76,7 +76,8 @@ class EventBuilder
             VISITORS => [$visitor],
             REVISION => $config->getRevision(),
             CLIENT_ENGINE => self::SDK_TYPE,
-            CLIENT_VERSION => self::SDK_VERSION
+            CLIENT_VERSION => self::SDK_VERSION,
+            ANONYMIZE_IP => $config->getAnonymizeIP()
         ];
 
         if(is_null($attributes))
