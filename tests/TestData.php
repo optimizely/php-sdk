@@ -676,7 +676,7 @@ define('DATAFILE','{
           "trafficAllocation": [
             {
               "entityId": "177778",
-              "endOfRange": 10000
+              "endOfRange": 5000
             }
           ]
         }

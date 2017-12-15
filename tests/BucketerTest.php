@@ -373,7 +373,8 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
 
     public function testBucketWithRolloutRule()
     {
-        $bucketer = new Bucketer($this->loggerMock);
+        $bucketer = new TestBucketer($this->loggerMock);
+        $bucketer->setBucketValues([4999, 5000]);
 
         $rollout = $this->config->getRolloutFromId('166660');
         $rollout_rule = null;
@@ -397,6 +398,16 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expectedVariation,
+            $bucketer->bucket(
+                $this->config,
+                $rollout_rule,
+                'bucketingId',
+                'userId'
+            )
+        );
+
+        $this->assertEquals(
+            new Variation(),
             $bucketer->bucket(
                 $this->config,
                 $rollout_rule,
