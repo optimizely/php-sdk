@@ -90,7 +90,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             [
             '7722400015' => $this->config->getGroup('7722400015')
-            ], $groupIdMap->getValue($this->config)
+            ],
+            $groupIdMap->getValue($this->config)
         );
 
         // Check experiment key map
@@ -106,7 +107,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_with_feature_rollout' => $this->config->getExperimentFromKey('test_experiment_with_feature_rollout'),
             'test_experiment_double_feature' =>  $this->config->getExperimentFromKey('test_experiment_double_feature'),
             'test_experiment_integer_feature' =>  $this->config->getExperimentFromKey('test_experiment_integer_feature')
-            ], $experimentKeyMap->getValue($this->config)
+            ],
+            $experimentKeyMap->getValue($this->config)
         );
 
         // Check experiment ID map
@@ -122,7 +124,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             '122235' => $this->config->getExperimentFromId('122235'),
             '122238' => $this->config->getExperimentFromId('122238'),
             '122241' => $this->config->getExperimentFromId('122241')
-            ], $experimentIdMap->getValue($this->config)
+            ],
+            $experimentIdMap->getValue($this->config)
         );
 
         // Check event key map
@@ -132,7 +135,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             [
             'purchase' => $this->config->getEvent('purchase'),
             'unlinked_event' => $this->config->getEvent('unlinked_event')
-            ], $eventKeyMap->getValue($this->config)
+            ],
+            $eventKeyMap->getValue($this->config)
         );
 
         // Check attribute key map
@@ -142,7 +146,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             [
             'device_type' => $this->config->getAttribute('device_type'),
             'location' => $this->config->getAttribute('location')
-            ], $attributeKeyMap->getValue($this->config)
+            ],
+            $attributeKeyMap->getValue($this->config)
         );
 
         // Check audience ID map
@@ -152,12 +157,14 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             [
             '7718080042' => $this->config->getAudience('7718080042'),
             '11155' => $this->config->getAudience('11155')
-            ], $audienceIdMap->getValue($this->config)
+            ],
+            $audienceIdMap->getValue($this->config)
         );
 
         // Check variation key map
         $variationKeyMap = new \ReflectionProperty(ProjectConfig::class, '_variationKeyMap');
         $variationKeyMap->setAccessible(true);
+
         $this->assertEquals(
             [
             'test_experiment' => [
@@ -193,8 +200,24 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_integer_feature' => [
                 'control' => $this->config->getVariationFromKey('test_experiment_integer_feature', 'control'),
                 'variation' => $this->config->getVariationFromKey('test_experiment_integer_feature', 'variation')
+            ],
+            'rollout_1_exp_1' => [
+                '177771' => $this->config->getVariationFromKey('rollout_1_exp_1', '177771')
+            ],
+            'rollout_1_exp_2' => [
+                '177773' => $this->config->getVariationFromKey('rollout_1_exp_2', '177773')
+            ],
+            'rollout_1_exp_3' => [
+                '177778' => $this->config->getVariationFromKey('rollout_1_exp_3', '177778')
+            ],
+            'rollout_2_exp_1' => [
+                '177775' => $this->config->getVariationFromKey('rollout_2_exp_1', '177775')
+            ],
+            'rollout_2_exp_2' => [
+                '177780' => $this->config->getVariationFromKey('rollout_2_exp_2', '177780')
             ]
-            ], $variationKeyMap->getValue($this->config)
+            ],
+            $variationKeyMap->getValue($this->config)
         );
 
         // Check variation ID map
@@ -235,8 +258,24 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_integer_feature' => [
                 '122242' => $this->config->getVariationFromId('test_experiment_integer_feature', '122242'),
                 '122243' => $this->config->getVariationFromId('test_experiment_integer_feature', '122243')
+            ],
+            'rollout_1_exp_1' => [
+                '177771' => $this->config->getVariationFromId('rollout_1_exp_1', '177771')
+            ],
+            'rollout_1_exp_2' => [
+                '177773' => $this->config->getVariationFromId('rollout_1_exp_2', '177773')
+            ],
+            'rollout_1_exp_3' => [
+                '177778' => $this->config->getVariationFromId('rollout_1_exp_3', '177778')
+            ],
+            'rollout_2_exp_1' => [
+                '177775' => $this->config->getVariationFromId('rollout_2_exp_1', '177775')
+            ],
+            'rollout_2_exp_2' => [
+                '177780' => $this->config->getVariationFromId('rollout_2_exp_2', '177780')
             ]
-            ], $variationIdMap->getValue($this->config)
+            ],
+            $variationIdMap->getValue($this->config)
         );
 
 
@@ -253,7 +292,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'multi_variate_feature' => $this->config->getFeatureFlagFromKey('multi_variate_feature'),
             'mutex_group_feature' => $this->config->getFeatureFlagFromKey('mutex_group_feature'),
             'empty_feature' => $this->config->getFeatureFlagFromKey('empty_feature')
-            ], $featureFlagKeyMap->getValue($this->config)
+            ],
+            $featureFlagKeyMap->getValue($this->config)
         );
 
 
@@ -264,7 +304,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             [
             '166660' => $this->config->getRolloutFromId('166660'),
             '166661' => $this->config->getRolloutFromId('166661')
-            ], $rolloutIdMap->getValue($this->config)
+            ],
+            $rolloutIdMap->getValue($this->config)
         );
 
 

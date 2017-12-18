@@ -172,6 +172,7 @@ class Bucketer
         $variationId = $this->findBucket($bucketingId, $userId, $experiment->getId(), $experiment->getTrafficAllocation());
         if (!empty($variationId)) {
             $variation = $config->getVariationFromId($experiment->getKey(), $variationId);
+
             $this->_logger->log(
                 Logger::INFO,
                 sprintf(
@@ -183,7 +184,7 @@ class Bucketer
             );
             return $variation;
         }
-
+        
         $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no variation.', $userId));
         return new Variation();
     }

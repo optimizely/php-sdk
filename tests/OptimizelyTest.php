@@ -2464,7 +2464,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 "",
                 "double_variable",
                 "user_id"
-            ), null
+            ),
+            null
         );
 
         // should return null and log a message when feature flag key is null
@@ -2477,7 +2478,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 null,
                 "double_variable",
                 "user_id"
-            ), null
+            ),
+            null
         );
 
         // should return null and log a message when variable key is empty
@@ -2490,7 +2492,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 "boolean_feature",
                 "",
                 "user_id"
-            ), null
+            ),
+            null
         );
 
         // should return null and log a message when variable key is null
@@ -2503,7 +2506,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 "boolean_feature",
                 null,
                 "user_id"
-            ), null
+            ),
+            null
         );
 
         // should return null and log a message when user id is empty
@@ -2516,7 +2520,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 "boolean_feature",
                 "double_variable",
                 ""
-            ), null
+            ),
+            null
         );
 
         // should return null and log a message when user id is null
@@ -2529,7 +2534,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 "boolean_feature",
                 "double_variable",
                 null
-            ), null
+            ),
+            null
         );
     }
 
@@ -2547,7 +2553,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 $feature_key,
                 "double_variable",
                 'user_id'
-            ), null
+            ),
+            null
         );
     }
 
@@ -2560,7 +2567,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(
-                Logger::ERROR, "No variable key \"{$variable_key}\" defined in datafile ".
+                Logger::ERROR,
+                "No variable key \"{$variable_key}\" defined in datafile ".
                 "for feature flag \"{$feature_key}\"."
             );
 
@@ -2569,7 +2577,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 $feature_key,
                 $variable_key,
                 'user_id'
-            ), null
+            ),
+            null
         );
     }
 
@@ -2588,7 +2597,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 "user_id",
                 null,
                 "string"
-            ), null
+            ),
+            null
         );
     }
 

@@ -241,7 +241,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateImpressionEventWithInvalidAttributesNoValue()
     {
-        $expectedLogEvent = new LogEvent(   
+        $expectedLogEvent = new LogEvent(
             $this->expectedEventUrl,
             $this->expectedEventParams,
             $this->expectedEventHttpVerb,

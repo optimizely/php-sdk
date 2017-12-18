@@ -61,7 +61,8 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             null,
             $this->notificationCenterObj->addNotificationListener(
-                $invalid_type, function () {
+                $invalid_type,
+                function () {
                 }
             )
         );
@@ -110,7 +111,8 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             2,
             $this->notificationCenterObj->addNotificationListener(
-                $notificationType, function () {
+                $notificationType,
+                function () {
                 }
             )
         );
@@ -153,7 +155,8 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             1,
             $this->notificationCenterObj->addNotificationListener(
-                NotificationType::ACTIVATE, function () {
+                NotificationType::ACTIVATE,
+                function () {
                 }
             )
         );
@@ -170,7 +173,8 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             2,
             $this->notificationCenterObj->addNotificationListener(
-                NotificationType::TRACK, function () {
+                NotificationType::TRACK,
+                function () {
                 }
             )
         );
@@ -196,7 +200,8 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             1,
             $this->notificationCenterObj->addNotificationListener(
-                NotificationType::ACTIVATE, function () {
+                NotificationType::ACTIVATE,
+                function () {
                 }
             )
         );
@@ -210,7 +215,8 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             2,
             $this->notificationCenterObj->addNotificationListener(
-                NotificationType::ACTIVATE, function () {
+                NotificationType::ACTIVATE,
+                function () {
                     echo "HelloWorld";
                 }
             )
@@ -225,7 +231,8 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             3,
             $this->notificationCenterObj->addNotificationListener(
-                NotificationType::ACTIVATE, function () {
+                NotificationType::ACTIVATE,
+                function () {
                     $a = 1;
                 }
             )
@@ -321,14 +328,16 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             1,
             $this->notificationCenterObj->addNotificationListener(
-                NotificationType::ACTIVATE, function () {
+                NotificationType::ACTIVATE,
+                function () {
                 }
             )
         );
         $this->assertSame(
             2,
             $this->notificationCenterObj->addNotificationListener(
-                NotificationType::TRACK, function () {
+                NotificationType::TRACK,
+                function () {
                 }
             )
         );
@@ -336,7 +345,8 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             3,
             $this->notificationCenterObj->addNotificationListener(
-                NotificationType::ACTIVATE, function () {
+                NotificationType::ACTIVATE,
+                function () {
                     //doSomething
                 }
             )
@@ -422,17 +432,20 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         
         // add a callback for multiple notification types
         $this->notificationCenterObj->addNotificationListener(
-            NotificationType::ACTIVATE, function () {
+            NotificationType::ACTIVATE,
+            function () {
             }
         );
         $this->notificationCenterObj->addNotificationListener(
-            NotificationType::TRACK, function () {
+            NotificationType::TRACK,
+            function () {
             }
         );
 
         // add another callback for NotificationType::ACTIVATE
         $this->notificationCenterObj->addNotificationListener(
-            NotificationType::ACTIVATE, function () {
+            NotificationType::ACTIVATE,
+            function () {
             }
         );
 
@@ -529,24 +542,29 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
 
         // add a callback for multiple notification types
         $notificationCenterA->addNotificationListener(
-            NotificationType::ACTIVATE, function () {
+            NotificationType::ACTIVATE,
+            function () {
             }
         );
         $notificationCenterA->addNotificationListener(
-            NotificationType::ACTIVATE, function () {
+            NotificationType::ACTIVATE,
+            function () {
             }
         );
         $notificationCenterA->addNotificationListener(
-            NotificationType::ACTIVATE, function () {
+            NotificationType::ACTIVATE,
+            function () {
             }
         );
 
         $notificationCenterA->addNotificationListener(
-            NotificationType::TRACK, function () {
+            NotificationType::TRACK,
+            function () {
             }
         );
         $notificationCenterA->addNotificationListener(
-            NotificationType::TRACK, function () {
+            NotificationType::TRACK,
+            function () {
             }
         );
 
@@ -687,13 +705,21 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $clientMock->expects($this->exactly(1))
             ->method('decision_callback_with_args')
             ->with(
-                5, 5.5, 'string', array(5,6), function () {
+                5,
+                5.5,
+                'string',
+                array(5,6),
+                function () {
                 }
             );
         $clientMock->expects($this->exactly(1))
             ->method('decision_callback_with_args_2')
             ->with(
-                5, 5.5, 'string', array(5,6), function () {
+                5,
+                5.5,
+                'string',
+                array(5,6),
+                function () {
                 }
             );
         $clientMock->expects($this->never())

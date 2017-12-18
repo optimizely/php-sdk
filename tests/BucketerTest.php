@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016-2017, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ namespace Optimizely\Tests;
 use Monolog\Logger;
 use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
+use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\DefaultLogger;
@@ -205,7 +206,9 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             new Variation(
-                '7722260071', 'group_exp_1_var_1', [
+                '7722260071',
+                'group_exp_1_var_1',
+                [
                 [
                   "id" => "155563",
                   "value" => "groupie_1_v1"
@@ -240,7 +243,9 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             new Variation(
-                '7722360022', 'group_exp_1_var_2', [
+                '7722360022',
+                'group_exp_1_var_2',
+                [
                 [
                   "id" => "155563",
                   "value" => "groupie_1_v2"
@@ -368,7 +373,9 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             new Variation(
-                '7725250007', 'group_exp_2_var_2', [
+                '7725250007',
+                'group_exp_2_var_2',
+                [
                 [
                   "id" => "155563",
                   "value" => "groupie_2_v1"
@@ -380,6 +387,52 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
                 $this->config->getExperimentFromKey('group_experiment_2'),
                 $this->testBucketingIdGroupExp2Var2,
                 $this->testUserIdBucketsToNoGroup
+            )
+        );
+    }
+
+    public function testBucketWithRolloutRule()
+    {
+        $bucketer = new TestBucketer($this->loggerMock);
+        $bucketer->setBucketValues([4999, 5000]);
+
+        $rollout = $this->config->getRolloutFromId('166660');
+        $rollout_rule = null;
+        $rollout_rules = $rollout->getExperiments();
+        foreach ($rollout_rules as $rule) {
+            if ($rule->getKey() == 'rollout_1_exp_3') {
+                $rollout_rule = $rule;
+            }
+        }
+
+        $expectedVariation = new Variation(
+            '177778',
+            '177778',
+            [
+                [
+                  "id"=> "155556",
+                  "value"=> "false"
+                ]
+              ]
+        );
+
+        $this->assertEquals(
+            $expectedVariation,
+            $bucketer->bucket(
+                $this->config,
+                $rollout_rule,
+                'bucketingId',
+                'userId'
+            )
+        );
+
+        $this->assertEquals(
+            new Variation(),
+            $bucketer->bucket(
+                $this->config,
+                $rollout_rule,
+                'bucketingId',
+                'userId'
             )
         );
     }
