@@ -296,4 +296,5 @@ class Experiment
         $forcedVariations = $this->getForcedVariations();
         return !is_null($forcedVariations) && isset($forcedVariations[$userId]);
     }
+
 }

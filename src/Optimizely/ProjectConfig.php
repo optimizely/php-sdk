@@ -206,6 +206,10 @@ class ProjectConfig
             $this->_experimentKeyMap = $this->_experimentKeyMap + $experimentsInGroup;
         }
 
+        $this->_variationKeyMap = [];
+        $this->_variationIdMap = [];
+        $this->_experimentIdMap = [];
+        
         forEach(array_values($this->_experimentKeyMap) as $experiment) {
             $this->_variationKeyMap[$experiment->getKey()] = [];
             $this->_variationIdMap[$experiment->getKey()] = [];
@@ -223,9 +227,27 @@ class ProjectConfig
             $audience->setConditionsList($conditionDecoder->getConditionsList());
         }
 
-        foreach(array_values($this->_rollouts) as $rollout){
+        $rolloutVariationIdMap = [];
+        $rolloutVariationKeyMap = [];
+        foreach($this->_rollouts as $rollout){
+
             $this->_rolloutIdMap[$rollout->getId()] = $rollout;
+
+            foreach($rollout->getExperiments() as $rule){
+                $rolloutVariationIdMap[$rule->getKey()] = [];
+                $rolloutVariationKeyMap[$rule->getKey()] = [];
+
+                $variations = $rule->getVariations();
+                foreach($variations as $variation){
+                    $rolloutVariationIdMap[$rule->getKey()][$variation->getId()] = $variation;
+                    $rolloutVariationKeyMap[$rule->getKey()][$variation->getKey()] = $variation;
+                }
+            }
         }
+
+        // Add variations for rollout experiments to variationIdMap and variationKeyMap
+        $this->_variationIdMap = $this->_variationIdMap + $rolloutVariationIdMap;
+        $this->_variationKeyMap = $this->_variationKeyMap + $rolloutVariationKeyMap;
 
         foreach(array_values($this->_featureFlags) as $featureFlag){
             $this->_featureKeyMap[$featureFlag->getKey()] = $featureFlag;
