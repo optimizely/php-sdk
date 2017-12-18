@@ -203,7 +203,7 @@ class ProjectConfig
                 $experiment->setGroupId($group->getId());
                 $experiment->setGroupPolicy($group->getPolicy());
             }
-            $this->_experimentKeyMap = array_merge($this->_experimentKeyMap, $experimentsInGroup);
+            $this->_experimentKeyMap = $this->_experimentKeyMap + $experimentsInGroup;
         }
 
         $this->_variationKeyMap = [];
