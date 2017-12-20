@@ -2435,6 +2435,52 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testGetFeatureVariableValueForTypeWithRolloutRule()
+    {
+        // should return specific value
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+
+        $feature_flag = $this->projectConfig->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $feature_flag->getRolloutId();
+        $rollout = $this->projectConfig->getRolloutFromId($rollout_id);
+        $experiment = $rollout->getExperiments()[0];
+        $expected_variation = $experiment->getVariations()[0];
+        $expected_decision = new FeatureDecision(
+            $experiment->getId(),
+            $expected_variation->getId(),
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expected_decision));
+
+        $this->loggerMock->expects($this->exactly(1))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "Returning variable value 'true' for variation '177771' ".
+                "of feature flag 'boolean_single_variable_feature'"
+            );
+
+        $this->assertSame(
+            $this->optimizelyObject->getFeatureVariableBoolean(
+                'boolean_single_variable_feature',
+                'boolean_variable',
+                'user_id',
+                []
+            ),
+            true
+        );
+    }
+
     public function testGetFeatureVariableValueForTypeGivenFeatureFlagIsEnabledForUserAndVariableNotInVariation()
     {
         // should return default value

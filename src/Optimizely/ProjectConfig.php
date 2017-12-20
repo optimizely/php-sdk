@@ -36,6 +36,7 @@ use Optimizely\Exceptions\InvalidFeatureFlagException;
 use Optimizely\Exceptions\InvalidFeatureVariableException;
 use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidRolloutException;
+use Optimizely\Exceptions\InvalidRolloutRuleException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Utils\ConditionDecoder;
@@ -88,6 +89,11 @@ class ProjectConfig
      * @var array Associative array of experiment ID to Experiment(s) in the datafile.
      */
     private $_experimentIdMap;
+
+    /**
+     * @var array Associative array of experiment ID to Rollout Experiment(s) in the datafile.
+     */
+    private $_rolloutExperimentIdMap;
 
     /**
      * @var array Associative array of experiment key to associative array of variation key to variations.
@@ -209,7 +215,8 @@ class ProjectConfig
         $this->_variationKeyMap = [];
         $this->_variationIdMap = [];
         $this->_experimentIdMap = [];
-        
+        $this->_rolloutExperimentIdMap= [];
+
         forEach(array_values($this->_experimentKeyMap) as $experiment) {
             $this->_variationKeyMap[$experiment->getKey()] = [];
             $this->_variationIdMap[$experiment->getKey()] = [];
@@ -236,6 +243,7 @@ class ProjectConfig
             foreach($rollout->getExperiments() as $rule){
                 $rolloutVariationIdMap[$rule->getKey()] = [];
                 $rolloutVariationKeyMap[$rule->getKey()] = [];
+                $this->_rolloutExperimentIdMap[$rule->getId()] = $rule;
 
                 $variations = $rule->getVariations();
                 foreach($variations as $variation){
@@ -350,6 +358,23 @@ class ProjectConfig
 
         $this->_logger->log(Logger::ERROR, sprintf('Experiment ID "%s" is not in datafile.', $experimentId));
         $this->_errorHandler->handleError(new InvalidExperimentException('Provided experiment is not in datafile.'));
+        return new Experiment();
+    }
+
+    /**
+     * @param $ruleId string ID of the Rollout rule.
+     *
+     * @return Experiment Entity corresponding to the key.
+     *         Dummy entity is returned if ID is invalid.
+     */
+    public function getRolloutRuleFromId($ruleId)
+    {
+        if (isset($this->_rolloutExperimentIdMap[$ruleId])) {
+            return $this->_rolloutExperimentIdMap[$ruleId];
+        }
+
+        $this->_logger->log(Logger::ERROR, sprintf('Rollout rule "%s" is not in datafile.', $ruleId));
+        $this->_errorHandler->handleError(new InvalidRolloutRuleException('Provided rollout rule is not in datafile.'));
         return new Experiment();
     }
 

@@ -35,6 +35,7 @@ use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
 use Optimizely\Exceptions\InvalidFeatureFlagException;
 use Optimizely\Exceptions\InvalidRolloutException;
+use Optimizely\Exceptions\InvalidRolloutRuleException;
 use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\NoOpLogger;
@@ -117,6 +118,17 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             '122238' => $this->config->getExperimentFromId('122238'),
             '122241' => $this->config->getExperimentFromId('122241')
         ], $experimentIdMap->getValue($this->config));
+
+        // Check rollout experiment ID map
+        $rolloutExperimentIdMap = new \ReflectionProperty(ProjectConfig::class, '_rolloutExperimentIdMap');
+        $rolloutExperimentIdMap->setAccessible(true);
+        $this->assertEquals([
+            '177770' => $this->config->getRolloutRuleFromId('177770'),
+            '177772' => $this->config->getRolloutRuleFromId('177772'),
+            '177776' => $this->config->getRolloutRuleFromId('177776'),
+            '177774' => $this->config->getRolloutRuleFromId('177774'),
+            '177779' => $this->config->getRolloutRuleFromId('177779')
+        ], $rolloutExperimentIdMap->getValue($this->config));
 
         // Check event key map
         $eventKeyMap = new \ReflectionProperty(ProjectConfig::class, '_eventKeyMap');
@@ -359,6 +371,25 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->with(new InvalidExperimentException('Provided experiment is not in datafile.'));
 
         $this->assertEquals(new Experiment(), $this->config->getExperimentFromId('42'));
+    }
+
+    public function testGetRolloutRuleValidId()
+    {
+        $rule = $this->config->getRolloutRuleFromId('177770');
+        $this->assertSame('177770', $rule->getId());
+        $this->assertSame('rollout_1_exp_1', $rule->getKey());
+    }
+
+    public function testGetRolloutRuleInvalidId()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::ERROR, 'Rollout rule "42" is not in datafile.');
+        $this->errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidRolloutRuleException('Provided rollout rule is not in datafile.'));
+
+        $this->assertEquals(new Experiment(), $this->config->getRolloutRuleFromId('42'));
     }
 
     public function testGetFeatureFlagInvalidKey()
