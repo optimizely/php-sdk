@@ -2084,8 +2084,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
 
         $expected_decision = new FeatureDecision(
-            $experiment->getId(),
-            $variation->getId(),
+            $experiment,
+            $variation,
             FeatureDecision::DECISION_SOURCE_EXPERIMENT
         );
 
@@ -2129,8 +2129,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $experiment = $rollout->getExperiments()[0];
         $variation = $experiment->getVariations()[0];
         $expected_decision = new FeatureDecision(
-            $experiment->getId(),
-            $variation->getId(),
+            $experiment,
+            $variation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 
@@ -2412,8 +2412,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
         $expected_decision = new FeatureDecision(
-            $experiment->getId(),
-            $variation->getId(),
+            $experiment,
+            $variation,
             FeatureDecision::DECISION_SOURCE_EXPERIMENT
         );
 
@@ -2447,20 +2447,20 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $decisionService->setAccessible(true);
         $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
 
-        $feature_flag = $this->projectConfig->getFeatureFlagFromKey('boolean_single_variable_feature');
-        $rollout_id = $feature_flag->getRolloutId();
-        $rollout = $this->projectConfig->getRolloutFromId($rollout_id);
+        $featureFlag = $this->projectConfig->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rolloutId = $featureFlag->getRolloutId();
+        $rollout = $this->projectConfig->getRolloutFromId($rolloutId);
         $experiment = $rollout->getExperiments()[0];
-        $expected_variation = $experiment->getVariations()[0];
-        $expected_decision = new FeatureDecision(
-            $experiment->getId(),
-            $expected_variation->getId(),
+        $expectedVariation = $experiment->getVariations()[0];
+        $expectedDecision = new FeatureDecision(
+            $experiment,
+            $expectedVariation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')
-            ->will($this->returnValue($expected_decision));
+            ->will($this->returnValue($expectedDecision));
 
         $this->loggerMock->expects($this->exactly(1))
             ->method('log')
@@ -2498,8 +2498,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_integer_feature');
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_integer_feature', 'control');
         $expected_decision = new FeatureDecision(
-            $experiment->getId(),
-            $variation->getId(),
+            $experiment,
+            $variation,
             FeatureDecision::DECISION_SOURCE_EXPERIMENT
         );
 
