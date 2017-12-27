@@ -682,7 +682,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         ->will($this->returnValue($variation));
         
         $feature_flag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
-        $expected_decision = new FeatureDecision($experiment->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_EXPERIMENT);
+        $expected_decision = new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_EXPERIMENT);
 
         $this->loggerMock->expects($this->at(0))
         ->method('log')
@@ -708,7 +708,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
         $variation = $mutex_exp->getVariations()[0];
-        $expected_decision = new FeatureDecision($mutex_exp->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_EXPERIMENT);
+        $expected_decision = new FeatureDecision($mutex_exp, $variation, FeatureDecision::DECISION_SOURCE_EXPERIMENT);
 
         $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
         $this->loggerMock->expects($this->at(0))
@@ -760,8 +760,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expected_experiment = $this->config->getExperimentFromId($expected_experiment_id);
         $expected_variation = $expected_experiment->getVariations()[0];
         $expected_decision = new FeatureDecision(
-            $expected_experiment->getId(),
-            $expected_variation->getId(),
+            $expected_experiment,
+            $expected_variation,
             FeatureDecision::DECISION_SOURCE_EXPERIMENT
         );
 
@@ -789,8 +789,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment = $rollout->getExperiments()[0];
         $expected_variation = $experiment->getVariations()[0];
         $expected_decision = new FeatureDecision(
-            $experiment->getId(),
-            $expected_variation->getId(),
+            $experiment,
+            $expected_variation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 
@@ -925,8 +925,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment = $rollout->getExperiments()[0];
         $expected_variation = $experiment->getVariations()[0];
         $expected_decision = new FeatureDecision(
-            $experiment->getId(),
-            $expected_variation->getId(),
+            $experiment,
+            $expected_variation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 
@@ -966,8 +966,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment2 = $rollout->getExperiments()[2];
         $expected_variation = $experiment2->getVariations()[0];
         $expected_decision = new FeatureDecision(
-            $experiment2->getId(),
-            $expected_variation->getId(),
+            $experiment2,
+            $expected_variation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 
@@ -1074,8 +1074,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment2 = $rollout->getExperiments()[2];
         $expected_variation = $experiment2->getVariations()[0];
         $expected_decision = new FeatureDecision(
-            $experiment2->getId(),
-            $expected_variation->getId(),
+            $experiment2,
+            $expected_variation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 

@@ -483,13 +483,10 @@ class Optimizely
             return false;
         }
 
-        $experiment_id = $decision->getExperimentId();
-        $variation_id = $decision->getVariationId();
+        $experiment = $decision->getExperiment();
+        $variation = $decision->getVariation();
 
         if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
-            $experiment = $this->_config->getExperimentFromId($experiment_id);
-            $variation = $this->_config->getVariationFromId($experiment->getKey(), $variation_id);
-
             $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
 
         } else {
@@ -586,10 +583,7 @@ class Optimizely
             $this->_logger->log(Logger::INFO, "User '{$userId}'is not in any variation, ".
                 "returning default value '{$variable_value}'.");
         } else {
-            $experiment_id = $decision->getExperimentId();
-            $variation_id = $decision->getVariationId();
-            $experiment = $this->_config->getExperimentFromId($experiment_id);
-            $variation = $this->_config->getVariationFromId($experiment->getKey(), $variation_id);
+            $variation = $decision->getVariation();
             $variable_usage = $variation->getVariableUsageById($variable->getId());
             if ($variable_usage) {
                 $variable_value = $variable_usage->getValue();

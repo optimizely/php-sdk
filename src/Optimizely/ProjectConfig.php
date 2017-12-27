@@ -209,7 +209,7 @@ class ProjectConfig
         $this->_variationKeyMap = [];
         $this->_variationIdMap = [];
         $this->_experimentIdMap = [];
-        
+
         forEach(array_values($this->_experimentKeyMap) as $experiment) {
             $this->_variationKeyMap[$experiment->getKey()] = [];
             $this->_variationIdMap[$experiment->getKey()] = [];
