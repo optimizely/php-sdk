@@ -22,14 +22,18 @@ class FeatureDecision
     const DECISION_SOURCE_ROLLOUT = 'rollout';
 
     /**
-     * @var string The ID experiment in this decision.
+     * The experiment in this decision.
+     *
+     * @var Experiment
      */
-    private $_experimentId;
+    private $_experiment;
 
     /**
-     * @var string The ID variation in this decision.
+     * The variation in this decision.
+     *
+     * @var Variation
      */
-    private $_variationId;
+    private $_variation;
 
     /**
      * The source of the decision. Either DECISION_SOURCE_EXPERIMENT or DECISION_SOURCE_ROLLOUT
@@ -41,25 +45,25 @@ class FeatureDecision
     /**
      * FeatureDecision constructor.
      *
-     * @param $experimentId
-     * @param $variationId
+     * @param $experiment
+     * @param $variation
      * @param $source
      */
-    public function __construct($experimentId, $variationId, $source)
+    public function __construct($experiment, $variation, $source)
     {
-        $this->_experimentId = $experimentId;
-        $this->_variationId = $variationId;
+        $this->_experiment = $experiment;
+        $this->_variation = $variation;
         $this->_source = $source;
     }
 
-    public function getExperimentId()
+    public function getExperiment()
     {
-        return $this->_experimentId;
+        return $this->_experiment;
     }
 
-    public function getVariationId()
+    public function getVariation()
     {
-        return $this->_variationId;
+        return $this->_variation;
     }
 
     public function getSource()

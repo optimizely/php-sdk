@@ -208,13 +208,13 @@ class ProjectConfig
                 $experiment->setGroupId($group->getId());
                 $experiment->setGroupPolicy($group->getPolicy());
             }
-            $this->_experimentKeyMap = array_merge($this->_experimentKeyMap, $experimentsInGroup);
+            $this->_experimentKeyMap = $this->_experimentKeyMap + $experimentsInGroup;
         }
 
         $this->_variationKeyMap = [];
         $this->_variationIdMap = [];
         $this->_experimentIdMap = [];
-        
+
         foreach (array_values($this->_experimentKeyMap) as $experiment) {
             $this->_variationKeyMap[$experiment->getKey()] = [];
             $this->_variationIdMap[$experiment->getKey()] = [];
@@ -521,6 +521,8 @@ class ProjectConfig
 
         $this->_logger->log(
             Logger::ERROR,
+   
+
             sprintf(
                 'No variable key "%s" defined in datafile for feature flag "%s".',
                 $variableKey,

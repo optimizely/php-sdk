@@ -242,7 +242,7 @@ class DecisionService
                     "The user '{$userId}' is bucketed into experiment '{$experiment->getKey()}' of feature '{$feature_flag_key}'."
                 );
 
-                return new FeatureDecision($experiment->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_EXPERIMENT);
+                return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_EXPERIMENT);
             }
         }
 
@@ -312,7 +312,7 @@ class DecisionService
             // Evaluate if user satisfies the traffic allocation for this rollout rule
             $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketing_id, $userId);
             if ($variation && $variation->getKey()) {
-                return new FeatureDecision($experiment->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);
+                return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
             } else {
                 $this->_logger->log(
                     Logger::DEBUG,
@@ -325,7 +325,7 @@ class DecisionService
         $experiment = $rolloutRules[sizeof($rolloutRules)-1];
         $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketing_id, $userId);
         if ($variation && $variation->getKey()) {
-            return new FeatureDecision($experiment->getId(), $variation->getId(), FeatureDecision::DECISION_SOURCE_ROLLOUT);
+            return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
         } else {
             $this->_logger->log(
                 Logger::DEBUG,
