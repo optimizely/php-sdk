@@ -96,7 +96,7 @@ class NotificationCenter
     /**
      * Removes notification callback from the notification center
      *
-     * @param int $notification_id notification IT
+     * @param int $notification_id notification ID
      *
      * @return true   When callback removed
      *         false  When no callback found for the given notification ID
@@ -148,7 +148,7 @@ class NotificationCenter
     /**
      * Executes all registered callbacks for the given notification type
      *
-     * @param [type] $notification_type One of the constants defined in NotificationType
+     * @param string $notification_type One of the constants defined in NotificationType
      * @param array  $args              Array of items to pass as arguments to the callback
      */
     public function sendNotifications($notification_type, array $args = [])
