@@ -16,7 +16,6 @@
  */
 namespace Optimizely\Utils;
 
-
 class ConfigParser
 {
 
@@ -30,14 +29,12 @@ class ConfigParser
     public static function generateMap($entities, $entityId, $entityClass)
     {
         $entityMap = [];
-        forEach ($entities as $entity)
-        {
-            if($entity instanceof $entityClass){
+        foreach ($entities as $entity) {
+            if ($entity instanceof $entityClass) {
                 $entityObject = $entity;
             } else {
                 $entityObject = new $entityClass;
-                forEach ($entity as $key => $value)
-                {
+                foreach ($entity as $key => $value) {
                     $propSetter = 'set'.ucfirst($key);
                     if (method_exists($entityObject, $propSetter)) {
                         $entityObject->$propSetter($value);
@@ -55,5 +52,4 @@ class ConfigParser
 
         return $entityMap;
     }
-
 }

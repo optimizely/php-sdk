@@ -19,28 +19,28 @@ namespace Optimizely\UserProfile;
 
 class Decision
 {
-  /**
-   * @var string The ID variation in this decision.
-   */
-  private $_variationId;
+    /**
+     * @var string The ID variation in this decision.
+     */
+    private $_variationId;
 
-  /**
-   * Decision constructor.
-   *
-   * @param $variationId
-   */
-  public function __construct($variationId)
-  {
-    $this->_variationId = $variationId;
-  }
+    /**
+     * Decision constructor.
+     *
+     * @param $variationId
+     */
+    public function __construct($variationId)
+    {
+        $this->_variationId = $variationId;
+    }
 
-  public function getVariationId()
-  {
-    return $this->_variationId;
-  }
+    public function getVariationId()
+    {
+        return $this->_variationId;
+    }
 
-  public function setVariationId($variationId)
-  {
-    $this->_variationId = $variationId;
-  }
+    public function setVariationId($variationId)
+    {
+        $this->_variationId = $variationId;
+    }
 }

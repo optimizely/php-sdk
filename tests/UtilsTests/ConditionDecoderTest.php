@@ -32,7 +32,8 @@ class ConditionDecoderTest extends \PHPUnit_Framework_TestCase
 
     public function testGetConditionsList()
     {
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             'and', [
                 'or', [
                     'or', (object)[
@@ -50,6 +51,8 @@ class ConditionDecoderTest extends \PHPUnit_Framework_TestCase
                     ]
                 ]
             ]
-        ], $this->conditionDecoder->getConditionsList());
+            ],
+            $this->conditionDecoder->getConditionsList()
+        );
     }
 }

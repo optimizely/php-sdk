@@ -55,6 +55,7 @@ class Bucketer
 
     /**
      * Bucketer constructor.
+     *
      * @param LoggerInterface $logger
      */
     public function __construct(LoggerInterface $logger)
@@ -103,8 +104,7 @@ class Bucketer
         $bucketingNumber = $this->generateBucketValue($bucketingKey);
         $this->_logger->log(Logger::DEBUG, sprintf('Assigned bucket %s to user "%s" with bucketing ID "%s".', $bucketingNumber, $userId, $bucketingId));
 
-        forEach ($trafficAllocations as $trafficAllocation)
-        {
+        foreach ($trafficAllocations as $trafficAllocation) {
             $currentEnd = $trafficAllocation->getEndOfRange();
             if ($bucketingNumber < $currentEnd) {
                 return $trafficAllocation->getEntityId();

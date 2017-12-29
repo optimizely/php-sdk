@@ -51,7 +51,8 @@ class LogEventTest extends \PHPUnit_Framework_TestCase
                 'accountId' => '1234',
                 'projectId' => '9876',
                 'visitorId' => 'testUser'
-            ], $this->logEvent->getParams()
+            ],
+            $this->logEvent->getParams()
         );
     }
 

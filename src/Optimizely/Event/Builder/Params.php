@@ -29,7 +29,7 @@ define('DECISIONS', 'decisions');
 define('EVENTS', 'events');;
 define('CLIENT_ENGINE', 'client_name');
 define('CLIENT_VERSION', 'client_version');
-define('CUSTOM_ATTRIBUTE_FEATURE_TYPE','custom');
+define('CUSTOM_ATTRIBUTE_FEATURE_TYPE', 'custom');
 define('ACTIVATE_EVENT_KEY', 'campaign_activated');
 define('SNAPSHOTS', 'snapshots');
 define('ATTRIBUTES', 'attributes');

@@ -25,5 +25,7 @@ use Exception;
  */
 class NoOpErrorHandler implements ErrorHandlerInterface
 {
-    public function handleError(Exception $error) {}
+    public function handleError(Exception $error)
+    {
+    }
 }

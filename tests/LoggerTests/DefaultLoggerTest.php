@@ -19,7 +19,6 @@ namespace Optimizely\Tests;
 use Monolog\Logger;
 use Optimizely\Logger\DefaultLogger;
 
-
 class DefaultLoggerTest extends \PHPUnit_Framework_TestCase
 {
     public function testDefaultLogger()

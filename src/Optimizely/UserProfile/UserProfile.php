@@ -68,7 +68,7 @@ class UserProfile
     {
         $decision = $this->getDecisionForExperiment($experimentId);
         if (!is_null($decision)) {
-          return $decision->getVariationId();
+            return $decision->getVariationId();
         }
 
         return null;
@@ -84,7 +84,7 @@ class UserProfile
     public function getDecisionForExperiment($experimentId)
     {
         if (isset($this->_experiment_bucket_map[$experimentId])) {
-          return $this->_experiment_bucket_map[$experimentId];
+            return $this->_experiment_bucket_map[$experimentId];
         }
 
         return null;
@@ -93,8 +93,8 @@ class UserProfile
     /**
      * Set the decision for the given experiment.
      *
-     * @param  $experimentId string   The ID of the experiment.
-     * @param  $decision     Decision The decision for the experiment.
+     * @param $experimentId string   The ID of the experiment.
+     * @param $decision     Decision The decision for the experiment.
      */
     public function saveDecisionForExperiment($experimentId, Decision $decision)
     {

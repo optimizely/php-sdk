@@ -33,21 +33,21 @@ class VariableTypeUtils
         $return_value = null;
 
         switch ($variableType) {
-            case FeatureVariable::BOOLEAN_TYPE:
-                $return_value = strtolower($value) == "true";
-                break;
+        case FeatureVariable::BOOLEAN_TYPE:
+            $return_value = strtolower($value) == "true";
+            break;
 
-            case FeatureVariable::INTEGER_TYPE:
-                if (ctype_digit($value)) {
-                    $return_value = (int) $value;
-                }
-                break;
+        case FeatureVariable::INTEGER_TYPE:
+            if (ctype_digit($value)) {
+                $return_value = (int) $value;
+            }
+            break;
 
-            case FeatureVariable::DOUBLE_TYPE:
-                if (is_numeric($value)) {
-                    $return_value = (float) $value;
-                }
-                break;
+        case FeatureVariable::DOUBLE_TYPE:
+            if (is_numeric($value)) {
+                $return_value = (float) $value;
+            }
+            break;
         }
 
         if (is_null($return_value) && $logger) {

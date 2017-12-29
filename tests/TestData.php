@@ -22,7 +22,9 @@ use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Event\LogEvent;
 use Optimizely\Optimizely;
 
-define('DATAFILE','{
+define(
+    'DATAFILE',
+    '{
   "experiments": [
     {
       "status": "Running",
@@ -736,7 +738,8 @@ define('DATAFILE','{
       ]
     }
   ]
-}');
+}'
+);
 
 /**
  * Class TestBucketer
@@ -766,40 +769,60 @@ class TestBucketer extends Bucketer
  */
 class OptimizelyTester extends Optimizely
 {
-  public function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes){
-    parent::sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
-  }
+    public function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
+    {
+        parent::sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+    }
 }
 
-class FireNotificationTester{
-    public function decision_callback_no_args(){}
+class FireNotificationTester
+{
+    public function decision_callback_no_args()
+    {
+    }
 
-    public function decision_callback_no_args_2(){}
+    public function decision_callback_no_args_2()
+    {
+    }
 
-    public function decision_callback_with_args($anInt, $aDouble, $aString, $anArray, $aFunction){}
+    public function decision_callback_with_args($anInt, $aDouble, $aString, $anArray, $aFunction)
+    {
+    }
 
-    public function decision_callback_with_args_2($anInt, $aDouble, $aString, $anArray, $aFunction){}
+    public function decision_callback_with_args_2($anInt, $aDouble, $aString, $anArray, $aFunction)
+    {
+    }
 
-    public function track_callback_no_args(){}
+    public function track_callback_no_args()
+    {
+    }
 }
 
 
 class ValidEventDispatcher implements EventDispatcherInterface
 {
-    public function dispatchEvent(LogEvent $event) {}
+    public function dispatchEvent(LogEvent $event)
+    {
+    }
 }
 
 class InvalidEventDispatcher
 {
-    public function dispatchEvent(LogEvent $event) {}
+    public function dispatchEvent(LogEvent $event)
+    {
+    }
 }
 
 class InvalidLogger
 {
-    public function log($logLevel, $logMessage) {}
+    public function log($logLevel, $logMessage)
+    {
+    }
 }
 
 class InvalidErrorHandler
 {
-    public function handleError(Exception $error) {}
+    public function handleError(Exception $error)
+    {
+    }
 }

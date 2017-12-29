@@ -42,7 +42,7 @@ class ConditionEvaluator
      */
     private function andEvaluator($conditions, $userAttributes)
     {
-        forEach ($conditions as $condition) {
+        foreach ($conditions as $condition) {
             $result = $this->evaluate($condition, $userAttributes);
             if (!$result) {
                 return false;
@@ -60,7 +60,7 @@ class ConditionEvaluator
      */
     private function orEvaluator($conditions, $userAttributes)
     {
-        forEach ($conditions as $condition) {
+        foreach ($conditions as $condition) {
             $result = $this->evaluate($condition, $userAttributes);
             if ($result) {
                 return true;
@@ -97,19 +97,18 @@ class ConditionEvaluator
     {
         if (is_array($conditions)) {
             switch ($conditions[0]) {
-                case self::AND_OPERATOR:
-                    array_shift($conditions);
-                    return $this->andEvaluator($conditions, $userAttributes);
-                case self::OR_OPERATOR:
-                    array_shift($conditions);
-                    return $this->orEvaluator($conditions, $userAttributes);
-                case self::NOT_OPERATOR:
-                    array_shift($conditions);
-                    return $this->notEvaluator($conditions, $userAttributes);
-                default:
-                    return false;
+            case self::AND_OPERATOR:
+                array_shift($conditions);
+                return $this->andEvaluator($conditions, $userAttributes);
+            case self::OR_OPERATOR:
+                array_shift($conditions);
+                return $this->orEvaluator($conditions, $userAttributes);
+            case self::NOT_OPERATOR:
+                array_shift($conditions);
+                return $this->notEvaluator($conditions, $userAttributes);
+            default:
+                return false;
             }
-
         }
 
         $conditionName = $conditions->{'name'};

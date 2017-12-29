@@ -82,17 +82,18 @@ class Experiment
     private $_trafficAllocation;
 
 
-    public function __construct($id = null,
-                                $key = null,
-                                $layerId = null,
-                                $status = null,
-                                $groupId = null,
-                                $variations = null,
-                                $forcedVariations = null,
-                                $groupPolicy = null,
-                                $audienceIds = null,
-                                $trafficAllocation = null)
-    {
+    public function __construct(
+        $id = null,
+        $key = null,
+        $layerId = null,
+        $status = null,
+        $groupId = null,
+        $variations = null,
+        $forcedVariations = null,
+        $groupPolicy = null,
+        $audienceIds = null,
+        $trafficAllocation = null
+    ) {
         $this->_id = $id;
         $this->_key = $key;
         $this->_status = $status;
@@ -288,7 +289,7 @@ class Experiment
     /**
      * Determine if user is in forced variation of experiment.
      *
-     * @param $userId string ID of the user.
+     * @param  $userId string ID of the user.
      * @return boolean True if user is in forced variation of experiment. False otherwise.
      */
     public function isUserInForcedVariation($userId)
@@ -296,5 +297,4 @@ class Experiment
         $forcedVariations = $this->getForcedVariations();
         return !is_null($forcedVariations) && isset($forcedVariations[$userId]);
     }
-
 }

@@ -16,7 +16,8 @@
  */
 
 namespace Optimizely\Event\Builder;
-include('Params.php');
+
+require 'Params.php';
 
 use Optimizely\Entity\Experiment;
 use Optimizely\Event\LogEvent;
@@ -24,7 +25,7 @@ use Optimizely\ProjectConfig;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\GeneratorUtils;
 
-define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY",     "optimizely_bucketing_id");
+define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY", "optimizely_bucketing_id");
 
 class EventBuilder
 {
@@ -82,26 +83,26 @@ class EventBuilder
             ANONYMIZE_IP => $config->getAnonymizeIP()
         ];
 
-        if(is_null($attributes))
+        if (is_null($attributes)) {
             return $commonParams;
+        }
 
-        foreach($attributes as $attributeKey => $attributeValue) {
+        foreach ($attributes as $attributeKey => $attributeValue) {
             $feature = [];
             // Do not discard attribute if value is zero or false
             if (!is_null($attributeValue)) {
                 // check for reserved attributes
-                if (strcmp($attributeKey , RESERVED_ATTRIBUTE_KEY_BUCKETING_ID) == 0) {
-                   $feature = [
+                if (strcmp($attributeKey, RESERVED_ATTRIBUTE_KEY_BUCKETING_ID) == 0) {
+                    $feature = [
                        ENTITY_ID => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID,
                        KEY => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
                        TYPE => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
                        VALUE => $attributeValue
-                   ];
-
+                    ];
                 } else {
                     $attributeEntity = $config->getAttribute($attributeKey);
                     if (!is_null($attributeEntity->getKey())) {
-                       $feature = [
+                        $feature = [
                             ENTITY_ID => $attributeEntity->getId(),
                             KEY => $attributeKey,
                             TYPE => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
@@ -111,8 +112,9 @@ class EventBuilder
                 }
             }
 
-            if(!empty($feature))
+            if (!empty($feature)) {
                 $commonParams[VISITORS][0][ATTRIBUTES][] = $feature;
+            }
         }
 
         return $commonParams;
@@ -133,7 +135,7 @@ class EventBuilder
                 [
                     CAMPAIGN_ID => $experiment->getLayerId(),
                     EXPERIMENT_ID => $experiment->getId(),
-                    VARIATION_ID => $variationId                
+                    VARIATION_ID => $variationId
                 ]
             ],
 
@@ -163,9 +165,8 @@ class EventBuilder
      */
     private function getConversionParams($config, $eventKey, $experimentVariationMap, $eventTags)
     {
-
         $conversionParams = [];
-        foreach($experimentVariationMap as $experimentId => $variationId){
+        foreach ($experimentVariationMap as $experimentId => $variationId) {
             $singleSnapshot = [];
             $experiment = $config->getExperimentFromId($experimentId);
             $eventEntity = $config->getEvent($eventKey);
@@ -187,18 +188,18 @@ class EventBuilder
                 ]
             ];
 
-            if(!is_null($eventTags)){
+            if (!is_null($eventTags)) {
                 $revenue = EventTagUtils::getRevenueValue($eventTags);
-                if(!is_null($revenue)){
+                if (!is_null($revenue)) {
                     $singleSnapshot[EVENTS][0][EventTagUtils::REVENUE_EVENT_METRIC_NAME] = $revenue;
                 }
 
                 $eventValue = EventTagUtils::getNumericValue($eventTags);
-                if(!is_null($eventValue)){
+                if (!is_null($eventValue)) {
                     $singleSnapshot[EVENTS][0][EventTagUtils::NUMERIC_EVENT_METRIC_NAME] = $eventValue;
                 }
 
-                 $singleSnapshot[EVENTS][0]['tags'] = $eventTags;
+                $singleSnapshot[EVENTS][0]['tags'] = $eventTags;
             }
 
             $conversionParams [] = $singleSnapshot;
@@ -245,7 +246,6 @@ class EventBuilder
      */
     public function createConversionEvent($config, $eventKey, $experimentVariationMap, $userId, $attributes, $eventTags)
     {
-
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
         $conversionParams = $this->getConversionParams($config, $eventKey, $experimentVariationMap, $eventTags);
 
@@ -253,5 +253,3 @@ class EventBuilder
         return new LogEvent(self::$ENDPOINT, $eventParams, self::$HTTP_VERB, self::$HTTP_HEADERS);
     }
 }
-
-

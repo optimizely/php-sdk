@@ -31,8 +31,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     {
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
-        ->setMethods(array('log'))
-        ->getMock();
+            ->setMethods(array('log'))
+            ->getMock();
     }
 
     public function testValidateJsonSchemaValidFile()
@@ -52,13 +52,13 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::validateJsonSchema($invalidDatafile));
     }
 
-    public function testValidateJsonSchemaInvalidJsonWithLogger(){
+    public function testValidateJsonSchemaInvalidJsonWithLogger()
+    {
         $invalidDatafile = '{"key1": "val1"}';
         $this->loggerMock->expects($this->at(0))
-        ->method('log')
-        ->with(Logger::DEBUG,"JSON does not validate. Violations:\n");
+            ->method('log')
+            ->with(Logger::DEBUG, "JSON does not validate. Violations:\n");
         $this->assertFalse(Validator::validateJsonSchema($invalidDatafile, $this->loggerMock));
-        
     }
 
     public function testAreAttributesValidValidAttributes()
@@ -67,10 +67,14 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(Validator::areAttributesValid([]));
 
         // Valid attributes
-        $this->assertTrue(Validator::areAttributesValid([
-            'location' => 'San Francisco',
-            'browser' => 'Firefox'
-        ]));
+        $this->assertTrue(
+            Validator::areAttributesValid(
+                [
+                'location' => 'San Francisco',
+                'browser' => 'Firefox'
+                ]
+            )
+        );
     }
 
     public function testAreAttributesValidInvalidAttributes()
@@ -97,11 +101,15 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(Validator::areEventTagsValid([]));
 
         // Valid attributes
-        $this->assertTrue(Validator::areEventTagsValid([
-            'revenue' => 0,
-            'location' => 'San Francisco',
-            'browser' => 'Firefox'
-        ]));
+        $this->assertTrue(
+            Validator::areEventTagsValid(
+                [
+                'revenue' => 0,
+                'location' => 'San Francisco',
+                'browser' => 'Firefox'
+                ]
+            )
+        );
     }
 
     public function testAreEventTagsValidInvalidEventTags()
@@ -125,11 +133,13 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     public function testIsUserInExperimentNoAudienceUsedInExperiment()
     {
         $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
-        $this->assertTrue(Validator::isUserInExperiment(
-            $config,
-            $config->getExperimentFromKey('paused_experiment'),
-            []
-        ));
+        $this->assertTrue(
+            Validator::isUserInExperiment(
+                $config,
+                $config->getExperimentFromKey('paused_experiment'),
+                []
+            )
+        );
     }
 
     public function testIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
@@ -137,38 +147,46 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
 
         // Test with empty attributes
-        $this->assertFalse(Validator::isUserInExperiment(
-            $config,
-            $config->getExperimentFromKey('test_experiment'),
-            []
-        ));
+        $this->assertFalse(
+            Validator::isUserInExperiment(
+                $config,
+                $config->getExperimentFromKey('test_experiment'),
+                []
+            )
+        );
 
         // Test with null attributes
-        $this->assertFalse(Validator::isUserInExperiment(
-            $config,
-            $config->getExperimentFromKey('test_experiment'),
-            null
-        ));
+        $this->assertFalse(
+            Validator::isUserInExperiment(
+                $config,
+                $config->getExperimentFromKey('test_experiment'),
+                null
+            )
+        );
     }
 
     public function testIsUserInExperimentAudienceMatch()
     {
         $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
-        $this->assertTrue(Validator::isUserInExperiment(
-            $config,
-            $config->getExperimentFromKey('test_experiment'),
-            ['device_type' => 'iPhone', 'location' => 'San Francisco']
-        ));
+        $this->assertTrue(
+            Validator::isUserInExperiment(
+                $config,
+                $config->getExperimentFromKey('test_experiment'),
+                ['device_type' => 'iPhone', 'location' => 'San Francisco']
+            )
+        );
     }
 
     public function testIsUserInExperimentAudienceNoMatch()
     {
         $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
-        $this->assertFalse(Validator::isUserInExperiment(
-            $config,
-            $config->getExperimentFromKey('test_experiment'),
-            ['device_type' => 'Android', 'location' => 'San Francisco']
-        ));
+        $this->assertFalse(
+            Validator::isUserInExperiment(
+                $config,
+                $config->getExperimentFromKey('test_experiment'),
+                ['device_type' => 'Android', 'location' => 'San Francisco']
+            )
+        );
     }
 
     public function testIsFeatureFlagValid()
