@@ -136,7 +136,8 @@ define(
               "id": "155561",
               "value": "red"
             }
-          ]
+          ],
+          "featureEnabled": "true"
         },
         {
           "id": "122232",
@@ -150,7 +151,8 @@ define(
               "id": "155561",
               "value": "eorge"
             }
-          ]
+          ],
+          "featureEnabled": "true"
         },
         {
           "id": "122233",
@@ -164,7 +166,8 @@ define(
               "id": "155561",
               "value": "red"
             }
-          ]
+          ],
+          "featureEnabled": "true"
         },
         {
           "id": "122234",
@@ -178,7 +181,8 @@ define(
               "id": "155561",
               "value": "eorge"
             }
-          ]
+          ],
+          "featureEnabled": "true"
         }
       ]
     },
@@ -212,7 +216,8 @@ define(
               "id": "155558",
               "value": "cta_1"
             }
-          ]
+          ],
+          "featureEnabled": "true"
         },
         {
           "id": "122237",
@@ -222,7 +227,8 @@ define(
               "id": "155558",
               "value": "cta_2"
             }
-          ]
+          ],
+          "featureEnabled": "true"
         }
       ]
     },
@@ -256,7 +262,8 @@ define(
               "id": "155551",
               "value": "42.42"
             }
-          ]
+          ],
+          "featureEnabled": "true"
         },
         {
           "id": "122240",
@@ -266,7 +273,8 @@ define(
               "id": "155551",
               "value": "13.37"
             }
-          ]
+          ],
+          "featureEnabled": "false"
         }
       ]
     },
@@ -300,7 +308,8 @@ define(
               "id": "155553",
               "value": "42"
             }
-          ]
+          ],
+          "featureEnabled": "true"
         },
         {
           "id": "122243",
@@ -310,7 +319,8 @@ define(
               "id": "155553",
               "value": "13"
             }
-          ]
+          ],
+          "featureEnabled": "true"
         }
       ]
     }
@@ -372,7 +382,8 @@ define(
                   "id": "155563",
                   "value": "groupie_1_v1"
                 }
-              ]
+              ],
+          "featureEnabled": "true"
             },
             {
               "id": "7722360022",
@@ -382,7 +393,8 @@ define(
                   "id": "155563",
                   "value": "groupie_1_v2"
                 }
-              ]
+              ],
+          "featureEnabled": "true"
             }
           ],
           "forcedVariations": {
@@ -416,7 +428,8 @@ define(
                   "id": "155563",
                   "value": "groupie_2_v1"
                 }
-              ]
+              ],
+          "featureEnabled": "true"
             },
             {
               "id": "7725250007",
@@ -426,7 +439,8 @@ define(
                   "id": "155563",
                   "value": "groupie_2_v1"
                 }
-              ]
+              ],
+          "featureEnabled": "true"
             }
           ],
           "forcedVariations": {
@@ -618,7 +632,8 @@ define(
                   "id": "155556",
                   "value": "true"
                 }
-              ]
+              ],
+              "featureEnabled": "true"
             }
           ],
           "trafficAllocation": [
@@ -645,7 +660,8 @@ define(
                   "id": "155556",
                   "value": "false"
                 }
-              ]
+              ],
+              "featureEnabled": "true"
             }
           ],
           "trafficAllocation": [
@@ -672,7 +688,8 @@ define(
                   "id": "155556",
                   "value": "false"
                 }
-              ]
+              ],
+              "featureEnabled": "true"
             }
           ],
           "trafficAllocation": [
@@ -701,7 +718,8 @@ define(
               "key": "177775",
               "variables": [
                 
-              ]
+              ],
+              "featureEnabled": "true"
             }
           ],
           "trafficAllocation": [
@@ -725,7 +743,8 @@ define(
               "key": "177780",
               "variables": [
                 
-              ]
+              ],
+              "featureEnabled": "true"
             }
           ],
           "trafficAllocation": [

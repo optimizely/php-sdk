@@ -510,15 +510,21 @@ class Optimizely
         $experiment = $decision->getExperiment();
         $variation = $decision->getVariation();
 
-        if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
-            $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
-        } else {
+        if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_ROLLOUT) {
             $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
+            $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
+            return true;
         }
 
-        $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
+        $variation = $decision->getVariation();
+        if ($variation->getFeatureEnabled() == 'true') {
+            $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
+            $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
+            return true;
+        }
 
-        return true;
+        $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
+        return false;
     }
 
     /**
