@@ -47,10 +47,11 @@ class Variation
     private $_variableIdToVariableUsageInstanceMap;
 
 
-    public function __construct($id = null, $key = null, $variableUsageInstances = [])
+    public function __construct($id = null, $key = null, $featureEnabled = false, $variableUsageInstances = [])
     {
         $this->_id = $id;
         $this->_key = $key;
+        $this->_featureEnabled = $featureEnabled;
 
         $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances, null, VariableUsage::class);
 
@@ -87,6 +88,22 @@ class Variation
     public function setKey($key)
     {
         $this->_key = $key;
+    }
+
+    /**
+     * @return boolean featureEnabled property
+     */
+    public function getFeatureEnabled()
+    {
+        return $this->_featureEnabled;
+    }
+
+    /**
+     * @param boolean $flag
+     */
+    public function setFeatureEnabled($flag)
+    {
+        $this->_featureEnabled = $flag;
     }
 
     /**

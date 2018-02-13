@@ -150,6 +150,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expectedVariation = new Variation(
             '7722260071',
             'group_exp_1_var_1',
+            true,
             [
                 [
                   "id" => "155563",
