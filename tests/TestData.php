@@ -137,7 +137,7 @@ define(
               "value": "red"
             }
           ],
-          "featureEnabled": "true"
+          "featureEnabled": true
         },
         {
           "id": "122232",
@@ -152,7 +152,7 @@ define(
               "value": "eorge"
             }
           ],
-          "featureEnabled": "true"
+          "featureEnabled": true
         },
         {
           "id": "122233",
@@ -167,7 +167,7 @@ define(
               "value": "red"
             }
           ],
-          "featureEnabled": "true"
+          "featureEnabled": true
         },
         {
           "id": "122234",
@@ -182,7 +182,7 @@ define(
               "value": "eorge"
             }
           ],
-          "featureEnabled": "true"
+          "featureEnabled": true
         }
       ]
     },
@@ -217,7 +217,7 @@ define(
               "value": "cta_1"
             }
           ],
-          "featureEnabled": "true"
+          "featureEnabled": true
         },
         {
           "id": "122237",
@@ -228,7 +228,7 @@ define(
               "value": "cta_2"
             }
           ],
-          "featureEnabled": "true"
+          "featureEnabled": true
         }
       ]
     },
@@ -263,7 +263,7 @@ define(
               "value": "42.42"
             }
           ],
-          "featureEnabled": "true"
+          "featureEnabled": true
         },
         {
           "id": "122240",
@@ -274,7 +274,7 @@ define(
               "value": "13.37"
             }
           ],
-          "featureEnabled": "false"
+          "featureEnabled": false
         }
       ]
     },
@@ -309,7 +309,7 @@ define(
               "value": "42"
             }
           ],
-          "featureEnabled": "true"
+          "featureEnabled": true
         },
         {
           "id": "122243",
@@ -320,7 +320,7 @@ define(
               "value": "13"
             }
           ],
-          "featureEnabled": "true"
+          "featureEnabled": true
         }
       ]
     }
@@ -383,7 +383,7 @@ define(
                   "value": "groupie_1_v1"
                 }
               ],
-          "featureEnabled": "true"
+          "featureEnabled": true
             },
             {
               "id": "7722360022",
@@ -394,7 +394,7 @@ define(
                   "value": "groupie_1_v2"
                 }
               ],
-          "featureEnabled": "true"
+          "featureEnabled": true
             }
           ],
           "forcedVariations": {
@@ -429,7 +429,7 @@ define(
                   "value": "groupie_2_v1"
                 }
               ],
-          "featureEnabled": "true"
+          "featureEnabled": true
             },
             {
               "id": "7725250007",
@@ -440,7 +440,7 @@ define(
                   "value": "groupie_2_v1"
                 }
               ],
-          "featureEnabled": "true"
+          "featureEnabled": true
             }
           ],
           "forcedVariations": {
@@ -633,7 +633,7 @@ define(
                   "value": "true"
                 }
               ],
-              "featureEnabled": "true"
+              "featureEnabled": true
             }
           ],
           "trafficAllocation": [
@@ -661,7 +661,7 @@ define(
                   "value": "false"
                 }
               ],
-              "featureEnabled": "true"
+              "featureEnabled": true
             }
           ],
           "trafficAllocation": [
@@ -689,7 +689,7 @@ define(
                   "value": "false"
                 }
               ],
-              "featureEnabled": "true"
+              "featureEnabled": true
             }
           ],
           "trafficAllocation": [
@@ -719,7 +719,7 @@ define(
               "variables": [
                 
               ],
-              "featureEnabled": "true"
+              "featureEnabled": true
             }
           ],
           "trafficAllocation": [
@@ -744,7 +744,7 @@ define(
               "variables": [
                 
               ],
-              "featureEnabled": "true"
+              "featureEnabled": true
             }
           ],
           "trafficAllocation": [

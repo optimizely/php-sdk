@@ -314,17 +314,14 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             new VariableUsage("155560", "F"),
             new VariableUsage("155561", "red")
         ];
-        $expectedVariation = new Variation("122231", "Fred", 'true', $variableUsages);
+        $expectedVariation = new Variation("122231", "Fred", true, $variableUsages);
         $actualVariation = $this->config->getVariationFromKey("test_experiment_multivariate", "Fred");
 
         $this->assertEquals($expectedVariation, $actualVariation);
 
-        // Check variation by default has featureEnabled set to 'false'
+        // Check variation by default has featureEnabled set to false
         $variation = new Variation();
-        $this->assertSame(
-            'false',
-            $variation->getFeatureEnabled()
-        );
+        $this->assertFalse($variation->getFeatureEnabled());
     }
 
     public function testGetAccountId()

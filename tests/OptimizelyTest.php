@@ -2284,11 +2284,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
 
-        // assert that featureEnabled for $variation is 'true'
-        $this->assertEquals(
-            'true',
-            $variation->getFeatureEnabled()
-        );
+        // assert that featureEnabled for $variation is true
+        $this->assertTrue($variation->getFeatureEnabled());
 
         $expected_decision = new FeatureDecision(
             $experiment,
@@ -2332,11 +2329,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'variation');
 
-        // assert that featureEnabled for $variation is 'false'
-        $this->assertEquals(
-            'false',
-            $variation->getFeatureEnabled()
-        );
+        // assert that featureEnabled for $variation is false
+        $this->assertFalse($variation->getFeatureEnabled());
 
         $expected_decision = new FeatureDecision(
             $experiment,
@@ -2378,15 +2372,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $rollout = $this->projectConfig->getRolloutFromId('166660');
         $experiment = $rollout->getExperiments()[0];
         $variation = $experiment->getVariations()[0];
-        $variation->setFeatureEnabled('false');
+        $variation->setFeatureEnabled(false);
 
-        // assert variation's 'featureEnabled' is set to 'false' to ensure that this property
+        // assert variation's 'featureEnabled' is set to false to ensure that this property
         // has no effect when Decision object is from Rollout
-        $this->assertEquals(
-            'false',
-            $variation->getFeatureEnabled()
-        );
-        
+        $this->assertFalse($variation->getFeatureEnabled());
 
         $expected_decision = new FeatureDecision(
             $experiment,

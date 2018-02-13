@@ -517,7 +517,7 @@ class Optimizely
         }
 
         $variation = $decision->getVariation();
-        if ($variation->getFeatureEnabled() == 'true') {
+        if ($variation->getFeatureEnabled()) {
             $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
             $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
             return true;

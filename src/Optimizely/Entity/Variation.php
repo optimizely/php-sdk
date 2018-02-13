@@ -47,7 +47,7 @@ class Variation
     private $_variableIdToVariableUsageInstanceMap;
 
 
-    public function __construct($id = null, $key = null, $featureEnabled = 'false', $variableUsageInstances = [])
+    public function __construct($id = null, $key = null, $featureEnabled = false, $variableUsageInstances = [])
     {
         $this->_id = $id;
         $this->_key = $key;

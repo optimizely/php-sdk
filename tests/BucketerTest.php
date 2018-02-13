@@ -208,7 +208,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             new Variation(
                 '7722260071',
                 'group_exp_1_var_1',
-                'true',
+                true,
                 [
                 [
                   "id" => "155563",
@@ -246,7 +246,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             new Variation(
                 '7722360022',
                 'group_exp_1_var_2',
-                'true',
+                true,
                 [
                 [
                   "id" => "155563",
@@ -377,7 +377,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             new Variation(
                 '7725250007',
                 'group_exp_2_var_2',
-                'true',
+                true,
                 [
                 [
                   "id" => "155563",
@@ -411,7 +411,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $expectedVariation = new Variation(
             '177778',
             '177778',
-            'true',
+            true,
             [
                 [
                   "id"=> "155556",
