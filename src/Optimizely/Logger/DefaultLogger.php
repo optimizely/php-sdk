@@ -40,7 +40,7 @@ class DefaultLogger implements LoggerInterface
     public function __construct($minLevel = Logger::INFO)
     {
         $formatter = new LineFormatter("[%datetime%] %channel%.%level_name%: %message%\n");
-        $streamHandler = new StreamHandler('php://output', $minLevel);
+        $streamHandler = new StreamHandler('php://stdout', $minLevel);
         $streamHandler->setFormatter($formatter);
         $this->logger = new Logger('Optimizely');
         $this->logger->pushHandler($streamHandler);
