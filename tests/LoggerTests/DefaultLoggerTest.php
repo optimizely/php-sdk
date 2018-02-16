@@ -23,7 +23,7 @@ class DefaultLoggerTest extends \PHPUnit_Framework_TestCase
 {
     public function testDefaultLogger()
     {
-        $logger = new DefaultLogger();
+        $logger = new DefaultLogger(Logger::INFO, 'output');
         $logger->log(Logger::INFO, 'Log me please.');
 
         $this->expectOutputRegex('/Log me please./');
