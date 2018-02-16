@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -509,6 +509,11 @@ class Optimizely
 
         $experiment = $decision->getExperiment();
         $variation = $decision->getVariation();
+
+        if (!$variation->getFeatureEnabled()) {
+            $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
+            return false;
+        }
 
         if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
             $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
