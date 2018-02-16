@@ -40,12 +40,8 @@ class EventTagUtils
      * @param  $eventTags array Representing metadata associated with the event.
      * @return integer Revenue value as an integer number or null if revenue can't be retrieved from the event tags
      */
-    public static function getRevenueValue($eventTags, LoggerInterface $logger = null)
+    public static function getRevenueValue($eventTags, $logger)
     {
-        if (!$logger) {
-            $logger = new NoOpLogger();
-        }
-
         if (!$eventTags) {
             $logger->log(Logger::DEBUG, "Event tags is undefined.");
             return null;

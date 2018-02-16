@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ class Optimizely
             return;
         }
 
-        $this->_eventBuilder = new EventBuilder();
+        $this->_eventBuilder = new EventBuilder($this->_logger);
         $this->_decisionService = new DecisionService($this->_logger, $this->_config, $userProfileService);
         $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
     }
