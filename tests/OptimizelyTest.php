@@ -62,7 +62,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Mock EventBuilder
         $this->eventBuilderMock = $this->getMockBuilder(EventBuilder::class)
-            ->setConstructorArgs(array($this->loggerMock, new NoOpErrorHandler))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('createImpressionEvent', 'createConversionEvent'))
             ->getMock();
 
