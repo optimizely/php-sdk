@@ -114,7 +114,9 @@ class Optimizely
 
         if (!$this->validateDatafile($datafile, $skipJsonValidation)) {
             $this->_isValid = false;
-            $this->_logger = new DefaultLogger();
+            $defaultLogger = new DefaultLogger();
+
+            $defaultLogger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
             $this->_logger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
             return;
         }
