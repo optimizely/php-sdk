@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ use Optimizely\Optimizely;
 
 class OptimizelyTest extends \PHPUnit_Framework_TestCase
 {
+    const OUTPUT_STREAM = 'output';
+
     private $datafile;
     private $eventBuilderMock;
     private $loggerMock;
@@ -138,7 +140,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $validateInputsMethod->invoke(
-                new Optimizely('Random datafile'),
+                new Optimizely('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM)),
                 'Random datafile',
                 false
             )
@@ -164,7 +166,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testActivateInvalidOptimizelyObject()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
-            ->setConstructorArgs(array('Random datafile', null, $this->loggerMock))
+            ->setConstructorArgs(array('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM)))
             ->setMethods(array('sendImpressionEvent'))
             ->getMock();
 
@@ -452,7 +454,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationInvalidOptimizelyObject()
     {
-        $optlyObject = new Optimizely('Random datafile');
+        $optlyObject = new Optimizely('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM));
         $optlyObject->getVariation('some_experiment', 'some_user');
         $this->expectOutputRegex('/Datafile has invalid format. Failing "getVariation"./');
     }
@@ -665,7 +667,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testTrackInvalidOptimizelyObject()
     {
-        $optlyObject = new Optimizely('Random datafile');
+        $optlyObject = new Optimizely('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM));
 
         // Verify that sendNotifications isn't called
         $this->notificationCenterMock->expects($this->never())
@@ -2157,7 +2159,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testIsFeatureEnabledGivenInvalidDataFile()
     {
-        $optlyObject = new Optimizely('Random datafile', null, $this->loggerMock);
+        $optlyObject = new Optimizely('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM));
 
         $this->expectOutputRegex("/Datafile has invalid format. Failing 'isFeatureEnabled'./");
         $optlyObject->isFeatureEnabled("boolean_feature", "user_id");
@@ -2452,7 +2454,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testGetEnabledFeaturesGivenInvalidDataFile()
     {
-        $optlyObject = new Optimizely('Random datafile');
+        $optlyObject = new Optimizely('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM));
 
         $this->expectOutputRegex("/Datafile has invalid format. Failing 'getEnabledFeatures'./");
 
