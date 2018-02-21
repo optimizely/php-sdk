@@ -2227,7 +2227,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($optimizelyObj->isFeatureEnabled('mutex_group_feature', "user_id"), false);
     }
 
-    public function testIsFeatureEnabledGivenFeatureFlagIsNotEnabledForUser()
+    public function testIsFeatureEnabledGivenGetVariationForFeatureReturnsNull()
     {
         // should return false when no variation is returned for user
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
@@ -2263,13 +2263,10 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, "Feature Flag 'double_single_variable_feature' is not enabled for user 'user_id'.");
 
-        $this->assertSame(
-            $optimizelyMock->isFeatureEnabled('double_single_variable_feature', 'user_id'),
-            false
-        );
+        $this->assertFalse($optimizelyMock->isFeatureEnabled('double_single_variable_feature', 'user_id'));
     }
 
-    public function testIsFeatureEnabledGivenFeatureFlagIsEnabledAndUserIsBeingExperimented()
+    public function testIsFeatureEnabledGivenFeatureExperimentAndFeatureEnabledIsTrue()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
             ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
@@ -2288,6 +2285,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Mock getVariationForFeature to return a valid decision with experiment and variation keys
         $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
         $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
+
+        // assert that featureEnabled for $variation is true
+        $this->assertTrue($variation->getFeatureEnabled());
 
         $expected_decision = new FeatureDecision(
             $experiment,
@@ -2308,13 +2308,53 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, "Feature Flag 'double_single_variable_feature' is enabled for user 'user_id'.");
 
-        $this->assertSame(
-            $optimizelyMock->isFeatureEnabled('double_single_variable_feature', 'user_id', []),
-            true
-        );
+        $this->assertTrue($optimizelyMock->isFeatureEnabled('double_single_variable_feature', 'user_id', []));
     }
 
-    public function testIsFeatureEnabledGivenFeatureFlagIsEnabledAndUserIsNotBeingExperimented()
+    public function testIsFeatureEnabledGivenFeatureExperimentAndFeatureEnabledIsFalse()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($optimizelyMock, $decisionServiceMock);
+
+        // Mock getVariationForFeature to return a valid decision with experiment and variation keys
+        $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
+        $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'variation');
+
+        // assert that featureEnabled for $variation is false
+        $this->assertFalse($variation->getFeatureEnabled());
+
+        $expected_decision = new FeatureDecision(
+            $experiment,
+            $variation,
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+        );
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expected_decision));
+
+        $optimizelyMock->expects($this->never())
+            ->method('sendImpressionEvent');
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "Feature Flag 'double_single_variable_feature' is not enabled for user 'user_id'.");
+
+        $this->assertFalse($optimizelyMock->isFeatureEnabled('double_single_variable_feature', 'user_id', []));
+    }
+
+    public function testIsFeatureEnabledGivenFeatureRolloutAndFeatureEnabledIsTrue()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
             ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
@@ -2334,6 +2374,10 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $rollout = $this->projectConfig->getRolloutFromId('166660');
         $experiment = $rollout->getExperiments()[0];
         $variation = $experiment->getVariations()[0];
+
+        // assert variation's 'featureEnabled' is set to true
+        $this->assertTrue($variation->getFeatureEnabled());
+
         $expected_decision = new FeatureDecision(
             $experiment,
             $variation,
@@ -2359,10 +2403,53 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, "Feature Flag 'boolean_single_variable_feature' is enabled for user 'user_id'.");
 
-        $this->assertSame(
-            $optimizelyMock->isFeatureEnabled('boolean_single_variable_feature', 'user_id', []),
-            true
+        $this->assertTrue($optimizelyMock->isFeatureEnabled('boolean_single_variable_feature', 'user_id', []));
+    }
+
+    public function testIsFeatureEnabledGivenFeatureRolloutAndFeatureEnabledIsFalse()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($optimizelyMock, $decisionServiceMock);
+
+        // Mock getVariationForFeature to return a valid decision with experiment and variation keys
+        $rollout = $this->projectConfig->getRolloutFromId('166660');
+        $experiment = $rollout->getExperiments()[0];
+        $variation = $experiment->getVariations()[0];
+        $variation->setFeatureEnabled(false);
+
+        // assert variation's 'featureEnabled' is set to false
+        $this->assertFalse($variation->getFeatureEnabled());
+
+        $expected_decision = new FeatureDecision(
+            $experiment,
+            $variation,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expected_decision));
+
+        // assert that sendImpressionEvent is not called
+        $optimizelyMock->expects($this->never())
+            ->method('sendImpressionEvent');
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "Feature Flag 'boolean_single_variable_feature' is not enabled for user 'user_id'.");
+
+        $this->assertFalse($optimizelyMock->isFeatureEnabled('boolean_single_variable_feature', 'user_id', []));
     }
 
     public function testGetEnabledFeaturesGivenInvalidDataFile()
