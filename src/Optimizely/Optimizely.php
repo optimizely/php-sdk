@@ -510,7 +510,7 @@ class Optimizely
         $experiment = $decision->getExperiment();
         $variation = $decision->getVariation();
 
-        if (!$variation->getFeatureEnabled()) {
+        if (is_null($variation) || !$variation->getFeatureEnabled()) {
             $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
             return false;
         }
