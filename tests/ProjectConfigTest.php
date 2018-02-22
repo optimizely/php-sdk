@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Optimizely;
 use Optimizely\ProjectConfig;
+use Optimizely\Utils\ConfigParser;
 
 class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 {
@@ -309,15 +310,45 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         );
 
 
-        // Check variable usage
+        // Check variation entity
         $variableUsages = [
             new VariableUsage("155560", "F"),
             new VariableUsage("155561", "red")
         ];
-        $expectedVariation = new Variation("122231", "Fred", $variableUsages);
+        $expectedVariation = new Variation("122231", "Fred", true, $variableUsages);
         $actualVariation = $this->config->getVariationFromKey("test_experiment_multivariate", "Fred");
 
         $this->assertEquals($expectedVariation, $actualVariation);
+    }
+
+    public function testVariationParsingWithoutFeatureEnabledProp()
+    {
+        $variables = [
+                [
+                  "id"=> "155556",
+                  "value"=> "true"
+                ]
+              ];
+
+        $data = [
+            [
+              "id"=> "177771",
+              "key"=> "my_var",
+              "variables"=> $variables
+            ]
+          ];
+
+        $variationIdMap = ConfigParser::generateMap($data, 'id', Variation::class);
+
+        $variation = $variationIdMap["177771"];
+        $this->assertEquals("177771", $variation->getId());
+        $this->assertEquals("my_var", $variation->getKey());
+
+        $variableUsageMap = ConfigParser::generateMap($variables, null, VariableUsage::class);
+        $this->assertEquals($variableUsageMap, $variation->getVariables());
+
+        // assert featureEnabled by default is set to false when property not provided in data file
+        $this->assertFalse($variation->getFeatureEnabled());
     }
 
     public function testGetAccountId()
