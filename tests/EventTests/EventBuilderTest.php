@@ -40,7 +40,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->testUserId = 'testUserId';
         $logger = new NoOpLogger();
         $this->config = new ProjectConfig(DATAFILE, $logger, new NoOpErrorHandler());
-        $this->eventBuilder = new EventBuilder();
+        $this->eventBuilder = new EventBuilder($logger);
         $this->timestamp = time()*1000;
         $this->uuid = 'a68cf1ad-0393-4e18-af87-efe8f01a7c9c';
         $this->differ = new Differ();
