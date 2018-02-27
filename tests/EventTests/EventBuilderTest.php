@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -518,7 +518,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'uuid'=> $this->uuid,
             'key'=> 'purchase',
             'tags' => [
-              'revenue' => '42',
+              'revenue' => '42.5',
               'non-revenue' => 'definitely',
               'value' => 'invalid value'
             ]
@@ -539,7 +539,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->testUserId,
             null,
             array(
-                'revenue' => '42',
+                'revenue' => '42.5',
                 'non-revenue' => 'definitely',
                 'value' => 'invalid value'
             )

@@ -18,6 +18,7 @@
 namespace Optimizely\Utils;
 
 use Optimizely\Logger\LoggerInterface;
+use Optimizely\Logger\NoOpLogger;
 use Monolog\Logger;
 
 class EventTagUtils
@@ -31,30 +32,45 @@ class EventTagUtils
 
     /**
      * Grab the revenue value from the event tags. "revenue" is a reserved keyword.
-     * The revenue value must be an integer, not  a numeric string.
+     * The value will be parsed to an integer if possible.
+     * Example:
+     *     4.0 or "4.0" will be parsed to int(4).
+     *     4.1 will not be parsed and the method will return null.
      *
      * @param  $eventTags array Representing metadata associated with the event.
      * @return integer Revenue value as an integer number or null if revenue can't be retrieved from the event tags
      */
-    public static function getRevenueValue($eventTags)
+    public static function getRevenueValue($eventTags, $logger)
     {
         if (!$eventTags) {
+            $logger->log(Logger::DEBUG, "Event tags is undefined.");
             return null;
         }
         if (!is_array($eventTags)) {
+            $logger->log(Logger::DEBUG, "Event tags is not a dictionary.");
             return null;
         }
 
         if (!isset($eventTags[self::REVENUE_EVENT_METRIC_NAME])) {
+            $logger->log(Logger::DEBUG, "The revenue key is not defined in the event tags or is null.");
             return null;
         }
 
-        $raw_value = $eventTags[self::REVENUE_EVENT_METRIC_NAME];
-        if (!is_int($raw_value)) {
+        $rawValue = $eventTags[self::REVENUE_EVENT_METRIC_NAME];
+
+        if (!is_numeric($rawValue)) {
+            $logger->log(Logger::DEBUG, "Revenue value is not an integer or float, or is not a numeric string.");
             return null;
         }
 
-        return $raw_value;
+        if ($rawValue != intval($rawValue)) {
+            $logger->log(Logger::DEBUG, "Revenue value couldn't be parsed as an integer.");
+            return null;
+        }
+
+        $rawValue = intval($rawValue);
+        $logger->log(Logger::INFO, "The revenue value {$rawValue} will be sent to results.");
+        return $rawValue;
     }
 
     /**

@@ -203,7 +203,7 @@ class EventBuilder
             ];
 
             if (!is_null($eventTags)) {
-                $revenue = EventTagUtils::getRevenueValue($eventTags);
+                $revenue = EventTagUtils::getRevenueValue($eventTags, $this->_logger);
                 if (!is_null($revenue)) {
                     $singleSnapshot[EVENTS][0][EventTagUtils::REVENUE_EVENT_METRIC_NAME] = $revenue;
                 }
