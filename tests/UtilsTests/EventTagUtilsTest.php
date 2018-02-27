@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => 'abcd'), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => true), $this->loggerMock));
-        $this->assertNull(EventTagUtils::getNumericValue(array('value' => array(1, 2, 3),$this->loggerMock)));
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => array(1, 2, 3)),$this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => false), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => array()), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => '1,234'), $this->loggerMock));

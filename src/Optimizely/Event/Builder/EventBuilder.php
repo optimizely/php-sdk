@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,20 @@ class EventBuilder
     private static $HTTP_HEADERS = [
         'Content-Type' => 'application/json'
     ];
+
+    /**
+     * @var LoggerInterface Logger for logging messages.
+     */
+    private $_logger;
+
+    /**
+     * Event Builder constructor to set logger
+     * @param $logger LoggerInterface
+     */
+    public function __construct($logger)
+    {
+        $this->_logger = $logger;
+    }
 
     /**
      * Helper function to get parameters common to impression and conversion events.
@@ -194,7 +208,7 @@ class EventBuilder
                     $singleSnapshot[EVENTS][0][EventTagUtils::REVENUE_EVENT_METRIC_NAME] = $revenue;
                 }
 
-                $eventValue = EventTagUtils::getNumericValue($eventTags);
+                $eventValue = EventTagUtils::getNumericValue($eventTags, $this->_logger);
                 if (!is_null($eventValue)) {
                     $singleSnapshot[EVENTS][0][EventTagUtils::NUMERIC_EVENT_METRIC_NAME] = $eventValue;
                 }
