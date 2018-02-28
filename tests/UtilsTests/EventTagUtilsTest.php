@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,37 +37,99 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
             ->getMock();
     }
 
-    public function testGetRevenueValueInvalidArgs()
+    public function testGetRevenueValueWithUndefinedTags()
     {
-        $this->assertNull(EventTagUtils::getRevenueValue(null));
-        $this->assertNull(EventTagUtils::getRevenueValue(0.5));
-        $this->assertNull(EventTagUtils::getRevenueValue(65536));
-        $this->assertNull(EventTagUtils::getRevenueValue(9223372036854775807));
-        $this->assertNull(EventTagUtils::getRevenueValue('65536'));
-        $this->assertNull(EventTagUtils::getRevenueValue(true));
-        $this->assertNull(EventTagUtils::getRevenueValue(false));
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Event tags is undefined.');
+
+        $this->assertNull(EventTagUtils::getRevenueValue(null, $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue(array(), $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue(false, $this->loggerMock));
     }
+
+    public function testGetRevenueValueWithNonDictionaryTags()
+    {
+        $this->loggerMock->expects($this->exactly(5))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Event tags is not a dictionary.');
+
+        $this->assertNull(EventTagUtils::getRevenueValue(0.5, $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue(65536, $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue(9223372036854775807, $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue('65536', $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue(true, $this->loggerMock));
+    }
+
+
     public function testGetRevenueValueNoRevenueTag()
     {
-        $this->assertNull(EventTagUtils::getRevenueValue(array()));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('non-revenue' => 42)));
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log')
+            ->with(Logger::DEBUG, "The revenue key is not defined in the event tags or is null.");
+
+        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => null), $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue(array('non-revenue' => 42), $this->loggerMock));
     }
 
-    public function testGetRevenueValueWithInvalidRevenueTag()
+    public function testGetRevenueValueWithNonNumericRevenueTag()
     {
-        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => null)));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => 0.5)));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => '65536')));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => true)));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => false)));
-        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => array(1, 2, 3))));
+        $this->loggerMock->expects($this->exactly(4))
+            ->method('log')
+            ->with(Logger::DEBUG, "Revenue value is not an integer or float, or is not a numeric string.");
+
+        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => 'optimizely'), $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => true), $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => false), $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => array(1, 2, 3)), $this->loggerMock));
     }
 
-    public function testGetRevenueValueWithRevenueTag()
+    public function testGetRevenueValueWithNonParsableRevenueTag()
     {
-        $this->assertSame(65536, EventTagUtils::getRevenueValue(array('revenue' => 65536)));
-        $this->assertSame(9223372036854775807, EventTagUtils::getRevenueValue(array('revenue' => 9223372036854775807)));
-        $this->assertSame(0, EventTagUtils::getRevenueValue(array('revenue' => 0)));
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log')
+            ->with(Logger::DEBUG, "Revenue value couldn't be parsed as an integer.");
+
+        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => 0.5), $this->loggerMock));
+        $this->assertNull(EventTagUtils::getRevenueValue(array('revenue' => "42.5"), $this->loggerMock));
+    }
+
+    public function testGetRevenueValueWithValidRevenueTag()
+    {
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "The revenue value 65536 will be sent to results.");
+        $this->assertSame(65536, EventTagUtils::getRevenueValue(array('revenue' => 65536), $this->loggerMock));
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "The revenue value 65536 will be sent to results.");
+        $this->assertSame(65536, EventTagUtils::getRevenueValue(array('revenue' => "65536"), $this->loggerMock));
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "The revenue value 65536 will be sent to results.");
+        $this->assertSame(65536, EventTagUtils::getRevenueValue(array('revenue' => 65536.0), $this->loggerMock));
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "The revenue value 65536 will be sent to results.");
+        $this->assertSame(65536, EventTagUtils::getRevenueValue(array('revenue' => "65536.0"), $this->loggerMock));
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "The revenue value 9223372036854775807 will be sent to results.");
+        $this->assertSame(9223372036854775807, EventTagUtils::getRevenueValue(array('revenue' => 9223372036854775807), $this->loggerMock));
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "The revenue value 0 will be sent to results.");
+        $this->assertSame(0, EventTagUtils::getRevenueValue(array('revenue' => 0), $this->loggerMock));
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "The revenue value 0 will be sent to results.");
+        $this->assertSame(0, EventTagUtils::getRevenueValue(array('revenue' => 0.0), $this->loggerMock));
     }
 
     public function testGetNumericValueWithUndefinedTags()
@@ -112,7 +174,7 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => 'abcd'), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => true), $this->loggerMock));
-        $this->assertNull(EventTagUtils::getNumericValue(array('value' => array(1, 2, 3),$this->loggerMock)));
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => array(1, 2, 3)),$this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => false), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => array()), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => '1,234'), $this->loggerMock));

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
         // === should add, log and return notification ID when an object method is passed as an argument === //
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
-        $eBuilder = new EventBuilder;
+        $eBuilder = new EventBuilder(new NoOpLogger());
         $callbackInput = array($eBuilder, 'createImpressionEvent');
 
         $this->loggerMock->expects($this->at(0))
@@ -289,7 +289,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         /////////////////////////////////////////////////////////////////////////
         // ===== verify that an object method with same body isn't re-added ===== //
         /////////////////////////////////////////////////////////////////////////
-        $eBuilder = new EventBuilder;
+        $eBuilder = new EventBuilder(new NoOpLogger());
         $callbackInput = array($eBuilder, 'createImpressionEvent');
 
         $this->loggerMock->expects($this->at(0))

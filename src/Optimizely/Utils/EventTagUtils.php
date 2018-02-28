@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 namespace Optimizely\Utils;
 
 use Optimizely\Logger\LoggerInterface;
+use Optimizely\Logger\NoOpLogger;
 use Monolog\Logger;
 
 class EventTagUtils
@@ -31,30 +32,45 @@ class EventTagUtils
 
     /**
      * Grab the revenue value from the event tags. "revenue" is a reserved keyword.
-     * The revenue value must be an integer, not  a numeric string.
+     * The value will be parsed to an integer if possible.
+     * Example:
+     *     4.0 or "4.0" will be parsed to int(4).
+     *     4.1 will not be parsed and the method will return null.
      *
      * @param  $eventTags array Representing metadata associated with the event.
      * @return integer Revenue value as an integer number or null if revenue can't be retrieved from the event tags
      */
-    public static function getRevenueValue($eventTags)
+    public static function getRevenueValue($eventTags, $logger)
     {
         if (!$eventTags) {
+            $logger->log(Logger::DEBUG, "Event tags is undefined.");
             return null;
         }
         if (!is_array($eventTags)) {
+            $logger->log(Logger::DEBUG, "Event tags is not a dictionary.");
             return null;
         }
 
         if (!isset($eventTags[self::REVENUE_EVENT_METRIC_NAME])) {
+            $logger->log(Logger::DEBUG, "The revenue key is not defined in the event tags or is null.");
             return null;
         }
 
-        $raw_value = $eventTags[self::REVENUE_EVENT_METRIC_NAME];
-        if (!is_int($raw_value)) {
+        $rawValue = $eventTags[self::REVENUE_EVENT_METRIC_NAME];
+
+        if (!is_numeric($rawValue)) {
+            $logger->log(Logger::DEBUG, "Revenue value is not an integer or float, or is not a numeric string.");
             return null;
         }
 
-        return $raw_value;
+        if ($rawValue != intval($rawValue)) {
+            $logger->log(Logger::DEBUG, "Revenue value couldn't be parsed as an integer.");
+            return null;
+        }
+
+        $rawValue = intval($rawValue);
+        $logger->log(Logger::INFO, "The revenue value {$rawValue} will be sent to results.");
+        return $rawValue;
     }
 
     /**
@@ -62,42 +78,40 @@ class EventTagUtils
      * The value of 'value' can be a float or a numeric string
      *
      * @param  $eventTags array Representing metadata associated with the event.
+     * @param $logger instance of LoggerInterface
+     *
      * @return float value of 'value' or null
      */
-    public static function getNumericValue($eventTags, LoggerInterface $logger = null)
+    public static function getNumericValue($eventTags, $logger)
     {
         if (!$eventTags) {
-            if ($logger) {
-                $logger->log(Logger::DEBUG, "Event tags is undefined.");
-            }
+            $logger->log(Logger::DEBUG, "Event tags is undefined.");
             return null;
-        } elseif (!is_array($eventTags)) {
-            if ($logger) {
-                $logger->log(Logger::DEBUG, "Event tags is not a dictionary.");
-            }
+        }
+
+        if (!is_array($eventTags)) {
+            $logger->log(Logger::DEBUG, "Event tags is not a dictionary.");
             return null;
-        } elseif (!isset($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
-            if ($logger) {
-                $logger->log(Logger::DEBUG, "The numeric metric key is not defined in the event tags or is null.");
-            }
+        }
+
+        if (!isset($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
+            $logger->log(Logger::DEBUG, "The numeric metric key is not defined in the event tags or is null.");
             return null;
-        } elseif (!is_numeric($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
-            if ($logger) {
-                $logger->log(Logger::DEBUG, "Numeric metric value is not an integer or float, or is not a numeric string.");
-            }
+        }
+
+        if (!is_numeric($eventTags[self::NUMERIC_EVENT_METRIC_NAME])) {
+            $logger->log(Logger::DEBUG, "Numeric metric value is not an integer or float, or is not a numeric string.");
             return null;
-        } elseif (is_nan($eventTags[self::NUMERIC_EVENT_METRIC_NAME]) || is_infinite(floatval($eventTags[self::NUMERIC_EVENT_METRIC_NAME]))) {
-            if ($logger) {
-                $logger->log(Logger::DEBUG, "Provided numeric value is in an invalid format.");
-            }
+        }
+
+        if (is_nan($eventTags[self::NUMERIC_EVENT_METRIC_NAME]) || is_infinite(floatval($eventTags[self::NUMERIC_EVENT_METRIC_NAME]))) {
+            $logger->log(Logger::DEBUG, "Provided numeric value is in an invalid format.");
             return null;
         }
 
         $rawValue = $eventTags[self::NUMERIC_EVENT_METRIC_NAME];
         // # Log the final numeric metric value
-        if ($logger) {
-            $logger->log(Logger::INFO, "The numeric metric value {$rawValue} will be sent to results.");
-        }
+        $logger->log(Logger::INFO, "The numeric metric value {$rawValue} will be sent to results.");
 
         return floatval($rawValue);
     }

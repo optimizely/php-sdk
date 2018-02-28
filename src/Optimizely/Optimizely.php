@@ -135,7 +135,7 @@ class Optimizely
             return;
         }
 
-        $this->_eventBuilder = new EventBuilder();
+        $this->_eventBuilder = new EventBuilder($this->_logger);
         $this->_decisionService = new DecisionService($this->_logger, $this->_config, $userProfileService);
         $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
     }
