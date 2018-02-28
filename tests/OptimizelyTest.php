@@ -890,7 +890,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.'
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
@@ -1028,7 +1028,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.'
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
@@ -1168,7 +1168,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.'
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
@@ -1304,7 +1304,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.'
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
@@ -1430,7 +1430,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.'
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
@@ -1525,7 +1525,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::INFO, 'Tracking event "purchase" for user "test_user".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.');
+            ->with(Logger::DEBUG, 'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.');
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1669,7 +1669,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.'
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
             );
 
 
@@ -1809,7 +1809,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::DEBUG,
-                'Dispatching conversion event to URL logx.optimizely.com/track with params param1=val1.'
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
@@ -3094,7 +3094,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::DEBUG,
-                'Dispatching impression event to URL logx.optimizely.com/decision with params param1=val1&param2=val2.'
+                'Dispatching impression event to URL logx.optimizely.com/decision with params {"param1":"val1","param2":"val2"}.'
             );
 
         $optlyObject->sendImpressionEvent('group_experiment_1', 'group_exp_1_var_2', 'user_1', null);
@@ -3173,7 +3173,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::DEBUG,
-                'Dispatching impression event to URL logx.optimizely.com/decision with params param1=val1.'
+                'Dispatching impression event to URL logx.optimizely.com/decision with params {"param1":"val1"}.'
             );
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');

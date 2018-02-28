@@ -239,7 +239,7 @@ class Optimizely
             sprintf(
                 'Dispatching impression event to URL %s with params %s.',
                 $impressionEvent->getUrl(),
-                http_build_query($impressionEvent->getParams())
+                json_encode($impressionEvent->getParams())
             )
         );
 
@@ -356,7 +356,7 @@ class Optimizely
                 sprintf(
                     'Dispatching conversion event to URL %s with params %s.',
                     $conversionEvent->getUrl(),
-                    http_build_query($conversionEvent->getParams())
+                    json_encode($conversionEvent->getParams())
                 )
             );
 
