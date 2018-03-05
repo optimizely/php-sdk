@@ -2506,6 +2506,41 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testGetEnabledFeaturesReturnsSortedFeatureKeys()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('isFeatureEnabled'))
+            ->getMock();
+
+        // Call mocked isFeatureEnabled with unordered feature keys
+        $map = [
+            ['string_single_variable_feature','user_id', [], true],
+            ['multi_variate_feature','user_id', [], true],
+            ['double_single_variable_feature','user_id', [], true],
+            ['integer_single_variable_feature','user_id', [], true],
+            ['empty_feature','user_id', [], true],
+            ['boolean_feature','user_id', [], true],
+        ];
+
+        // Mock isFeatureEnabled to return specific values
+        $optimizelyMock->expects($this->exactly(8))
+            ->method('isFeatureEnabled')
+            ->will($this->returnValueMap($map));
+
+        $this->assertEquals(
+            [
+                'boolean_feature',
+                'double_single_variable_feature',                   
+                'empty_feature',
+                'integer_single_variable_feature',
+                'multi_variate_feature',
+                'string_single_variable_feature'
+            ],
+            $optimizelyMock->getEnabledFeatures("user_id", [])
+        );
+    }
+
     public function testGetEnabledFeaturesWithUserAttributes()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
