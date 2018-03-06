@@ -2513,26 +2513,37 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('isFeatureEnabled'))
             ->getMock();
 
-        // Call mocked isFeatureEnabled with unordered feature keys
-        $map = [
-            ['string_single_variable_feature','user_id', [], true],
-            ['multi_variate_feature','user_id', [], true],
-            ['double_single_variable_feature','user_id', [], true],
-            ['integer_single_variable_feature','user_id', [], true],
-            ['empty_feature','user_id', [], true],
-            ['boolean_feature','user_id', [], true],
-        ];
-
-        // Mock isFeatureEnabled to return specific values
-        $optimizelyMock->expects($this->exactly(8))
+        // Mock isFeatureEnabled and assert that isFeatureEnabled does get called in an unsorted order
+        $optimizelyMock->expects($this->at(0))
             ->method('isFeatureEnabled')
-            ->will($this->returnValueMap($map));
+            ->with('boolean_feature', 'user_id', [])
+            ->willReturn(true);
+        $optimizelyMock->expects($this->at(1))
+            ->method('isFeatureEnabled')
+            ->with('double_single_variable_feature', 'user_id', [])
+            ->willReturn(true);
+        $optimizelyMock->expects($this->at(2))
+            ->method('isFeatureEnabled')
+            ->with('integer_single_variable_feature', 'user_id', [])
+            ->willReturn(true);
+        $optimizelyMock->expects($this->at(3))
+            ->method('isFeatureEnabled')
+            ->with('boolean_single_variable_feature', 'user_id', [])
+            ->willReturn(true);
+        $optimizelyMock->expects($this->at(4))
+            ->method('isFeatureEnabled')
+            ->with('string_single_variable_feature', 'user_id', [])
+            ->willReturn(true);
+        $optimizelyMock->expects($this->at(5))
+            ->method('isFeatureEnabled')
+            ->with('multi_variate_feature', 'user_id', [])
+            ->willReturn(true);
 
         $this->assertEquals(
             [
                 'boolean_feature',
-                'double_single_variable_feature',                   
-                'empty_feature',
+                'boolean_single_variable_feature',
+                'double_single_variable_feature',
                 'integer_single_variable_feature',
                 'multi_variate_feature',
                 'string_single_variable_feature'
