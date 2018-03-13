@@ -2506,6 +2506,52 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testGetEnabledFeaturesReturnsSortedFeatureKeys()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('isFeatureEnabled'))
+            ->getMock();
+
+        // Mock isFeatureEnabled and assert that isFeatureEnabled does get called in an unsorted order
+        $optimizelyMock->expects($this->at(0))
+            ->method('isFeatureEnabled')
+            ->with('boolean_feature', 'user_id', [])
+            ->willReturn(true);
+        $optimizelyMock->expects($this->at(1))
+            ->method('isFeatureEnabled')
+            ->with('double_single_variable_feature', 'user_id', [])
+            ->willReturn(true);
+        $optimizelyMock->expects($this->at(2))
+            ->method('isFeatureEnabled')
+            ->with('integer_single_variable_feature', 'user_id', [])
+            ->willReturn(true);
+        $optimizelyMock->expects($this->at(3))
+            ->method('isFeatureEnabled')
+            ->with('boolean_single_variable_feature', 'user_id', [])
+            ->willReturn(true);
+        $optimizelyMock->expects($this->at(4))
+            ->method('isFeatureEnabled')
+            ->with('string_single_variable_feature', 'user_id', [])
+            ->willReturn(true);
+        $optimizelyMock->expects($this->at(5))
+            ->method('isFeatureEnabled')
+            ->with('multi_variate_feature', 'user_id', [])
+            ->willReturn(true);
+
+        $this->assertEquals(
+            [
+                'boolean_feature',
+                'boolean_single_variable_feature',
+                'double_single_variable_feature',
+                'integer_single_variable_feature',
+                'multi_variate_feature',
+                'string_single_variable_feature'
+            ],
+            $optimizelyMock->getEnabledFeatures("user_id", [])
+        );
+    }
+
     public function testGetEnabledFeaturesWithUserAttributes()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
