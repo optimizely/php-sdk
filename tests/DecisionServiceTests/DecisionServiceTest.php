@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely
+ * Copyright 2017-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -955,13 +955,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket')
             ->willReturn($expected_variation);
 
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "Attempting to bucket user 'user_1' into rollout rule '{$experiment->getKey()}'."
-            );
-
         $this->assertEquals(
             $expected_decision,
             $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes)
@@ -1000,20 +993,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket')
             ->willReturn($expected_variation);
 
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "Attempting to bucket user 'user_1' into rollout rule '{$experiment0->getKey()}'."
-            );
-        $this->loggerMock->expects($this->at(1))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "User 'user_1' was excluded due to traffic allocation. Checking 'Everyone Else' rule now."
-            );
-
-
         $this->assertEquals(
             $expected_decision,
             $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes)
@@ -1045,25 +1024,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->bucketerMock->expects($this->at(1))
             ->method('bucket')
             ->willReturn(null);
-
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "Attempting to bucket user 'user_1' into rollout rule '{$experiment0->getKey()}'."
-            );
-        $this->loggerMock->expects($this->at(1))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "User 'user_1' was excluded due to traffic allocation. Checking 'Everyone Else' rule now."
-            );
-        $this->loggerMock->expects($this->at(2))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "User 'user_1' was excluded from the 'Everyone Else' rule for feature flag"
-            );
 
         $this->assertEquals(
             null,
@@ -1101,7 +1061,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
         // Expect bucket to be called exactly once for the everyone else/last rule.
-        // As we ignore Audience check only for thelast rule
         $this->bucketerMock->expects($this->exactly(1))
             ->method('bucket')
             ->willReturn($expected_variation);
@@ -1124,5 +1083,54 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             $expected_decision,
             $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes)
         );
+    }
+
+    public function testGetVariationForFeatureRolloutWhenUserDoesNotQualifyForAnyTargetingRuleOrEveryoneElseRule()
+    {
+        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $feature_flag->getRolloutId();
+        $rollout = $this->config->getRolloutFromId($rollout_id);
+        $experiment0 = $rollout->getExperiments()[0];
+        $experiment1 = $rollout->getExperiments()[1];
+        // Everyone Else Rule
+        $experiment2 = $rollout->getExperiments()[2];
+        
+        // Set an AudienceId for everyone else/last rule so that user does not qualify for audience
+        $experiment2->setAudienceIds(["11154"]);
+        $expected_variation = $experiment2->getVariations()[0];
+        
+        // Provide null attributes so that user does not qualify for audience
+        $user_attributes = [];
+        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+
+        // // Expect bucket never called for the everyone else/last rule.
+        $this->bucketerMock->expects($this->never())
+            ->method('bucket');
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment0->getKey()}'."
+            );
+
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment1->getKey()}'."
+            );
+        
+        $this->loggerMock->expects($this->at(2))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment2->getKey()}'."
+        );    
+
+        $this->assertNull($this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes));
     }
 }
