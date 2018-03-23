@@ -315,16 +315,17 @@ class DecisionService
         $experiment = $rolloutRules[sizeof($rolloutRules)-1];        
         
         // Evaluate if user meets the audience condition of Everyone Else Rule / Last Rule now
-        if (Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes)) {
-            $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketing_id, $userId);
-            if ($variation && $variation->getKey()) {
-                return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
-            }
-        } 
-        $this->_logger->log(
-			Logger::DEBUG,
-            sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey()));
+        if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes)) {
+            $this->_logger->log(
+                Logger::DEBUG,
+                sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey()));
+            return null;
+        }
         
+        $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketing_id, $userId);
+        if ($variation && $variation->getKey()) {
+            return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
+        }
         return null;
     }
 

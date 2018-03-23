@@ -1025,6 +1025,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket')
             ->willReturn(null);
 
+        $this->loggerMock->expects($this->never())
+            ->method('log');
+
         $this->assertEquals(
             null,
             $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes)
