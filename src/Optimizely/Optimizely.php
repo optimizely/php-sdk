@@ -317,16 +317,6 @@ class Optimizely
             return;
         }
 
-        if (!is_null($eventTags) && is_numeric($eventTags) && !is_string($eventTags)) {
-            $eventTags = array(
-                EventTagUtils::REVENUE_EVENT_METRIC_NAME => $eventTags,
-            );
-            $this->_logger->log(
-                Logger::WARNING,
-                'Event value is deprecated in track call. Use event tags to pass in revenue value instead.'
-            );
-        }
-
         if (!$this->validateUserInputs($attributes, $eventTags)) {
             return;
         }
