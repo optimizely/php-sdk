@@ -28,6 +28,7 @@ $booleanVariable = $optimizelyClient->getFeatureVariableBoolean('my_feature_key'
 $eventTags = ['revenue' => 4200];
 
 $optimizelyClient->track('event_key', 'user_id', $userAttributes, $eventTags);
+```
 
 ## 1.5.0
 - Added support for notification listeners.
@@ -44,11 +45,11 @@ $optimizelyClient->track('event_key', 'user_id', $userAttributes, $eventTags);
  * Force a user into a variation for a given experiment.
  *
  * @param $experimentKey string Key identifying the experiment.
- * @param $userId string The user ID to be used for bucketing. 
- * @param $variationKey string The variation key specifies the variation which the user  
+ * @param $userId string The user ID to be used for bucketing.
+ * @param $variationKey string The variation key specifies the variation which the user
  * will be forced into. If null, then clear the existing experiment-to-variation mapping.
  *
- * @return boolean A boolean value that indicates if the set completed successfully. 
+ * @return boolean A boolean value that indicates if the set completed successfully.
  */
 ```
 ```
@@ -58,14 +59,14 @@ public function setForcedVariation($experimentKey, $userId, $variationKey);
  * Gets the forced variation for a given user and experiment.
  *
  * @param $experimentKey string Key identifying the experiment.
- * @param $userId string The user ID to be used for bucketing. 
+ * @param $userId string The user ID to be used for bucketing.
  *
  * @return string|null The forced variation key.
  */
 public function getForcedVariation($experimentKey, $userId);
 ```
 
-- Added the bucketing ID feature allows decoupling bucketing from user identification so that a group of users that have the same bucketing ID are put into the same variation. 
+- Added the bucketing ID feature allows decoupling bucketing from user identification so that a group of users that have the same bucketing ID are put into the same variation.
 
 ## 1.2.0
 - Add user profile service.
