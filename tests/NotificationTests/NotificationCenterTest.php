@@ -58,14 +58,8 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::ERROR, "Invalid notification type.");
 
-        $this->assertSame(
-            null,
-            $this->notificationCenterObj->addNotificationListener(
-                $invalid_type,
-                function () {
-                }
-            )
-        );
+        $this->assertNull($this->notificationCenterObj->addNotificationListener($invalid_type, function () {
+        }));
 
         // should log and return null if invalid callable given
         $invalid_callable = "HelloWorld";
@@ -73,10 +67,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::ERROR, "Invalid notification callback.");
 
-        $this->assertSame(
-            null,
-            $this->notificationCenterObj->addNotificationListener(NotificationType::ACTIVATE, $invalid_callable)
-        );
+        $this->assertNull($this->notificationCenterObj->addNotificationListener(NotificationType::ACTIVATE, $invalid_callable));
     }
 
     public function testAddNotificationWithValidTypeAndCallback()
@@ -372,10 +363,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::DEBUG, sprintf("No Callback found with notification ID '%s'.", $invalid_id));
-        $this->assertSame(
-            false,
-            $this->notificationCenterObj->removeNotificationListener($invalid_id)
-        );
+        $this->assertFalse($this->notificationCenterObj->removeNotificationListener($invalid_id));
 
         /////////////////////////////////////////////////////////////////////
         // === Verify that callback is removed for a valid notification ID //
@@ -385,10 +373,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::INFO, sprintf("Callback with notification ID '%s' has been removed.", $valid_id));
-        $this->assertSame(
-            true,
-            $this->notificationCenterObj->removeNotificationListener($valid_id)
-        );
+        $this->assertTrue($this->notificationCenterObj->removeNotificationListener($valid_id));
 
         // verify that notifications length for NotificationType::ACTIVATE is now 1
         $this->assertSame(
@@ -409,10 +394,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::DEBUG, sprintf("No Callback found with notification ID '%s'.", $valid_id));
-        $this->assertSame(
-            false,
-            $this->notificationCenterObj->removeNotificationListener($valid_id)
-        );
+        $this->assertFalse($this->notificationCenterObj->removeNotificationListener($valid_id));
 
         //verify that notifications lengths for NotificationType::ACTIVATE and NotificationType::TRACK remain same
         $this->assertSame(
@@ -475,10 +457,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
             ->method('handleError')
             ->with(new InvalidNotificationTypeException('Invalid notification type.'));
 
-        $this->assertSame(
-            null,
-            $this->notificationCenterObj->clearNotifications($invalid_type)
-        );
+        $this->assertNull($this->notificationCenterObj->clearNotifications($invalid_type));
 
         // Verify that notifications length for NotificationType::ACTIVATE is still 2
         $this->assertSame(
