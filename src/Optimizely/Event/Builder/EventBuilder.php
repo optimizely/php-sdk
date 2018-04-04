@@ -37,7 +37,7 @@ class EventBuilder
     /**
      * @const string Version of the Optimizely PHP SDK.
      */
-    const SDK_VERSION = '1.5.0';
+    const SDK_VERSION = '2.0.0-beta1';
 
     /**
      * @var string URL to send event to.
@@ -184,7 +184,7 @@ class EventBuilder
             $singleSnapshot = [];
             $experiment = $config->getExperimentFromId($experimentId);
             $eventEntity = $config->getEvent($eventKey);
-                        
+
             $singleSnapshot[DECISIONS] = [
                 [
                     CAMPAIGN_ID => $experiment->getLayerId(),

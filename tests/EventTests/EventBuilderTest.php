@@ -68,7 +68,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 ]],
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '1.5.0',
+                'client_version' => '2.0.0-beta1',
                 'anonymize_ip'=> false,
             ];
         $this->expectedEventHttpVerb = 'POST';
@@ -89,7 +89,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         if (!$isEqual) {
             $msg = $this->differ->diff(var_export($e1, true), var_export($e2, true));
         }
-      
+
         return [$isEqual,$msg];
     }
 
@@ -129,7 +129,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->testUserId,
             null
         );
-        
+
         $logEvent = $this->fakeParamsToReconcile($logEvent);
         $result = $this->areLogEventsEqual($this->expectedLogEvent, $logEvent);
         $this->assertTrue($result[0], $result[1]);
@@ -149,7 +149,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->expectedEventHttpVerb,
             $this->expectedEventHeaders
         );
-        
+
         $userAttributes = [
             'device_type' => 'iPhone',
             'company' => 'Optimizely'
@@ -218,7 +218,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->expectedEventHttpVerb,
             $this->expectedEventHeaders
         );
-        
+
         $userAttributes = [
             'device_type' => 0,
             'company' => 'Optimizely'
@@ -247,7 +247,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->expectedEventHttpVerb,
             $this->expectedEventHeaders
         );
-        
+
         $userAttributes = [
             'invalid_attribute' => 'sorry_not_sorry'
         ];
@@ -316,7 +316,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->expectedEventHttpVerb,
             $this->expectedEventHeaders
         );
-        
+
         $userAttributes = [
             'device_type' => 'iPhone',
             'company' => 'Optimizely'
@@ -346,14 +346,14 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'key'=> 'purchase'
           ];
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
-        
+
         $expectedLogEvent = new LogEvent(
             $this->expectedEventUrl,
             $this->expectedEventParams,
             $this->expectedEventHttpVerb,
             $this->expectedEventHeaders
         );
-        
+
         $userAttributes = [
             'invalid_attribute'=> 'sorry_not_sorry'
         ];
@@ -388,7 +388,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
            ];
 
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
-        
+
         $expectedLogEvent = new LogEvent(
             $this->expectedEventUrl,
             $this->expectedEventParams,
@@ -432,7 +432,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             ]
            ];
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
-        
+
         $expectedLogEvent = new LogEvent(
             $this->expectedEventUrl,
             $this->expectedEventParams,
@@ -456,7 +456,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'value'=> '13.37'
             )
         );
-       
+
         $logEvent = $this->fakeParamsToReconcile($logEvent);
         $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
         $this->assertTrue($result[0], $result[1]);
@@ -482,7 +482,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             ]
            ];
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
-        
+
         $expectedLogEvent = new LogEvent(
             $this->expectedEventUrl,
             $this->expectedEventParams,
@@ -503,7 +503,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'value'=> '13.37'
             )
         );
-       
+
         $logEvent = $this->fakeParamsToReconcile($logEvent);
         $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
         $this->assertTrue($result[0], $result[1]);
@@ -524,14 +524,14 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             ]
            ];
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][0]['variation_id'] = '7722370027';
-        
+
         $expectedLogEvent = new LogEvent(
             $this->expectedEventUrl,
             $this->expectedEventParams,
             $this->expectedEventHttpVerb,
             $this->expectedEventHeaders
         );
-        
+
         $logEvent = $this->eventBuilder->createConversionEvent(
             $this->config,
             'purchase',
@@ -544,7 +544,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'value' => 'invalid value'
             )
         );
- 
+
         $logEvent = $this->fakeParamsToReconcile($logEvent);
         $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
         $this->assertTrue($result[0], $result[1]);
@@ -587,7 +587,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $userAttributes
         );
 
-     
+
         $logEvent = $this->fakeParamsToReconcile($logEvent);
         $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
         $this->assertTrue($result[0], $result[1]);
