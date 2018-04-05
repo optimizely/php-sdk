@@ -542,7 +542,6 @@ class Optimizely
             }
         }
 
-        sort($enabledFeatureKeys);
         return $enabledFeatureKeys;
     }
 
