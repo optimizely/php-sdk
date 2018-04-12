@@ -16,6 +16,9 @@ The Optimizely PHP SDK can be installed through [Composer](https://getcomposer.o
 php composer.phar require optimizely/optimizely-sdk
 ```
 
+### Feature Management Access
+To access the Feature Management configuration in the Optimizely dashboard, please contact your Optimizely account executive.
+
 ### Using the SDK
 See the Optimizely Full Stack [developer documentation](https://developers.optimizely.com/x/solutions/sdks/reference/?language=php) to learn how to set up your first Full Stack project and use the SDK.
 
