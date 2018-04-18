@@ -179,6 +179,29 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->expectOutputRegex('/Datafile has invalid format. Failing "activate"./');
     }
 
+    public function testActivateCallsValidateInputs()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('validateInputs'))
+            ->getMock();
+
+        $experimentKey = 'test_experiment';
+        $userId = 'test_user';
+        $inputArray = [
+            Optimizely::EXPERIMENT_KEY => $experimentKey,
+            Optimizely::USER_ID => $userId
+        ];
+
+        // assert that validateInputs gets called with exactly same keys
+        $optimizelyMock->expects($this->once())
+            ->method('validateInputs')
+            ->with($inputArray)
+            ->willReturn(false);
+
+        $this->assertNull($optimizelyMock->activate($experimentKey, $userId));
+    }
+
     public function testActivateInvalidAttributes()
     {
         $this->loggerMock->expects($this->exactly(2))
@@ -460,6 +483,29 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->expectOutputRegex('/Datafile has invalid format. Failing "getVariation"./');
     }
 
+    public function testGetVariationCallsValidateInputs()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('validateInputs'))
+            ->getMock();
+
+        $experimentKey = 'test_experiment';
+        $userId = 'test_user';
+        $inputArray = [
+            Optimizely::EXPERIMENT_KEY => $experimentKey,
+            Optimizely::USER_ID => $userId
+        ];
+
+        // assert that validateInputs gets called with exactly same keys
+        $optimizelyMock->expects($this->once())
+            ->method('validateInputs')
+            ->with($inputArray)
+            ->willReturn(false);
+
+        $this->assertNull($optimizelyMock->getVariation($experimentKey, $userId));
+    }
+
     public function testGetVariationInvalidAttributes()
     {
         $this->loggerMock->expects($this->once())
@@ -677,6 +723,29 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optlyObject->track('some_event', 'some_user');
         $this->expectOutputRegex('/Datafile has invalid format. Failing "track"./');
+    }
+
+    public function testTrackCallsValidateInputs()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('validateInputs'))
+            ->getMock();
+
+        $eventKey = 'test_event';
+        $userId = 'test_user';
+        $inputArray = [
+            Optimizely::EVENT_KEY => $eventKey,
+            Optimizely::USER_ID => $userId
+        ];
+
+        // assert that validateInputs gets called with exactly same keys
+        $optimizelyMock->expects($this->once())
+            ->method('validateInputs')
+            ->with($inputArray)
+            ->willReturn(false);
+
+        $this->assertNull($optimizelyMock->track($eventKey, $userId));
     }
 
     public function testTrackInvalidAttributes()
@@ -1632,14 +1701,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'location' => 'San Francisco'
         ];
 
-        // null user ID --> set should fail, normal bucketing  [TODO (Alda): getVariation on a null userID should return null]
+        // null user ID should fail setForcedVariation. getVariation on a null userID should return null
         $this->assertFalse($optlyObject->setForcedVariation('test_experiment', null, 'bad_variation'), 'Set variation for null user ID should have failed.');
+
         $variationKey = $optlyObject->getVariation('test_experiment', null, $userAttributes);
-        $this->assertEquals('variation', $variationKey, sprintf('Invalid variation "%s" for null user ID.', $variationKey));
-        // empty string user ID --> set should fail, normal bucketing [TODO (Alda): getVariation on an empty userID should return null]
+        $this->assertNull($variationKey);
+
+        // empty string user ID should fail setForcedVariation. getVariation on an empty userID should return null
         $this->assertFalse($optlyObject->setForcedVariation('test_experiment', '', 'bad_variation'), 'Set variation for empty string user ID should have failed.');
+
         $variationKey = $optlyObject->getVariation('test_experiment', '', $userAttributes);
-        $this->assertEquals('variation', $variationKey, sprintf('Invalid variation "%s" for empty string user ID.', $variationKey));
+        $this->assertNull($variationKey);
     }
 
     public function testSetForcedVariationWithInvalidExperimentKeys()
@@ -2843,5 +2915,67 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $optlyObject->sendImpressionEvent('test_experiment', 'control', 'test_user', $userAttributes);
+    }
+
+    /*
+    * test ValidateInputs method validates and logs for different and multiple keys
+    */
+    public function testValidateInputs()
+    {
+        $optlyObject = new OptimizelyTester($this->datafile, null, $this->loggerMock);
+
+        $INVALID_USER_ID_LOG = 'Provided User ID is in an invalid format.';
+        $INVALID_EVENT_KEY_LOG = 'Provided Event Key is in an invalid format.';
+        $INVALID_RANDOM_KEY_LOG = 'Provided ABCD is in an invalid format.';
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, $INVALID_USER_ID_LOG);
+        $this->assertFalse($optlyObject->validateInputs([Optimizely::USER_ID => null]));
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, $INVALID_RANDOM_KEY_LOG);
+        $this->assertFalse($optlyObject->validateInputs(['ABCD' => null]));
+
+        // Verify that multiple messages are logged.
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, $INVALID_EVENT_KEY_LOG);
+
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::ERROR, $INVALID_USER_ID_LOG);
+        $this->assertFalse($optlyObject->validateInputs([Optimizely::EVENT_KEY => null, Optimizely::USER_ID => null]));
+
+        // Verify that logger level is taken into account
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, $INVALID_RANDOM_KEY_LOG);
+        $this->assertFalse($optlyObject->validateInputs(['ABCD' => null], Logger::INFO));
+
+        // Verify that it returns true and nothing is logged if valid values given
+        $this->loggerMock->expects($this->never())
+            ->method('log');
+        $this->assertTrue($optlyObject->validateInputs([Optimizely::EVENT_KEY => 'test_event', Optimizely::USER_ID => 'test_user']));
+    }
+
+    /*
+    * test ValidateInputs method only returns true for non-empty string
+    */
+    public function testValidateInputsWithDifferentValues()
+    {
+        $optlyObject = new OptimizelyTester($this->datafile);
+
+        $this->assertTrue($optlyObject->validateInputs(['key' => '0']));
+        $this->assertTrue($optlyObject->validateInputs(['key' => 'test_user']));
+
+        $this->assertFalse($optlyObject->validateInputs(['key' => '']));
+        $this->assertFalse($optlyObject->validateInputs(['key' => null]));
+        $this->assertFalse($optlyObject->validateInputs(['key' => false]));
+        $this->assertFalse($optlyObject->validateInputs(['key' => true]));
+        $this->assertFalse($optlyObject->validateInputs(['key' => 2]));
+        $this->assertFalse($optlyObject->validateInputs(['key' => 2.0]));
+        $this->assertFalse($optlyObject->validateInputs(['key' => array()]));
     }
 }

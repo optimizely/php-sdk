@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 namespace Optimizely\Tests;
 
 use Exception;
+
+use Monolog\Logger;
+
 use Optimizely\Bucketer;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Event\LogEvent;
@@ -791,6 +794,11 @@ class OptimizelyTester extends Optimizely
     public function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
     {
         parent::sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+    }
+
+    public function validateInputs(array $values, $logLevel = Logger::ERROR)
+    {
+        return parent::validateInputs($values, $logLevel);
     }
 }
 
