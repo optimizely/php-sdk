@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,11 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testValidateJsonSchemaInvalidFile()
     {
-        $invalidDatafile = '{"key1": "val1"}';
-        $this->assertFalse(Validator::validateJsonSchema($invalidDatafile));
+        $datafile = DATAFILE;
+        $config = json_decode($datafile);
+
+        unset($config->rollouts);
+        $this->assertFalse(Validator::validateJsonSchema(json_encode($config)));
     }
 
     public function testValidateJsonSchemaNoJsonContent()
