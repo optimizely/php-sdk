@@ -127,7 +127,7 @@ class Bucketer
     public function bucket(ProjectConfig $config, Experiment $experiment, $bucketingId, $userId)
     {
         if (is_null($experiment->getKey())) {
-            return new Variation();
+            return null;
         }
 
         // Determine if experiment is in a mutually exclusive group.
@@ -135,13 +135,13 @@ class Bucketer
             $group = $config->getGroup($experiment->getGroupId());
 
             if (is_null($group->getId())) {
-                return new Variation();
+                return null;
             }
 
             $userExperimentId = $this->findBucket($bucketingId, $userId, $group->getId(), $group->getTrafficAllocation());
             if (empty($userExperimentId)) {
                 $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no experiment.', $userId));
-                return new Variation();
+                return null;
             }
 
             if ($userExperimentId != $experiment->getId()) {
@@ -154,7 +154,7 @@ class Bucketer
                         $experiment->getGroupId()
                     )
                 );
-                return new Variation();
+                return null;
             }
 
             $this->_logger->log(
@@ -186,6 +186,6 @@ class Bucketer
         }
         
         $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no variation.', $userId));
-        return new Variation();
+        return null;
     }
 }
