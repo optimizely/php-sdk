@@ -561,12 +561,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             'device_type' => 'iPhone',
             'company' => 'Optimizely',
             'location' => 'San Francisco',
-            RESERVED_ATTRIBUTE_KEY_BUCKETING_ID => $this->testBucketingIdVariation
+            '$opt_bucketing_id' => $this->testBucketingIdVariation
         ];
 
         $invalidUserAttributesWithBucketingId = [
             'company' => 'Optimizely',
-            RESERVED_ATTRIBUTE_KEY_BUCKETING_ID => $this->testBucketingIdControl
+            '$opt_bucketing_id' => $this->testBucketingIdControl
         ];
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);

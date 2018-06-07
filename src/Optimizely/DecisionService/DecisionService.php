@@ -23,6 +23,7 @@ use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
 use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
+use Optimizely\Enums\ControlAttributes;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\ProjectConfig;
 use Optimizely\UserProfile\Decision;
@@ -30,9 +31,6 @@ use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\UserProfile\UserProfile;
 use Optimizely\UserProfile\UserProfileUtils;
 use Optimizely\Utils\Validator;
-
-// Reserved attribute for bucketing ID.
-define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID", "\$opt_bucketing_id");
 
 /**
  * Optimizely's decision service that determines which variation of an experiment the user will be allocated to.
@@ -98,8 +96,10 @@ class DecisionService
 
         // If the bucketing ID key is defined in userAttributes, then use that in
         // place of the userID for the murmur hash key
-        if (!empty($userAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID])) {
-            $bucketingId = $userAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
+        $bucketingIdKey = ControlAttributes::BUCKETING_ID;
+        
+        if (!empty($userAttributes[$bucketingIdKey])) {
+            $bucketingId = $userAttributes[$bucketingIdKey];
             $this->_logger->log(Logger::DEBUG, sprintf('Setting the bucketing ID to "%s".', $bucketingId));
         }
 
@@ -318,7 +318,8 @@ class DecisionService
         if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes)) {
             $this->_logger->log(
                 Logger::DEBUG,
-                sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey()));
+                sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey())
+            );
             return null;
         }
         

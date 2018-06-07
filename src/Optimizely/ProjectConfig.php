@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016, 2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ use Optimizely\Entity\FeatureVariable;
 use Optimizely\Entity\Group;
 use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
+use Optimizely\Enums\ControlAttributes;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
@@ -48,6 +49,8 @@ use Optimizely\Utils\ConfigParser;
  */
 class ProjectConfig
 {
+    const RESERVED_ATTRIBUTE_PREFIX = '$opt_';
+
     /**
      * @var string Version of the datafile.
      */
@@ -68,6 +71,12 @@ class ProjectConfig
      * last block of visitors' IP address before storing event data
      */
     private $_anonymizeIP;
+
+    /**
+     * @var boolean denotes if Optimizely should perform
+     * bot filtering on your dispatched events.
+     */
+    private $_botFiltering;
 
     /**
      * @var string Revision of the datafile.
@@ -183,6 +192,7 @@ class ProjectConfig
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
         $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
+        $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
         $this->_forcedVariationMap = [];
 
@@ -291,6 +301,15 @@ class ProjectConfig
     public function getAnonymizeIP()
     {
         return $this->_anonymizeIP;
+    }
+
+    /**
+     * @return boolean Flag denoting if Optimizely should perform
+     * bot filtering on your dispatched events.
+     */
+    public function getBotFiltering()
+    {
+        return $this->_botFiltering;
     }
 
     /**
@@ -431,17 +450,31 @@ class ProjectConfig
      * @param $attributeKey string Key of the attribute.
      *
      * @return Attribute Entity corresponding to the key.
-     *         Dummy entity is returned if key is invalid.
+     *         Null is returned if key is invalid.
      */
     public function getAttribute($attributeKey)
     {
+        $hasReservedPrefix = strpos($attributeKey, self::RESERVED_ATTRIBUTE_PREFIX) === 0;
+
         if (isset($this->_attributeKeyMap[$attributeKey])) {
+            if ($hasReservedPrefix) {
+                $this->_logger->log(
+                    Logger::WARNING,
+                    sprintf('Attribute %s unexpectedly has reserved prefix %s; using attribute ID instead of reserved attribute name.', $attributeKey, self::RESERVED_ATTRIBUTE_PREFIX)
+                );
+            }
+
             return $this->_attributeKeyMap[$attributeKey];
+        }
+
+        if ($hasReservedPrefix && $attributeKey != ControlAttributes::BOT_FILTERING) {
+            return new Attribute($attributeKey, $attributeKey);
         }
 
         $this->_logger->log(Logger::ERROR, sprintf('Attribute key "%s" is not in datafile.', $attributeKey));
         $this->_errorHandler->handleError(new InvalidAttributeException('Provided attribute is not in datafile.'));
-        return new Attribute();
+        
+        return null;
     }
 
     /**

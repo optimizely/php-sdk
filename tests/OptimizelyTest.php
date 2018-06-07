@@ -1878,7 +1878,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'device_type' => 'iPhone',
             'company' => 'Optimizely',
             'location' => 'San Francisco',
-            RESERVED_ATTRIBUTE_KEY_BUCKETING_ID => $this->testBucketingIdVariation
+            "\$opt_bucketing_id" => $this->testBucketingIdVariation
         ];
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
