@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdoc>
+<title>Optimizely PHP-SDK</title>
+  <parser>
+    <visibility>public</visibility>
+    <target>docs</target>
+</parser>
+<transformer>
+    <target>docs</target>
+</transformer>
+<files>
+    <file>src/Optimizely/Optimizely.php</file>
+    <directory>src/Optimizely/ErrorHandler</directory>
+    <directory>src/Optimizely/Event/Dispatcher</directory>
+    <directory>src/Optimizely/Exceptions</directory>
+    <directory>src/Optimizely/Logger</directory>
+    <directory>src/Optimizely/UserProfile/UserProfileServiceInterface.php</directory>
+</files>
+</phpdoc>

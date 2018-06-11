@@ -3,3 +3,5 @@ build/
 vendor/
 composer.lock
 composer.phar
+phpDocumentor.phar
+docs/
