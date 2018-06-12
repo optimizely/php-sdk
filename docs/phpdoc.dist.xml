@@ -3,10 +3,10 @@
 <title>Optimizely PHP-SDK</title>
   <parser>
     <visibility>public</visibility>
-    <target>docs</target>
+    <target>docs/api</target>
 </parser>
 <transformer>
-    <target>docs</target>
+    <target>docs/api</target>
 </transformer>
 <files>
     <file>src/Optimizely/Optimizely.php</file>
