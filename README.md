@@ -4,7 +4,7 @@
 [![Total Downloads](https://poser.pugx.org/optimizely/optimizely-sdk/downloads)](https://packagist.org/packages/optimizely/optimizely-sdk)
 [![Apache 2.0](https://img.shields.io/github/license/nebula-plugins/gradle-extra-configurations-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-This repository houses the PHP SDK for Optimizely Full Stack.
+This repository houses the official PHP SDK for Optimizely Full Stack.
 
 ## Getting Started
 
