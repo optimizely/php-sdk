@@ -467,7 +467,7 @@ class ProjectConfig
             return $this->_attributeKeyMap[$attributeKey];
         }
 
-        if ($hasReservedPrefix && $attributeKey != ControlAttributes::BOT_FILTERING) {
+        if ($hasReservedPrefix) {
             return new Attribute($attributeKey, $attributeKey);
         }
 

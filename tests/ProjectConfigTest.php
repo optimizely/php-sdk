@@ -545,9 +545,6 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
         $optBucketingIdAttr = new Attribute('$opt_bucketing_id', '$opt_bucketing_id');
         $this->assertEquals($optBucketingIdAttr, $this->config->getAttribute('$opt_bucketing_id'));
-
-        # Should return null when key is $opt_bot_filtering
-        $this->assertNull($this->config->getAttribute('$opt_bot_filtering'));
     }
 
     public function testGetVariationFromKeyValidExperimentKeyValidVariationKey()
