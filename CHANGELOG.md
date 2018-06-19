@@ -1,3 +1,8 @@
+# 2.0.1
+June 19th, 2018
+
+- Fix: send impression event for Feature Test when Feature is disabled ([#114](https://github.com/optimizely/php-sdk/pull/114))
+
 ## 2.0.0
 April 12th, 2018
 
