@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,8 +107,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no variation.');
 
-        $this->assertEquals(
-            new Variation(),
+        $this->assertNull(
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('test_experiment'),
@@ -167,8 +166,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no variation.');
 
-        $this->assertEquals(
-            new Variation(),
+        $this->assertNull(
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('test_experiment'),
@@ -271,8 +269,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is not in experiment group_experiment_1 of group 7722400015.');
 
-        $this->assertEquals(
-            new Variation(),
+        $this->assertNull(
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_1'),
@@ -290,8 +287,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
 
-        $this->assertEquals(
-            new Variation(),
+        $this->assertNull(
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_1'),
@@ -308,8 +304,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
-        $this->assertEquals(
-            new Variation(),
+        $this->assertNull(
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('group_experiment_1'),
@@ -325,8 +320,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->never())
             ->method('log');
 
-        $this->assertEquals(
-            new Variation(),
+        $this->assertNull(
             $bucketer->bucket($this->config, new Experiment(), $this->testBucketingIdControl, $this->testUserId)
         );
     }
@@ -356,8 +350,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $bucketer = new TestBucketer($this->loggerMock);
         $bucketer->setBucketValues([1000, 3000, 7000, 9000]);
 
-        $this->assertEquals(
-            new Variation(),
+        $this->assertNull(
             $bucketer->bucket(
                 $this->config,
                 $this->config->getExperimentFromKey('invalid_experiment'),
@@ -430,8 +423,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $this->assertEquals(
-            new Variation(),
+        $this->assertNull(
             $bucketer->bucket(
                 $this->config,
                 $rollout_rule,
