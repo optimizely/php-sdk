@@ -25,12 +25,12 @@ use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureVariable;
-use Optimizely\Logger\DefaultLogger;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
+use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
@@ -479,18 +479,18 @@ class Optimizely
             return false;
         }
 
-        $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
-        if ($feature_flag && (!$feature_flag->getId())) {
+        $featureFlag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
+        if ($featureFlag && (!$featureFlag->getId())) {
             // Error logged in ProjectConfig - getFeatureFlagFromKey
             return false;
         }
 
         //validate feature flag
-        if (!Validator::isFeatureFlagValid($this->_config, $feature_flag)) {
+        if (!Validator::isFeatureFlagValid($this->_config, $featureFlag)) {
             return false;
         }
 
-        $decision = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
+        $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
         if (!$decision) {
             $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
             return false;
@@ -574,8 +574,8 @@ class Optimizely
             return null;
         }
 
-        $feature_flag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
-        if ($feature_flag && (!$feature_flag->getId())) {
+        $featureFlag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
+        if ($featureFlag && (!$featureFlag->getId())) {
             // Error logged in ProjectConfig - getFeatureFlagFromKey
             return null;
         }
@@ -594,35 +594,35 @@ class Optimizely
             return null;
         }
 
-        $decision = $this->_decisionService->getVariationForFeature($feature_flag, $userId, $attributes);
-        $variable_value = $variable->getDefaultValue();
+        $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
+        $variableValue = $variable->getDefaultValue();
 
         if (!$decision) {
             $this->_logger->log(
                 Logger::INFO,
                 "User '{$userId}'is not in any variation, ".
-                "returning default value '{$variable_value}'."
+                "returning default value '{$variableValue}'."
             );
         } else {
             $variation = $decision->getVariation();
             $variable_usage = $variation->getVariableUsageById($variable->getId());
             if ($variable_usage) {
-                $variable_value = $variable_usage->getValue();
+                $variableValue = $variable_usage->getValue();
                 $this->_logger->log(
                     Logger::INFO,
-                    "Returning variable value '{$variable_value}' for variation '{$variation->getKey()}' ".
+                    "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
                     "of feature flag '{$featureFlagKey}'"
                 );
             } else {
                 $this->_logger->log(
                     Logger::INFO,
                     "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}', ".
-                    "returning default value '{$variable_value}'."
+                    "returning default value '{$variableValue}'."
                 );
             }
         }
 
-        return $variable_value;
+        return $variableValue;
     }
 
     /**
@@ -637,7 +637,7 @@ class Optimizely
      */
     public function getFeatureVariableBoolean($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
-        $variable_value = $this->getFeatureVariableValueForType(
+        $variableValue = $this->getFeatureVariableValueForType(
             $featureFlagKey,
             $variableKey,
             $userId,
@@ -645,11 +645,11 @@ class Optimizely
             FeatureVariable::BOOLEAN_TYPE
         );
 
-        if (!is_null($variable_value)) {
-            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
+        if (!is_null($variableValue)) {
+            return VariableTypeUtils::castStringToType($variableValue, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
         }
 
-        return $variable_value;
+        return $variableValue;
     }
 
     /**
@@ -664,7 +664,7 @@ class Optimizely
      */
     public function getFeatureVariableInteger($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
-        $variable_value = $this->getFeatureVariableValueForType(
+        $variableValue = $this->getFeatureVariableValueForType(
             $featureFlagKey,
             $variableKey,
             $userId,
@@ -672,11 +672,11 @@ class Optimizely
             FeatureVariable::INTEGER_TYPE
         );
 
-        if (!is_null($variable_value)) {
-            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::INTEGER_TYPE, $this->_logger);
+        if (!is_null($variableValue)) {
+            return VariableTypeUtils::castStringToType($variableValue, FeatureVariable::INTEGER_TYPE, $this->_logger);
         }
 
-        return $variable_value;
+        return $variableValue;
     }
 
     /**
@@ -691,7 +691,7 @@ class Optimizely
      */
     public function getFeatureVariableDouble($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
-        $variable_value = $this->getFeatureVariableValueForType(
+        $variableValue = $this->getFeatureVariableValueForType(
             $featureFlagKey,
             $variableKey,
             $userId,
@@ -699,11 +699,11 @@ class Optimizely
             FeatureVariable::DOUBLE_TYPE
         );
 
-        if (!is_null($variable_value)) {
-            return VariableTypeUtils::castStringToType($variable_value, FeatureVariable::DOUBLE_TYPE, $this->_logger);
+        if (!is_null($variableValue)) {
+            return VariableTypeUtils::castStringToType($variableValue, FeatureVariable::DOUBLE_TYPE, $this->_logger);
         }
 
-        return $variable_value;
+        return $variableValue;
     }
 
     /**
@@ -718,7 +718,7 @@ class Optimizely
      */
     public function getFeatureVariableString($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
-        $variable_value = $this->getFeatureVariableValueForType(
+        $variableValue = $this->getFeatureVariableValueForType(
             $featureFlagKey,
             $variableKey,
             $userId,
@@ -726,6 +726,6 @@ class Optimizely
             FeatureVariable::STRING_TYPE
         );
 
-        return $variable_value;
+        return $variableValue;
     }
 }
