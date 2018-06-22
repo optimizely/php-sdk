@@ -625,21 +625,21 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     // should return nil and log a message when the feature flag's experiment ids array is empty
     public function testGetVariationForFeatureExperimentGivenNullExperimentIds()
     {
-        $feature_flag = $this->config->getFeatureFlagFromKey('empty_feature');
+        $featureFlag = $this->config->getFeatureFlagFromKey('empty_feature');
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::DEBUG, "The feature flag 'empty_feature' is not used in any experiments.");
 
-        $this->assertNull($this->decisionService->getVariationForFeatureExperiment($feature_flag, 'user1', []));
+        $this->assertNull($this->decisionService->getVariationForFeatureExperiment($featureFlag, 'user1', []));
     }
 
     // should return nil and log a message when the experiment is not in the datafile
     public function testGetVariationForFeatureExperimentGivenExperimentNotInDataFile()
     {
         $boolean_feature = $this->config->getFeatureFlagFromKey('boolean_feature');
-        $feature_flag = clone $boolean_feature;
+        $featureFlag = clone $boolean_feature;
         // Use any string that is not an experiment id in the data file
-        $feature_flag->setExperimentIds(["29039203"]);
+        $featureFlag->setExperimentIds(["29039203"]);
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -652,7 +652,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "The user 'user1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
             );
 
-        $this->assertNull($this->decisionService->getVariationForFeatureExperiment($feature_flag, 'user1', []));
+        $this->assertNull($this->decisionService->getVariationForFeatureExperiment($featureFlag, 'user1', []));
     }
 
     // should return nil and log when the user is not bucketed into the feature flag's experiments
@@ -672,8 +672,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 Logger::INFO,
                 "The user 'user1' is not bucketed into any of the experiments using the feature 'multi_variate_feature'."
             );
-        $feature_flag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user1', []));
+        $featureFlag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
+        $this->assertNull($this->decisionServiceMock->getVariationForFeatureExperiment($featureFlag, 'user1', []));
     }
 
     //  should return the variation when the user is bucketed into a variation for the experiment on the feature flag
@@ -686,7 +686,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('getVariation')
             ->will($this->returnValue($variation));
         
-        $feature_flag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
+        $featureFlag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
         $expected_decision = new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_EXPERIMENT);
 
         $this->loggerMock->expects($this->at(0))
@@ -698,7 +698,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user1', [])
+            $this->decisionServiceMock->getVariationForFeatureExperiment($featureFlag, 'user1', [])
         );
     }
 
@@ -715,7 +715,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $variation = $mutex_exp->getVariations()[0];
         $expected_decision = new FeatureDecision($mutex_exp, $variation, FeatureDecision::DECISION_SOURCE_EXPERIMENT);
 
-        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_feature');
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(
@@ -724,7 +724,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             );
         $this->assertEquals(
             $expected_decision,
-            $this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user_1', [])
+            $this->decisionServiceMock->getVariationForFeatureExperiment($featureFlag, 'user_1', [])
         );
     }
 
@@ -739,14 +739,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
 
         $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
-        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_feature');
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(
                 Logger::INFO,
                 "The user 'user_1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
             );
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureExperiment($feature_flag, 'user_1', []));
+        $this->assertNull($this->decisionServiceMock->getVariationForFeatureExperiment($featureFlag, 'user_1', []));
     }
 
     // should return the bucketed experiment and variation
@@ -757,8 +757,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeatureExperiment'))
             ->getMock();
 
-        $feature_flag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
-        $expected_experiment_id = $feature_flag->getExperimentIds()[0];
+        $featureFlag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
+        $expected_experiment_id = $featureFlag->getExperimentIds()[0];
         $expected_experiment = $this->config->getExperimentFromId($expected_experiment_id);
         $expected_variation = $expected_experiment->getVariations()[0];
         $expected_decision = new FeatureDecision(
@@ -773,7 +773,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $decisionServiceMock->getVariationForFeature($feature_flag, 'user_1', [])
+            $decisionServiceMock->getVariationForFeature($featureFlag, 'user_1', [])
         );
     }
 
@@ -785,8 +785,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeatureExperiment','getVariationForFeatureRollout'))
             ->getMock();
 
-        $feature_flag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
-        $rollout_id = $feature_flag->getRolloutId();
+        $featureFlag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
+        $rollout_id = $featureFlag->getRolloutId();
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment = $rollout->getExperiments()[0];
         $expected_variation = $experiment->getVariations()[0];
@@ -814,7 +814,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $decisionServiceMock->getVariationForFeature($feature_flag, 'user_1', [])
+            $decisionServiceMock->getVariationForFeature($featureFlag, 'user_1', [])
         );
     }
 
@@ -826,7 +826,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeatureExperiment','getVariationForFeatureRollout'))
             ->getMock();
 
-        $feature_flag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
+        $featureFlag = $this->config->getFeatureFlagFromKey('string_single_variable_feature');
 
         $decisionServiceMock
             ->method('getVariationForFeatureExperiment')
@@ -843,14 +843,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "User 'user_1' is not bucketed into rollout for feature flag 'string_single_variable_feature'."
             );
 
-        $this->assertNull($decisionServiceMock->getVariationForFeature($feature_flag, 'user_1', []));
+        $this->assertNull($decisionServiceMock->getVariationForFeature($featureFlag, 'user_1', []));
     }
 
     // should return null
     public function testGetVariationForFeatureRolloutWhenNoRolloutIsAssociatedToFeatureFlag()
     {
         // No rollout id is associated to boolean_feature
-        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_feature');
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -859,16 +859,16 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "Feature flag 'boolean_feature' is not used in a rollout."
             );
 
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureRollout($feature_flag, 'user_1', []));
+        $this->assertNull($this->decisionServiceMock->getVariationForFeatureRollout($featureFlag, 'user_1', []));
     }
 
     // should return null
     public function testGetVariationForFeatureRolloutWhenRolloutIsNotInDataFile()
     {
-        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_feature');
-        $feature_flag = clone $feature_flag;
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_feature');
+        $featureFlag = clone $featureFlag;
         // Set any string which is not a rollout id in the data file
-        $feature_flag->setRolloutId('invalid_rollout_id');
+        $featureFlag->setRolloutId('invalid_rollout_id');
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -877,7 +877,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 'Rollout with ID "invalid_rollout_id" is not in the datafile.'
             );
 
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureRollout($feature_flag, 'user_1', []));
+        $this->assertNull($this->decisionServiceMock->getVariationForFeatureRollout($featureFlag, 'user_1', []));
     }
 
     // should return null
@@ -891,8 +891,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->decisionService = new DecisionService($this->loggerMock, $configMock);
   
-        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
-        $rollout_id = $feature_flag->getRolloutId();
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $featureFlag->getRolloutId();
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment_less_rollout = clone $rollout;
         $experiment_less_rollout->setExperiments([]);
@@ -901,7 +901,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('getRolloutFromId')
             ->will($this->returnValue($experiment_less_rollout));
 
-        $this->assertNull($this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', []));
+        $this->assertNull($this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', []));
     }
 
     // ============== when the user qualifies for targeting rule (audience match) ======================
@@ -909,8 +909,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     //  should return the variation the user is bucketed into when the user is bucketed into the targeting rule
     public function testGetVariationForFeatureRolloutWhenUserIsBucketedInTheTargetingRule()
     {
-        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
-        $rollout_id = $feature_flag->getRolloutId();
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $featureFlag->getRolloutId();
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment = $rollout->getExperiments()[0];
         $expected_variation = $experiment->getVariations()[0];
@@ -933,7 +933,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes)
         );
     }
 
@@ -941,8 +941,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     // and the user is not bucketed into the targeting rule
     public function testGetVariationForFeatureRolloutWhenUserIsNotBucketedInTheTargetingRuleButBucketedToEveryoneElseRule()
     {
-        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
-        $rollout_id = $feature_flag->getRolloutId();
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $featureFlag->getRolloutId();
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment0 = $rollout->getExperiments()[0];
         // Everyone Else Rule
@@ -971,7 +971,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes)
         );
     }
 
@@ -979,8 +979,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     // the user is not bucketed into the "Everyone Else" rule'
     public function testGetVariationForFeatureRolloutWhenUserIsNeitherBucketedInTheTargetingRuleNorToEveryoneElseRule()
     {
-        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
-        $rollout_id = $feature_flag->getRolloutId();
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $featureFlag->getRolloutId();
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment0 = $rollout->getExperiments()[0];
         // Everyone Else Rule
@@ -1005,7 +1005,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log');
 
         $this->assertNull(
-            $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes));
+            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes));
     }
 
     // ============== END of tests - when the user qualifies for targeting rule (audience match) ======================
@@ -1016,8 +1016,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     // including Everyone Else rule
     public function testGetVariationForFeatureRolloutWhenUserDoesNotQualifyForAnyTargetingRule()
     {
-        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
-        $rollout_id = $feature_flag->getRolloutId();
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $featureFlag->getRolloutId();
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment0 = $rollout->getExperiments()[0];
         $experiment1 = $rollout->getExperiments()[1];
@@ -1058,14 +1058,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes)
         );
     }
 
     public function testGetVariationForFeatureRolloutWhenUserDoesNotQualifyForAnyTargetingRuleOrEveryoneElseRule()
     {
-        $feature_flag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
-        $rollout_id = $feature_flag->getRolloutId();
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $featureFlag->getRolloutId();
         $rollout = $this->config->getRolloutFromId($rollout_id);
         $experiment0 = $rollout->getExperiments()[0];
         $experiment1 = $rollout->getExperiments()[1];
@@ -1108,6 +1108,6 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment2->getKey()}'."
         );    
 
-        $this->assertNull($this->decisionService->getVariationForFeatureRollout($feature_flag, 'user_1', $user_attributes));
+        $this->assertNull($this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes));
     }
 }
