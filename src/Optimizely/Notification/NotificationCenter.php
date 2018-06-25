@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely Inc and Contributors
+ * Copyright 2017-2018, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,9 @@ class NotificationCenter
 
     private $_errorHandler;
 
+    /**
+    * @internal
+    */
     public function __construct(LoggerInterface $logger, ErrorHandlerInterface $errorHandler)
     {
         $this->_notificationId = 1;
@@ -50,6 +53,9 @@ class NotificationCenter
         $this->_errorHandler = $errorHandler;
     }
 
+    /**
+    * @internal
+    */
     public function getNotifications()
     {
         return $this->_notifications;
@@ -147,7 +153,7 @@ class NotificationCenter
 
     /**
      * Executes all registered callbacks for the given notification type
-     *
+     * @internal
      * @param string $notification_type One of the constants defined in NotificationType
      * @param array  $args              Array of items to pass as arguments to the callback
      */
@@ -184,6 +190,7 @@ class NotificationCenter
     }
 
     /**
+     * @internal
      * Logs and raises an exception when registered callback expects more number of arguments when executed
      */
     public function reportArgumentCountError()

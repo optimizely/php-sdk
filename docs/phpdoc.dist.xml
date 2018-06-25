@@ -10,10 +10,11 @@
 </transformer>
 <files>
     <file>src/Optimizely/Optimizely.php</file>
+    <file>src/Optimizely/UserProfile/UserProfileServiceInterface.php</file>
     <directory>src/Optimizely/ErrorHandler</directory>
     <directory>src/Optimizely/Event/Dispatcher</directory>
     <directory>src/Optimizely/Exceptions</directory>
     <directory>src/Optimizely/Logger</directory>
-    <directory>src/Optimizely/UserProfile/UserProfileServiceInterface.php</directory>
+    <directory>src/Optimizely/Notification</directory>
 </files>
 </phpdoc>

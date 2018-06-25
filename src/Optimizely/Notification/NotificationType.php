@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely Inc and Contributors
+ * Copyright 2017-2018, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ class NotificationType
     const ACTIVATE = "ACTIVATE:experiment, user_id, attributes, variation, event";
     const TRACK = "TRACK:event_key, user_id, attributes, event_tags, event";
 
+    /**
+    * @internal
+    */
     public static function isNotificationTypeValid($notification_type)
     {
         $oClass = new \ReflectionClass(__CLASS__);
@@ -30,6 +33,9 @@ class NotificationType
         return in_array($notification_type, $notificationTypeList);
     }
 
+    /**
+    * @internal
+    */
     public static function getAll()
     {
         $oClass = new \ReflectionClass(__CLASS__);
