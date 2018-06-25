@@ -24,9 +24,7 @@ use Monolog\Logger;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
-use Optimizely\Entity\FeatureFlag;
 use Optimizely\Entity\FeatureVariable;
-use Optimizely\Entity\Rollout;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
@@ -38,7 +36,6 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\UserProfile\UserProfileServiceInterface;
-use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\Validator;
 use Optimizely\Utils\VariableTypeUtils;
 
@@ -502,20 +499,19 @@ class Optimizely
         $experiment = $decision->getExperiment();
         $variation = $decision->getVariation();
 
-        if (is_null($variation) || !$variation->getFeatureEnabled()) {
-            $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
-            return false;
-        }
-
         if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
             $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
         } else {
             $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
         }
 
-        $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
+        if ($variation->getFeatureEnabled()) {
+            $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
+            return true;
+        }
 
-        return true;
+        $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
+        return false;
     }
 
     /**
