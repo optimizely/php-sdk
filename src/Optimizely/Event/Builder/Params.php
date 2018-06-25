@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,25 @@
  */
 
 define('ACCOUNT_ID', 'account_id');
-define('PROJECT_ID', 'project_id');
-define('ENTITY_ID', 'entity_id');
-define('TIMESTAMP', 'timestamp');
-define('VISITORS', 'visitors');
-define('REVISION', 'revision');
-define('EXPERIMENT_ID', 'experiment_id');
-define('VARIATION_ID', 'variation_id');
+define('ACTIVATE_EVENT_KEY', 'campaign_activated');
+define('ANONYMIZE_IP', 'anonymize_ip');
+define('ATTRIBUTES', 'attributes');
 define('CAMPAIGN_ID', 'campaign_id');
-define('VISITOR_ID', 'visitor_id');
-define('DECISIONS', 'decisions');
-define('EVENTS', 'events');;
 define('CLIENT_ENGINE', 'client_name');
 define('CLIENT_VERSION', 'client_version');
 define('CUSTOM_ATTRIBUTE_FEATURE_TYPE', 'custom');
-define('ACTIVATE_EVENT_KEY', 'campaign_activated');
-define('SNAPSHOTS', 'snapshots');
-define('ATTRIBUTES', 'attributes');
+define('DECISIONS', 'decisions');
+define('ENTITY_ID', 'entity_id');
+define('EVENTS', 'events');;
+define('EXPERIMENT_ID', 'experiment_id');
 define('KEY', 'key');
+define('PROJECT_ID', 'project_id');
+define('REVISION', 'revision');
+define('SNAPSHOTS', 'snapshots');
+define('TIMESTAMP', 'timestamp');
 define('TYPE', 'type');
-define('VALUE', 'value');
 define('UUID', 'uuid');
-define('ANONYMIZE_IP', 'anonymize_ip');
+define('VALUE', 'value');
+define('VARIATION_ID', 'variation_id');
+define('VISITOR_ID', 'visitor_id');
+define('VISITORS', 'visitors');
