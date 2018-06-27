@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -460,6 +460,10 @@ define(
     {
       "id": "7723340004",
       "key": "location"
+    },
+    {
+      "id": "7723340006",
+      "key": "$opt_xyz"
     }
   ],
   "projectId": "7720880029",
@@ -482,6 +486,7 @@ define(
     }
   ],
   "anonymizeIP": false,
+  "botFiltering": true,
   "revision": "15",
   "featureFlags": [
     {

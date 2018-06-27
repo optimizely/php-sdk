@@ -19,13 +19,13 @@ namespace Optimizely\Event\Builder;
 
 require 'Params.php';
 
+use Optimizely\Entity\Attribute;
 use Optimizely\Entity\Experiment;
+use Optimizely\Enums\ControlAttributes;
 use Optimizely\Event\LogEvent;
 use Optimizely\ProjectConfig;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\GeneratorUtils;
-
-define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY", "optimizely_bucketing_id");
 
 class EventBuilder
 {
@@ -63,6 +63,7 @@ class EventBuilder
 
     /**
      * Event Builder constructor to set logger
+     *
      * @param $logger LoggerInterface
      */
     public function __construct($logger)
@@ -97,38 +98,37 @@ class EventBuilder
             ANONYMIZE_IP => $config->getAnonymizeIP()
         ];
 
-        if (is_null($attributes)) {
-            return $commonParams;
-        }
-
-        foreach ($attributes as $attributeKey => $attributeValue) {
-            $feature = [];
-            // Do not discard attribute if value is zero or false
-            if (!is_null($attributeValue)) {
-                // check for reserved attributes
-                if (strcmp($attributeKey, RESERVED_ATTRIBUTE_KEY_BUCKETING_ID) == 0) {
-                    $feature = [
-                       ENTITY_ID => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID,
-                       KEY => RESERVED_ATTRIBUTE_KEY_BUCKETING_ID_EVENT_PARAM_KEY,
-                       TYPE => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
-                       VALUE => $attributeValue
-                    ];
-                } else {
+        if(!is_null($attributes)) {
+            foreach ($attributes as $attributeKey => $attributeValue) {
+                $feature = [];
+                // Do not discard attribute if value is zero or false
+                if (!is_null($attributeValue)) {
                     $attributeEntity = $config->getAttribute($attributeKey);
-                    if (!is_null($attributeEntity->getKey())) {
+                    if ($attributeEntity instanceof Attribute) {
                         $feature = [
                             ENTITY_ID => $attributeEntity->getId(),
                             KEY => $attributeKey,
                             TYPE => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
                             VALUE => $attributeValue
                         ];
+
+                        $commonParams[VISITORS][0][ATTRIBUTES][] = $feature;
                     }
                 }
             }
+        }
 
-            if (!empty($feature)) {
-                $commonParams[VISITORS][0][ATTRIBUTES][] = $feature;
-            }
+        // Append Bot Filtering attribute
+        $botFilteringValue = $config->getBotFiltering();
+        if (is_bool($botFilteringValue)) {
+            $feature = [
+                ENTITY_ID => ControlAttributes::BOT_FILTERING,
+                KEY => ControlAttributes::BOT_FILTERING,
+                TYPE => CUSTOM_ATTRIBUTE_FEATURE_TYPE,
+                VALUE => $botFilteringValue
+            ];
+
+            $commonParams[VISITORS][0][ATTRIBUTES][] = $feature;
         }
 
         return $commonParams;
