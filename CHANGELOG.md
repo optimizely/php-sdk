@@ -1,4 +1,9 @@
-# 2.0.1
+## 2.1.0
+June 29th, 2018
+
+- Introduces support for bot filtering.
+
+## 2.0.1
 June 19th, 2018
 
 - Fix: send impression event for Feature Test when Feature is disabled ([#114](https://github.com/optimizely/php-sdk/pull/114)).
