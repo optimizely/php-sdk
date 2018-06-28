@@ -1,7 +1,7 @@
 ## 2.1.0
 June 29th, 2018
 
-- Introduces support for bot filtering.
+- Introduces support for bot filtering ([#110](https://github.com/optimizely/php-sdk/pull/110)).
 
 ## 2.0.1
 June 19th, 2018
