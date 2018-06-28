@@ -192,28 +192,28 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     public function testIsFeatureFlagValid()
     {
         $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
-        $feature_flag_source = $config->getFeatureFlagFromKey('mutex_group_feature');
+        $featureFlagSource = $config->getFeatureFlagFromKey('mutex_group_feature');
 
         // should return true when no experiment ids exist
-        $feature_flag = clone $feature_flag_source;
-        $feature_flag->setExperimentIds([]);
-        $this->assertTrue(Validator::isFeatureFlagValid($config, $feature_flag));
+        $featureFlag = clone $featureFlagSource;
+        $featureFlag->setExperimentIds([]);
+        $this->assertTrue(Validator::isFeatureFlagValid($config, $featureFlag));
 
         // should return true when only one experiment id exists
-        $feature_flag = clone $feature_flag_source;
-        $feature_flag->setExperimentIds(['122241']);
-        $this->assertTrue(Validator::isFeatureFlagValid($config, $feature_flag));
+        $featureFlag = clone $featureFlagSource;
+        $featureFlag->setExperimentIds(['122241']);
+        $this->assertTrue(Validator::isFeatureFlagValid($config, $featureFlag));
 
         // should return true when more than one experiment ids exist that belong to the same group
-        $feature_flag = clone $feature_flag_source;
-        $this->assertTrue(Validator::isFeatureFlagValid($config, $feature_flag));
+        $featureFlag = clone $featureFlagSource;
+        $this->assertTrue(Validator::isFeatureFlagValid($config, $featureFlag));
 
         //should return false when more than one experiment ids exist that belong to different group
-        $feature_flag = clone $feature_flag_source;
-        $experimentIds = $feature_flag->getExperimentIds();
+        $featureFlag = clone $featureFlagSource;
+        $experimentIds = $featureFlag->getExperimentIds();
         $experimentIds [] = '122241';
-        $feature_flag->setExperimentIds($experimentIds);
+        $featureFlag->setExperimentIds($experimentIds);
 
-        $this->assertFalse(Validator::isFeatureFlagValid($config, $feature_flag));
+        $this->assertFalse(Validator::isFeatureFlagValid($config, $featureFlag));
     }
 }

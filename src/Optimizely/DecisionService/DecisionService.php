@@ -23,6 +23,7 @@ use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
 use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
+use Optimizely\Enums\ControlAttributes;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\ProjectConfig;
 use Optimizely\UserProfile\Decision;
@@ -30,9 +31,6 @@ use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\UserProfile\UserProfile;
 use Optimizely\UserProfile\UserProfileUtils;
 use Optimizely\Utils\Validator;
-
-// Reserved attribute for bucketing ID.
-define("RESERVED_ATTRIBUTE_KEY_BUCKETING_ID", "\$opt_bucketing_id");
 
 /**
  * Optimizely's decision service that determines which variation of an experiment the user will be allocated to.
@@ -98,8 +96,10 @@ class DecisionService
 
         // If the bucketing ID key is defined in userAttributes, then use that in
         // place of the userID for the murmur hash key
-        if (!empty($userAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID])) {
-            $bucketingId = $userAttributes[RESERVED_ATTRIBUTE_KEY_BUCKETING_ID];
+        $bucketingIdKey = ControlAttributes::BUCKETING_ID;
+        
+        if (!empty($userAttributes[$bucketingIdKey])) {
+            $bucketingId = $userAttributes[$bucketingIdKey];
             $this->_logger->log(Logger::DEBUG, sprintf('Setting the bucketing ID to "%s".', $bucketingId));
         }
 
@@ -215,14 +215,14 @@ class DecisionService
      */
     public function getVariationForFeatureExperiment(FeatureFlag $featureFlag, $userId, $userAttributes)
     {
-        $feature_flag_key = $featureFlag->getKey();
+        $featureFlagKey = $featureFlag->getKey();
         $experimentIds = $featureFlag->getExperimentIds();
 
         // Check if there are any experiment IDs inside feature flag
         if (empty($experimentIds)) {
             $this->_logger->log(
                 Logger::DEBUG,
-                "The feature flag '{$feature_flag_key}' is not used in any experiments."
+                "The feature flag '{$featureFlagKey}' is not used in any experiments."
             );
             return null;
         }
@@ -239,7 +239,7 @@ class DecisionService
             if ($variation && $variation->getKey()) {
                 $this->_logger->log(
                     Logger::INFO,
-                    "The user '{$userId}' is bucketed into experiment '{$experiment->getKey()}' of feature '{$feature_flag_key}'."
+                    "The user '{$userId}' is bucketed into experiment '{$experiment->getKey()}' of feature '{$featureFlagKey}'."
                 );
 
                 return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_EXPERIMENT);
@@ -248,7 +248,7 @@ class DecisionService
 
         $this->_logger->log(
             Logger::INFO,
-            "The user '{$userId}' is not bucketed into any of the experiments using the feature '{$feature_flag_key}'."
+            "The user '{$userId}' is not bucketed into any of the experiments using the feature '{$featureFlagKey}'."
         );
 
         return null;
@@ -270,12 +270,12 @@ class DecisionService
     public function getVariationForFeatureRollout(FeatureFlag $featureFlag, $userId, $userAttributes)
     {
         $bucketing_id = $this->getBucketingId($userId, $userAttributes);
-        $feature_flag_key = $featureFlag->getKey();
+        $featureFlagKey = $featureFlag->getKey();
         $rollout_id = $featureFlag->getRolloutId();
         if (empty($rollout_id)) {
             $this->_logger->log(
                 Logger::DEBUG,
-                "Feature flag '{$feature_flag_key}' is not used in a rollout."
+                "Feature flag '{$featureFlagKey}' is not used in a rollout."
             );
             return null;
         }
@@ -318,7 +318,8 @@ class DecisionService
         if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes)) {
             $this->_logger->log(
                 Logger::DEBUG,
-                sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey()));
+                sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey())
+            );
             return null;
         }
         

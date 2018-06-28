@@ -1878,7 +1878,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'device_type' => 'iPhone',
             'company' => 'Optimizely',
             'location' => 'San Francisco',
-            RESERVED_ATTRIBUTE_KEY_BUCKETING_ID => $this->testBucketingIdVariation
+            "\$opt_bucketing_id" => $this->testBucketingIdVariation
         ];
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
@@ -1960,11 +1960,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $config->setAccessible(true);
         $config->setValue($optimizelyObj, $projectConfig);
 
-        $feature_flag = $projectConfig->getFeatureFlagFromKey('mutex_group_feature');
+        $featureFlag = $projectConfig->getFeatureFlagFromKey('mutex_group_feature');
         // Add such an experiment to the list of experiment ids, that does not belong to the same mutex group
-        $experimentIds = $feature_flag->getExperimentIds();
+        $experimentIds = $featureFlag->getExperimentIds();
         $experimentIds [] = '122241';
-        $feature_flag->setExperimentIds($experimentIds);
+        $featureFlag->setExperimentIds($experimentIds);
 
         //should return false when feature flag is invalid
         $this->assertFalse($optimizelyObj->isFeatureEnabled('mutex_group_feature', "user_id"));
@@ -2087,8 +2087,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('getVariationForFeature')
             ->will($this->returnValue($expected_decision));
 
-        $optimizelyMock->expects($this->never())
-            ->method('sendImpressionEvent');
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with('test_experiment_double_feature', 'variation', 'user_id', []);
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -2188,7 +2189,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optimizelyMock->expects($this->never())
             ->method('sendImpressionEvent');
 
+        // confirm log messages seen
         $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "The user 'user_id' is not being experimented on Feature Flag 'boolean_single_variable_feature'.");
+
+        $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO, "Feature Flag 'boolean_single_variable_feature' is not enabled for user 'user_id'.");
 
