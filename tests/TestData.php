@@ -463,6 +463,10 @@ define(
     {
       "id": "7723340004",
       "key": "location"
+    },
+    {
+      "id": "7723340006",
+      "key": "$opt_xyz"
     }
   ],
   "projectId": "7720880029",
@@ -485,6 +489,7 @@ define(
     }
   ],
   "anonymizeIP": false,
+  "botFiltering": true,
   "revision": "15",
   "featureFlags": [
     {
