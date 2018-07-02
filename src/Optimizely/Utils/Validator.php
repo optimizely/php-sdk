@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,5 +136,21 @@ class Validator
         }
 
         return true;
+    }
+
+    /**
+     * Checks if the provided value is a non-empty string
+     *
+     * @param $value The value to validate
+     *
+     * @return boolean True if $value is a non-empty string
+     */
+    public static function validateNonEmptyString($value)
+    {
+        if (is_string($value) && $value!='') {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -17,6 +17,9 @@
 namespace Optimizely\Tests;
 
 use Exception;
+
+use Monolog\Logger;
+
 use Optimizely\Bucketer;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Event\LogEvent;
@@ -796,6 +799,11 @@ class OptimizelyTester extends Optimizely
     public function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
     {
         parent::sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+    }
+
+    public function validateInputs(array $values, $logLevel = Logger::ERROR)
+    {
+        return parent::validateInputs($values, $logLevel);
     }
 }
 
