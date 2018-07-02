@@ -407,7 +407,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testclearNotificationsAndVerifyThatclearNotificationListenersWithArgsIsCalled()
+    public function testClearNotificationsAndVerifyThatClearNotificationListenersWithArgsIsCalled()
     {
       # Mock NotificationCenter
       $this->notificationCenterMock = $this->getMockBuilder(NotificationCenter::class)
@@ -432,7 +432,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
       $this->notificationCenterMock->clearNotifications(NotificationType::ACTIVATE);
     }
 
-    public function testclearNotificationListeners()
+    public function testClearNotificationListeners()
     {
         // ensure that notifications length is zero for each notification type
         $this->notificationCenterObj->clearAllNotificationListeners();
@@ -528,7 +528,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testclearAllNotificationListeners()
+    public function testClearAllNotificationListeners()
     {
         // using a new notification center object to avoid using the method being tested,
         // to reset notifications list
@@ -604,7 +604,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $notificationCenterA->clearAllNotificationListeners();
     }
 
-    public function testcleanAllNotificationsAndVerifyThatclearAllNotificationListenersIsCalled()
+    public function testCleanAllNotificationsAndVerifyThatClearAllNotificationListenersIsCalled()
     {
       # Mock NotificationCenter
       $this->notificationCenterMock = $this->getMockBuilder(NotificationCenter::class)
@@ -626,7 +626,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
       $this->notificationCenterMock->cleanAllNotifications();
     }
 
-    public function testsendNotificationsGivenLessThanExpectedNumberOfArguments()
+    public function testSendNotificationsGivenLessThanExpectedNumberOfArguments()
     {
         $clientObj = new FireNotificationTester;
         $this->notificationCenterObj->clearAllNotificationListeners();
@@ -651,7 +651,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->notificationCenterObj->sendNotifications(NotificationType::ACTIVATE, array("HelloWorld"));
     }
 
-    public function testsendNotificationsAndVerifyThatAllCallbacksWithoutArgsAreCalled()
+    public function testSendNotificationsAndVerifyThatAllCallbacksWithoutArgsAreCalled()
     {
         $clientMock = $this->getMockBuilder(FireNotificationTester::class)
             ->setMethods(array('decision_callback_no_args', 'decision_callback_no_args_2', 'track_callback_no_args'))
@@ -702,7 +702,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->notificationCenterObj->sendNotifications("abacada");
     }
 
-    public function testsendNotificationsAndVerifyThatAllCallbacksWithArgsAreCalled()
+    public function testSendNotificationsAndVerifyThatAllCallbacksWithArgsAreCalled()
     {
         $clientMock = $this->getMockBuilder(FireNotificationTester::class)
             ->setMethods(array('decision_callback_with_args', 'decision_callback_with_args_2', 'track_callback_no_args'))
