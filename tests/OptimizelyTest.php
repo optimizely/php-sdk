@@ -1980,35 +1980,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject->isFeatureEnabled("boolean_feature", "user_id");
     }
 
-    public function testIsFeatureEnabledGivenInvalidArguments()
+    public function testIsFeatureEnabledCallsValidateInputs()
     {
-        // should return false and log a message when feature flag key is empty
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::ERROR, "Feature Flag key cannot be empty.");
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('validateInputs'))
+            ->getMock();
 
-        $this->assertFalse($this->optimizelyObject->isFeatureEnabled("", "user_id"));
+        $featureKey = 'test_feature';
+        $userId = 'test_user';
+        $inputArray = [
+            'Feature Flag Key' => $featureKey,
+            'User ID' => $userId
+        ];
 
-        // should return false and log a message when feature flag key is null
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::ERROR, "Feature Flag key cannot be empty.");
+        // assert that validateInputs gets called with exactly same keys
+        $optimizelyMock->expects($this->once())
+            ->method('validateInputs')
+            ->with($inputArray)
+            ->willReturn(false);
 
-        $this->assertFalse($this->optimizelyObject->isFeatureEnabled(null, "user_id"));
-
-        // should return false and log a message when user id is empty
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::ERROR, "User ID cannot be empty.");
-
-        $this->assertFalse($this->optimizelyObject->isFeatureEnabled("boolean_feature", ""));
-
-        // should return false and log a message when user id is null
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::ERROR, "User ID cannot be empty.");
-
-        $this->assertFalse($this->optimizelyObject->isFeatureEnabled("boolean_feature", null));
+        $this->assertFalse($optimizelyMock->isFeatureEnabled($featureKey, $userId));
     }
 
     public function testIsFeatureEnabledGivenFeatureFlagNotFound()
@@ -2282,6 +2274,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($optlyObject->getEnabledFeatures("user_id", []));
     }
 
+    public function testGetEnabledFeaturesCallsValidateInputs()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('validateInputs'))
+            ->getMock();
+
+        $userId = 'test_user';
+        $inputArray = [
+            'User ID' => $userId
+        ];
+
+        // assert that validateInputs gets called with exactly same keys
+        $optimizelyMock->expects($this->once())
+            ->method('validateInputs')
+            ->with($inputArray)
+            ->willReturn(false);
+
+        $this->assertEmpty($optimizelyMock->getEnabledFeatures($userId));
+    }
+
     public function testGetEnabledFeaturesGivenNoFeatureIsEnabledForUser()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
@@ -2362,52 +2375,29 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGetFeatureVariableValueForTypeGivenInvalidArguments()
+    public function testGetFeatureVariableValueForTypeCallsValidateInputs()
     {
-        // should return null and log a message when feature flag key is empty
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::ERROR, "Feature Flag key cannot be empty.");
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('validateInputs'))
+            ->getMock();
 
-        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType(
-            "", "double_variable", "user_id"));
+        $featureKey = 'test_feature';
+        $variableKey = 'test_variable';
+        $userId = 'test_user';
+        $inputArray = [
+            'Feature Flag Key' => $featureKey,
+            'Variable Key' => $variableKey,
+            'User ID' => $userId
+        ];
 
-        // should return null and log a message when feature flag key is null
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::ERROR, "Feature Flag key cannot be empty.");
+        // assert that validateInputs gets called with exactly same keys
+        $optimizelyMock->expects($this->once())
+            ->method('validateInputs')
+            ->with($inputArray)
+            ->willReturn(false);
 
-        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType(
-            null, "double_variable", "user_id"));
-
-        // should return null and log a message when variable key is empty
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::ERROR, "Variable key cannot be empty.");
-
-        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType(
-            "boolean_feature", "", "user_id"));
-
-        // should return null and log a message when variable key is null
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::ERROR, "Variable key cannot be empty.");
-
-        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType("boolean_feature", null, "user_id"));
-
-        // should return null and log a message when user id is empty
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::ERROR, "User ID cannot be empty.");
-
-        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType("boolean_feature", "double_variable", ""));
-
-        // should return null and log a message when user id is null
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(Logger::ERROR, "User ID cannot be empty.");
-
-        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType("boolean_feature", "double_variable", null));
+        $this->assertNull($optimizelyMock->getFeatureVariableValueForType($featureKey, $variableKey, $userId));
     }
 
     public function testGetFeatureVariableValueForTypeGivenFeatureFlagNotFound()
