@@ -1987,8 +1987,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('validateInputs'))
             ->getMock();
 
-        $featureKey = 'test_feature';
-        $userId = 'test_user';
+        $featureKey = 'boolean_feature';
+        $userId = null;
         $inputArray = [
             'Feature Flag Key' => $featureKey,
             'User ID' => $userId
@@ -2281,7 +2281,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('validateInputs'))
             ->getMock();
 
-        $userId = 'test_user';
+        $userId = null;
         $inputArray = [
             'User ID' => $userId
         ];
@@ -2383,8 +2383,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $featureKey = 'test_feature';
-        $variableKey = 'test_variable';
-        $userId = 'test_user';
+        $variableKey = 1.2;
+        $userId = null;
         $inputArray = [
             'Feature Flag Key' => $featureKey,
             'Variable Key' => $variableKey,

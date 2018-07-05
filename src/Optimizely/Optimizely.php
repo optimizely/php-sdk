@@ -560,21 +560,22 @@ class Optimizely
      */
     public function getEnabledFeatures($userId, $attributes = null)
     {
+        $enabledFeatureKeys = [];
+
         if (!$this->validateInputs(
             [
                 self::USER_ID => $userId
             ]
             )
         ) {
-            return [];
+            return $enabledFeatureKeys;
         }
 
         if (!$this->_isValid) {
             $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'.");
-            return [];
+            return $enabledFeatureKeys;
         }
 
-        $enabledFeatureKeys = [];
         $featureFlags = $this->_config->getFeatureFlags();
         foreach ($featureFlags as $feature) {
             $featureKey = $feature->getKey();
