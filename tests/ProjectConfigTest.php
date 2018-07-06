@@ -80,6 +80,11 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $projectId->setAccessible(true);
         $this->assertEquals('7720880029', $projectId->getValue($this->config));
 
+        // Check botFiltering
+        $botFiltering = new \ReflectionProperty(ProjectConfig::class, '_botFiltering');
+        $botFiltering->setAccessible(true);
+        $this->assertSame(true, $botFiltering->getValue($this->config));
+
         // Check revision
         $revision = new \ReflectionProperty(ProjectConfig::class, '_revision');
         $revision->setAccessible(true);
@@ -146,7 +151,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             [
             'device_type' => $this->config->getAttribute('device_type'),
-            'location' => $this->config->getAttribute('location')
+            'location' => $this->config->getAttribute('location'),
+            '$opt_xyz' => $this->config->getAttribute('$opt_xyz')
             ],
             $attributeKeyMap->getValue($this->config)
         );
@@ -361,6 +367,13 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('7720880029', $this->config->getProjectId());
     }
 
+    public function testGetBotFiltering()
+    {
+        $botFiltering = new \ReflectionProperty(ProjectConfig::class, '_botFiltering');
+        $botFiltering->setAccessible(true);
+        $this->assertSame($botFiltering->getValue($this->config), $this->config->getBotFiltering());
+    }
+
     public function testGetRevision()
     {
         $this->assertEquals('15', $this->config->getRevision());
@@ -494,6 +507,18 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('7723280020', $attribute->getId());
     }
 
+    public function testGetAttributeValidKeyWithReservedPrefix()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::WARNING, 
+                'Attribute $opt_xyz unexpectedly has reserved prefix $opt_; using attribute ID instead of reserved attribute name.'
+            );
+
+        $validAttrWithReservedPrefix = new Attribute('7723340006', '$opt_xyz');
+        $this->assertEquals($validAttrWithReservedPrefix, $this->config->getAttribute('$opt_xyz'));
+    }
+
     public function testGetAttributeInvalidKey()
     {
         $this->loggerMock->expects($this->once())
@@ -503,7 +528,23 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->method('handleError')
             ->with(new InvalidAttributeException('Provided attribute is not in datafile.'));
 
-        $this->assertEquals(new Attribute(), $this->config->getAttribute('invalid_key'));
+        $this->assertNull($this->config->getAttribute('invalid_key'));
+    }
+
+    public function testGetAttributeMissingKeyWithReservedPrefix()
+    {
+        $validAttrWithReservedPrefix = new Attribute('$opt_007', '$opt_007');
+        $this->assertEquals($validAttrWithReservedPrefix, $this->config->getAttribute('$opt_007'));
+    }
+
+    public function testGetAttributeForControlAttributes()
+    {
+        # Should return attribute with ID same as given Key
+        $optUserAgentAttr = new Attribute('$opt_user_agent', '$opt_user_agent');
+        $this->assertEquals($optUserAgentAttr, $this->config->getAttribute('$opt_user_agent'));
+
+        $optBucketingIdAttr = new Attribute('$opt_bucketing_id', '$opt_bucketing_id');
+        $this->assertEquals($optBucketingIdAttr, $this->config->getAttribute('$opt_bucketing_id'));
     }
 
     public function testGetVariationFromKeyValidExperimentKeyValidVariationKey()
