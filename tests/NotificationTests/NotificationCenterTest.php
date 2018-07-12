@@ -73,7 +73,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
     public function testAddNotificationWithValidTypeAndCallback()
     {
         $notificationType = NotificationType::ACTIVATE;
-        $this->notificationCenterObj->cleanAllNotifications();
+        $this->notificationCenterObj->clearAllNotificationListeners();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //  === should add, log and return notification ID when a plain function is passed as an argument === //
@@ -135,7 +135,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
 
     public function testAddNotificationForMultipleNotificationTypes()
     {
-        $this->notificationCenterObj->cleanAllNotifications();
+        $this->notificationCenterObj->clearAllNotificationListeners();
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // === should add, log and return notification ID when a valid callback is added for each notification type === //
@@ -179,7 +179,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
 
     public function testAddNotificationForMultipleCallbacksForASingleNotificationType()
     {
-        $this->notificationCenterObj->cleanAllNotifications();
+        $this->notificationCenterObj->clearAllNotificationListeners();
 
         ///////////////////////////////////////////////////////////////////////////////////////
         // === should add, log and return notification ID when multiple valid callbacks
@@ -243,7 +243,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         
         $functionToSend = function () {
         };
-        $this->notificationCenterObj->cleanAllNotifications();
+        $this->notificationCenterObj->clearAllNotificationListeners();
 
         ///////////////////////////////////////////////////////////////////////////
         // ===== verify that a variable method with same body isn't re-added ===== //
@@ -313,7 +313,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
 
     public function testRemoveNotification()
     {
-        $this->notificationCenterObj->cleanAllNotifications();
+        $this->notificationCenterObj->clearAllNotificationListeners();
 
         // add a callback for multiple notification types
         $this->assertSame(
@@ -407,10 +407,35 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testClearNotifications()
+    public function testClearNotificationsAndVerifyThatClearNotificationListenersWithArgsIsCalled()
+    {
+      # Mock NotificationCenter
+      $this->notificationCenterMock = $this->getMockBuilder(NotificationCenter::class)
+        ->setConstructorArgs(array($this->loggerMock, $this->errorHandlerMock))
+        ->setMethods(array('clearNotificationListeners'))
+        ->getMock();
+
+      # Log deprecation message
+      $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(
+          Logger::WARNING,
+          sprintf("'clearNotifications' is deprecated. Call 'clearNotificationListeners' instead.")
+        );
+
+      $this->notificationCenterMock->expects($this->once())
+        ->method('clearNotificationListeners')
+        ->with(
+          NotificationType::ACTIVATE
+        );
+
+      $this->notificationCenterMock->clearNotifications(NotificationType::ACTIVATE);
+    }
+
+    public function testClearNotificationListeners()
     {
         // ensure that notifications length is zero for each notification type
-        $this->notificationCenterObj->cleanAllNotifications();
+        $this->notificationCenterObj->clearAllNotificationListeners();
         
         // add a callback for multiple notification types
         $this->notificationCenterObj->addNotificationListener(
@@ -457,7 +482,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
             ->method('handleError')
             ->with(new InvalidNotificationTypeException('Invalid notification type.'));
 
-        $this->assertNull($this->notificationCenterObj->clearNotifications($invalid_type));
+        $this->assertNull($this->notificationCenterObj->clearNotificationListeners($invalid_type));
 
         // Verify that notifications length for NotificationType::ACTIVATE is still 2
         $this->assertSame(
@@ -482,7 +507,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
                 sprintf("All callbacks for notification type '%s' have been removed.", NotificationType::ACTIVATE)
             );
 
-        $this->notificationCenterObj->clearNotifications(NotificationType::ACTIVATE);
+        $this->notificationCenterObj->clearNotificationListeners(NotificationType::ACTIVATE);
 
         // Verify that notifications length for NotificationType::ACTIVATE is now 0
         $this->assertSame(
@@ -499,11 +524,11 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         // == Verify that no error is thrown when clearNotification is called again for the same notification type === //
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-        $this->notificationCenterObj->clearNotifications(NotificationType::ACTIVATE);
+        $this->notificationCenterObj->clearNotificationListeners(NotificationType::ACTIVATE);
     }
 
 
-    public function testCleanAllNotifications()
+    public function testClearAllNotificationListeners()
     {
         // using a new notification center object to avoid using the method being tested,
         // to reset notifications list
@@ -558,10 +583,10 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         );
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        // === verify that cleanAllNotifications removes all notifications for each notification type === //
+        // === verify that clearAllNotificationListeners removes all notifications for each notification type === //
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        $notificationCenterA->cleanAllNotifications();
+        $notificationCenterA->clearAllNotificationListeners();
 
         // verify that notifications length for each type is now set to 0
         $this->assertSame(
@@ -574,15 +599,37 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         );
 
         ///////////////////////////////////////////////////////////////////////////////////////
-        //=== verify that cleanAllNotifications doesn't throw an error when called again === //
+        //=== verify that clearAllNotificationListeners doesn't throw an error when called again === //
         ///////////////////////////////////////////////////////////////////////////////////////
-        $notificationCenterA->cleanAllNotifications();
+        $notificationCenterA->clearAllNotificationListeners();
     }
 
-    public function testsendNotificationsGivenLessThanExpectedNumberOfArguments()
+    public function testCleanAllNotificationsAndVerifyThatClearAllNotificationListenersIsCalled()
+    {
+      # Mock NotificationCenter
+      $this->notificationCenterMock = $this->getMockBuilder(NotificationCenter::class)
+        ->setConstructorArgs(array($this->loggerMock, $this->errorHandlerMock))
+        ->setMethods(array('clearAllNotificationListeners'))
+        ->getMock();
+
+      # Log deprecation message
+      $this->loggerMock->expects($this->at(0))
+        ->method('log')
+        ->with(
+          Logger::WARNING,
+          sprintf("'cleanAllNotifications' is deprecated. Call 'clearAllNotificationListeners' instead.")
+        );
+
+      $this->notificationCenterMock->expects($this->once())
+        ->method('clearAllNotificationListeners');
+
+      $this->notificationCenterMock->cleanAllNotifications();
+    }
+
+    public function testSendNotificationsGivenLessThanExpectedNumberOfArguments()
     {
         $clientObj = new FireNotificationTester;
-        $this->notificationCenterObj->cleanAllNotifications();
+        $this->notificationCenterObj->clearAllNotificationListeners();
         
         // add a notification callback with arguments
         $this->notificationCenterObj->addNotificationListener(
@@ -604,13 +651,13 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->notificationCenterObj->sendNotifications(NotificationType::ACTIVATE, array("HelloWorld"));
     }
 
-    public function testsendNotificationsAndVerifyThatAllCallbacksWithoutArgsAreCalled()
+    public function testSendNotificationsAndVerifyThatAllCallbacksWithoutArgsAreCalled()
     {
         $clientMock = $this->getMockBuilder(FireNotificationTester::class)
             ->setMethods(array('decision_callback_no_args', 'decision_callback_no_args_2', 'track_callback_no_args'))
             ->getMock();
 
-        $this->notificationCenterObj->cleanAllNotifications();
+        $this->notificationCenterObj->clearAllNotificationListeners();
 
         //add notification callbacks
         $this->notificationCenterObj->addNotificationListener(
@@ -655,13 +702,13 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
         $this->notificationCenterObj->sendNotifications("abacada");
     }
 
-    public function testsendNotificationsAndVerifyThatAllCallbacksWithArgsAreCalled()
+    public function testSendNotificationsAndVerifyThatAllCallbacksWithArgsAreCalled()
     {
         $clientMock = $this->getMockBuilder(FireNotificationTester::class)
             ->setMethods(array('decision_callback_with_args', 'decision_callback_with_args_2', 'track_callback_no_args'))
             ->getMock();
 
-        $this->notificationCenterObj->cleanAllNotifications();
+        $this->notificationCenterObj->clearAllNotificationListeners();
 
         //add notification callbacks with args
         $this->notificationCenterObj->addNotificationListener(

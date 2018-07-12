@@ -36,6 +36,7 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\UserProfile\UserProfileServiceInterface;
+use Optimizely\Utils\Errors;
 use Optimizely\Utils\Validator;
 use Optimizely\Utils\VariableTypeUtils;
 
@@ -46,6 +47,12 @@ use Optimizely\Utils\VariableTypeUtils;
  */
 class Optimizely
 {
+    const EVENT_KEY = 'Event Key';
+    const EXPERIMENT_KEY = 'Experiment Key';
+    const FEATURE_FLAG_KEY = 'Feature Flag Key';
+    const USER_ID = 'User ID';
+    const VARIABLE_KEY = 'Variable Key';
+
     /**
      * @var ProjectConfig
      */
@@ -288,6 +295,16 @@ class Optimizely
             return null;
         }
 
+        if (!$this->validateInputs(
+            [
+                self::EXPERIMENT_KEY =>$experimentKey,
+                self::USER_ID => $userId
+            ]
+        	)
+        ) {
+            return null;
+        }
+
         $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
         if (is_null($variationKey)) {
             $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
@@ -312,6 +329,16 @@ class Optimizely
         if (!$this->_isValid) {
             $this->_logger->log(Logger::ERROR, 'Datafile has invalid format. Failing "track".');
             return;
+        }
+
+        if (!$this->validateInputs(
+            [
+                self::EVENT_KEY =>$eventKey,
+                self::USER_ID => $userId
+            ]
+        	)
+        ) {
+            return null;
         }
 
         if (!$this->validateUserInputs($attributes, $eventTags)) {
@@ -401,6 +428,16 @@ class Optimizely
             return null;
         }
 
+        if (!$this->validateInputs(
+            [
+                self::EXPERIMENT_KEY =>$experimentKey,
+                self::USER_ID => $userId
+            ]
+        	)
+        ) {
+            return null;
+        }
+
         $experiment = $this->_config->getExperimentFromKey($experimentKey);
 
         if (is_null($experiment->getKey())) {
@@ -469,13 +506,13 @@ class Optimizely
             return false;
         }
 
-        if (!$featureFlagKey) {
-            $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty.");
-            return false;
-        }
-
-        if (!$userId) {
-            $this->_logger->log(Logger::ERROR, "User ID cannot be empty.");
+        if (!$this->validateInputs(
+            [
+                self::FEATURE_FLAG_KEY =>$featureFlagKey,
+                self::USER_ID => $userId
+            ]
+            )
+        ) {
             return false;
         }
 
@@ -525,6 +562,15 @@ class Optimizely
     {
         $enabledFeatureKeys = [];
 
+        if (!$this->validateInputs(
+            [
+                self::USER_ID => $userId
+            ]
+            )
+        ) {
+            return $enabledFeatureKeys;
+        }
+
         if (!$this->_isValid) {
             $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'.");
             return $enabledFeatureKeys;
@@ -559,18 +605,14 @@ class Optimizely
         $attributes = null,
         $variableType = null
     ) {
-        if (!$featureFlagKey) {
-            $this->_logger->log(Logger::ERROR, "Feature Flag key cannot be empty.");
-            return null;
-        }
-
-        if (!$variableKey) {
-            $this->_logger->log(Logger::ERROR, "Variable key cannot be empty.");
-            return null;
-        }
-
-        if (!$userId) {
-            $this->_logger->log(Logger::ERROR, "User ID cannot be empty.");
+        if (!$this->validateInputs(
+            [
+                self::FEATURE_FLAG_KEY => $featureFlagKey,
+                self::VARIABLE_KEY => $variableKey,
+                self::USER_ID => $userId
+            ]
+            )
+        ) {
             return null;
         }
 
@@ -727,5 +769,28 @@ class Optimizely
         );
 
         return $variableValue;
+    }
+
+    /**
+    * Calls Validator::validateNonEmptyString for each value in array
+    * Logs for each invalid value
+    *
+    * @param array values to validate
+    * @param logger
+    *
+    * @return bool True if all of the values are valid, False otherwise
+    */
+    protected function validateInputs(array $values, $logLevel = Logger::ERROR)
+    {
+        $isValid = true;
+        foreach ($values as $key => $value) {
+            if (!Validator::validateNonEmptyString($value)) {
+                $isValid = false;
+                $message = sprintf(Errors::INVALID_FORMAT, $key);
+                $this->_logger->log($logLevel, $message);
+            }
+        }
+
+        return $isValid;
     }
 }
