@@ -23,7 +23,7 @@
   },
   "autoload": {
     "psr-4": {
-      "": "src/"
+      "Optimizely\\": "src/Optimizely"
     }
   }
 }
