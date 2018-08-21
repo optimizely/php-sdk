@@ -345,11 +345,13 @@ class DecisionService
         if (!is_null($forcedVariations) && isset($forcedVariations[$userId])) {
             $variationKey = $forcedVariations[$userId];
             $variation = $this->_projectConfig->getVariationFromKey($experiment->getKey(), $variationKey);
-            if ($variationKey) {
+            if ($variationKey && !empty($variation->getKey())) {
                 $this->_logger->log(
                     Logger::INFO,
                     sprintf('User "%s" is forced in variation "%s" of experiment "%s".', $userId, $variationKey, $experiment->getKey())
                 );
+            } else {
+                return null;
             }
             return $variation;
         }
