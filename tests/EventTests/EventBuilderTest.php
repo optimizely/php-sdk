@@ -823,4 +823,70 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
         $this->assertTrue($result[0], $result[1]);
     }
+
+    public function testCreateConversionEventWhenEventUsedInMultipleExp()
+    {  
+        $eventTags = [
+            'revenue' => 4200,
+            'value' => 1.234,
+            'non-revenue' => 'abc'
+        ];      
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['decisions'][] = [
+            'campaign_id' => '4',
+            'experiment_id' => '122230',
+            'variation_id' => '122234'
+        ];
+
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] = [
+            'entity_id' => '7718020065',
+            'timestamp' => $this->timestamp,
+            'uuid' => $this->uuid,
+            'key' => 'multi_exp_event',
+            'revenue' => 4200,
+            'value' => 1.234,                    
+            'tags' => $eventTags,                        
+        ];
+        
+        array_unshift($this->expectedEventParams['visitors'][0]['attributes'],  
+            [                 
+                'entity_id' => '7723280020',
+                'key' => 'device_type',
+                'type' => 'custom',
+                'value' => 'iPhone'
+            ],[
+                'entity_id' => '7723340004',
+                'key' => 'location',
+                'type' => 'custom',
+                'value' => 'SF'
+            ]);
+        
+        $decisions = [
+            '7716830082' => '7721010009',
+            '122230' => '122234'
+        ];
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'location' => 'SF'
+        ];
+
+        $logEvent = $this->eventBuilder->createConversionEvent(
+                $this->config,
+                'multi_exp_event',
+                $decisions,
+                $this->testUserId,
+                $userAttributes,
+                $eventTags
+            );
+        $expectedLogEvent = new LogEvent(
+                $this->expectedEventUrl,
+                $this->expectedEventParams,
+                $this->expectedEventHttpVerb,
+                $this->expectedEventHeaders
+        );
+            
+        $logEvent = $this->fakeParamsToReconcile($logEvent);
+        $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
+        $this->assertTrue($result[0], $result[1]);
+            
+    }
 }
