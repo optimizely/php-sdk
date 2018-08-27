@@ -180,44 +180,49 @@ class EventBuilder
     private function getConversionParams($config, $eventKey, $experimentVariationMap, $eventTags)
     {
         $conversionParams = [];
+        $singleSnapshot = [];
+        $decisions = [];
+
         foreach ($experimentVariationMap as $experimentId => $variationId) {
-            $singleSnapshot = [];
+            
+            
             $experiment = $config->getExperimentFromId($experimentId);
             $eventEntity = $config->getEvent($eventKey);
 
-            $singleSnapshot[DECISIONS] = [
-                [
-                    CAMPAIGN_ID => $experiment->getLayerId(),
-                    EXPERIMENT_ID => $experiment->getId(),
-                    VARIATION_ID => $variationId
-                ]
+            $decision = [                
+                CAMPAIGN_ID => $experiment->getLayerId(),
+                EXPERIMENT_ID => $experiment->getId(),
+                VARIATION_ID => $variationId                
             ];
+            $decisions [] = $decision;
+        }
 
-            $singleSnapshot[EVENTS] = [
-                [
-                    ENTITY_ID => $eventEntity->getId(),
-                    TIMESTAMP => time()*1000,
-                    UUID => GeneratorUtils::getRandomUuid(),
-                    KEY => $eventKey
-                ]
-            ];
+        $eventDict = [
+            ENTITY_ID => $eventEntity->getId(),
+            TIMESTAMP => time()*1000,
+            UUID => GeneratorUtils::getRandomUuid(),
+            KEY => $eventKey            
+        ];
 
-            if (!is_null($eventTags)) {
-                $revenue = EventTagUtils::getRevenueValue($eventTags, $this->_logger);
-                if (!is_null($revenue)) {
-                    $singleSnapshot[EVENTS][0][EventTagUtils::REVENUE_EVENT_METRIC_NAME] = $revenue;
-                }
-
-                $eventValue = EventTagUtils::getNumericValue($eventTags, $this->_logger);
-                if (!is_null($eventValue)) {
-                    $singleSnapshot[EVENTS][0][EventTagUtils::NUMERIC_EVENT_METRIC_NAME] = $eventValue;
-                }
-
-                $singleSnapshot[EVENTS][0]['tags'] = $eventTags;
+        if (!is_null($eventTags)) {
+            $revenue = EventTagUtils::getRevenueValue($eventTags, $this->_logger);
+            if (!is_null($revenue)) {
+                $eventDict[EventTagUtils::REVENUE_EVENT_METRIC_NAME] = $revenue;
             }
 
-            $conversionParams [] = $singleSnapshot;
+            $eventValue = EventTagUtils::getNumericValue($eventTags, $this->_logger);
+            if (!is_null($eventValue)) {
+                $eventDict[EventTagUtils::NUMERIC_EVENT_METRIC_NAME] = $eventValue;
+            }
+
+            if(count($eventTags) > 0) {
+                $eventDict['tags'] = $eventTags;
+            }            
         }
+
+        $singleSnapshot[DECISIONS] = $decisions;
+        $singleSnapshot[EVENTS] [] = $eventDict;
+        $conversionParams [] = $singleSnapshot;
 
         return $conversionParams;
     }
