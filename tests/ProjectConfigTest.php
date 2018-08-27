@@ -140,7 +140,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             [
             'purchase' => $this->config->getEvent('purchase'),
-            'unlinked_event' => $this->config->getEvent('unlinked_event')
+            'unlinked_event' => $this->config->getEvent('unlinked_event'),
+            'multi_exp_event' => $this->config->getEvent('multi_exp_event')
             ],
             $eventKeyMap->getValue($this->config)
         );

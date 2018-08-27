@@ -483,6 +483,14 @@ define(
       "experimentIds": [],
       "id": "7718020064",
       "key": "unlinked_event"
+    },
+    {
+      "experimentIds":[
+        "7716830082",
+        "122230"
+      ],
+      "id": "7718020065",
+      "key": "multi_exp_event"
     }
   ],
   "anonymizeIP": false,
