@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2018, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,8 @@
  * limitations under the License.
  */
 
-namespace Optimizely\Enums;
+namespace Optimizely\Exceptions;
 
-class ControlAttributes
+class InvalidDatafileVersionException extends OptimizelyException
 {
-    const BOT_FILTERING = "\$opt_bot_filtering";
-    const BUCKETING_ID = "\$opt_bucketing_id";
-    const USER_AGENT = "\$opt_user_agent";
-    const SUPPORTED_VERSIONS = array(
-      'v1'=> '1',
-      'v2'=> '2',
-      'v3'=> '3',
-      'v4'=> '4'
-    );
 }
