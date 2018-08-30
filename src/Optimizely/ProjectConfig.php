@@ -31,6 +31,7 @@ use Optimizely\Enums\ControlAttributes;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
+use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
 use Optimizely\Exceptions\InvalidFeatureFlagException;
@@ -195,6 +196,13 @@ class ProjectConfig
         $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
         $this->_forcedVariationMap = [];
+        if(in_array($this->_revision, ControlAttributes::SUPPORTED_VERSIONS)){
+          $this->_errorHandler->handleError(
+            new InvalidDatafileVersionException(
+              "This version of the Ruby SDK does not support the given datafile version: '{$this->_revision}'."
+            )
+          );
+        }
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];

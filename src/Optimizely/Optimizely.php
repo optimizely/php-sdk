@@ -127,6 +127,11 @@ class Optimizely
 
         try {
             $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
+        } catch (InvalidDatafileVersionException $exception) {
+            $this->_isValid = false;
+            $this->_logger = new DefaultLogger();
+            $this->_logger->log(Logger::ERROR, $exception->getMessage());
+            return;
         } catch (Throwable $exception) {
             $this->_isValid = false;
             $this->_logger = new DefaultLogger();
