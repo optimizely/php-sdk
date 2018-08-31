@@ -32,6 +32,7 @@ use Optimizely\Entity\VariableUsage;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
+use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
 use Optimizely\Exceptions\InvalidFeatureFlagException;
@@ -65,11 +66,6 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testInit()
     {
-        // Check version
-        $version = new \ReflectionProperty(ProjectConfig::class, '_version');
-        $version->setAccessible(true);
-        $this->assertEquals('4', $version->getValue($this->config));
-
         // Check account ID
         $accountId = new \ReflectionProperty(ProjectConfig::class, '_accountId');
         $accountId->setAccessible(true);
@@ -326,6 +322,23 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $actualVariation = $this->config->getVariationFromKey("test_experiment_multivariate", "Fred");
 
         $this->assertEquals($expectedVariation, $actualVariation);
+    }
+
+    public function testExceptionThrownForUnsupportedVersion()
+    {
+        // Verify that an exception is thrown when given datafile version is unsupported //
+        $datafile = json_decode(DATAFILE, true);
+        $datafile['version'] = '5';
+        $this->setExpectedException(
+            InvalidDatafileVersionException::class,
+            'This version of the PHP SDK does not support the given datafile version: 5.'
+        );
+
+        $this->config = new ProjectConfig(
+            json_encode($datafile),
+            $this->loggerMock,
+            $this->errorHandlerMock
+        );
     }
 
     public function testVariationParsingWithoutFeatureEnabledProp()

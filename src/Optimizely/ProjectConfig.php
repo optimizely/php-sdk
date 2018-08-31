@@ -31,6 +31,7 @@ use Optimizely\Enums\ControlAttributes;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
+use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
 use Optimizely\Exceptions\InvalidFeatureFlagException;
@@ -50,6 +51,9 @@ use Optimizely\Utils\ConfigParser;
 class ProjectConfig
 {
     const RESERVED_ATTRIBUTE_PREFIX = '$opt_';
+    const V2 = '2';
+    const V3 = '3';
+    const V4 = '4';
 
     /**
      * @var string Version of the datafile.
@@ -195,6 +199,13 @@ class ProjectConfig
         $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
         $this->_forcedVariationMap = [];
+
+        $supportedVersions = array(self::V2, self::V3, self::V4);
+        if(!in_array($this->_version, $supportedVersions)){
+            throw new InvalidDatafileVersionException(
+                "This version of the PHP SDK does not support the given datafile version: {$this->_version}."
+            );
+        }
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];

@@ -18,6 +18,7 @@ namespace Optimizely;
 
 use Exception;
 use Optimizely\Exceptions\InvalidAttributeException;
+use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
 use Monolog\Logger;
@@ -127,12 +128,13 @@ class Optimizely
 
         try {
             $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
-        } catch (Throwable $exception) {
+        } catch (InvalidDatafileVersionException $e) {
             $this->_isValid = false;
-            $this->_logger = new DefaultLogger();
-            $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
+            $defaultLogger = new DefaultLogger();
+            $defaultLogger->log(Logger::ERROR, $e->getMessage());
+            $this->_logger->log(Logger::ERROR, $e->getMessage());
             return;
-        } catch (Exception $exception) {
+        } catch (Exception $e) {
             $this->_isValid = false;
             $this->_logger = new DefaultLogger();
             $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
