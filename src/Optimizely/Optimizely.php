@@ -772,6 +772,14 @@ class Optimizely
     }
 
     /**
+     * @return boolean Flag denoting if Optimizely Instance is valid.
+     */
+    public function isValid()
+    {
+        return $this->_isValid;
+    }
+
+    /**
     * Calls Validator::validateNonEmptyString for each value in array
     * Logs for each invalid value
     *
