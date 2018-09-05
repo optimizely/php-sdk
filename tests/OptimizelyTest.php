@@ -76,6 +76,18 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
     }
 
+    public function testIsValidForInvalidOptimizelyObject()
+    {
+        $optlyObject = new Optimizely('Random datafile');
+        $this->assertFalse($optlyObject->isValid());
+    }
+
+    public function testIsValidForValidOptimizelyObject()
+    {
+        $optlyObject = new Optimizely($this->datafile);
+        $this->assertTrue($optlyObject->isValid());
+    }
+
     public function testInitValidEventDispatcher()
     {
         $validDispatcher = new ValidEventDispatcher();

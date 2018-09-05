@@ -729,4 +729,17 @@ class Optimizely
 
         return $variableValue;
     }
+
+    /**
+     * Determine if the instance of the Optimizely client is valid.
+     * An instance can be deemed invalid if it was not initialized
+     * properly due to an invalid datafile being passed in.
+     *
+     * @return True if the Optimizely instance is valid.
+     *         False if the Optimizely instance is not valid.
+     */
+    public function isValid()
+    {
+        return $this->_isValid;
+    }
 }
