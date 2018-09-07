@@ -189,23 +189,23 @@ class ProjectConfig
      */
     public function __construct($datafile, $logger, $errorHandler)
     {
+        $supportedVersions = array(self::V2, self::V3, self::V4);
         $config = json_decode($datafile, true);
         $this->_logger = $logger;
         $this->_errorHandler = $errorHandler;
         $this->_version = $config['version'];
+        if(!in_array($this->_version, $supportedVersions)){
+            throw new InvalidDatafileVersionException(
+                "This version of the PHP SDK does not support the given datafile version: {$this->_version}."
+            );
+        }
+
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
         $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
         $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
         $this->_forcedVariationMap = [];
-
-        $supportedVersions = array(self::V2, self::V3, self::V4);
-        if(!in_array($this->_version, $supportedVersions)){
-            throw new InvalidDatafileVersionException(
-                "This version of the PHP SDK does not support the given datafile version: {$this->_version}."
-            );
-        }
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
