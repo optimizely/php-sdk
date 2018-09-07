@@ -23,7 +23,9 @@ use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
 use Optimizely\Exceptions\InvalidAttributeException;
+use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidEventTagException;
+use Optimizely\Exceptions\InvalidInputException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
@@ -144,6 +146,42 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->fail('Unexpected behavior. Invalid error handler went through.');
+    }
+
+    public function testInitUnSupportedDatafileVersion()
+    {
+        $errorHandlerMock = $this->getMockBuilder(NoOpErrorHandler::class)
+            ->setMethods(array('handleError'))
+            ->getMock();
+        $errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidDatafileVersionException('This version of the PHP SDK does not support the given datafile version: 5.'));
+        $optlyObject = new Optimizely(
+            UNSUPPORTED_DATAFILE,
+            null,
+            new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM),
+            $errorHandlerMock,
+            true
+        );
+        $this->expectOutputRegex("/This version of the PHP SDK does not support the given datafile version: 5./");
+    }
+
+    public function testInitDatafileInvalidFormat()
+    {
+        $errorHandlerMock = $this->getMockBuilder(NoOpErrorHandler::class)
+            ->setMethods(array('handleError'))
+            ->getMock();
+        $errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidInputException('Provided datafile is in an invalid format.'));
+        $optlyObject = new Optimizely(
+            '{"version": "2"}',
+            null,
+            new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM),
+            $errorHandlerMock,
+            true
+        );
+        $this->expectOutputRegex('/Provided datafile is in an invalid format./');
     }
 
     public function testValidateDatafileInvalidFileJsonValidationNotSkipped()
