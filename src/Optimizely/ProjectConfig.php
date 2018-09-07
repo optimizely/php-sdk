@@ -31,6 +31,7 @@ use Optimizely\Enums\ControlAttributes;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
+use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
 use Optimizely\Exceptions\InvalidFeatureFlagException;
@@ -50,6 +51,9 @@ use Optimizely\Utils\ConfigParser;
 class ProjectConfig
 {
     const RESERVED_ATTRIBUTE_PREFIX = '$opt_';
+    const V2 = '2';
+    const V3 = '3';
+    const V4 = '4';
 
     /**
      * @var string Version of the datafile.
@@ -185,10 +189,17 @@ class ProjectConfig
      */
     public function __construct($datafile, $logger, $errorHandler)
     {
+        $supportedVersions = array(self::V2, self::V3, self::V4);
         $config = json_decode($datafile, true);
         $this->_logger = $logger;
         $this->_errorHandler = $errorHandler;
         $this->_version = $config['version'];
+        if(!in_array($this->_version, $supportedVersions)){
+            throw new InvalidDatafileVersionException(
+                "This version of the PHP SDK does not support the given datafile version: {$this->_version}."
+            );
+        }
+
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
         $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;

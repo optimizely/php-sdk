@@ -18,7 +18,9 @@ namespace Optimizely;
 
 use Exception;
 use Optimizely\Exceptions\InvalidAttributeException;
+use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidEventTagException;
+use Optimizely\Exceptions\InvalidInputException;
 use Throwable;
 use Monolog\Logger;
 use Optimizely\DecisionService\DecisionService;
@@ -127,15 +129,14 @@ class Optimizely
 
         try {
             $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
-        } catch (Throwable $exception) {
-            $this->_isValid = false;
-            $this->_logger = new DefaultLogger();
-            $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
-            return;
         } catch (Exception $exception) {
             $this->_isValid = false;
-            $this->_logger = new DefaultLogger();
-            $this->_logger->log(Logger::ERROR, 'Provided "datafile" is in an invalid format.');
+            $defaultLogger = new DefaultLogger();
+            $errorMsg = $exception->getCode() == InvalidDatafileVersionException::class ? $exception->getMessage() : sprintf(Errors::INVALID_FORMAT, 'datafile');
+            $errorToHandle = $exception->getCode() == InvalidDatafileVersionException::class ? new InvalidDatafileVersionException($errorMsg) : new InvalidInputException($errorMsg);
+            $defaultLogger->log(Logger::ERROR, $errorMsg);
+            $this->_logger->log(Logger::ERROR, $errorMsg);
+            $this->_errorHandler->handleError($errorToHandle);
             return;
         }
 
@@ -769,6 +770,19 @@ class Optimizely
         );
 
         return $variableValue;
+    }
+
+    /**
+     * Determine if the instance of the Optimizely client is valid.
+     * An instance can be deemed invalid if it was not initialized
+     * properly due to an invalid datafile being passed in.
+     *
+     * @return True if the Optimizely instance is valid.
+     *         False if the Optimizely instance is not valid.
+     */
+    public function isValid()
+    {
+        return $this->_isValid;
     }
 
     /**
