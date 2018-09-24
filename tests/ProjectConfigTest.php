@@ -154,7 +154,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             [
             'device_type' => $this->config->getAttribute('device_type'),
             'location' => $this->config->getAttribute('location'),
-            '$opt_xyz' => $this->config->getAttribute('$opt_xyz')
+            '$opt_xyz' => $this->config->getAttribute('$opt_xyz'),
+            'boolean_key' => $this->config->getAttribute('boolean_key'),
+            'double_key' => $this->config->getAttribute('double_key'),
+            'integer_key' => $this->config->getAttribute('integer_key')
             ],
             $attributeKeyMap->getValue($this->config)
         );

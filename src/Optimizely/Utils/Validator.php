@@ -63,6 +63,19 @@ class Validator
     }
 
     /**
+     * @param $attributeKey The key to validate.
+     * @param $attributeValue The value to validate.
+     *
+     * @return boolean Representing whether attribute's key and value are
+     * valid for event payload or not.
+     */
+    public static function isAttributeValid($attributeKey, $attributeValue)
+    {
+        $validTypes = array('boolean', 'double', 'integer', 'string');
+        return is_string($attributeKey) && in_array(gettype($attributeValue), $validTypes);
+    }
+
+    /**
      * @param $eventTags mixed Event tags to be validated.
      *
      * @return boolean Representing whether event tags are valid or not.
