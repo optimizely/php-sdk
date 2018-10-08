@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016, 2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,36 @@ class ConditionEvaluator
      * const string Representing NOT operator.
      */
     const NOT_OPERATOR = 'not';
+
+
+    const CUSTOM_ATTRIBUTE_CONDITION_TYPE = 'custom_attribute';
+
+    const EXACT_MATCH_TYPE = 'exact';
+    const EXISTS_MATCH_TYPE = 'exists';
+    const GREATER_THAN_MATCH_TYPE = 'gt';
+    const LESS_THAN_MATCH_TYPE = 'lt';
+    const SUBSTRING_MATCH_TYPE = 'substring';
+
+
+    public static function getMatchTypes()
+    {
+        return array(EXACT_MATCH_TYPE, EXISTS_MATCH_TYPE, GREATER_THAN_MATCH_TYPE,
+         LESS_THAN_MATCH_TYPE, SUBSTRING_MATCH_TYPE);
+    }
+
+
+    public static function getEvaluatorByMatchType($matchType)
+    {
+        $evaluatorsByMatchType = array();
+
+        $evaluatorsByMatchType[EXACT_MATCH_TYPE] = 'exactEvaluator';
+        $evaluatorsByMatchType[EXISTS_MATCH_TYPE] = 'existsEvaluator';
+        $evaluatorsByMatchType[GREATER_THAN_MATCH_TYPE] = 'greaterThanEvaluator';
+        $evaluatorsByMatchType[LESS_THAN_MATCH_TYPE] = 'lessThanEvaluator';
+        $evaluatorsByMatchType[SUBSTRING_MATCH_TYPE] = 'substringEvaluator';
+
+        return $evaluatorsByMatchType[$matchType];
+    }
 
     /**
      * @param $conditions array Audience conditions list.
@@ -116,5 +146,91 @@ class ConditionEvaluator
             return false;
         }
         return $userAttributes[$conditionName] == $conditions->{'value'};
+    }
+
+    private function isFinite($value)
+    {
+        if(is_numeric($value) ) {
+
+            if(is_string($value) || is_nan($value) || is_infinite($value)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private function isValueValidForExactConditions($value)
+    {
+        if(is_string($value) || is_bool($value) || isFinite($value)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function exactEvaluator($condition, $userAttributes)
+    {
+        $conditionName = $conditions->{'name'};
+        $conditionValue = $conditions->{'value'};
+        $conditionValueType = gettype($conditionValue);
+
+        $userValue = $userAttributes[$conditionName];
+        $userValueType = gettype($userValue);
+
+        if(!isValueValidForExactConditions($userValue) ||
+            !isValueValidForExactConditions($conditionValue)) ||
+            $conditionValueType !== $userValueType) {
+                return null;
+            }
+
+        return $conditionValue === $userValue;
+    }
+
+    public function existsEvaluator($condition, $userAttributes) 
+    {
+        $conditionName = $conditions->{'name'};
+        return isset($userAttributes[$conditionName]);
+    }
+
+    public function greaterThanEvaluator($condition, $userAttributes)
+    {
+        $conditionName = $conditions->{'name'};
+        $conditionValue = $conditions->{'value'};
+        $userValue = $userAttributes[$conditionName];
+
+        if(!isFinite($userValue) || !isFinite($conditionValue)) {
+            return null;
+        }
+
+        return $userValue > $conditionValue;
+    }
+
+    public function lessThanEvaluator($condition, $userAttributes)
+    {
+        $conditionName = $conditions->{'name'};
+        $conditionValue = $conditions->{'value'};
+        $userValue = $userAttributes[$conditionName];
+
+        if(!isFinite($userValue) || !isFinite($conditionValue)) {
+            return null;
+        }
+
+        return $userValue < $conditionValue;
+    }
+
+    public function substringEvaluator($condition, $userAttributes)
+    {
+        $conditionName = $conditions->{'name'};
+        $conditionValue = $conditions->{'value'};
+        $userValue = $userAttributes[$conditionName];
+
+        if(!is_string($userValue) || !is_string($conditionValue)) {
+            return null;
+        }
+
+        return strpos($userValue, $conditionValue) !== false;
     }
 }
