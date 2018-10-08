@@ -43,11 +43,15 @@ class ConditionEvaluator
     const LESS_THAN_MATCH_TYPE = 'lt';
     const SUBSTRING_MATCH_TYPE = 'substring';
 
+    public static function getSupportedOperators()
+    {
+        return array(self::AND_OPERATOR, self::OR_OPERATOR, self::NOT_OPERATOR);
+    }
 
     public static function getMatchTypes()
     {
-        return array(EXACT_MATCH_TYPE, EXISTS_MATCH_TYPE, GREATER_THAN_MATCH_TYPE,
-         LESS_THAN_MATCH_TYPE, SUBSTRING_MATCH_TYPE);
+        return array(self::EXACT_MATCH_TYPE, self::EXISTS_MATCH_TYPE, self::GREATER_THAN_MATCH_TYPE,
+         self::LESS_THAN_MATCH_TYPE, self::SUBSTRING_MATCH_TYPE);
     }
 
 
@@ -55,11 +59,11 @@ class ConditionEvaluator
     {
         $evaluatorsByMatchType = array();
 
-        $evaluatorsByMatchType[EXACT_MATCH_TYPE] = 'exactEvaluator';
-        $evaluatorsByMatchType[EXISTS_MATCH_TYPE] = 'existsEvaluator';
-        $evaluatorsByMatchType[GREATER_THAN_MATCH_TYPE] = 'greaterThanEvaluator';
-        $evaluatorsByMatchType[LESS_THAN_MATCH_TYPE] = 'lessThanEvaluator';
-        $evaluatorsByMatchType[SUBSTRING_MATCH_TYPE] = 'substringEvaluator';
+        $evaluatorsByMatchType[self::EXACT_MATCH_TYPE] = 'exactEvaluator';
+        $evaluatorsByMatchType[self::EXISTS_MATCH_TYPE] = 'existsEvaluator';
+        $evaluatorsByMatchType[self::GREATER_THAN_MATCH_TYPE] = 'greaterThanEvaluator';
+        $evaluatorsByMatchType[self::LESS_THAN_MATCH_TYPE] = 'lessThanEvaluator';
+        $evaluatorsByMatchType[self::SUBSTRING_MATCH_TYPE] = 'substringEvaluator';
 
         return $evaluatorsByMatchType[$matchType];
     }
@@ -72,14 +76,20 @@ class ConditionEvaluator
      */
     private function andEvaluator($conditions, $userAttributes)
     {
+        $sawNullResult = false;
         foreach ($conditions as $condition) {
             $result = $this->evaluate($condition, $userAttributes);
-            if (!$result) {
+            
+            if($result === false) {
                 return false;
+            }
+
+            if(is_null($result)) {
+                $sawNullResult = true;
             }
         }
 
-        return true;
+        return $sawNullResult ? null : true;
     }
 
     /**
@@ -90,14 +100,20 @@ class ConditionEvaluator
      */
     private function orEvaluator($conditions, $userAttributes)
     {
+        $sawNullResult = false;
         foreach ($conditions as $condition) {
             $result = $this->evaluate($condition, $userAttributes);
-            if ($result) {
+
+            if($result === true) {
                 return true;
+            }
+
+            if(is_null($result)) {
+                $sawNullResult = true;
             }
         }
 
-        return false;
+        return $sawNullResult ? null : false;
     }
 
     /**
@@ -108,11 +124,12 @@ class ConditionEvaluator
      */
     private function notEvaluator($condition, $userAttributes)
     {
-        if (count($condition) != 1) {
-            return false;
+        if (empty($condition)) {
+            return null;
         }
 
-        return !$this->evaluate($condition[0], $userAttributes);
+        $result = $this->evaluate($condition[0], $userAttributes);
+        return is_null($result) ? null: !$result;
     }
 
     /**
@@ -126,26 +143,36 @@ class ConditionEvaluator
     public function evaluate($conditions, $userAttributes)
     {
         if (is_array($conditions)) {
-            switch ($conditions[0]) {
-            case self::AND_OPERATOR:
-                array_shift($conditions);
-                return $this->andEvaluator($conditions, $userAttributes);
-            case self::OR_OPERATOR:
-                array_shift($conditions);
-                return $this->orEvaluator($conditions, $userAttributes);
-            case self::NOT_OPERATOR:
-                array_shift($conditions);
-                return $this->notEvaluator($conditions, $userAttributes);
-            default:
-                return false;
+
+            $operator = array_shift($conditions);
+
+            switch ($operator) {
+                case self::AND_OPERATOR:
+                    return $this->andEvaluator($conditions, $userAttributes); 
+                case self::NOT_OPERATOR:
+                    return $this->notEvaluator($conditions, $userAttributes);
+                default:
+                    return $this->orEvaluator($conditions, $userAttributes);
             }
         }
 
-        $conditionName = $conditions->{'name'};
-        if (!isset($userAttributes[$conditionName])) {
-            return false;
+        $leafCondition = $conditions;
+
+        if($leafCondition->{'type'} !== self::CUSTOM_ATTRIBUTE_CONDITION_TYPE) {
+            return null;
         }
-        return $userAttributes[$conditionName] == $conditions->{'value'};
+
+        $conditionMatch = null;
+        if(!isset($leafCondition->{'match'})) {
+            $conditionMatch = self::EXACT_MATCH_TYPE;
+        }
+
+        if(!in_array($conditionMatch, self::getMatchTypes())) {
+            return null;
+        }
+
+        $evaluatorForMatch = self::getEvaluatorByMatchType($conditionMatch);
+        return $this->$evaluatorForMatch($leafCondition, $userAttributes);
     }
 
     private function isFinite($value)
@@ -164,7 +191,7 @@ class ConditionEvaluator
 
     private function isValueValidForExactConditions($value)
     {
-        if(is_string($value) || is_bool($value) || isFinite($value)) {
+        if(is_string($value) || is_bool($value) || $this->isFinite($value)) {
             return true;
         }
 
@@ -173,15 +200,15 @@ class ConditionEvaluator
 
     public function exactEvaluator($condition, $userAttributes)
     {
-        $conditionName = $conditions->{'name'};
-        $conditionValue = $conditions->{'value'};
+        $conditionName = $condition->{'name'};
+        $conditionValue = $condition->{'value'};
         $conditionValueType = gettype($conditionValue);
 
-        $userValue = $userAttributes[$conditionName];
+        $userValue = isset($userAttributes[$conditionName]) ? $userAttributes[$conditionName]: null;
         $userValueType = gettype($userValue);
 
-        if(!isValueValidForExactConditions($userValue) ||
-            !isValueValidForExactConditions($conditionValue)) ||
+        if(!$this->isValueValidForExactConditions($userValue) ||
+            !$this->isValueValidForExactConditions($conditionValue) ||
             $conditionValueType !== $userValueType) {
                 return null;
             }
@@ -201,7 +228,7 @@ class ConditionEvaluator
         $conditionValue = $conditions->{'value'};
         $userValue = $userAttributes[$conditionName];
 
-        if(!isFinite($userValue) || !isFinite($conditionValue)) {
+        if(!$this->isFinite($userValue) || !$this->isFinite($conditionValue)) {
             return null;
         }
 

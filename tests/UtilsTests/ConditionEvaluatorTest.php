@@ -57,16 +57,4 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($this->conditionEvaluator->evaluate($this->conditionsList, $userAttributes));
     }
-
-    public function testEvaluateEmptyUserAttributes()
-    {
-        $userAttributes = [];
-        $this->assertFalse($this->conditionEvaluator->evaluate($this->conditionsList, $userAttributes));
-    }
-
-    public function testEvaluateNullUserAttributes()
-    {
-        $userAttributes = null;
-        $this->assertFalse($this->conditionEvaluator->evaluate($this->conditionsList, $userAttributes));
-    }
 }
