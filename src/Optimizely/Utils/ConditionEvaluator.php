@@ -43,19 +43,19 @@ class ConditionEvaluator
     const LESS_THAN_MATCH_TYPE = 'lt';
     const SUBSTRING_MATCH_TYPE = 'substring';
 
-    public static function getSupportedOperators()
+    public function getSupportedOperators()
     {
         return array(self::AND_OPERATOR, self::OR_OPERATOR, self::NOT_OPERATOR);
     }
 
-    public static function getMatchTypes()
+    public function getMatchTypes()
     {
         return array(self::EXACT_MATCH_TYPE, self::EXISTS_MATCH_TYPE, self::GREATER_THAN_MATCH_TYPE,
          self::LESS_THAN_MATCH_TYPE, self::SUBSTRING_MATCH_TYPE);
     }
 
 
-    public static function getEvaluatorByMatchType($matchType)
+    public function getEvaluatorByMatchType($matchType)
     {
         $evaluatorsByMatchType = array();
 
@@ -74,7 +74,7 @@ class ConditionEvaluator
      *
      * @return boolean True if all conditions evaluate to True.
      */
-    private function andEvaluator($conditions, $userAttributes)
+    public function andEvaluator($conditions, $userAttributes)
     {
         $sawNullResult = false;
         foreach ($conditions as $condition) {
@@ -98,7 +98,7 @@ class ConditionEvaluator
      *
      * @return boolean True if any one of the conditions evaluate to True.
      */
-    private function orEvaluator($conditions, $userAttributes)
+    public function orEvaluator($conditions, $userAttributes)
     {
         $sawNullResult = false;
         foreach ($conditions as $condition) {
@@ -122,7 +122,7 @@ class ConditionEvaluator
      *
      * @return boolean True if the condition evaluates to False.
      */
-    private function notEvaluator($condition, $userAttributes)
+    public function notEvaluator($condition, $userAttributes)
     {
         if (empty($condition)) {
             return null;
@@ -167,15 +167,15 @@ class ConditionEvaluator
             $conditionMatch = self::EXACT_MATCH_TYPE;
         }
 
-        if(!in_array($conditionMatch, self::getMatchTypes())) {
+        if(!in_array($conditionMatch, $this->getMatchTypes())) {
             return null;
         }
 
-        $evaluatorForMatch = self::getEvaluatorByMatchType($conditionMatch);
+        $evaluatorForMatch = $this->getEvaluatorByMatchType($conditionMatch);
         return $this->$evaluatorForMatch($leafCondition, $userAttributes);
     }
 
-    private function isFinite($value)
+    public function isFinite($value)
     {
         if(is_numeric($value) ) {
 
@@ -189,7 +189,7 @@ class ConditionEvaluator
         return false;
     }
 
-    private function isValueValidForExactConditions($value)
+    public function isValueValidForExactConditions($value)
     {
         if(is_string($value) || is_bool($value) || $this->isFinite($value)) {
             return true;
@@ -218,14 +218,14 @@ class ConditionEvaluator
 
     public function existsEvaluator($condition, $userAttributes) 
     {
-        $conditionName = $conditions->{'name'};
+        $conditionName = $condition->{'name'};
         return isset($userAttributes[$conditionName]);
     }
 
     public function greaterThanEvaluator($condition, $userAttributes)
     {
-        $conditionName = $conditions->{'name'};
-        $conditionValue = $conditions->{'value'};
+        $conditionName = $condition->{'name'};
+        $conditionValue = $condition->{'value'};
         $userValue = $userAttributes[$conditionName];
 
         if(!$this->isFinite($userValue) || !$this->isFinite($conditionValue)) {
@@ -237,11 +237,11 @@ class ConditionEvaluator
 
     public function lessThanEvaluator($condition, $userAttributes)
     {
-        $conditionName = $conditions->{'name'};
-        $conditionValue = $conditions->{'value'};
+        $conditionName = $condition->{'name'};
+        $conditionValue = $condition->{'value'};
         $userValue = $userAttributes[$conditionName];
 
-        if(!isFinite($userValue) || !isFinite($conditionValue)) {
+        if(!$this->isFinite($userValue) || !$this->isFinite($conditionValue)) {
             return null;
         }
 
@@ -250,8 +250,8 @@ class ConditionEvaluator
 
     public function substringEvaluator($condition, $userAttributes)
     {
-        $conditionName = $conditions->{'name'};
-        $conditionValue = $conditions->{'value'};
+        $conditionName = $condition->{'name'};
+        $conditionValue = $condition->{'value'};
         $userValue = $userAttributes[$conditionName];
 
         if(!is_string($userValue) || !is_string($conditionValue)) {
