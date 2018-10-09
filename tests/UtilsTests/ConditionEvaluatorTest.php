@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016, 2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,15 +37,6 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         $this->conditionEvaluatorMock = $this->getMockBuilder(ConditionEvaluator::class)
             ->setMethods(array('evaluate'))
             ->getMock();
-    }
-
-
-    public function testGetSupportedOperators()
-    {
-        $this->assertEquals(
-            ['and', 'or', 'not'],
-            $this->conditionEvaluator->getSupportedOperators()
-        );
     }
 
     public function testGetMatchTypes()
@@ -92,6 +83,24 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($this->conditionEvaluatorMock->andEvaluator(range(0,2), null));
     }
 
+    public function testAndEvaluatorWithFalseAndNull()
+    {
+        $this->conditionEvaluatorMock->expects($this->exactly(3))
+            ->method('evaluate')
+            ->will($this->onConsecutiveCalls(null, null, false));
+
+        $this->assertFalse($this->conditionEvaluatorMock->andEvaluator(range(0,2), null));
+    }
+
+    public function testAndEvaluatorWithAllNull()
+    {
+        $this->conditionEvaluatorMock->expects($this->exactly(3))
+            ->method('evaluate')
+            ->will($this->onConsecutiveCalls(null, null, null));
+
+        $this->assertNull($this->conditionEvaluatorMock->andEvaluator(range(0,2), null));
+    }
+
     public function testOrEvaluatorWithAllFalse()
     {
         $this->conditionEvaluatorMock->expects($this->exactly(3))
@@ -115,6 +124,24 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         $this->conditionEvaluatorMock->expects($this->exactly(3))
             ->method('evaluate')
             ->will($this->onConsecutiveCalls(false, false, null));
+
+        $this->assertNull($this->conditionEvaluatorMock->orEvaluator(range(0,2), null));
+    }
+
+    public function testOrEvaluatorWithTrueAndNull()
+    {
+        $this->conditionEvaluatorMock->expects($this->exactly(3))
+            ->method('evaluate')
+            ->will($this->onConsecutiveCalls(null, null, true));
+
+        $this->assertTrue($this->conditionEvaluatorMock->orEvaluator(range(0,2), null));
+    }
+
+    public function testOrEvaluatorWithAllNull()
+    {
+        $this->conditionEvaluatorMock->expects($this->exactly(3))
+            ->method('evaluate')
+            ->will($this->onConsecutiveCalls(null, null, null));
 
         $this->assertNull($this->conditionEvaluatorMock->orEvaluator(range(0,2), null));
     }
@@ -144,6 +171,14 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             ->willReturn(false);
 
         $this->assertTrue($this->conditionEvaluatorMock->notEvaluator(1, null));
+    }
+
+    public function testNotEvaluatorWithEmptyConditionArray()
+    {
+        $this->conditionEvaluatorMock->expects($this->never())
+            ->method('evaluate');
+
+        $this->assertNull($this->conditionEvaluatorMock->notEvaluator(array(), null));
     }
 
     public function testIsFinite()
@@ -229,6 +264,11 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
     public function testGreaterThanEvaluator()
     {
+        // should return null when respective user attribute value isn't present
+        $condition = (object) ['name' => 'device_type', 'value' => 'android'];
+        $userAttributes = []; 
+        $this->assertNull($this->conditionEvaluator->greaterThanEvaluator($condition, $userAttributes));
+
         // should return null when user attribute value is not finite
         $condition = (object) ['name' => 'device_type', 'value' => 5];
         $userAttributes = ['device_type' => '5']; 
@@ -252,6 +292,11 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
     public function testLessThanEvaluator()
     {
+        // should return null when respective user attribute value isn't present
+        $condition = (object) ['name' => 'device_type', 'value' => 'android'];
+        $userAttributes = []; 
+        $this->assertNull($this->conditionEvaluator->lessThanEvaluator($condition, $userAttributes));
+
         // should return null when user attribute value is not finite
         $condition = (object) ['name' => 'device_type', 'value' => 5];
         $userAttributes = ['device_type' => '5']; 
@@ -275,6 +320,11 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
     public function testSubStringEvaluator()
     {
+        // should return null when respective user attribute value isn't present
+        $condition = (object) ['name' => 'device_type', 'value' => 'android'];
+        $userAttributes = []; 
+        $this->assertNull($this->conditionEvaluator->substringEvaluator($condition, $userAttributes));
+
         // should return null when user attribute value is not a string
         $condition = (object) ['name' => 'device_type', 'value' => 'android'];
         $userAttributes = ['device_type' => 5]; 
@@ -296,6 +346,151 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->conditionEvaluator->substringEvaluator($condition, $userAttributes));
     }
 
+    public function testEvaluateCallsCorrespondingOperatorMethods()
+    {
+        $conditions = (object)["name" => "browser_type"];
+
+        $conditionEvaluatorMock = $this->getMockBuilder(ConditionEvaluator::class)
+            ->setMethods(array('andEvaluator', 'orEvaluator', 'notEvaluator'))
+            ->getMock();
+
+        // test AND evaluator
+        $conditionEvaluatorMock->expects($this->exactly(1))
+            ->method('andEvaluator')
+            ->with([$conditions], null);
+
+        $conditionEvaluatorMock->evaluate(['and', $conditions], null);
+
+        // test OR evaluator
+        $conditionEvaluatorMock->expects($this->exactly(1))
+            ->method('orEvaluator')
+            ->with([$conditions], true);
+
+        $conditionEvaluatorMock->evaluate(['or', $conditions], true);
+
+        // test NOT evaluator
+        $conditionEvaluatorMock->expects($this->exactly(1))
+            ->method('notEvaluator')
+            ->with([$conditions], false);
+
+        $conditionEvaluatorMock->evaluate(['not', $conditions], null);
+    }
+
+    public function testEvaluateWithInvalidType()
+    {
+        $conditions = (object)["name" => "browser_type", 
+            "value" => "firefox", 
+            "type" => "weird", 
+            "match" =>"exact"
+        ];
+
+        $userAttributes = ["browser_type" => "firefox"];
+
+        $this->assertNull($this->conditionEvaluator->evaluate(
+            ['and', $conditions], $userAttributes
+        ));
+    }
+
+    public function testEvaluateWithInvalidMatchType()
+    {
+        $conditions = (object)["name" => "browser_type", 
+            "value" => "firefox", 
+            "type" => "custom_attribute", 
+            "match" =>"weird"
+        ];
+
+        $userAttributes = ["browser_type" => "firefox"];
+
+        $this->assertNull($this->conditionEvaluator->evaluate(
+            ['and', $conditions], $userAttributes
+        ));
+    }
+
+    public function testEvaluateCallsCorrespondingMatchTypeEvaluator()
+    {
+        $conditionEvaluatorMock = $this->getMockBuilder(ConditionEvaluator::class)
+            ->setMethods(array(
+                'exactEvaluator', 'existsEvaluator', 'greaterThanEvaluator', 
+                'lessThanEvaluator', 'substringEvaluator'
+            ))
+            ->getMock();
+
+        // test exactEvaluator
+        $condition = (object)["name" => "browser_type", 
+            "value" => "firefox", 
+            "type" => "custom_attribute", 
+            "match" => "exact"
+        ];
+
+        $userAttributes = ["browser_type" => "firefox"];
+
+        $conditionEvaluatorMock->expects($this->exactly(1))
+            ->method('exactEvaluator')
+            ->with($condition, $userAttributes);
+
+        $conditionEvaluatorMock->evaluate($condition, $userAttributes);
+
+        // test existsEvaluator
+        $condition = (object)["name" => "browser_type", 
+            "type" => "custom_attribute", 
+            "match" => "exists"
+        ];
+
+        $userAttributes = ["browser_type" => "firefox"];
+
+        $conditionEvaluatorMock->expects($this->exactly(1))
+            ->method('existsEvaluator')
+            ->with($condition, $userAttributes);
+
+        $conditionEvaluatorMock->evaluate($condition, $userAttributes);
+
+        // test greaterThanEvaluator
+        $condition = (object)["name" => "browser_type",
+            "value" => "firefox",
+            "type" => "custom_attribute", 
+            "match" => "gt"
+        ];
+
+        $userAttributes = ["browser_type" => "firefox"];
+
+        $conditionEvaluatorMock->expects($this->exactly(1))
+            ->method('greaterThanEvaluator')
+            ->with($condition, $userAttributes);
+
+        $conditionEvaluatorMock->evaluate($condition, $userAttributes);
+
+        // test lessThanEvaluator
+        $condition = (object)["name" => "browser_type",
+            "value" => "firefox",
+            "type" => "custom_attribute", 
+            "match" => "lt"
+        ];
+
+        $userAttributes = ["browser_type" => "firefox"];
+
+        $conditionEvaluatorMock->expects($this->exactly(1))
+            ->method('lessThanEvaluator')
+            ->with($condition, $userAttributes);
+
+        $conditionEvaluatorMock->evaluate($condition, $userAttributes);
+
+        // test substringEvaluator
+        $condition = (object)["name" => "browser_type",
+            "value" => "firefox",
+            "type" => "custom_attribute", 
+            "match" => "substring"
+        ];
+
+        $userAttributes = ["browser_type" => "firefox"];
+
+        $conditionEvaluatorMock->expects($this->exactly(1))
+            ->method('substringEvaluator')
+            ->with($condition, $userAttributes);
+
+        $conditionEvaluatorMock->evaluate($condition, $userAttributes);
+    }
+
+
     public function testEvaluateConditionsMatch()
     {
         $userAttributes = [
@@ -306,7 +501,6 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($this->conditionEvaluator->evaluate($this->conditionsList, $userAttributes));
     }
-
 
     public function testEvaluateConditionsDoNotMatch()
     {
