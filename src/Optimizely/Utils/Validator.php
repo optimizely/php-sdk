@@ -59,7 +59,15 @@ class Validator
      */
     public static function areAttributesValid($attributes)
     {
-        return is_array($attributes) && count(array_filter(array_keys($attributes), 'is_int')) == 0;
+        if(!is_array($attributes)){
+            return false;
+        }
+
+        if (empty($attributes)){
+            return true;
+        }
+        // At least one key string to be an associative array.
+        return count(array_filter(array_keys($attributes), 'is_string')) > 0;
     }
 
     /**

@@ -66,6 +66,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         // Empty attributes
         $this->assertTrue(Validator::areAttributesValid([]));
 
+        // Mixed array as attributes
+        $this->assertTrue(Validator::areAttributesValid([0, 1, 2, 42, 'abc' => 'def']));
+
         // Valid attributes
         $this->assertTrue(
             Validator::areAttributesValid(
@@ -78,6 +81,21 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 ]
             )
         );
+    }
+
+    public function testAreAttributesValidInvalidAttributes()
+    {
+        // String as attributes
+        $this->assertFalse(Validator::areAttributesValid('Invalid string attributes.'));
+
+        // Integer as attributes
+        $this->assertFalse(Validator::areAttributesValid(42));
+
+        // Boolean as attributes
+        $this->assertFalse(Validator::areAttributesValid(true));
+
+        // Sequential array as attributes
+        $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42]));
     }
 
     public function testisAttributeValidAttributeWithValidKeyValue()
@@ -103,24 +121,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::isAttributeValid([], 'value'));
         $this->assertFalse(Validator::isAttributeValid(5, 'value'));
         $this->assertFalse(Validator::isAttributeValid(5.5, 'value'));
-    }
-
-    public function testAreAttributesValidInvalidAttributes()
-    {
-        // String as attributes
-        $this->assertFalse(Validator::areAttributesValid('Invalid string attributes.'));
-
-        // Integer as attributes
-        $this->assertFalse(Validator::areAttributesValid(42));
-
-        // Boolean as attributes
-        $this->assertFalse(Validator::areAttributesValid(true));
-
-        // Sequential array as attributes
-        $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42]));
-
-        // Mixed array as attributes
-        $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42, 'abc' => 'def']));
     }
 
     public function testAreEventTagsValidValidEventTags()
