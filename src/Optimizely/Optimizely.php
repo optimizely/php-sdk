@@ -38,6 +38,7 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\UserProfile\UserProfileServiceInterface;
+use Optimizely\Utils\Errors;
 use Optimizely\Utils\Validator;
 use Optimizely\Utils\VariableTypeUtils;
 
