@@ -32,6 +32,7 @@ use Optimizely\Entity\VariableUsage;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
+use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidEventException;
 use Optimizely\Exceptions\InvalidExperimentException;
 use Optimizely\Exceptions\InvalidFeatureFlagException;
@@ -140,7 +141,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             [
             'purchase' => $this->config->getEvent('purchase'),
-            'unlinked_event' => $this->config->getEvent('unlinked_event')
+            'unlinked_event' => $this->config->getEvent('unlinked_event'),
+            'multi_exp_event' => $this->config->getEvent('multi_exp_event')
             ],
             $eventKeyMap->getValue($this->config)
         );
@@ -325,6 +327,21 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $actualVariation = $this->config->getVariationFromKey("test_experiment_multivariate", "Fred");
 
         $this->assertEquals($expectedVariation, $actualVariation);
+    }
+
+    public function testExceptionThrownForUnsupportedVersion()
+    {
+        // Verify that an exception is thrown when given datafile version is unsupported //
+        $this->setExpectedException(
+            InvalidDatafileVersionException::class,
+            'This version of the PHP SDK does not support the given datafile version: 5.'
+        );
+
+        $this->config = new ProjectConfig(
+            UNSUPPORTED_DATAFILE,
+            $this->loggerMock,
+            $this->errorHandlerMock
+        );
     }
 
     public function testVariationParsingWithoutFeatureEnabledProp()

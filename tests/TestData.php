@@ -483,6 +483,14 @@ define(
       "experimentIds": [],
       "id": "7718020064",
       "key": "unlinked_event"
+    },
+    {
+      "experimentIds":[
+        "7716830082",
+        "122230"
+      ],
+      "id": "7718020065",
+      "key": "multi_exp_event"
     }
   ],
   "anonymizeIP": false,
@@ -763,6 +771,60 @@ define(
     }
   ]
 }'
+);
+
+define(
+    'UNSUPPORTED_DATAFILE',
+    '{
+      "version": "5",
+      "rollouts": [],
+      "anonymizeIP": true,
+      "projectId": "10431130345",
+      "variables": [],
+      "featureFlags": [],
+      "experiments": [
+        {
+          "status": "Running",
+          "key": "ab_running_exp_untargeted",
+          "layerId": "10417730432",
+          "trafficAllocation": [
+            {
+              "entityId": "10418551353",
+              "endOfRange": 10000
+            }
+          ],
+          "audienceIds": [],
+          "variations": [
+            {
+              "variables": [],
+              "id": "10418551353",
+              "key": "all_traffic_variation"
+            },
+            {
+              "variables": [],
+              "id": "10418510624",
+              "key": "no_traffic_variation"
+            }
+          ],
+          "forcedVariations": {},
+          "id": "10420810910"
+        }
+      ],
+      "audiences": [],
+      "groups": [],
+      "attributes": [],
+      "accountId": "10367498574",
+      "events": [
+        {
+          "experimentIds": [
+            "10420810910"
+          ],
+          "id": "10404198134",
+          "key": "winning"
+        }
+      ],
+      "revision": "1337"
+    }'
 );
 
 /**
