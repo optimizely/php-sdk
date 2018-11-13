@@ -715,7 +715,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $invalidVariationKey = 'invalid_variation';
         $callIndex = 0;
 
-        $this->loggerMock->expects($this->exactly(4))
+        $this->loggerMock->expects($this->exactly(5))
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
@@ -723,6 +723,9 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::VARIATION_KEY));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::ERROR, sprintf('No variation key "%s" defined in datafile for experiment "%s".', $invalidVariationKey, $experimentKey));
@@ -734,6 +737,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
         $this->config->setForcedVariation($invalidExperimentKey, $userId, $variationKey);
         $this->config->setForcedVariation($experimentKey, $userId, null);
+        $this->config->setForcedVariation($experimentKey, $userId, '');
         $this->config->setForcedVariation($experimentKey, $userId, $invalidVariationKey);
         $this->config->setForcedVariation($experimentKey, $userId, $variationKey);
     }
