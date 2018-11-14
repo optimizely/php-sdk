@@ -59,7 +59,7 @@ class NotificationCenter
      * Adds a notification callback for a notification type to the notification center
      *
      * @param string $notification_type     One of the constants defined in NotificationType
-     * @param string $notification_callback A valid PHP callback
+     * @param callable $notification_callback A valid PHP callback
      *
      * @return null  Given invalid notification type/callback
      *         -1    Given callback has been already added
