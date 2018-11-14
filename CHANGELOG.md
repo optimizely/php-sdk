@@ -8,7 +8,7 @@ Changes that have landed in master but are not yet released.
 November 14th, 2018
 
 ### Bug fixes
-- fix(generateBucketValue): Avoid negative bucket number for PHP x86 ([#137](https://github.com/optimizely/php-sdk/pull/137))
+- fix(generateBucketValue): Avoid negative bucket number for PHP x86. ([#137](https://github.com/optimizely/php-sdk/pull/137))
 - fix(phpdoc-notification-callback): Fixes phpdoc primitive type of notification-callback. ([#135](https://github.com/optimizely/php-sdk/pull/135))
 
 
