@@ -86,7 +86,13 @@ class Bucketer
     {
         $hashCode = $this->generateHashCode($bucketingKey);
         $ratio = $hashCode / Bucketer::$MAX_HASH_VALUE;
-        return intval(floor($ratio * Bucketer::$MAX_TRAFFIC_VALUE));
+        $bucketVal = intval(floor($ratio * Bucketer::$MAX_TRAFFIC_VALUE));
+
+        if ($bucketVal < 0) {
+            $bucketVal += 10000;
+        }
+
+        return $bucketVal;
     }
 
     /**
