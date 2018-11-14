@@ -4,6 +4,14 @@ Changes that have landed in master but are not yet released.
 - refac: Renames notification-center methods. ([#120](https://github.com/optimizely/php-sdk/pull/120))
 - fix: Validate Inputs for activate/track/getVariation. ([#105](https://github.com/optimizely/php-sdk/pull/105))
 
+## 2.2.1
+November 14th, 2018
+
+### Bug fixes
+- fix(generateBucketValue): Avoid negative bucket number for PHP x86. ([#137](https://github.com/optimizely/php-sdk/pull/137))
+- fix(phpdoc-notification-callback): Fixes phpdoc primitive type of notification-callback. ([#135](https://github.com/optimizely/php-sdk/pull/135))
+
+
 ## 2.2.0
 October 29th, 2018
 
