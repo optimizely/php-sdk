@@ -798,6 +798,15 @@ class Optimizely
     protected function validateInputs(array $values, $logLevel = Logger::ERROR)
     {
         $isValid = true;
+        if (array_key_exists(self::USER_ID, $values)) {
+            // Empty str is a valid user ID
+            if (!is_string($values[self::USER_ID])) {
+                $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_FORMAT, self::USER_ID));
+                $isValid = false;
+            }
+            unset($values[self::USER_ID]);
+        }
+
         foreach ($values as $key => $value) {
             if (!Validator::validateNonEmptyString($value)) {
                 $isValid = false;

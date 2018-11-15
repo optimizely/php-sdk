@@ -252,6 +252,69 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($optimizelyMock->activate($experimentKey, $userId));
     }
 
+    public function testActivateWithInvalidUserID()
+    {
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, new ValidEventDispatcher(), $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        // verify that sendImpression isn't called
+        $optimizelyMock->expects($this->never())
+            ->method('sendImpressionEvent');
+
+        // Call activate
+        $this->assertNull($optimizelyMock->activate('test_experiment', null));
+        $this->assertNull($optimizelyMock->activate('test_experiment', 5));
+        $this->assertNull($optimizelyMock->activate('test_experiment', 5.5));
+        $this->assertNull($optimizelyMock->activate('test_experiment', true));
+        $this->assertNull($optimizelyMock->activate('test_experiment', []));
+        $this->assertNull($optimizelyMock->activate('test_experiment', (object) array()));
+    }
+
+    public function testActivateWithEmptyUserID()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco'
+        ];
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'User "" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 7428 to user "" with bucketing ID "".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "" is in variation variation of experiment test_experiment.'
+            );
+
+        // Verify that sendImpressionEvent is called with expected attributes
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with('test_experiment', 'variation', '', $userAttributes);
+
+        // Call activate
+        $this->assertEquals('variation', $optimizelyMock->activate('test_experiment', '', $userAttributes));
+    }
+
+
     public function testActivateInvalidAttributes()
     {
         $this->loggerMock->expects($this->exactly(2))
@@ -556,6 +619,33 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($optimizelyMock->getVariation($experimentKey, $userId));
     }
 
+    public function testGetVariationWithInvalidUserID()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco'
+        ];
+
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
+
+        $optlyObject = new Optimizely(
+            $this->datafile,
+            new ValidEventDispatcher(),
+            $this->loggerMock
+        );
+
+        // Call getVariation
+        $this->assertNull($optlyObject->getVariation('test_experiment', null, $userAttributes));
+        $this->assertNull($optlyObject->getVariation('test_experiment', 5, $userAttributes));
+        $this->assertNull($optlyObject->getVariation('test_experiment', 5.5, $userAttributes));
+        $this->assertNull($optlyObject->getVariation('test_experiment', false, $userAttributes));
+        $this->assertNull($optlyObject->getVariation('test_experiment', [], $userAttributes));
+        $this->assertNull($optlyObject->getVariation('test_experiment', (object) array(), $userAttributes));
+    }
+
     public function testGetVariationInvalidAttributes()
     {
         $this->loggerMock->expects($this->once())
@@ -796,6 +886,38 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(false);
 
         $this->assertNull($optimizelyMock->track($eventKey, $userId));
+    }
+
+    public function testTrackWithInvalidUserID()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco'
+        ];
+
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
+
+        $optlyObject = new Optimizely(
+            $this->datafile,
+            new ValidEventDispatcher(),
+            $this->loggerMock
+        );
+
+        // Verify that sendNotifications isn't called
+        $this->notificationCenterMock->expects($this->never())
+            ->method('sendNotifications');
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
+
+        // Call track
+        $this->assertNull($optlyObject->track('purchase', null, $userAttributes, array('revenue' => 42)));
+        $this->assertNull($optlyObject->track('purchase', 5, $userAttributes, array('revenue' => 42)));
+        $this->assertNull($optlyObject->track('purchase', 5.5, $userAttributes, array('revenue' => 42)));
+        $this->assertNull($optlyObject->track('purchase', true, $userAttributes, array('revenue' => 42)));
+        $this->assertNull($optlyObject->track('purchase', [], $userAttributes, array('revenue' => 42)));
+        $this->assertNull($optlyObject->track('purchase', (object) array(), $userAttributes, array('revenue' => 42)));
     }
 
     public function testTrackInvalidAttributes()
@@ -1701,6 +1823,145 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject->track('purchase', 'test_user', $userAttributes, array('revenue' => 42));
     }
 
+    public function testTrackWithEmptyUserID()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco'
+        ];
+
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfig,
+                'purchase',
+                [
+                    '7716830082' => '7721010009',
+                    '7718750065' => '7725250007'
+                ],
+                '',
+                $userAttributes,
+                array('revenue' => 42)
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(16))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'User "" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 7428 to user "" with bucketing ID "".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "" is in variation variation of experiment test_experiment.'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'User "" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Assigned bucket 2339 to user "" with bucketing ID "".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "" is not in experiment group_experiment_1 of group 7722400015.'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'Not tracking user "" for experiment "group_experiment_1".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'User "" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Assigned bucket 2339 to user "" with bucketing ID "".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "" is in experiment group_experiment_2 of group 7722400015.'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Assigned bucket 5641 to user "" with bucketing ID "".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "" is in variation group_exp_2_var_2 of experiment group_experiment_2.'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'Experiment "paused_experiment" is not running.'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'Not tracking user "" for experiment "paused_experiment".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'Tracking event "purchase" for user "".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
+            );
+
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            'purchase',
+            '',
+            $userAttributes,
+            array('revenue' => 42),
+            new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
+        );
+
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::TRACK,
+                $arrayParam
+            );
+
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Call track
+        $optlyObject->track('purchase', '', $userAttributes, array('revenue' => 42));
+    }
+
     // check that a null variation key clears the forced variation
     public function testSetForcedVariationNullVariation()
     {
@@ -1742,7 +2003,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('variation', $variationKey, sprintf('Invalid variation "%s" for valid conditions.', $variationKey));
     }
 
-    public function testSetForcedVariationWithInvalidUserIDs()
+    public function testSetForcedVariationWithEmptyUserID()
     {
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1751,17 +2012,29 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'location' => 'San Francisco'
         ];
 
-        // null user ID should fail setForcedVariation. getVariation on a null userID should return null
-        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', null, 'bad_variation'), 'Set variation for null user ID should have failed.');
-
-        $variationKey = $optlyObject->getVariation('test_experiment', null, $userAttributes);
-        $this->assertNull($variationKey);
-
-        // empty string user ID should fail setForcedVariation. getVariation on an empty userID should return null
-        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', '', 'bad_variation'), 'Set variation for empty string user ID should have failed.');
-
         $variationKey = $optlyObject->getVariation('test_experiment', '', $userAttributes);
-        $this->assertNull($variationKey);
+        $this->assertEquals('variation', $variationKey, sprintf('Invalid variation "%s" for baseline check.', $variationKey));
+
+        // valid experiment, valid variation, empty user ID --> the user should be bucketed to the specified forced variation
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', '', 'variation'), 'Set variation for valid conditions should have succeeded.');
+        $variationKey = $optlyObject->getVariation('test_experiment', '', $userAttributes);
+        $this->assertEquals('variation', $variationKey, sprintf('Invalid variation "%s" for valid conditions.', $variationKey));
+    }
+
+    public function testSetForcedVariationWithInvalidUserIDs()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
+
+        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', null, 'control'));
+        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', 5, 'control'));
+        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', 5.5, 'control'));
+        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', false, 'control'));
+        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', [], 'control'));
+        $this->assertFalse($optlyObject->setForcedVariation('test_experiment', (object) array(), 'control'));
     }
 
     public function testSetForcedVariationWithInvalidExperimentKeys()
@@ -1847,6 +2120,15 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('variation', $forcedVariationKey);
     }
 
+    public function testGetForcedVariationWithEmptyUserID()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $this->assertTrue($optlyObject->setForcedVariation('test_experiment', '', 'variation'), 'Set variation to "variation" failed.');
+        // call getForcedVariation with valid experiment key and empty user ID
+        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', '');
+        $this->assertEquals('variation', $forcedVariationKey);
+    }
 
     public function testGetForcedVariationWithInvalidExperimentKeys()
     {
@@ -1867,15 +2149,16 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
-        // call getForcedVariation invalid userID
-        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', 'invalid_user');
-        $this->assertNull($forcedVariationKey);
-        // call getForcedVariation with null userID
-        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', null);
-        $this->assertNull($forcedVariationKey);
-        // call getForcedVariation with empty userID
-        $forcedVariationKey = $optlyObject->getForcedVariation('test_experiment', '');
-        $this->assertNull($forcedVariationKey);
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
+
+        $this->assertNull($optlyObject->getForcedVariation('test_experiment', null));
+        $this->assertNull($optlyObject->getForcedVariation('test_experiment', 5));
+        $this->assertNull($optlyObject->getForcedVariation('test_experiment', 5.5));
+        $this->assertNull($optlyObject->getForcedVariation('test_experiment', false));
+        $this->assertNull($optlyObject->getForcedVariation('test_experiment', []));
+        $this->assertNull($optlyObject->getForcedVariation('test_experiment', (object) array()));
     }
 
     public function testGetForcedVariationWithExperimentNotRunning()
@@ -1938,7 +2221,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User ID is invalid');
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1977,7 +2260,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User ID is invalid');
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
 
         $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -2051,6 +2334,22 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(false);
 
         $this->assertFalse($optimizelyMock->isFeatureEnabled($featureKey, $userId));
+    }
+
+    public function testIsFeatureEnabledWithInvalidUserID()
+    {
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
+
+        $this->assertFalse($optlyObject->isFeatureEnabled('boolean_feature', null));
+        $this->assertFalse($optlyObject->isFeatureEnabled('boolean_feature', 5));
+        $this->assertFalse($optlyObject->isFeatureEnabled('boolean_feature', 5.5));
+        $this->assertFalse($optlyObject->isFeatureEnabled('boolean_feature', false));
+        $this->assertFalse($optlyObject->isFeatureEnabled('boolean_feature', []));
+        $this->assertFalse($optlyObject->isFeatureEnabled('boolean_feature', (object) array()));
     }
 
     public function testIsFeatureEnabledGivenFeatureFlagNotFound()
@@ -2315,6 +2614,48 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($optimizelyMock->isFeatureEnabled('boolean_single_variable_feature', 'user_id', []));
     }
 
+    public function testIsFeatureEnabledWithEmptyUserID()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($optimizelyMock, $decisionServiceMock);
+
+        // Mock getVariationForFeature to return a valid decision with experiment and variation keys
+        $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
+        $variation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
+
+        $expected_decision = new FeatureDecision(
+            $experiment,
+            $variation,
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+        );
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expected_decision));
+
+        // assert that sendImpressionEvent is called with expected params
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with('test_experiment_double_feature', 'control', '', []);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, "Feature Flag 'double_single_variable_feature' is enabled for user ''.");
+
+        $this->assertTrue($optimizelyMock->isFeatureEnabled('double_single_variable_feature', '', []));
+    }
+
     public function testGetEnabledFeaturesGivenInvalidDataFile()
     {
         $optlyObject = new Optimizely('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM));
@@ -2324,25 +2665,20 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($optlyObject->getEnabledFeatures("user_id", []));
     }
 
-    public function testGetEnabledFeaturesCallsValidateInputs()
+    public function testGetEnabledFeaturesWithInvalidUserID()
     {
-        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
-            ->setConstructorArgs(array($this->datafile))
-            ->setMethods(array('validateInputs'))
-            ->getMock();
+        $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
-        $userId = null;
-        $inputArray = [
-            'User ID' => $userId
-        ];
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
 
-        // assert that validateInputs gets called with exactly same keys
-        $optimizelyMock->expects($this->once())
-            ->method('validateInputs')
-            ->with($inputArray)
-            ->willReturn(false);
-
-        $this->assertEmpty($optimizelyMock->getEnabledFeatures($userId));
+        $this->assertEmpty($optlyObject->getEnabledFeatures(null));
+        $this->assertEmpty($optlyObject->getEnabledFeatures(5));
+        $this->assertEmpty($optlyObject->getEnabledFeatures(5.5));
+        $this->assertEmpty($optlyObject->getEnabledFeatures(false));
+        $this->assertEmpty($optlyObject->getEnabledFeatures([]));
+        $this->assertEmpty($optlyObject->getEnabledFeatures((object) array()));
     }
 
     public function testGetEnabledFeaturesGivenNoFeatureIsEnabledForUser()
@@ -2386,6 +2722,29 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             ['boolean_feature', 'boolean_single_variable_feature', 'empty_feature'],
             $optimizelyMock->getEnabledFeatures("user_id", [])
+        );
+    }
+
+    public function testGetEnabledFeaturesGivenFeaturesAreEnabledForEmptyUserID()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('isFeatureEnabled'))
+            ->getMock();
+
+        $map = [
+            ['boolean_feature','', [], true],
+            ['double_single_variable_feature','', [], true]
+        ];
+
+        // Mock isFeatureEnabled to return specific values
+        $optimizelyMock->expects($this->exactly(8))
+            ->method('isFeatureEnabled')
+            ->will($this->returnValueMap($map));
+
+        $this->assertEquals(
+            ['boolean_feature', 'double_single_variable_feature'],
+            $optimizelyMock->getEnabledFeatures("", [])
         );
     }
 
@@ -2448,6 +2807,26 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(false);
 
         $this->assertNull($optimizelyMock->getFeatureVariableValueForType($featureKey, $variableKey, $userId));
+    }
+
+    public function testGetFeatureVariableValueForTypeWithInvalidUserID()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco'
+        ];
+
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
+
+        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType("double_single_variable_feature", "double_variable", null, $userAttributes, "string"));
+        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType("double_single_variable_feature", "double_variable", 5, $userAttributes, "string"));
+        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType("double_single_variable_feature", "double_variable", 5.5, $userAttributes, "string"));
+        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType("double_single_variable_feature", "double_variable", false, $userAttributes, "string"));
+        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType("double_single_variable_feature", "double_variable", [], $userAttributes, "string"));
+        $this->assertNull($this->optimizelyObject->getFeatureVariableValueForType("double_single_variable_feature", "double_variable", (object) array(), $userAttributes, "string"));
     }
 
     public function testGetFeatureVariableValueForTypeGivenFeatureFlagNotFound()
@@ -2640,6 +3019,34 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testGetFeatureVariableValueForTypeWithEmptyUserID()
+    {
+        // should return default value
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue(null));
+
+        $this->loggerMock->expects($this->exactly(1))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                "User ''is not in any variation, returning default value '14.99'."
+            );
+
+        $this->assertSame(
+            $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', '', [], 'double'),
+            '14.99'
+        );
+    }
 
     public function testGetFeatureVariableBooleanCaseTrue()
     {
@@ -2987,11 +3394,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that multiple messages are logged.
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::ERROR, $INVALID_EVENT_KEY_LOG);
+            ->with(Logger::ERROR, $INVALID_USER_ID_LOG);
 
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::ERROR, $INVALID_USER_ID_LOG);
+            ->with(Logger::ERROR, $INVALID_EVENT_KEY_LOG);
+
         $this->assertFalse($optlyObject->validateInputs([Optimizely::EVENT_KEY => null, Optimizely::USER_ID => null]));
 
         // Verify that logger level is taken into account
