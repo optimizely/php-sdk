@@ -470,6 +470,15 @@ class Optimizely
      */
     public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
+        if (!$this->validateInputs(
+            [
+                self::EXPERIMENT_KEY =>$experimentKey,
+                self::USER_ID => $userId
+            ]
+        )
+        ) {
+            return false;
+        }
         return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
     }
 
@@ -483,6 +492,16 @@ class Optimizely
      */
     public function getForcedVariation($experimentKey, $userId)
     {
+        if (!$this->validateInputs(
+            [
+                self::EXPERIMENT_KEY =>$experimentKey,
+                self::USER_ID => $userId
+            ]
+        )
+        ) {
+            return null;
+        }
+
         $forcedVariation = $this->_config->getForcedVariation($experimentKey, $userId);
         if (isset($forcedVariation)) {
             return $forcedVariation->getKey();

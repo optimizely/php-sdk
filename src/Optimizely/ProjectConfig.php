@@ -598,12 +598,6 @@ class ProjectConfig
     public function getForcedVariation($experimentKey, $userId)
     {
 
-        // check for empty string user ID
-        if (!is_string($userId)) {
-            $this->_logger->log(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
-            return null;
-        }
-
         if (!isset($this->_forcedVariationMap[$userId])) {
             $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
             return null;
@@ -643,11 +637,6 @@ class ProjectConfig
      */
     public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
-        // check for empty string user ID
-        if (!is_string($userId)) {
-            $this->_logger->log(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::USER_ID));
-            return false;
-        }
 
         // check for empty string Variation key
         if (!is_null($variationKey) && !Validator::validateNonEmptyString($variationKey)) {
