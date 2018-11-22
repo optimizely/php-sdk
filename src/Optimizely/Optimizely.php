@@ -54,6 +54,7 @@ class Optimizely
     const FEATURE_FLAG_KEY = 'Feature Flag Key';
     const USER_ID = 'User ID';
     const VARIABLE_KEY = 'Variable Key';
+    const VARIATION_KEY = 'Variation Key';
 
     /**
      * @var ProjectConfig
