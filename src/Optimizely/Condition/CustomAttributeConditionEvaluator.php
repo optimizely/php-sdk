@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, 2018, Optimizely
+ * Copyright 2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,9 @@
  * limitations under the License.
  */
 
-namespace Optimizely\Utils;
 
-class ConditionEvaluator
+class CustomAttributeConditionEvaluator
 {
-    /**
-     * const string Representing AND operator.
-     */
-    const AND_OPERATOR = 'and';
-
-    /**
-     * const string Representing OR operator.
-     */
-    const OR_OPERATOR = 'or';
-
-    /**
-     * const string Representing NOT operator.
-     */
-    const NOT_OPERATOR = 'not';
-
     /**
      * const string Representing custom attribute type
      */
@@ -74,125 +58,6 @@ class ConditionEvaluator
         $evaluatorsByMatchType[self::SUBSTRING_MATCH_TYPE] = 'substringEvaluator';
 
         return $evaluatorsByMatchType[$matchType];
-    }
-
-    /**
-     * Evaluates an array of conditions as if the evaluator had been applied
-     * to each entry and the results AND-ed together.
-     * 
-     * @param $conditions array Audience conditions list.
-     * @param $userAttributes array Associative array of user attributes to values.
-     *
-     * @return null|boolean true/false if the user attributes match/don't match the given conditions, null if the user attributes and conditions can't be evaluated. 
-     * 
-     */
-    public function andEvaluator($conditions, $userAttributes)
-    {
-        $sawNullResult = false;
-        foreach ($conditions as $condition) {
-            $result = $this->evaluate($condition, $userAttributes);
-            
-            if($result === false) {
-                return false;
-            }
-
-            if(is_null($result)) {
-                $sawNullResult = true;
-            }
-        }
-
-        return $sawNullResult ? null : true;
-    }
-
-    /**
-     * Evaluates an array of conditions as if the evaluator had been applied
-     * to each entry and the results OR-ed together.
-     * 
-     * @param $conditions array Audience conditions list.
-     * @param $userAttributes array Associative array of user attributes to values.
-     *
-     * @return null|boolean true/false if the user attributes match/don't match the given conditions, null if the user attributes and conditions can't be evaluated. 
-     */
-    public function orEvaluator($conditions, $userAttributes)
-    {
-        $sawNullResult = false;
-        foreach ($conditions as $condition) {
-            $result = $this->evaluate($condition, $userAttributes);
-
-            if($result === true) {
-                return true;
-            }
-
-            if(is_null($result)) {
-                $sawNullResult = true;
-            }
-        }
-
-        return $sawNullResult ? null : false;
-    }
-
-    /**
-     * Evaluates an array of conditions as if the evaluator had been applied
-     * to a single entry and NOT was applied to the result.
-     * 
-     * @param $condition array Audience conditions list consisting of single condition.
-     * @param $userAttributes array Associative array of user attributes to values.
-     *
-     * @return null|boolean true/false if the user attributes match/don't match the given conditions, null if the user attributes and conditions can't be evaluated.
-     */
-    public function notEvaluator($condition, $userAttributes)
-    {
-        if (empty($condition)) {
-            return null;
-        }
-
-        $result = $this->evaluate($condition[0], $userAttributes);
-        return is_null($result) ? null: !$result;
-    }
-
-    /**
-     * Function to evaluate audience conditions against user's attributes.
-     *
-     * @param $conditions array Nested array of and/or/not conditions representing the audience conditions.
-     * @param $userAttributes array Associative array of user attributes to values.
-     *
-     * @return null|boolean true/false if the given user attributes match/don't match the given conditions, null if the given user attributes and conditions can't be evaluated
-     */
-    public function evaluate($conditions, $userAttributes)
-    {
-        if (is_array($conditions)) {
-
-            $operator = array_shift($conditions);
-
-            switch ($operator) {
-                case self::AND_OPERATOR:
-                    return $this->andEvaluator($conditions, $userAttributes); 
-                case self::NOT_OPERATOR:
-                    return $this->notEvaluator($conditions, $userAttributes);
-                default:
-                    return $this->orEvaluator($conditions, $userAttributes);
-            }
-        }
-
-        $leafCondition = $conditions;
-
-        if($leafCondition->{'type'} !== self::CUSTOM_ATTRIBUTE_CONDITION_TYPE) {
-            return null;
-        }
-
-        $conditionMatch = null;
-        if(!isset($leafCondition->{'match'})) {
-            $conditionMatch = self::EXACT_MATCH_TYPE;
-        } else {
-            $conditionMatch = $leafCondition->{'match'};
-        }
-
-        if(!in_array($conditionMatch, $this->getMatchTypes())) {
-            return null;
-        }
-
-        $evaluatorForMatch = $this->getEvaluatorByMatchType($conditionMatch);
-        return $this->$evaluatorForMatch($leafCondition, $userAttributes);
     }
 
     /**
@@ -348,5 +213,50 @@ class ConditionEvaluator
         }
 
         return strpos($userValue, $conditionValue) !== false;
+    }
+
+    /**
+     * Function to evaluate audience conditions against user's attributes.
+     *
+     * @param $conditions array Nested array of and/or/not conditions representing the audience conditions.
+     * @param $userAttributes array Associative array of user attributes to values.
+     *
+     * @return null|boolean true/false if the given user attributes match/don't match the given conditions, null if the given user attributes and conditions can't be evaluated
+     */
+    public function evaluate($conditions, $userAttributes)
+    {
+        if (is_array($conditions)) {
+
+            $operator = array_shift($conditions);
+
+            switch ($operator) {
+                case self::AND_OPERATOR:
+                    return $this->andEvaluator($conditions, $userAttributes); 
+                case self::NOT_OPERATOR:
+                    return $this->notEvaluator($conditions, $userAttributes);
+                default:
+                    return $this->orEvaluator($conditions, $userAttributes);
+            }
+        }
+
+        $leafCondition = $conditions;
+
+        if($leafCondition->{'type'} !== self::CUSTOM_ATTRIBUTE_CONDITION_TYPE) {
+            return null;
+        }
+
+        $conditionMatch = null;
+        if(!isset($leafCondition->{'match'})) {
+            $conditionMatch = self::EXACT_MATCH_TYPE;
+        } else {
+            $conditionMatch = $leafCondition->{'match'};
+        }
+
+        if(!in_array($conditionMatch, $this->getMatchTypes())) {
+            return null;
+        }
+
+        $evaluatorForMatch = $this->getEvaluatorByMatchType($conditionMatch);
+        return $this->$evaluatorForMatch($leafCondition, $userAttributes);
     }
 }
