@@ -496,8 +496,7 @@ class Optimizely
                 self::EXPERIMENT_KEY =>$experimentKey,
                 self::USER_ID => $userId
             ]
-        )
-        ) {
+        )) {
             return null;
         }
 
