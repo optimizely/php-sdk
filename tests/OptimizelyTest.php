@@ -499,6 +499,46 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('control', $optimizelyMock->activate('test_experiment', 'test_user', $userAttributes));
     }
 
+    public function testActivateWithAttributesOfDifferentTypes()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'location' => 'San Francisco',
+            'boolean'=> true,
+            'double'=> 5.5,
+            'integer'=> 5
+        ];
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "test_user" is in variation control of experiment test_experiment.'
+            );
+
+        // Verify that sendImpressionEvent is called with expected attributes
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with('test_experiment', 'control', 'test_user', $userAttributes);
+
+        // Call activate
+        $this->assertEquals('control', $optimizelyMock->activate('test_experiment', 'test_user', $userAttributes));
+    }
+
     public function testActivateExperimentNotRunning()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
