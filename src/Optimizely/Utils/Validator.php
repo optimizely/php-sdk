@@ -59,7 +59,28 @@ class Validator
      */
     public static function areAttributesValid($attributes)
     {
-        return is_array($attributes) && count(array_filter(array_keys($attributes), 'is_int')) == 0;
+        if(!is_array($attributes)){
+            return false;
+        }
+
+        if (empty($attributes)){
+            return true;
+        }
+        // At least one key string to be an associative array.
+        return count(array_filter(array_keys($attributes), 'is_string')) > 0;
+    }
+
+    /**
+     * @param $attributeKey The key to validate.
+     * @param $attributeValue The value to validate.
+     *
+     * @return boolean Representing whether attribute's key and value are
+     * valid for event payload or not.
+     */
+    public static function isAttributeValid($attributeKey, $attributeValue)
+    {
+        $validTypes = array('boolean', 'double', 'integer', 'string');
+        return is_string($attributeKey) && in_array(gettype($attributeValue), $validTypes);
     }
 
     /**

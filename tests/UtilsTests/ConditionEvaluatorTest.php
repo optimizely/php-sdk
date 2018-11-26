@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016, 2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,5 +68,21 @@ class ConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     {
         $userAttributes = null;
         $this->assertFalse($this->conditionEvaluator->evaluate($this->conditionsList, $userAttributes));
+    }
+
+    public function testTypedUserAttributesEvaluateTrue()
+    {
+        $decoder = new ConditionDecoder();
+        $conditions = "[\"and\", [\"or\", [\"or\", {\"name\": \"device_type\", \"type\": \"custom_attribute\", \"value\": \"iPhone\"}]], [\"or\", [\"or\", {\"name\": \"is_firefox\", \"type\": \"custom_attribute\", \"value\": false}]], [\"or\", [\"or\", {\"name\": \"num_users\", \"type\": \"custom_attribute\", \"value\": 15}]], [\"or\", [\"or\", {\"name\": \"pi_value\", \"type\": \"custom_attribute\", \"value\": 3.14}]]]";
+        $decoder->deserializeAudienceConditions($conditions);
+
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'is_firefox' => false,
+            'num_users' => 15,
+            'pi_value' => 3.14
+        ];
+        $this->conditionsList = $decoder->getConditionsList();
+        $this->assertTrue($this->conditionEvaluator->evaluate($this->conditionsList, $userAttributes));
     }
 }

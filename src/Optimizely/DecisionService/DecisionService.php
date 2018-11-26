@@ -87,23 +87,19 @@ class DecisionService
      * @param string $userId         user ID
      * @param array  $userAttributes user attributes
      *
-     * @return string  the bucketing ID assigned to user
+     * @return String representing bucketing ID if it is a String type in attributes else return user ID.
      */
-    private function getBucketingId($userId, $userAttributes)
+    protected function getBucketingId($userId, $userAttributes)
     {
-        // By default, the bucketing ID should be the user ID
-        $bucketingId = $userId;
-
-        // If the bucketing ID key is defined in userAttributes, then use that in
-        // place of the userID for the murmur hash key
         $bucketingIdKey = ControlAttributes::BUCKETING_ID;
-        
-        if (!empty($userAttributes[$bucketingIdKey])) {
-            $bucketingId = $userAttributes[$bucketingIdKey];
-            $this->_logger->log(Logger::DEBUG, sprintf('Setting the bucketing ID to "%s".', $bucketingId));
-        }
 
-        return $bucketingId;
+        if (isset($userAttributes[$bucketingIdKey])){
+            if (is_string($userAttributes[$bucketingIdKey])){
+                return $userAttributes[$bucketingIdKey];
+            }
+            $this->_logger->log(Logger::WARNING, 'Bucketing ID attribute is not a string. Defaulted to user ID.');
+        }
+        return $userId;
     }
 
     /**
