@@ -598,12 +598,6 @@ class ProjectConfig
     public function getForcedVariation($experimentKey, $userId)
     {
 
-        // check for null and empty string user ID
-        if (strlen($userId) == 0) {
-            $this->_logger->log(Logger::DEBUG, 'User ID is invalid');
-            return null;
-        }
-
         if (!isset($this->_forcedVariationMap[$userId])) {
             $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
             return null;
@@ -643,11 +637,6 @@ class ProjectConfig
      */
     public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
-        // check for null and empty string user ID
-        if (strlen($userId) == 0) {
-            $this->_logger->log(Logger::DEBUG, 'User ID is invalid');
-            return false;
-        }
 
         // check for empty string Variation key
         if (!is_null($variationKey) && !Validator::validateNonEmptyString($variationKey)) {
