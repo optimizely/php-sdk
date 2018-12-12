@@ -6,8 +6,6 @@ php:
   - '7.1'
 before_install:
 - composer install --dev
-addons:
-  srcclr: true
 script:
 - mkdir -p build/logs
 - ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
