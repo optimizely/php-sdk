@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2017, Optimizely
+ * Copyright 2016-2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,12 +66,18 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         // Empty attributes
         $this->assertTrue(Validator::areAttributesValid([]));
 
+        // Mixed array as attributes
+        $this->assertTrue(Validator::areAttributesValid([0, 1, 2, 42, 'abc' => 'def']));
+
         // Valid attributes
         $this->assertTrue(
             Validator::areAttributesValid(
                 [
-                'location' => 'San Francisco',
-                'browser' => 'Firefox'
+                    'location' => 'San Francisco',
+                    'browser' => 'Firefox',
+                    'boolean'=> true,
+                    'double'=> 5.5,
+                    'integer'=> 5
                 ]
             )
         );
@@ -90,9 +96,31 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
         // Sequential array as attributes
         $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42]));
+    }
 
-        // Mixed array as attributes
-        $this->assertFalse(Validator::areAttributesValid([0, 1, 2, 42, 'abc' => 'def']));
+    public function testisAttributeValidAttributeWithValidKeyValue()
+    {
+        $this->assertTrue(Validator::isAttributeValid('key', 'value'));
+        $this->assertTrue(Validator::isAttributeValid('key', 5));
+        $this->assertTrue(Validator::isAttributeValid('key', 5.5));
+        $this->assertTrue(Validator::isAttributeValid('key', true));
+        $this->assertTrue(Validator::isAttributeValid('key', false));
+        $this->assertTrue(Validator::isAttributeValid('key', 0));
+        $this->assertTrue(Validator::isAttributeValid('key', 0.0));
+        $this->assertTrue(Validator::isAttributeValid('', 0.0));
+    }
+
+    public function testisAttributeValidAttributeWithInValidKeyValue()
+    {
+        # Invalid Value
+        $this->assertFalse(Validator::isAttributeValid('key', null));
+        $this->assertFalse(Validator::isAttributeValid('key', []));
+        $this->assertFalse(Validator::isAttributeValid('key', ['key'=>'value']));
+        # Invalid Key
+        $this->assertFalse(Validator::isAttributeValid(null, 'value'));
+        $this->assertFalse(Validator::isAttributeValid([], 'value'));
+        $this->assertFalse(Validator::isAttributeValid(5, 'value'));
+        $this->assertFalse(Validator::isAttributeValid(5.5, 'value'));
     }
 
     public function testAreEventTagsValidValidEventTags()

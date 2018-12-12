@@ -470,6 +470,14 @@ class Optimizely
      */
     public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
+        if (!$this->validateInputs(
+            [
+                self::EXPERIMENT_KEY =>$experimentKey,
+                self::USER_ID => $userId
+            ]
+        )) {
+            return false;
+        }
         return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
     }
 
@@ -483,6 +491,15 @@ class Optimizely
      */
     public function getForcedVariation($experimentKey, $userId)
     {
+        if (!$this->validateInputs(
+            [
+                self::EXPERIMENT_KEY =>$experimentKey,
+                self::USER_ID => $userId
+            ]
+        )) {
+            return null;
+        }
+
         $forcedVariation = $this->_config->getForcedVariation($experimentKey, $userId);
         if (isset($forcedVariation)) {
             return $forcedVariation->getKey();
@@ -798,6 +815,15 @@ class Optimizely
     protected function validateInputs(array $values, $logLevel = Logger::ERROR)
     {
         $isValid = true;
+        if (array_key_exists(self::USER_ID, $values)) {
+            // Empty str is a valid user ID
+            if (!is_string($values[self::USER_ID])) {
+                $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_FORMAT, self::USER_ID));
+                $isValid = false;
+            }
+            unset($values[self::USER_ID]);
+        }
+
         foreach ($values as $key => $value) {
             if (!Validator::validateNonEmptyString($value)) {
                 $isValid = false;
