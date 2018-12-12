@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
+namespace Optimizely\Utils;
+
+use Optimizely\Utils\Validator;
 
 class CustomAttributeConditionEvaluator
 {
-    /**
-     * const string Representing custom attribute type
-     */
     const CUSTOM_ATTRIBUTE_CONDITION_TYPE = 'custom_attribute';
 
     const EXACT_MATCH_TYPE = 'exact';
@@ -30,11 +30,26 @@ class CustomAttributeConditionEvaluator
     const SUBSTRING_MATCH_TYPE = 'substring';
 
     /**
+     * @var UserAttributes
+    */
+    protected $userAttributes;
+
+    /**
+     * CustomAttributeConditionEvaluator constructor
+     * 
+     * @param array $userAttributes Associative array of user attributes to values.
+     */
+    public function __construct(array $userAttributes)
+    {
+        $this->userAttributes = $userAttributes;
+    }
+
+    /**
      * Gets the supported match types for condition evaluation.
      * 
-     * @return array list of supported match types.
+     * @return array List of supported match types.
      */
-    public function getMatchTypes()
+    protected function getMatchTypes()
     {
         return array(self::EXACT_MATCH_TYPE, self::EXISTS_MATCH_TYPE, self::GREATER_THAN_MATCH_TYPE,
          self::LESS_THAN_MATCH_TYPE, self::SUBSTRING_MATCH_TYPE);
@@ -43,14 +58,13 @@ class CustomAttributeConditionEvaluator
     /**
      * Gets the evaluator method name for the given match type.
      * 
-     * @param  $matchType string match type for which to get evaluator. 
+     * @param  string $matchType Match type for which to get evaluator. 
      * 
-     * @return string corresponding evaluator method name.
+     * @return string Corresponding evaluator method name.
      */
-    public function getEvaluatorByMatchType($matchType)
+    protected function getEvaluatorByMatchType($matchType)
     {
         $evaluatorsByMatchType = array();
-
         $evaluatorsByMatchType[self::EXACT_MATCH_TYPE] = 'exactEvaluator';
         $evaluatorsByMatchType[self::EXISTS_MATCH_TYPE] = 'existsEvaluator';
         $evaluatorsByMatchType[self::GREATER_THAN_MATCH_TYPE] = 'greaterThanEvaluator';
@@ -61,35 +75,14 @@ class CustomAttributeConditionEvaluator
     }
 
     /**
-     * Checks if the given input is a finite number
-     * 
-     * @param  $value Input to check.
-     * 
-     * @return boolean true if given input is a number but not +/-Infinity or NAN, false otherwise.
-     */
-    public function isFinite($value)
-    {
-        if(is_numeric($value) ) {
-
-            if(is_string($value) || is_nan($value) || is_infinite($value)) {
-                return false;
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Checks if the given input is a valid value for exact condition evaluation.
      * 
      * @param  $value Input to check.
      * @return boolean true if given input is a string/boolean/finite number, false otherwise.
      */
-    public function isValueValidForExactConditions($value)
+    protected function isValueValidForExactConditions($value)
     {
-        if(is_string($value) || is_bool($value) || $this->isFinite($value)) {
+        if(is_string($value) || is_bool($value) || Validator::isFiniteNumber($value)) {
             return true;
         }
 
@@ -100,7 +93,6 @@ class CustomAttributeConditionEvaluator
      * Evaluate the given exact match condition for the given user attributes.
      * 
      * @param  object $condition
-     * @param  array $userAttributes
      * 
      * @return null|boolean true if the user attribute value is equal (===) to the condition value,
      *                      false if the user attribute value is not equal (!==) to the condition value,
@@ -108,59 +100,54 @@ class CustomAttributeConditionEvaluator
      *                      if there is a mismatch between the user attribute type and the condition
      *                      value type
      */
-    public function exactEvaluator($condition, $userAttributes)
+    protected function exactEvaluator($condition)
     {
         $conditionName = $condition->{'name'};
         $conditionValue = $condition->{'value'};
-        $conditionValueType = gettype($conditionValue);
-
-        $userValue = isset($userAttributes[$conditionName]) ? $userAttributes[$conditionName]: null;
-        $userValueType = gettype($userValue);
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
         if(!$this->isValueValidForExactConditions($userValue) ||
             !$this->isValueValidForExactConditions($conditionValue) ||
-            $conditionValueType !== $userValueType) {
+            !Validator::areValuesSameType($conditionValue, $userValue)) {
                 return null;
             }
 
-        return $conditionValue === $userValue;
+        return $conditionValue == $userValue;
     }
 
     /**
      * Evaluate the given exists match condition for the given user attributes.
      * 
      * @param  object $condition
-     * @param  array $userAttributes
      * 
      * @return null|boolean true if both:
      *                           1) the user attributes have a value for the given condition, and
      *                           2) the user attribute value is not null.
      *                      false otherwise.
      */
-    public function existsEvaluator($condition, $userAttributes) 
+    protected function existsEvaluator($condition) 
     {
         $conditionName = $condition->{'name'};
-        return isset($userAttributes[$conditionName]);
+        return isset($this->userAttributes[$conditionName]);
     }
 
     /**
      * Evaluate the given greater than match condition for the given user attributes.
      * 
      * @param  object $condition
-     * @param  array $userAttributes
      * 
      * @return boolean true if the user attribute value is greater than the condition value,
      *                 false if the user attribute value is less than or equal to the condition value,
      *                 null if the condition value isn't a number or the user attribute value
      *                 isn't a number
      */
-    public function greaterThanEvaluator($condition, $userAttributes)
+    protected function greaterThanEvaluator($condition)
     {
         $conditionName = $condition->{'name'};
         $conditionValue = $condition->{'value'};
-        $userValue = isset($userAttributes[$conditionName]) ? $userAttributes[$conditionName]: null;
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if(!$this->isFinite($userValue) || !$this->isFinite($conditionValue)) {
+        if(!Validator::isFiniteNumber($userValue) || !Validator::isFiniteNumber($conditionValue)) {
             return null;
         }
 
@@ -171,20 +158,19 @@ class CustomAttributeConditionEvaluator
      * Evaluate the given less than match condition for the given user attributes.
      * 
      * @param  object $condition
-     * @param  array $userAttributes
      * 
      * @return boolean true if the user attribute value is less than the condition value,
      *                 false if the user attribute value is greater than or equal to the condition value,
      *                 null if the condition value isn't a number or the user attribute value
      *                 isn't a number
      */
-    public function lessThanEvaluator($condition, $userAttributes)
+    protected function lessThanEvaluator($condition)
     {
         $conditionName = $condition->{'name'};
         $conditionValue = $condition->{'value'};
-        $userValue = isset($userAttributes[$conditionName]) ? $userAttributes[$conditionName]: null;
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if(!$this->isFinite($userValue) || !$this->isFinite($conditionValue)) {
+        if(!Validator::isFiniteNumber($userValue) || !Validator::isFiniteNumber($conditionValue)) {
             return null;
         }
 
@@ -195,18 +181,17 @@ class CustomAttributeConditionEvaluator
      * Evaluate the given substring than match condition for the given user attributes.
      * 
      * @param  object $condition
-     * @param  array $userAttributes
      * 
      * @return boolean true if the condition value is a substring of the user attribute value,
      *                 false if the condition value is not a substring of the user attribute value,
      *                 null if the condition value isn't a string or the user attribute value
      *                 isn't a string
      */
-    public function substringEvaluator($condition, $userAttributes)
+    protected function substringEvaluator($condition)
     {
         $conditionName = $condition->{'name'};
         $conditionValue = $condition->{'value'};
-        $userValue = isset($userAttributes[$conditionName]) ? $userAttributes[$conditionName]: null;
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
         if(!is_string($userValue) || !is_string($conditionValue)) {
             return null;
@@ -218,34 +203,17 @@ class CustomAttributeConditionEvaluator
     /**
      * Function to evaluate audience conditions against user's attributes.
      *
-     * @param $conditions array Nested array of and/or/not conditions representing the audience conditions.
-     * @param $userAttributes array Associative array of user attributes to values.
+     * @param array $leafCondition  Condition to be evaluated. 
      *
-     * @return null|boolean true/false if the given user attributes match/don't match the given conditions, null if the given user attributes and conditions can't be evaluated
+     * @return null|boolean true/false if the given user attributes match/don't match the given conditions, 
+     * null if the given user attributes and conditions can't be evaluated.
      */
-    public function evaluate($conditions, $userAttributes)
+    public function evaluate($leafCondition)
     {
-        if (is_array($conditions)) {
-
-            $operator = array_shift($conditions);
-
-            switch ($operator) {
-                case self::AND_OPERATOR:
-                    return $this->andEvaluator($conditions, $userAttributes); 
-                case self::NOT_OPERATOR:
-                    return $this->notEvaluator($conditions, $userAttributes);
-                default:
-                    return $this->orEvaluator($conditions, $userAttributes);
-            }
-        }
-
-        $leafCondition = $conditions;
-
         if($leafCondition->{'type'} !== self::CUSTOM_ATTRIBUTE_CONDITION_TYPE) {
             return null;
         }
 
-        $conditionMatch = null;
         if(!isset($leafCondition->{'match'})) {
             $conditionMatch = self::EXACT_MATCH_TYPE;
         } else {
@@ -257,6 +225,6 @@ class CustomAttributeConditionEvaluator
         }
 
         $evaluatorForMatch = $this->getEvaluatorByMatchType($conditionMatch);
-        return $this->$evaluatorForMatch($leafCondition, $userAttributes);
+        return $this->$evaluatorForMatch($leafCondition);
     }
 }

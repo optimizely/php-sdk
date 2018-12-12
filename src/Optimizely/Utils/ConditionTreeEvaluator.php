@@ -19,29 +19,18 @@ namespace Optimizely\Utils;
 
 class ConditionTreeEvaluator
 {
-    /**
-     * const string Representing AND operator.
-     */
     const AND_OPERATOR = 'and';
-
-    /**
-     * const string Representing OR operator.
-     */
     const OR_OPERATOR = 'or';
-
-    /**
-     * const string Representing NOT operator.
-     */
     const NOT_OPERATOR = 'not';
 
-    protected function getDefaultOperators()
+    protected function getOperators()
     {
         return array(self::AND_OPERATOR, self::OR_OPERATOR, self::NOT_OPERATOR);
     }
 
     protected function getEvaluatorByOperatorType($operator)
     {
-        $evaluatorsByOperator = [];
+        $evaluatorsByOperator = array();
         $evaluatorsByOperator[self::AND_OPERATOR] = 'andEvaluator';
         $evaluatorsByOperator[self::OR_OPERATOR] = 'orEvaluator';
         $evaluatorsByOperator[self::NOT_OPERATOR] = 'notEvaluator';
@@ -53,13 +42,14 @@ class ConditionTreeEvaluator
      * Evaluates an array of conditions as if the evaluator had been applied
      * to each entry and the results AND-ed together.
      * 
-     * @param $conditions array Audience conditions list.
-     * @param $userAttributes array Associative array of user attributes to values.
+     * @param array     $conditions  Audience conditions list.
+     * @param callable  $leafEvaluator Method to evaluate leaf condition. 
      *
-     * @return null|boolean true/false if the user attributes match/don't match the given conditions, null if the user attributes and conditions can't be evaluated. 
-     * 
+     * @return null|boolean True if all the operands evaluate to true.
+     *                      False if a single operand evaluates to false.
+     *                      Null if conditions couldn't be evaluated.
      */
-    public function andEvaluator($conditions, $leafEvaluator)
+    protected function andEvaluator(array $conditions, callable $leafEvaluator)
     {
         $sawNullResult = false;
         foreach ($conditions as $condition) {
@@ -69,7 +59,7 @@ class ConditionTreeEvaluator
                 return false;
             }
 
-            if(is_null($result)) {
+            if($result === null) {
                 $sawNullResult = true;
             }
         }
@@ -81,12 +71,14 @@ class ConditionTreeEvaluator
      * Evaluates an array of conditions as if the evaluator had been applied
      * to each entry and the results OR-ed together.
      * 
-     * @param $conditions array Audience conditions list.
-     * @param $userAttributes array Associative array of user attributes to values.
+     * @param array     $conditions  Audience conditions list.
+     * @param callable  $leafEvaluator Method to evaluate leaf condition. 
      *
-     * @return null|boolean true/false if the user attributes match/don't match the given conditions, null if the user attributes and conditions can't be evaluated. 
+     * @return null|boolean True if any operand evaluates to true.
+     *                    False if all operands evaluate to false.
+     *                    Null if conditions couldn't be evaluated.
      */
-    public function orEvaluator($conditions, $leafEvaluator)
+    protected function orEvaluator(array $conditions, callable $leafEvaluator)
     {
         $sawNullResult = false;
         foreach ($conditions as $condition) {
@@ -96,7 +88,7 @@ class ConditionTreeEvaluator
                 return true;
             }
 
-            if(is_null($result)) {
+            if($result === null) {
                 $sawNullResult = true;
             }
         }
@@ -108,45 +100,47 @@ class ConditionTreeEvaluator
      * Evaluates an array of conditions as if the evaluator had been applied
      * to a single entry and NOT was applied to the result.
      * 
-     * @param $condition array Audience conditions list consisting of single condition.
-     * @param $userAttributes array Associative array of user attributes to values.
+     * @param array     $conditions  Audience conditions list.
+     * @param callable  $leafEvaluator Method to evaluate leaf condition. 
      *
-     * @return null|boolean true/false if the user attributes match/don't match the given conditions, null if the user attributes and conditions can't be evaluated.
+     * @return null|boolean True if the operand evaluates to false.
+     *                      False if the operand evaluates to true.
+     *                      Null if conditions is empty or couldn't be evaluated.
      */
-    public function notEvaluator($condition, $leafEvaluator)
+    protected function notEvaluator(array $condition, callable $leafEvaluator)
     {
         if (empty($condition)) {
             return null;
         }
 
         $result = $this->evaluate($condition[0], $leafEvaluator);
-        return is_null($result) ? null: !$result;
+        return $result === null ? null: !$result;
     }
 
     /**
      * Function to evaluate audience conditions against user's attributes.
      *
-     * @param $conditions array Nested array of and/or/not conditions representing the audience conditions.
-     * @param $userAttributes array Associative array of user attributes to values.
+     * @param array     $conditions Nested array of and/or/not conditions representing the audience conditions.
+     * @param callable  $leafEvaluator Method to evaluate leaf condition. 
      *
-     * @return null|boolean true/false if the given user attributes match/don't match the given conditions, null if the given user attributes and conditions can't be evaluated
+     * @return null|boolean Result of evaluating the conditions using the operator rules 
+     *                      and the leaf evaluator. Null if conditions couldn't be evaluated.
      */
-    public function evaluate($conditions, $leafEvaluator)
+    public function evaluate($conditions, callable $leafEvaluator)
     {
         if (is_array($conditions)) {
 
-            if(in_array($conditions[0], $this->getDefaultOperators()) {
+            if(in_array($conditions[0], $this->getOperators())) {
                 $operator = array_shift($conditions);
             } else {
                 $operator = self::OR_OPERATOR;
             }
 
             $evaluatorFunc = $this->getEvaluatorByOperatorType($operator);
-            return $evaluatorFunc($conditions, $leafEvaluator);
+            return $this->{$evaluatorFunc}($conditions, $leafEvaluator);
         }
 
         $leafCondition = $conditions;
         return $leafEvaluator($leafCondition);
     }
-
 }
