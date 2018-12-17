@@ -20,7 +20,7 @@ namespace Optimizely\Tests;
 use Optimizely\Utils\ConditionTreeEvaluator;
 
 class ConditionTreeEvaluatorTest extends \PHPUnit_Framework_TestCase
-{   
+{
     public function setUp()
     {
         $this->conditionA = (object)[
@@ -45,6 +45,7 @@ class ConditionTreeEvaluatorTest extends \PHPUnit_Framework_TestCase
         $this->conditionTreeEvaluator = new ConditionTreeEvaluator();
     }
 
+    // Helper for mocking leaf evaluator with side effects.
     protected function getLeafEvaluator($a, $b = null, $c = null) {
         $numOfCalls = 0;
 
@@ -63,35 +64,268 @@ class ConditionTreeEvaluatorTest extends \PHPUnit_Framework_TestCase
         return $leafEvaluator;
     }
 
+    // Test that evaluate returns True when the leaf condition evaluator returns True.
     public function testEvaluateReturnsTrueWhenLeafConditionReturnsTrue()
-    {   
-        $leafEvaluator = function() {
-            return True;
-        };
-
+    {
         $this->assertTrue(
-            $this->conditionTreeEvaluator->evaluate($this->conditionA, $this->getLeafEvaluator(True))
+            $this->conditionTreeEvaluator->evaluate($this->conditionA, $this->getLeafEvaluator(true))
         );
     }
 
-    // Test that andEvaluator returns false when any one condition evaluates to false. 
+    // Test that evaluate returns False when the leaf condition evaluator returns False.
+    public function testEvaluateReturnsFalseWhenLeafConditionReturnsFalse()
+    {
+        $this->assertFalse(
+            $this->conditionTreeEvaluator->evaluate($this->conditionA, $this->getLeafEvaluator(false))
+        );
+    }
+
+    // Test that andEvaluator returns false when any one condition evaluates to false.
     public function testAndEvaluatorReturnsFalseWhenAnyOneConditionEvaluatesFalse()
-    {   
+    {
         $this->assertFalse(
             $this->conditionTreeEvaluator->evaluate(
-                ['and', $this->conditionA, $this->conditionB], 
+                ['and', $this->conditionA, $this->conditionB],
                 $this->getLeafEvaluator(True, False)
             )
         );
     }
 
-    public function testAndEvaluatorReturnsNullWhenTruesAndNulls()
+    // Test that andEvaluator returns True when all conditions evaluate to True.
+    public function testAndEvaluatorReturnsTrueWhenAllConditionsEvaluateTrue()
     {
-        $this->assertNull(
+        $this->assertTrue(
             $this->conditionTreeEvaluator->evaluate(
-                ['and', $this->conditionA, $this->conditionB, $this->conditionC], 
-                $this->getLeafEvaluator(true, true, null)
+                ['and', $this->conditionA, $this->conditionB],
+                $this->getLeafEvaluator(true, true)
             )
         );
     }
+
+    //  Test that andEvaluator returns null when all operands evaluate to null.
+    public function testAndEvaluatorReturnsNullWhenAllNulls()
+    {
+        $this->assertNull(
+            $this->conditionTreeEvaluator->evaluate(
+                ['and', $this->conditionA, $this->conditionB],
+                $this->getLeafEvaluator(null, null)
+            )
+        );
+    }
+
+    // Test that andEvaluator returns null when operands evaluate to trues and null.
+    public function testAndEvaluatorReturnsNullWhenTruesAndNull()
+    {
+        $this->assertNull(
+            $this->conditionTreeEvaluator->evaluate(
+                ['and', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(true, true, null)
+            )
+        );
+
+        $this->assertNull(
+            $this->conditionTreeEvaluator->evaluate(
+                ['and', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(null, true, true)
+            )
+        );
+    }
+
+    //  Test that andEvaluator returns False when when operands evaluate to falses and null.
+    public function testAndEvaluatorReturnsFalseWhenFalsesAndNull()
+    {
+        $this->assertFalse(
+            $this->conditionTreeEvaluator->evaluate(
+                ['and', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(false, false, null)
+            )
+        );
+
+        $this->assertFalse(
+            $this->conditionTreeEvaluator->evaluate(
+                ['and', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(null, false, false)
+            )
+        );
+    }
+
+    // Test that andEvaluator returns False when operands evaluate to trues, falses and null.
+    public function testAndEvaluatorReturnsFalseWhenTruesFalsesAndNull()
+    {
+        $this->assertFalse(
+            $this->conditionTreeEvaluator->evaluate(
+                ['and', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(true, false, null)
+            )
+        );
+    }
+
+    // Test that orEvaluator returns True when any one condition evaluates to True.
+    public function testOrEvaluatorReturnsTrueWhenAnyOneConditionEvaluatesTrue()
+    {
+        $this->assertTrue(
+            $this->conditionTreeEvaluator->evaluate(
+                ['or', $this->conditionA, $this->conditionB],
+                $this->getLeafEvaluator(false, true)
+            )
+        );
+    }
+
+    // Test that orEvaluator returns False when all conditions evaluates to False.
+    public function testOrEvaluatorReturnsFalseWhenAllConditionsAreFalse()
+    {
+        $this->assertFalse(
+            $this->conditionTreeEvaluator->evaluate(
+                ['or', $this->conditionA, $this->conditionB],
+                $this->getLeafEvaluator(false, false)
+            )
+        );
+    }
+
+    // Test that orEvaluator returns null when all operands evaluate to null.
+    public function testOrEvaluatorReturnsNullWhenAllNulls()
+    {
+        $this->assertNull(
+            $this->conditionTreeEvaluator->evaluate(
+                ['or', $this->conditionA, $this->conditionB],
+                $this->getLeafEvaluator(null, null)
+            )
+        );
+    }
+
+    // Test that orEvaluator returns True when operands evaluate to trues and null.
+    public function testOrEvaluatorReturnsTrueWhenTruesAndNull()
+    {
+        $this->assertTrue(
+            $this->conditionTreeEvaluator->evaluate(
+                ['or', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(true, true, null)
+            )
+        );
+
+        $this->assertTrue(
+            $this->conditionTreeEvaluator->evaluate(
+                ['or', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(null, true, true)
+            )
+        );
+    }
+
+    // Test that orEvaluator returns null when operands evaluate to falses and null.
+    public function testOrEvaluatorReturnsNullWhenFalsesAndNull()
+    {
+        $this->assertNull(
+            $this->conditionTreeEvaluator->evaluate(
+                ['or', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(false, false, null)
+            )
+        );
+
+        $this->assertNull(
+            $this->conditionTreeEvaluator->evaluate(
+                ['or', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(null, false, false)
+            )
+        );
+    }
+
+    // Test that orEvaluator returns True when operands evaluate to trues, falses and null.
+    public function testOrEvaluatorReturnsTrueWhenTruesFalsesAndNull()
+    {
+        $this->assertTrue(
+            $this->conditionTreeEvaluator->evaluate(
+                ['or', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(false, null, true)
+            )
+        );
+    }
+
+    //  Test that notEvaluator returns True when condition evaluates to False.
+    public function testNotEvaluatorReturnsTrueWhenConditionEvaluatesFalse()
+    {
+        $this->assertTrue(
+            $this->conditionTreeEvaluator->evaluate(
+                ['not', $this->conditionA],
+                $this->getLeafEvaluator(false)
+            )
+        );
+    }
+
+    // Test that notEvaluator returns False when condition evaluates to True.
+    public function testNotEvaluatorReturnsFalseWhenConditionEvaluatesTrue()
+    {
+        $this->assertFalse(
+            $this->conditionTreeEvaluator->evaluate(
+                ['not', $this->conditionA],
+                $this->getLeafEvaluator(true)
+            )
+        );
+    }
+
+    // Test that notEvaluator negates first condition and ignores rest.
+    public function testNotEvaluatorNegatesFirstConditionIgnoresRest()
+    {
+        $this->assertTrue(
+            $this->conditionTreeEvaluator->evaluate(
+                ['not', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(false, true, null)
+            )
+        );
+
+        $this->assertFalse(
+            $this->conditionTreeEvaluator->evaluate(
+                ['not', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(true, false, null)
+            )
+        );
+
+        $this->assertNull(
+            $this->conditionTreeEvaluator->evaluate(
+                ['not', $this->conditionA, $this->conditionB, $this->conditionC],
+                $this->getLeafEvaluator(null, false, true)
+            )
+        );
+    }
+
+    // Test that notEvaluator returns null when condition evaluates to null.
+    public function testNotEvaluatorReturnsNullWhenConditionEvaluatesNull()
+    {
+        $this->assertNull(
+            $this->conditionTreeEvaluator->evaluate(
+                ['not', $this->conditionA],
+                $this->getLeafEvaluator(null)
+            )
+        );
+    }
+
+    // Test that notEvaluator returns null when there are no conditions.
+    public function testNotEvaluatorReturnsNullWhenNoConditionsGiven()
+    {
+        $this->assertNull(
+            $this->conditionTreeEvaluator->evaluate(
+                ['not'],
+                $this->getLeafEvaluator(null)
+            )
+        );
+    }
+
+    // Test that by default OR operator is assumed when the first item in conditions is not
+    //    a recognized operator.
+    public function testEvaluateAssumesOrOperatorWhenFirstArrayItemUnrecognizedOperator()
+    {
+        $this->assertTrue(
+            $this->conditionTreeEvaluator->evaluate(
+                [$this->conditionA, $this->conditionB],
+                $this->getLeafEvaluator(false, true)
+            )
+        );
+
+        $this->assertFalse(
+            $this->conditionTreeEvaluator->evaluate(
+                [$this->conditionA, $this->conditionB],
+                $this->getLeafEvaluator(false, false)
+            )
+        );
+    }
+
 }
