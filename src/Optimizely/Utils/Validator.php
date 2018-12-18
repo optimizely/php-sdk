@@ -21,6 +21,8 @@ use Monolog\Logger;
 use Optimizely\Entity\Experiment;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\ProjectConfig;
+use Optimizely\Utils\ConditionTreeEvaluator;
+use Optimizely\Utils\CustomAttributeConditionEvaluator;
 
 class Validator
 {
@@ -114,11 +116,16 @@ class Validator
             return false;
         }
 
+        $customAttrCondEval = new CustomAttributeConditionEvaluator($userAttributes);
+        $evaluateCustomAttr = function($leafCondition) use ($customAttrCondEval) {
+            return $customAttrCondEval->evaluate($leafCondition);
+        };
+
         // Return true if conditions for any audience are met.
-        $conditionEvaluator = new ConditionEvaluator();
+        $conditionTreeEvaluator = new ConditionTreeEvaluator();
         foreach ($audienceIds as $audienceId) {
             $audience = $config->getAudience($audienceId);
-            $result = $conditionEvaluator->evaluate($audience->getConditionsList(), $userAttributes);
+            $result = $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
             if ($result) {
                 return true;
             }
@@ -173,5 +180,47 @@ class Validator
         }
 
         return false;
+    }
+
+    /**
+     * Checks if the given input is a number and is not one of NAN, INF, -INF.
+     * 
+     * @param  $value Input to check.
+     * 
+     * @return boolean true if given input is a number but not +/-Infinity or NAN, false otherwise.
+     */
+    public static function isFiniteNumber($value)
+    {
+        if(!is_numeric($value) ) {
+            return false;
+        }
+
+        if(is_string($value) || is_nan($value) || is_infinite($value)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Method to verify that both values belong to same type. 
+     * Float/Double and Integer are considered similar.
+     * 
+     * @param  mixed  $firstVal
+     * @param  mixed  $secondVal
+     * 
+     * @return bool   True if values belong to similar types. Otherwise, False.
+     */
+    public static function areValuesSameType($firstVal, $secondVal)
+    {
+        $firstValType = gettype($firstVal);
+        $secondValType = gettype($secondVal);
+        $numberTypes = array('double', 'integer');
+
+        if(in_array($firstValType, $numberTypes) && in_array($secondValType, $numberTypes)) {
+            return True;
+        }
+
+        return $firstValType == $secondValType;
     }
 }
