@@ -140,19 +140,21 @@ class ConditionTreeEvaluator
      */
     public function evaluate($conditions, callable $leafEvaluator)
     {
-        if (!Validator::doesArrayContainOnlyStringKeys($conditions)) {
-
-            if(in_array($conditions[0], $this->getOperators())) {
-                $operator = array_shift($conditions);
-            } else {
-                $operator = self::OR_OPERATOR;
-            }
-
-            $evaluatorFunc = $this->getEvaluatorByOperatorType($operator);
-            return $this->{$evaluatorFunc}($conditions, $leafEvaluator);
+        // When parsing audiences tree the leaf node is a string representing an audience ID.
+        // When parsing conditions of a single audience the leaf node is an associative array with all keys of type string. 
+        if (is_string($conditions) || Validator::doesArrayContainOnlyStringKeys($conditions)) {
+            
+            $leafCondition = $conditions;
+            return $leafEvaluator($leafCondition);
+        }
+            
+        if(in_array($conditions[0], $this->getOperators())) {
+            $operator = array_shift($conditions);
+        } else {
+            $operator = self::OR_OPERATOR;
         }
 
-        $leafCondition = $conditions;
-        return $leafEvaluator($leafCondition);
+        $evaluatorFunc = $this->getEvaluatorByOperatorType($operator);
+        return $this->{$evaluatorFunc}($conditions, $leafEvaluator);
     }
 }
