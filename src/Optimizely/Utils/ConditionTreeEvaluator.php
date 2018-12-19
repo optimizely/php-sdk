@@ -140,7 +140,7 @@ class ConditionTreeEvaluator
      */
     public function evaluate($conditions, callable $leafEvaluator)
     {
-        if (is_array($conditions)) {
+        if (!Validator::doesArrayContainOnlyStringKeys($conditions)) {
 
             if(in_array($conditions[0], $this->getOperators())) {
                 $operator = array_shift($conditions);

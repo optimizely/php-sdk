@@ -18,6 +18,7 @@
 namespace Optimizely\Tests;
 
 use Monolog\Logger;
+use Optimizely\Entity\Audience;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
@@ -170,25 +171,44 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    // test that Audience evaluation proceeds if provided attributes are empty or null.
     public function testIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
     {
-        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $configMock = $this->getMockBuilder(ProjectConfig::class)
+            ->setConstructorArgs(array(DATAFILE, $this->loggerMock, new NoOpErrorHandler()))
+            ->setMethods(array('getAudience'))
+            ->getMock();
 
-        // Test with empty attributes
-        $this->assertFalse(
+        $existsCondition = [
+            'type' => 'custom_attribute',
+            'name' => 'input_value',
+            'match' => 'exists',
+            'value' => null
+        ];
+
+        $experiment = $configMock->getExperimentFromKey('test_experiment');
+        $experiment->setAudienceIds(['007']);
+        $audience = new Audience();
+        $audience->setConditionsList(['not', $existsCondition]);
+
+        $configMock
+            ->method('getAudience')
+            ->with('007')
+            ->will($this->returnValue($audience));
+
+        $this->assertTrue(
             Validator::isUserInExperiment(
-                $config,
-                $config->getExperimentFromKey('test_experiment'),
-                []
+                $configMock,
+                $experiment,
+                null
             )
         );
 
-        // Test with null attributes
-        $this->assertFalse(
+        $this->assertTrue(
             Validator::isUserInExperiment(
-                $config,
-                $config->getExperimentFromKey('test_experiment'),
-                null
+                $configMock,
+                $experiment,
+                []
             )
         );
     }
