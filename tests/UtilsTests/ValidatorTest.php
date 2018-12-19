@@ -264,4 +264,26 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(Validator::isFeatureFlagValid($config, $featureFlag));
     }
+
+    public function testDoesArrayContainOnlyStringKeys()
+    {
+        // Valid values
+        $this->assertTrue(Validator::doesArrayContainOnlyStringKeys(
+            ["name"=> "favorite_ice_cream", "type"=> "custom_attribute", "match"=> "exists"])
+        );
+
+        // Invalid values
+        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys([]));
+        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys((object)[]));
+        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(
+            ["and", ["or", ["or", ["name"=> "favorite_ice_cream", "type"=> "custom_attribute","match"=> "exists"]]]]
+        ));
+        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(['hello' => 'world', 0 => 'bye']));
+        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(['hello' => 'world', '0' => 'bye']));
+        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(['hello' => 'world', 'and']));
+        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys('helloworld'));
+        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(12));
+        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys('12.5'));
+        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(true));
+    }
 }

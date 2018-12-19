@@ -232,7 +232,7 @@ class CustomAttributeConditionEvaluator
             return null;
         }
 
-        if(($leafCondition['match']) == null) {
+        if(($leafCondition['match']) === null) {
             $conditionMatch = self::EXACT_MATCH_TYPE;
         } else {
             $conditionMatch = $leafCondition['match'];

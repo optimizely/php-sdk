@@ -230,7 +230,7 @@ class Validator
      */
     public static function doesArrayContainOnlyStringKeys($arr)
     {
-        if(empty($arr)) {
+        if(!is_array($arr) || empty($arr)) {
             return false;
         }
 
