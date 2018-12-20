@@ -110,7 +110,7 @@ class Validator
             return false;
         }        
 
-        if (abs($value) > (2**53)) {
+        if (abs($value) > pow(2,53)) {
             return false;
         }
 
