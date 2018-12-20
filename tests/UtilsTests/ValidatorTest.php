@@ -134,10 +134,10 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::IsFiniteNumber(INF));
         $this->assertFalse(Validator::IsFiniteNumber(-INF));
         $this->assertFalse(Validator::IsFiniteNumber(NAN));
-        $this->assertFalse(Validator::IsFiniteNumber((2**53) + 1));
-        $this->assertFalse(Validator::IsFiniteNumber(-(2**53) - 1));
-        $this->assertFalse(Validator::IsFiniteNumber((2**53) + 2.0));
-        $this->assertFalse(Validator::IsFiniteNumber(-(2**53) - 2.0));
+        $this->assertFalse(Validator::IsFiniteNumber(pow(2,53) + 1));
+        $this->assertFalse(Validator::IsFiniteNumber(-pow(2,53) - 1));
+        $this->assertFalse(Validator::IsFiniteNumber(pow(2,53) + 2.0));
+        $this->assertFalse(Validator::IsFiniteNumber(-pow(2,53) - 2.0));
     }
 
     public function testIsFiniteNumberWithValidValues()
@@ -145,9 +145,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(Validator::IsFiniteNumber(0));
         $this->assertTrue(Validator::IsFiniteNumber(5));
         $this->assertTrue(Validator::IsFiniteNumber(5.5));
-        $this->assertTrue(Validator::IsFiniteNumber((2**53) + 1.0));
-        $this->assertTrue(Validator::IsFiniteNumber(-(2**53) - 1.0));
-        $this->assertTrue(Validator::IsFiniteNumber((2**53)));
+        $this->assertTrue(Validator::IsFiniteNumber(pow(2,53) + 1.0));
+        $this->assertTrue(Validator::IsFiniteNumber(-pow(2,53) - 1.0));
+        $this->assertTrue(Validator::IsFiniteNumber(pow(2,53)));
     }
 
     public function testAreEventTagsValidValidEventTags()
