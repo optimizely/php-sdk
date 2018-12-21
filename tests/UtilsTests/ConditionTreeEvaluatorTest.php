@@ -23,19 +23,19 @@ class ConditionTreeEvaluatorTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->conditionA = [
+        $this->conditionA = (object)[
             'name' => 'browser_type',
             'value' => 'safari',
             'type' => 'custom_attribute'
         ];
 
-        $this->conditionB = [
+        $this->conditionB = (object)[
             'name' => 'device_model',
             'value' => 'iphone6',
             'type' => 'custom_attribute'
         ];
 
-        $this->conditionC = [
+        $this->conditionC = (object)[
             'name' => 'location',
             'match' => 'exact',
             'type' => 'custom_attribute',

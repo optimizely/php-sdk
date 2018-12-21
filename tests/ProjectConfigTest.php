@@ -508,35 +508,6 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('iPhone users in San Francisco', $audience->getName());
     }
 
-    public function testGetAudiencePrefersTypedAudiencesOverAudiences()
-    {
-        $projectConfig = new ProjectConfig(
-            DATAFILE_WITH_TYPED_AUDIENCES, $this->loggerMock, $this->errorHandlerMock
-        );
-
-        // test that typedAudience is returned when an audience exists with the same ID.
-        $audience = $projectConfig->getAudience('3988293898');
-
-        $this->assertEquals('3988293898', $audience->getId());
-        $this->assertEquals('substringString', $audience->getName());
-
-        $expectedConditions = json_decode('["and", ["or", ["or", {"name": "house", "type": "custom_attribute",
-                         "match": "substring", "value": "Slytherin"}]]]', true);
-        $this->assertEquals($expectedConditions, $audience->getConditions());
-        $this->assertEquals($expectedConditions, $audience->getConditionsList());
-
-        // test that normal audience is returned if no typedAudience exists with the same ID.
-        $audience = $projectConfig->getAudience('3468206642');
-
-        $this->assertEquals('3468206642', $audience->getId());
-        $this->assertEquals('exactString', $audience->getName());
-
-        $expectedConditions = '["and", ["or", ["or", {"name": "house", "type": "custom_attribute", "value": "Gryffindor"}]]]';
-        $this->assertEquals($expectedConditions, $audience->getConditions());
-        $expectedConditionsList = json_decode($expectedConditions, true);
-        $this->assertEquals($expectedConditionsList, $audience->getConditionsList());
-    }
-
     public function testGetAudienceInvalidKey()
     {
         $this->loggerMock->expects($this->once())

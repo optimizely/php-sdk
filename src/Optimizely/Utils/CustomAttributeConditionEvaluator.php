@@ -45,21 +45,6 @@ class CustomAttributeConditionEvaluator
     }
 
     /**
-     * Sets null for missing keys in a leaf condition.
-     * 
-     * @param array $leafCondition The leaf condition node of an audience.
-     */
-    protected function setNullForMissingKeys(array $leafCondition)
-    {
-        $keys = ['type', 'match', 'value'];
-        foreach($keys as $key) {
-            $leafCondition[$key] = isset($leafCondition[$key]) ? $leafCondition[$key]: null;
-        }
-
-        return $leafCondition;
-    }
-
-    /**
      * Gets the supported match types for condition evaluation.
      * 
      * @return array List of supported match types.
@@ -118,8 +103,8 @@ class CustomAttributeConditionEvaluator
      */
     protected function exactEvaluator($condition)
     {
-        $conditionName = $condition['name'];
-        $conditionValue = $condition['value'];
+        $conditionName = $condition->{'name'};
+        $conditionValue = $condition->{'value'};
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
         if(!$this->isValueValidForExactConditions($userValue) ||
@@ -143,7 +128,7 @@ class CustomAttributeConditionEvaluator
      */
     protected function existsEvaluator($condition) 
     {
-        $conditionName = $condition['name'];
+        $conditionName = $condition->{'name'};
         return isset($this->userAttributes[$conditionName]);
     }
 
@@ -159,8 +144,8 @@ class CustomAttributeConditionEvaluator
      */
     protected function greaterThanEvaluator($condition)
     {
-        $conditionName = $condition['name'];
-        $conditionValue = $condition['value'];
+        $conditionName = $condition->{'name'};
+        $conditionValue = $condition->{'value'};
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
         if(!Validator::isFiniteNumber($userValue) || !Validator::isFiniteNumber($conditionValue)) {
@@ -182,8 +167,8 @@ class CustomAttributeConditionEvaluator
      */
     protected function lessThanEvaluator($condition)
     {
-        $conditionName = $condition['name'];
-        $conditionValue = $condition['value'];
+        $conditionName = $condition->{'name'};
+        $conditionValue = $condition->{'value'};
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
         if(!Validator::isFiniteNumber($userValue) || !Validator::isFiniteNumber($conditionValue)) {
@@ -205,8 +190,8 @@ class CustomAttributeConditionEvaluator
      */
     protected function substringEvaluator($condition)
     {
-        $conditionName = $condition['name'];
-        $conditionValue = $condition['value'];
+        $conditionName = $condition->{'name'};
+        $conditionValue = $condition->{'value'};
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
         if(!is_string($userValue) || !is_string($conditionValue)) {
@@ -226,16 +211,14 @@ class CustomAttributeConditionEvaluator
      */
     public function evaluate($leafCondition)
     {
-        $leafCondition = $this->setNullForMissingKeys($leafCondition);
-
-        if($leafCondition['type'] !== self::CUSTOM_ATTRIBUTE_CONDITION_TYPE) {
+        if($leafCondition->{'type'} !== self::CUSTOM_ATTRIBUTE_CONDITION_TYPE) {
             return null;
         }
 
-        if(($leafCondition['match']) === null) {
+        if(!isset($leafCondition->{'match'})) {
             $conditionMatch = self::EXACT_MATCH_TYPE;
         } else {
-            $conditionMatch = $leafCondition['match'];
+            $conditionMatch = $leafCondition->{'match'};
         }
 
         if(!in_array($conditionMatch, $this->getMatchTypes())) {

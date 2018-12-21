@@ -18,7 +18,6 @@
 namespace Optimizely\Tests;
 
 use Monolog\Logger;
-use Optimizely\Entity\Audience;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
@@ -171,44 +170,25 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    // test that Audience evaluation proceeds if provided attributes are empty or null.
     public function testIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
     {
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
-            ->setConstructorArgs(array(DATAFILE, $this->loggerMock, new NoOpErrorHandler()))
-            ->setMethods(array('getAudience'))
-            ->getMock();
+        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
 
-        $existsCondition = [
-            'type' => 'custom_attribute',
-            'name' => 'input_value',
-            'match' => 'exists',
-            'value' => null
-        ];
-
-        $experiment = $configMock->getExperimentFromKey('test_experiment');
-        $experiment->setAudienceIds(['007']);
-        $audience = new Audience();
-        $audience->setConditionsList(['not', $existsCondition]);
-
-        $configMock
-            ->method('getAudience')
-            ->with('007')
-            ->will($this->returnValue($audience));
-
-        $this->assertTrue(
+        // Test with empty attributes
+        $this->assertFalse(
             Validator::isUserInExperiment(
-                $configMock,
-                $experiment,
-                null
+                $config,
+                $config->getExperimentFromKey('test_experiment'),
+                []
             )
         );
 
-        $this->assertTrue(
+        // Test with null attributes
+        $this->assertFalse(
             Validator::isUserInExperiment(
-                $configMock,
-                $experiment,
-                []
+                $config,
+                $config->getExperimentFromKey('test_experiment'),
+                null
             )
         );
     }
@@ -263,27 +243,5 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $featureFlag->setExperimentIds($experimentIds);
 
         $this->assertFalse(Validator::isFeatureFlagValid($config, $featureFlag));
-    }
-
-    public function testDoesArrayContainOnlyStringKeys()
-    {
-        // Valid values
-        $this->assertTrue(Validator::doesArrayContainOnlyStringKeys(
-            ["name"=> "favorite_ice_cream", "type"=> "custom_attribute", "match"=> "exists"])
-        );
-
-        // Invalid values
-        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys([]));
-        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys((object)[]));
-        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(
-            ["and", ["or", ["or", ["name"=> "favorite_ice_cream", "type"=> "custom_attribute","match"=> "exists"]]]]
-        ));
-        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(['hello' => 'world', 0 => 'bye']));
-        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(['hello' => 'world', '0' => 'bye']));
-        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(['hello' => 'world', 'and']));
-        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys('helloworld'));
-        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(12));
-        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys('12.5'));
-        $this->assertFalse(Validator::doesArrayContainOnlyStringKeys(true));
     }
 }

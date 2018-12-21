@@ -23,85 +23,85 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->browserConditionSafari = [
+        $this->browserConditionSafari = (object)[
             'type' => 'custom_attribute',
             'name' => 'browser_type',
             'value' => 'safari',
             'match' => 'exact'
         ];
-        $this->booleanCondition = [
+        $this->booleanCondition = (object)[
             'type' => 'custom_attribute',
             'name' => 'is_firefox',
             'value' => true,
             'match' => 'exact'
         ];
-        $this->integerCondition = [
+        $this->integerCondition = (object)[
             'type' => 'custom_attribute',
             'name' => 'num_users',
             'value' => 10,
             'match' => 'exact'
         ];
-        $this->doubleCondition =  [
+        $this->doubleCondition =  (object)[
             'type' => 'custom_attribute',
             'name' => 'pi_value',
             'value' => 3.14,
             'match' => 'exact'
         ];
-        $this->existsCondition = [
+        $this->existsCondition = (object)[
             'type' => 'custom_attribute',
             'name' => 'input_value',
             'value' => null,
             'match' => 'exists'
         ];
-        $this->exactStringCondition = [
+        $this->exactStringCondition = (object)[
             'name' => 'favorite_constellation',
             'value' =>'Lacerta',
             'type' => 'custom_attribute',
             'match' =>'exact'
         ];
-        $this->exactIntCondition = [
+        $this->exactIntCondition = (object)[
             'name' => 'lasers_count',
             'value' => 9000,
             'type' => 'custom_attribute',
             'match' => 'exact'
         ];
-        $this->exactFloatCondition = [
+        $this->exactFloatCondition = (object)[
             'name' => 'lasers_count',
             'value' => 9000.0,
             'type' => 'custom_attribute',
             'match' => 'exact'
         ];
-        $this->exactBoolCondition = [
+        $this->exactBoolCondition = (object)[
             'name' => 'did_register_user',
             'value' => false,
             'type' => 'custom_attribute',
             'match' => 'exact'
         ];
-        $this->substringCondition = [
+        $this->substringCondition = (object)[
             'name' => 'headline_text',
             'value' => 'buy now',
             'type' => 'custom_attribute',
             'match' => 'substring'
         ];
-        $this->gtIntCondition = [
+        $this->gtIntCondition = (object)[
             'name' => 'meters_travelled',
             'value' => 48,
             'type' => 'custom_attribute',
             'match' => 'gt'
         ];
-        $this->gtFloatCondition = [
+        $this->gtFloatCondition = (object)[
             'name' => 'meters_travelled',
             'value' => 48.2,
             'type' => 'custom_attribute',
             'match' => 'gt'
         ];
-        $this->ltIntCondition = [
+        $this->ltIntCondition = (object)[
             'name' => 'meters_travelled',
              'value' => 48,
              'type' => 'custom_attribute',
              'match' => 'lt'
           ];
-        $this->ltFloatCondition = [
+        $this->ltFloatCondition = (object)[
             'name' => 'meters_travelled',
             'value' => 48.2,
             'type' => 'custom_attribute',
@@ -181,7 +181,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                [
+                (object)[
                     'type' => 'custom_attribute',
                     'name' => 'weird_condition',
                     'value' => 'hi',
@@ -200,7 +200,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                [
+                (object)[
                     'type' => 'custom_attribute',
                     'name' => 'favorite_constellation',
                     'value' => 'Lacerta',
@@ -218,7 +218,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                [
+                (object)[
                     'type' => 'weird_type',
                     'name' => 'weird_condition',
                     'value' => 'hi',

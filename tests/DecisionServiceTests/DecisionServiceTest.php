@@ -1138,7 +1138,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment2 = $rollout->getExperiments()[2];
         
         // Set an AudienceId for everyone else/last rule so that user does not qualify for audience
-        $experiment2->setAudienceIds(["11155"]);
+        $experiment2->setAudienceIds(["11154"]);
         $expected_variation = $experiment2->getVariations()[0];
         
         // Provide null attributes so that user does not qualify for audience
