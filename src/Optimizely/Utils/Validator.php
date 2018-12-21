@@ -111,9 +111,8 @@ class Validator
             return true;
         }
 
-        // Return false if there is audience, but no user attributes.
-        if (empty($userAttributes)) {
-            return false;
+        if ($userAttributes == null) {
+            $userAttributes = [];
         }
 
         $customAttrCondEval = new CustomAttributeConditionEvaluator($userAttributes);
@@ -222,5 +221,19 @@ class Validator
         }
 
         return $firstValType == $secondValType;
+    }
+
+    /**
+     * Returns true only if given input is an array with all of it's keys of type string.
+     * @param  mixed $arr
+     * @return bool  True if array contains all string keys. Otherwise, false.
+     */
+    public static function doesArrayContainOnlyStringKeys($arr)
+    {
+        if(!is_array($arr) || empty($arr)) {
+            return false;
+        }
+
+        return count(array_filter(array_keys($arr), 'is_string')) == count(array_keys($arr));
     }
 }
