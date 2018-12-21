@@ -145,6 +145,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(Validator::IsFiniteNumber(0));
         $this->assertTrue(Validator::IsFiniteNumber(5));
         $this->assertTrue(Validator::IsFiniteNumber(5.5));
+        // float(2**53) + 1.0 evaluates to float(2**53)
         $this->assertTrue(Validator::IsFiniteNumber(pow(2,53) + 1.0));
         $this->assertTrue(Validator::IsFiniteNumber(-pow(2,53) - 1.0));
         $this->assertTrue(Validator::IsFiniteNumber(pow(2,53)));
