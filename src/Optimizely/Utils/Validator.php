@@ -217,26 +217,6 @@ class Validator
     }
 
     /**
-     * Checks if the given input is a number and is not one of NAN, INF, -INF.
-     * 
-     * @param  $value Input to check.
-     * 
-     * @return boolean true if given input is a number but not +/-Infinity or NAN, false otherwise.
-     */
-    public static function isFiniteNumber($value)
-    {
-        if(!is_numeric($value) ) {
-            return false;
-        }
-
-        if(is_string($value) || is_nan($value) || is_infinite($value)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Method to verify that both values belong to same type. 
      * Float/Double and Integer are considered similar.
      * 
