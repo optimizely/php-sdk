@@ -73,16 +73,51 @@ class Validator
     }
 
     /**
+     * @param $value The value to validate.
+     *
+     * @return boolean Representing whether attribute's value is
+     * a number and not NAN, INF, -INF or greater than absolute limit of 2^53.
+     */
+    public static function isFiniteNumber($value)
+    {
+        if (!(is_int($value) || is_float($value))) {
+            return false;
+        }
+       
+        if (is_nan($value) || is_infinite($value)) {
+            return false;
+        }        
+
+        if (abs($value) > pow(2, 53)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * @param $attributeKey The key to validate.
      * @param $attributeValue The value to validate.
      *
      * @return boolean Representing whether attribute's key and value are
-     * valid for event payload or not.
+     * valid for event payload or not. Valid attribute key must be a string.
+     * Valid attribute value can be a string, bool, or a finite number.
      */
     public static function isAttributeValid($attributeKey, $attributeValue)
     {
-        $validTypes = array('boolean', 'double', 'integer', 'string');
-        return is_string($attributeKey) && in_array(gettype($attributeValue), $validTypes);
+        if (!is_string($attributeKey)) {
+            return false;
+        }
+
+        if (is_string($attributeValue) || is_bool($attributeValue)) {
+            return true;
+        }
+
+        if (is_int($attributeValue) || is_float($attributeValue)) {
+            return Validator::isFiniteNumber($attributeValue);
+        }
+
+        return false;
     }
 
     /**

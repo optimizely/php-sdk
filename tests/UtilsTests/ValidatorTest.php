@@ -124,6 +124,34 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::isAttributeValid(5.5, 'value'));
     }
 
+    public function testIsFiniteNumberWithInvalidValues()
+    {
+        $this->assertFalse(Validator::IsFiniteNumber('HelloWorld'));
+        $this->assertFalse(Validator::IsFiniteNumber(true));
+        $this->assertFalse(Validator::IsFiniteNumber(false));
+        $this->assertFalse(Validator::IsFiniteNumber(null));
+        $this->assertFalse(Validator::IsFiniteNumber((object)[]));
+        $this->assertFalse(Validator::IsFiniteNumber([]));
+        $this->assertFalse(Validator::IsFiniteNumber(INF));
+        $this->assertFalse(Validator::IsFiniteNumber(-INF));
+        $this->assertFalse(Validator::IsFiniteNumber(NAN));
+        $this->assertFalse(Validator::IsFiniteNumber(pow(2,53) + 1));
+        $this->assertFalse(Validator::IsFiniteNumber(-pow(2,53) - 1));
+        $this->assertFalse(Validator::IsFiniteNumber(pow(2,53) + 2.0));
+        $this->assertFalse(Validator::IsFiniteNumber(-pow(2,53) - 2.0));
+    }
+
+    public function testIsFiniteNumberWithValidValues()
+    {
+        $this->assertTrue(Validator::IsFiniteNumber(0));
+        $this->assertTrue(Validator::IsFiniteNumber(5));
+        $this->assertTrue(Validator::IsFiniteNumber(5.5));
+        // float pow(2,53) + 1.0 evaluates to float pow(2,53)
+        $this->assertTrue(Validator::IsFiniteNumber(pow(2,53) + 1.0));
+        $this->assertTrue(Validator::IsFiniteNumber(-pow(2,53) - 1.0));
+        $this->assertTrue(Validator::IsFiniteNumber(pow(2,53)));
+    }
+
     public function testAreEventTagsValidValidEventTags()
     {
         // Empty attributes
