@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016, 2018, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,12 @@ class Experiment
     private $_audienceIds;
 
     /**
+     * @var array/string Single audience ID the experiment is attached to or
+     *                   hierarchical conditions array of audience IDs related by AND/OR/NOT operators. 
+     */
+    private $_audienceConditions;
+
+    /**
      * @var array Traffic allocation of variations in the experiment.
      */
     private $_trafficAllocation;
@@ -92,6 +98,7 @@ class Experiment
         $forcedVariations = null,
         $groupPolicy = null,
         $audienceIds = null,
+        $audienceConditions = null,
         $trafficAllocation = null
     ) {
         $this->_id = $id;
@@ -103,6 +110,7 @@ class Experiment
         $this->_forcedVariations = $forcedVariations;
         $this->_groupPolicy = $groupPolicy;
         $this->_audienceIds = $audienceIds;
+        $this->_audienceConditions = $audienceConditions;
         $this->_trafficAllocation = $trafficAllocation;
     }
 
@@ -248,6 +256,22 @@ class Experiment
     public function setAudienceIds($audienceIds)
     {
         $this->_audienceIds = $audienceIds;
+    }
+
+    /**
+     * @return array/string Audience conditions attached to experiment.
+     */
+    public function getAudienceConditions()
+    {
+        return $this->_audienceConditions;
+    }
+
+    /**
+     * @param array/string $audienceConditions Audience conditions attached to experiment.
+     */
+    public function setAudienceConditions($audienceConditions)
+    {
+        $this->_audienceConditions = $audienceConditions;
     }
 
     /**

@@ -659,6 +659,48 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($optimizelyMock->activate('typed_audience_experiment', 'test_user', $userAttributes));
     }
 
+    public function testActivateWithAttributesComplexAudienceMatch()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->typedAudiencesDataFile , null, null))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $userAttributes = [
+            'house' => 'Welcome to Slytherin!',
+            'lasers' => 45.5
+        ];
+
+        // Verify that sendImpressionEvent is called once with expected attributes
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with('audience_combinations_experiment', 'A', 'test_user', $userAttributes);
+
+        // Should be included via substring match string audience with id '3988293898', and
+        // exact match number audience with id '3468206646'
+        $this->assertEquals('A', $optimizelyMock->activate('audience_combinations_experiment', 'test_user', $userAttributes));
+    }
+
+    public function testActivateWithAttributesComplexAudienceMismatch()
+    {
+        $userAttributes = [
+            'house' => 'Hufflepuff',
+            'lasers' => 45.5
+        ];
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->typedAudiencesDataFile , null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        // Verify that sendImpressionEvent is not called
+        $optimizelyMock->expects($this->never())
+            ->method('sendImpressionEvent');
+
+        // Call activate
+        $this->assertNull($optimizelyMock->activate('audience_combinations_experiment', 'test_user', $userAttributes));
+    }
+
     public function testActivateExperimentNotRunning()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
@@ -1970,6 +2012,60 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optlyObject->track('item_bought', 'test_user', $userAttributes, array('revenue' => 42));
     }
 
+    public function testTrackWithAttributesComplexAudienceMatch()
+    {
+        $userAttributes = [
+            'house' => 'Gryffindor',
+            'should_do_it' => true
+        ];
+
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfigForTypedAudience,
+                'user_signed_up',
+                [
+                    '1323241598' => '1423767504',
+                    '1323241599' => '1423767505'
+                ],
+                'test_user',
+                $userAttributes,
+                array('revenue' => 42)
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Should be included via exact match string audience with id '3468206642', and
+        // exact match boolean audience with id '3468206643'
+        $optlyObject->track('user_signed_up', 'test_user', $userAttributes, array('revenue' => 42));
+    }
+
+    public function testTrackWithAttributesComplexAudienceMismatch()
+    {
+        $userAttributes = [
+            'house' => 'Gryffindor',
+            'should_do_it' => false
+        ];
+
+        $this->eventBuilderMock->expects($this->never())
+            ->method('createConversionEvent');
+
+        $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Should be excluded - exact match boolean audience with id '3468206643' does not match,
+        // so the overall conditions fail
+        $optlyObject->track('user_signed_up', 'test_user', $userAttributes, array('revenue' => 42));
+    }
+
     public function testTrackWithEmptyUserID()
     {
         $userAttributes = [
@@ -2791,6 +2887,33 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testIsFeatureEnabledGivenFeatureRolloutComplexAudienceMatch()
+    {
+        $userAttributes = [
+            'house' => '...Slytherinnn...sss.',
+            'favorite_ice_cream' => 'matcha'
+        ];
+
+        // Should be included via substring match string audience with id '3988293898', and
+        // exists audience with id '3988293899'
+        $this->assertTrue(
+            $this->optimizelyTypedAudienceObject->isFeatureEnabled('feat2', 'test_user', $userAttributes)
+        );
+    }
+
+    public function testIsFeatureEnabledGivenFeatureRolloutComplexAudienceMismatch()
+    {
+        $userAttributes = [
+            'house' => 'Lannister'
+        ];
+
+        // Should be excluded - substring match string audience with id '3988293898' does not match,
+        // and no other audience matches either
+        $this->assertFalse(
+            $this->optimizelyTypedAudienceObject->isFeatureEnabled('feat2', 'test_user', $userAttributes)
+        );
+    }
+
     public function testIsFeatureEnabledWithEmptyUserID()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
@@ -3421,6 +3544,26 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Should be included in the feature test via greater-than match audience with id '3468206647'
         $this->assertEquals('x', $this->optimizelyTypedAudienceObject->getFeatureVariableString('feat_with_var', 'x', 'user1', $userAttributes));
+    }
+
+    public function testGetFeatureVariableReturnsVariableValueForComplexAudienceMatch()
+    {
+        $userAttributes = [
+            'house' => 'Gryffindor',
+            'lasers' => 700
+        ];
+
+        // Should be included via exact match string audience with id '3468206642', and
+        // greater than audience with id '3468206647'
+        $this->assertSame(150, $this->optimizelyTypedAudienceObject->getFeatureVariableInteger('feat2_with_var', 'z', 'user1', $userAttributes));
+    }
+
+    public function testGetFeatureVariableReturnsDefaultValueForComplexAudienceMismatch()
+    {
+        $userAttributes = [];
+
+        // Should be excluded - no audiences match with no attributes
+        $this->assertSame(10, $this->optimizelyTypedAudienceObject->getFeatureVariableInteger('feat2_with_var', 'z', 'user1', $userAttributes));
     }
 
     public function testSendImpressionEventWithNoAttributes()

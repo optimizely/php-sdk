@@ -139,14 +139,17 @@ class Validator
      */
     public static function isUserInExperiment($config, $experiment, $userAttributes)
     {
-        $audienceIds = $experiment->getAudienceIds();
+        $audienceConditions = $experiment->getAudienceConditions();
+        if ($audienceConditions === null) {
+            $audienceConditions = $experiment->getAudienceIds();
+        }
 
         // Return true if experiment is not targeted to any audience.
-        if (empty($audienceIds)) {
+        if (empty($audienceConditions)) {
             return true;
         }
 
-        if ($userAttributes == null) {
+        if ($userAttributes === null) {
             $userAttributes = [];
         }
 
@@ -155,17 +158,16 @@ class Validator
             return $customAttrCondEval->evaluate($leafCondition);
         };
 
-        // Return true if conditions for any audience are met.
-        $conditionTreeEvaluator = new ConditionTreeEvaluator();
-        foreach ($audienceIds as $audienceId) {
+        $evaluateAudience = function($audienceId) use ($config, $evaluateCustomAttr) {
+            $conditionTreeEvaluator = new ConditionTreeEvaluator();
             $audience = $config->getAudience($audienceId);
-            $result = $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
-            if ($result) {
-                return true;
-            }
-        }
+            return $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
+        };
 
-        return false;
+        $conditionTreeEvaluator = new ConditionTreeEvaluator();
+        $evalResult = $conditionTreeEvaluator->evaluate($audienceConditions, $evaluateAudience);
+        
+        return $evalResult || false;
     }
 
     /**

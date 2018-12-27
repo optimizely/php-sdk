@@ -187,18 +187,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::areEventTagsValid([0, 1, 2, 42, 'abc' => 'def']));
     }
 
-    public function testIsUserInExperimentNoAudienceUsedInExperiment()
-    {
-        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
-        $this->assertTrue(
-            Validator::isUserInExperiment(
-                $config,
-                $config->getExperimentFromKey('paused_experiment'),
-                []
-            )
-        );
-    }
-
     // test that Audience evaluation proceeds if provided attributes are empty or null.
     public function testIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
     {
@@ -261,6 +249,187 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $config,
                 $config->getExperimentFromKey('test_experiment'),
                 ['device_type' => 'Android', 'location' => 'San Francisco']
+            )
+        );
+    }
+
+    // test that isUserInExperiment returns true when no audience is attached to experiment.
+    public function testIsUserInExperimentNoAudienceUsedInExperiment()
+    {
+        $config = new ProjectConfig(DATAFILE, null, null);
+        $experiment = $config->getExperimentFromKey('test_experiment');
+
+        // Both audience conditions and audience Ids are empty.
+        $experiment->setAudienceIds([]);
+        $experiment->setAudienceConditions([]);
+        $this->assertTrue(
+            Validator::isUserInExperiment(
+                $config,
+                $experiment,
+                []
+            )
+        );
+
+        // Audience Ids exist but audience conditions is empty.
+        $experiment->setAudienceIds(['7718080042']);
+        $experiment->setAudienceConditions([]);
+        $this->assertTrue(
+            Validator::isUserInExperiment(
+                $config,
+                $experiment,
+                []
+            )
+        );
+
+        // Audience Ids is empty and audience conditions is null.
+        $experiment->setAudienceIds([]);
+        $experiment->setAudienceConditions(null);
+        $this->assertTrue(
+            Validator::isUserInExperiment(
+                $config,
+                $experiment,
+                []
+            )
+        );
+        
+    }
+
+    // test that isUserInExperiment returns false when some audience is attached to experiment
+    // and user attributes do not match.
+    public function testIsUserInExperimentSomeAudienceUsedInExperiment()
+    {
+        $config = new ProjectConfig(DATAFILE, null, null);
+        $experiment = $config->getExperimentFromKey('test_experiment');
+
+        // Both audience Ids and audience conditions exist. Audience Ids is ignored.
+        $experiment->setAudienceIds(['7718080042']);
+        $experiment->setAudienceConditions(['11155']);
+        
+        $this->assertFalse(
+            Validator::isUserInExperiment(
+                $config,
+                $experiment,
+                ['device_type' => 'Android', 'location' => 'San Francisco']
+            )
+        );
+
+        // Audience Ids exist and audience conditions is null.
+        $experiment = $config->getExperimentFromKey('test_experiment');
+        $experiment->setAudienceIds(['11155']);
+        $experiment->setAudienceConditions(null);
+        
+        $this->assertFalse(
+            Validator::isUserInExperiment(
+                $config,
+                $experiment,
+                ['device_type' => 'iPhone', 'location' => 'San Francisco']
+            )
+        );
+    }
+
+    // test that isUserInExperiment evaluates audience when audienceConditions is an audience leaf node.
+    public function testIsUserInExperimentWithAudienceConditionsSetToAudienceIdString()
+    {
+        $config = new ProjectConfig(DATAFILE, null, null);
+        $experiment = $config->getExperimentFromKey('test_experiment');
+
+        // Both audience Ids and audience conditions exist. Audience Ids is ignored.
+        $experiment->setAudienceIds([]);
+        $experiment->setAudienceConditions('7718080042');
+        
+        $this->assertTrue(
+            Validator::isUserInExperiment(
+                $config,
+                $experiment,
+                ['device_type' => 'iPhone', 'location' => 'San Francisco']
+            )
+        );
+    }
+
+    // test that isUserInExperiment evaluates simple audience.
+    public function testIsUserInExperimentWithSimpleAudience()
+    {
+        $config = new ProjectConfig(DATAFILE, null, null);
+        $configMock = $this->getMockBuilder(ProjectConfig::class)
+            ->setConstructorArgs(array(DATAFILE, $this->loggerMock, new NoOpErrorHandler()))
+            ->setMethods(array('getAudience'))
+            ->getMock();
+
+        $experiment = $configMock->getExperimentFromKey('test_experiment');
+        $experiment->setAudienceIds(['11155', '7718080042']);
+        $experiment->setAudienceConditions(null);
+
+        $configMock->expects($this->at(0))
+            ->method('getAudience')
+            ->with('11155')
+            ->will($this->returnValue($config->getAudience('11155')));
+
+        $configMock->expects($this->at(1))
+            ->method('getAudience')
+            ->with('7718080042')
+            ->will($this->returnValue($config->getAudience('7718080042')));
+
+        $this->assertTrue(
+            Validator::isUserInExperiment(
+                $configMock,
+                $experiment,
+                ['device_type' => 'iPhone', 'location' => 'San Francisco']
+            )
+        );
+    }
+
+    // test that isUserInExperiment evaluates complex audience.
+    public function testIsUserInExperimentWithComplexAudience()
+    {
+        $config = new ProjectConfig(DATAFILE_WITH_TYPED_AUDIENCES, null, null);
+        $configMock = $this->getMockBuilder(ProjectConfig::class)
+            ->setConstructorArgs(array(DATAFILE_WITH_TYPED_AUDIENCES, $this->loggerMock, new NoOpErrorHandler()))
+            ->setMethods(array('getAudience'))
+            ->getMock();
+
+        $experiment = $configMock->getExperimentFromKey('audience_combinations_experiment');
+        $experiment->setAudienceIds([]);
+        $experiment->setAudienceConditions(["or", ["and", "3468206642", "3988293898"], ["or", "3988293899",
+                                 "3468206646", "3468206647", "3468206644", "3468206643"]]);
+
+        // Qualifies for audience "3468206643".
+        // Fails for audience "3468206642" hence "3988293898" is not evaluated.
+
+        $configMock->expects($this->at(0))
+            ->method('getAudience')
+            ->with('3468206642')
+            ->will($this->returnValue($config->getAudience('3468206642')));
+
+        $configMock->expects($this->at(1))
+            ->method('getAudience')
+            ->with('3988293899')
+            ->will($this->returnValue($config->getAudience('3988293899')));
+
+        $configMock->expects($this->at(2))
+            ->method('getAudience')
+            ->with('3468206646')
+            ->will($this->returnValue($config->getAudience('3468206646')));
+
+        $configMock->expects($this->at(3))
+            ->method('getAudience')
+            ->with('3468206647')
+            ->will($this->returnValue($config->getAudience('3468206647')));
+
+        $configMock->expects($this->at(4))
+            ->method('getAudience')
+            ->with('3468206644')
+            ->will($this->returnValue($config->getAudience('3468206644')));
+
+        $configMock->expects($this->at(5))
+            ->method('getAudience')
+            ->with('3468206643')
+            ->will($this->returnValue($config->getAudience('3468206643')));
+
+        $this->assertTrue(
+            Validator::isUserInExperiment(
+                $configMock,
+                $experiment,
+                ['should_do_it' => true, 'house' => 'foo']
             )
         );
     }
