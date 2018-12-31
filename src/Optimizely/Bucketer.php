@@ -86,7 +86,21 @@ class Bucketer
     {
         $hashCode = $this->generateHashCode($bucketingKey);
         $ratio = $hashCode / Bucketer::$MAX_HASH_VALUE;
-        return intval(floor($ratio * Bucketer::$MAX_TRAFFIC_VALUE));
+        $bucketVal = intval(floor($ratio * Bucketer::$MAX_TRAFFIC_VALUE));
+
+        /* murmurhash3_int returns both positive and negative integers for PHP x86 versions
+        it returns negative integers when it tries to create 2^32 integers while PHP doesn't support
+        unsigned integers and can store integers only upto 2^31. 
+        Observing generated hashcodes and their corresponding bucket values after normalization
+        indicates that a negative bucket number on x86 is exactly 10,000 less than it's 
+        corresponding bucket number on x64. Hence we can safely add 10,000 to a negative number to
+        make it consistent across both of the PHP variants. */
+        
+        if ($bucketVal < 0) {
+            $bucketVal += 10000;
+        }
+
+        return $bucketVal;
     }
 
     /**

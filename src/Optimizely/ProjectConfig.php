@@ -42,6 +42,8 @@ use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Utils\ConditionDecoder;
 use Optimizely\Utils\ConfigParser;
+use Optimizely\Utils\Errors;
+use Optimizely\Utils\Validator;
 
 /**
  * Class ProjectConfig
@@ -212,6 +214,7 @@ class ProjectConfig
         $events = $config['events'] ?: [];
         $attributes = $config['attributes'] ?: [];
         $audiences = $config['audiences'] ?: [];
+        $typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences']: [];
         $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
         $featureFlags = isset($config['featureFlags']) ? $config['featureFlags']: [];
 
@@ -219,6 +222,7 @@ class ProjectConfig
         $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);
         $this->_eventKeyMap = ConfigParser::generateMap($events, 'key', Event::class);
         $this->_attributeKeyMap = ConfigParser::generateMap($attributes, 'key', Attribute::class);
+        $typedAudienceIdMap = ConfigParser::generateMap($typedAudiences, 'id', Audience::class);
         $this->_audienceIdMap = ConfigParser::generateMap($audiences, 'id', Audience::class);
         $this->_rollouts = ConfigParser::generateMap($rollouts, null, Rollout::class);
         $this->_featureFlags = ConfigParser::generateMap($featureFlags, null, FeatureFlag::class);
@@ -247,11 +251,18 @@ class ProjectConfig
             }
         }
 
-        $conditionDecoder = new ConditionDecoder();
         foreach (array_values($this->_audienceIdMap) as $audience) {
-            $conditionDecoder->deserializeAudienceConditions($audience->getConditions());
-            $audience->setConditionsList($conditionDecoder->getConditionsList());
+            $audience->setConditionsList(json_decode($audience->getConditions(), true));
         }
+
+        // Conditions in typedAudiences are not expected to be string-encoded so they don't need
+        // to be decoded unlike audiences. 
+        foreach (array_values($typedAudienceIdMap) as $typedAudience) {
+            $typedAudience->setConditionsList($typedAudience->getConditions());
+        }
+
+        // Overwrite audiences by typedAudiences.
+        $this->_audienceIdMap = array_replace($this->_audienceIdMap, $typedAudienceIdMap);
 
         $rolloutVariationIdMap = [];
         $rolloutVariationKeyMap = [];
@@ -596,12 +607,6 @@ class ProjectConfig
     public function getForcedVariation($experimentKey, $userId)
     {
 
-        // check for null and empty string user ID
-        if (strlen($userId) == 0) {
-            $this->_logger->log(Logger::DEBUG, 'User ID is invalid');
-            return null;
-        }
-
         if (!isset($this->_forcedVariationMap[$userId])) {
             $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
             return null;
@@ -641,9 +646,10 @@ class ProjectConfig
      */
     public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
-        // check for null and empty string user ID
-        if (strlen($userId) == 0) {
-            $this->_logger->log(Logger::DEBUG, 'User ID is invalid');
+
+        // check for empty string Variation key
+        if (!is_null($variationKey) && !Validator::validateNonEmptyString($variationKey)) {
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_FORMAT, Optimizely::VARIATION_KEY));
             return false;
         }
 

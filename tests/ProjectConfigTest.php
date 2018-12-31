@@ -154,7 +154,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             [
             'device_type' => $this->config->getAttribute('device_type'),
             'location' => $this->config->getAttribute('location'),
-            '$opt_xyz' => $this->config->getAttribute('$opt_xyz')
+            '$opt_xyz' => $this->config->getAttribute('$opt_xyz'),
+            'boolean_key' => $this->config->getAttribute('boolean_key'),
+            'double_key' => $this->config->getAttribute('double_key'),
+            'integer_key' => $this->config->getAttribute('integer_key')
             ],
             $attributeKeyMap->getValue($this->config)
         );
@@ -505,6 +508,35 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('iPhone users in San Francisco', $audience->getName());
     }
 
+    public function testGetAudiencePrefersTypedAudiencesOverAudiences()
+    {
+        $projectConfig = new ProjectConfig(
+            DATAFILE_WITH_TYPED_AUDIENCES, $this->loggerMock, $this->errorHandlerMock
+        );
+
+        // test that typedAudience is returned when an audience exists with the same ID.
+        $audience = $projectConfig->getAudience('3988293898');
+
+        $this->assertEquals('3988293898', $audience->getId());
+        $this->assertEquals('substringString', $audience->getName());
+
+        $expectedConditions = json_decode('["and", ["or", ["or", {"name": "house", "type": "custom_attribute",
+                         "match": "substring", "value": "Slytherin"}]]]', true);
+        $this->assertEquals($expectedConditions, $audience->getConditions());
+        $this->assertEquals($expectedConditions, $audience->getConditionsList());
+
+        // test that normal audience is returned if no typedAudience exists with the same ID.
+        $audience = $projectConfig->getAudience('3468206642');
+
+        $this->assertEquals('3468206642', $audience->getId());
+        $this->assertEquals('exactString', $audience->getName());
+
+        $expectedConditions = '["and", ["or", ["or", {"name": "house", "type": "custom_attribute", "value": "Gryffindor"}]]]';
+        $this->assertEquals($expectedConditions, $audience->getConditions());
+        $expectedConditionsList = json_decode($expectedConditions, true);
+        $this->assertEquals($expectedConditionsList, $audience->getConditionsList());
+    }
+
     public function testGetAudienceInvalidKey()
     {
         $this->loggerMock->expects($this->once())
@@ -715,7 +747,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $invalidVariationKey = 'invalid_variation';
         $callIndex = 0;
 
-        $this->loggerMock->expects($this->exactly(4))
+        $this->loggerMock->expects($this->exactly(5))
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
@@ -723,6 +755,9 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::VARIATION_KEY));
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::ERROR, sprintf('No variation key "%s" defined in datafile for experiment "%s".', $invalidVariationKey, $experimentKey));
@@ -734,6 +769,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
         $this->config->setForcedVariation($invalidExperimentKey, $userId, $variationKey);
         $this->config->setForcedVariation($experimentKey, $userId, null);
+        $this->config->setForcedVariation($experimentKey, $userId, '');
         $this->config->setForcedVariation($experimentKey, $userId, $invalidVariationKey);
         $this->config->setForcedVariation($experimentKey, $userId, $variationKey);
     }

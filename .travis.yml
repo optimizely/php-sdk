@@ -14,4 +14,23 @@ script:
 - mkdir -p build/logs
 - ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 after_script:
-- vendor/bin/coveralls -v
+- vendor/bin/php-coveralls -v
+
+# Integration tests need to run first to reset the PR build status to pending
+stages:
+  - 'Integration tests'
+  - 'Test'
+
+jobs:
+  include:
+    - stage: 'Integration tests'
+      env: SDK=php
+      language: python
+      before_install: skip
+      install:
+        - "pip install awscli"
+      before_script:
+        - "aws s3 cp s3://optimizely-travisci-artifacts/ci/trigger_fullstack-sdk-compat.sh ci/ && chmod u+x ci/trigger_fullstack-sdk-compat.sh"
+      script:
+        - "ci/trigger_fullstack-sdk-compat.sh"
+      after_success: skip

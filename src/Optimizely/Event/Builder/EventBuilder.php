@@ -26,6 +26,7 @@ use Optimizely\Event\LogEvent;
 use Optimizely\ProjectConfig;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\GeneratorUtils;
+use Optimizely\Utils\Validator;
 
 class EventBuilder
 {
@@ -37,7 +38,7 @@ class EventBuilder
     /**
      * @const string Version of the Optimizely PHP SDK.
      */
-    const SDK_VERSION = '2.1.0';
+    const SDK_VERSION = '2.2.1';
 
     /**
      * @var string URL to send event to.
@@ -100,9 +101,8 @@ class EventBuilder
 
         if(!is_null($attributes)) {
             foreach ($attributes as $attributeKey => $attributeValue) {
-                $feature = [];
-                // Do not discard attribute if value is zero or false
-                if (!is_null($attributeValue)) {
+                // Omit attributes that are not supported by the log endpoint.
+                if (Validator::isAttributeValid($attributeKey, $attributeValue)) {
                     $attributeEntity = $config->getAttribute($attributeKey);
                     if ($attributeEntity instanceof Attribute) {
                         $feature = [

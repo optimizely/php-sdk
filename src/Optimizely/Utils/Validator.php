@@ -21,6 +21,8 @@ use Monolog\Logger;
 use Optimizely\Entity\Experiment;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\ProjectConfig;
+use Optimizely\Utils\ConditionTreeEvaluator;
+use Optimizely\Utils\CustomAttributeConditionEvaluator;
 
 class Validator
 {
@@ -59,7 +61,63 @@ class Validator
      */
     public static function areAttributesValid($attributes)
     {
-        return is_array($attributes) && count(array_filter(array_keys($attributes), 'is_int')) == 0;
+        if(!is_array($attributes)){
+            return false;
+        }
+
+        if (empty($attributes)){
+            return true;
+        }
+        // At least one key string to be an associative array.
+        return count(array_filter(array_keys($attributes), 'is_string')) > 0;
+    }
+
+    /**
+     * @param $value The value to validate.
+     *
+     * @return boolean Representing whether attribute's value is
+     * a number and not NAN, INF, -INF or greater than absolute limit of 2^53.
+     */
+    public static function isFiniteNumber($value)
+    {
+        if (!(is_int($value) || is_float($value))) {
+            return false;
+        }
+       
+        if (is_nan($value) || is_infinite($value)) {
+            return false;
+        }        
+
+        if (abs($value) > pow(2, 53)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $attributeKey The key to validate.
+     * @param $attributeValue The value to validate.
+     *
+     * @return boolean Representing whether attribute's key and value are
+     * valid for event payload or not. Valid attribute key must be a string.
+     * Valid attribute value can be a string, bool, or a finite number.
+     */
+    public static function isAttributeValid($attributeKey, $attributeValue)
+    {
+        if (!is_string($attributeKey)) {
+            return false;
+        }
+
+        if (is_string($attributeValue) || is_bool($attributeValue)) {
+            return true;
+        }
+
+        if (is_int($attributeValue) || is_float($attributeValue)) {
+            return Validator::isFiniteNumber($attributeValue);
+        }
+
+        return false;
     }
 
     /**
@@ -81,29 +139,35 @@ class Validator
      */
     public static function isUserInExperiment($config, $experiment, $userAttributes)
     {
-        $audienceIds = $experiment->getAudienceIds();
+        $audienceConditions = $experiment->getAudienceConditions();
+        if ($audienceConditions === null) {
+            $audienceConditions = $experiment->getAudienceIds();
+        }
 
         // Return true if experiment is not targeted to any audience.
-        if (empty($audienceIds)) {
+        if (empty($audienceConditions)) {
             return true;
         }
 
-        // Return false if there is audience, but no user attributes.
-        if (empty($userAttributes)) {
-            return false;
+        if ($userAttributes === null) {
+            $userAttributes = [];
         }
 
-        // Return true if conditions for any audience are met.
-        $conditionEvaluator = new ConditionEvaluator();
-        foreach ($audienceIds as $audienceId) {
+        $customAttrCondEval = new CustomAttributeConditionEvaluator($userAttributes);
+        $evaluateCustomAttr = function($leafCondition) use ($customAttrCondEval) {
+            return $customAttrCondEval->evaluate($leafCondition);
+        };
+
+        $evaluateAudience = function($audienceId) use ($config, $evaluateCustomAttr) {
+            $conditionTreeEvaluator = new ConditionTreeEvaluator();
             $audience = $config->getAudience($audienceId);
-            $result = $conditionEvaluator->evaluate($audience->getConditionsList(), $userAttributes);
-            if ($result) {
-                return true;
-            }
-        }
+            return $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
+        };
 
-        return false;
+        $conditionTreeEvaluator = new ConditionTreeEvaluator();
+        $evalResult = $conditionTreeEvaluator->evaluate($audienceConditions, $evaluateAudience);
+        
+        return $evalResult || false;
     }
 
     /**
@@ -152,5 +216,41 @@ class Validator
         }
 
         return false;
+    }
+
+    /**
+     * Method to verify that both values belong to same type. 
+     * Float/Double and Integer are considered similar.
+     * 
+     * @param  mixed  $firstVal
+     * @param  mixed  $secondVal
+     * 
+     * @return bool   True if values belong to similar types. Otherwise, False.
+     */
+    public static function areValuesSameType($firstVal, $secondVal)
+    {
+        $firstValType = gettype($firstVal);
+        $secondValType = gettype($secondVal);
+        $numberTypes = array('double', 'integer');
+
+        if(in_array($firstValType, $numberTypes) && in_array($secondValType, $numberTypes)) {
+            return True;
+        }
+
+        return $firstValType == $secondValType;
+    }
+
+    /**
+     * Returns true only if given input is an array with all of it's keys of type string.
+     * @param  mixed $arr
+     * @return bool  True if array contains all string keys. Otherwise, false.
+     */
+    public static function doesArrayContainOnlyStringKeys($arr)
+    {
+        if(!is_array($arr) || empty($arr)) {
+            return false;
+        }
+
+        return count(array_filter(array_keys($arr), 'is_string')) == count(array_keys($arr));
     }
 }

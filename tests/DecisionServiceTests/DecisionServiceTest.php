@@ -118,6 +118,71 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testGetBucketingIdWhenBucketingIdIsNotString()
+    {
+        $decisionService = new DecisionTester($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $userAttributesWithBucketingId = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco',
+            '$opt_bucketing_id' => 5
+        ];
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::WARNING, 'Bucketing ID attribute is not a string. Defaulted to user ID.');
+
+        $this->assertSame($this->testUserId, $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
+    }
+
+    public function testGetBucketingIdWhenBucketingIdIsNull()
+    {
+        $decisionService = new DecisionTester($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $userAttributesWithBucketingId = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco',
+            '$opt_bucketing_id' => null
+        ];
+
+        $this->loggerMock->expects($this->never())
+            ->method('log');
+
+        $this->assertSame($this->testUserId, $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
+    }
+
+    public function testGetBucketingIdWhenBucketingIdIsString()
+    {
+        $decisionService = new DecisionTester($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $userAttributesWithBucketingId = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco',
+            '$opt_bucketing_id' => 'i_am_bucketing_id'
+        ];
+
+        $this->loggerMock->expects($this->never())
+            ->method('log');
+
+        $this->assertSame('i_am_bucketing_id', $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
+    }
+
+    public function testGetBucketingIdWhenBucketingIdIsEmptyString()
+    {
+        $decisionService = new DecisionTester($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $userAttributesWithBucketingId = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco',
+            '$opt_bucketing_id' => ''
+        ];
+
+        $this->loggerMock->expects($this->never())
+            ->method('log');
+
+        $this->assertSame('', $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
+    }
+
     public function testGetVariationReturnsWhitelistedVariation()
     {
         $expectedVariation = new Variation('7722370027', 'control');
@@ -1073,7 +1138,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment2 = $rollout->getExperiments()[2];
         
         // Set an AudienceId for everyone else/last rule so that user does not qualify for audience
-        $experiment2->setAudienceIds(["11154"]);
+        $experiment2->setAudienceIds(["11155"]);
         $expected_variation = $experiment2->getVariations()[0];
         
         // Provide null attributes so that user does not qualify for audience
@@ -1100,7 +1165,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 Logger::DEBUG,
                 "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment1->getKey()}'."
             );
-        
+
         $this->loggerMock->expects($this->at(2))
             ->method('log')
             ->with(
