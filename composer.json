@@ -15,7 +15,7 @@
     "lastguest/murmurhash": "1.3.0",
     "guzzlehttp/guzzle": "~5.3|~6.2",
     "monolog/monolog": "~1.21",
-    "icecave/parity": "^1.0"
+    "icecave/parity": "^1.0 || ^2.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^4.8|^5.0",
