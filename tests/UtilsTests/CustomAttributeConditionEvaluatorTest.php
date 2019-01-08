@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2018, Optimizely
+ * Copyright 2018-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,10 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
+        $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
+            ->setMethods(array('log'))
+            ->getMock();
+
         $this->browserConditionSafari = [
             'type' => 'custom_attribute',
             'name' => 'browser_type',
@@ -112,7 +116,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testEvaluateReturnsTrueWhenAttrsPassAudienceCondition()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['browser_type' => 'safari']
+            ['browser_type' => 'safari'],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -125,7 +130,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testEvaluateReturnsFalseWhenAttrsFailAudienceConditions()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['browser_type' => 'chrome']
+            ['browser_type' => 'chrome'],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -145,7 +151,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            $userAttributes
+            $userAttributes,
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -176,7 +183,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testEvaluateReturnsNullForInvalidMatchProperty()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['weird_condition' => 'hi']
+            ['weird_condition' => 'hi'],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -195,7 +203,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testEvaluateAssumesExactWhenConditionMatchPropertyIsNull()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['favorite_constellation' => 'Lacerta']
+            ['favorite_constellation' => 'Lacerta'],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -213,7 +222,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testEvaluateReturnsNullWhenConditionHasInvalidTypeProperty()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['weird_condition' => 'hi']
+            ['weird_condition' => 'hi'],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -231,7 +241,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExistsReturnsFalseWhenNoUserProvidedValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            []
+            [],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -244,7 +255,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExistsReturnsFalseWhenUserProvidedValueIsNull()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['input_value' => null]
+            ['input_value' => null],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -257,7 +269,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExistsReturnsTrueWhenUserProvidedValueIsString()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['input_value' => 'hi']
+            ['input_value' => 'hi'],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -270,7 +283,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExistsReturnsTrueWhenUserProvidedValueIsNumber()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['input_value' => 10]
+            ['input_value' => 10],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -280,7 +294,9 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['input_value' => 10.0]
+
+            ['input_value' => 10.0],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -294,7 +310,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExistsReturnsTrueWhenUserProvidedValueIsBoolean()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['input_value' => false]
+            ['input_value' => false],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -307,7 +324,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactStringReturnsTrueWhenAttrsEqualToConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['favorite_constellation' => 'Lacerta']
+            ['favorite_constellation' => 'Lacerta'],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -320,7 +338,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactStringReturnsFalseWhenAttrsNotEqualToConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['favorite_constellation' => 'The Big Dipper']
+            ['favorite_constellation' => 'The Big Dipper'],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -333,7 +352,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactStringReturnsNullWhenAttrsIsDifferentTypeFromConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['favorite_constellation' => false]
+            ['favorite_constellation' => false],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -346,7 +366,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactStringReturnsNullWhenNoUserProvidedValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            []
+            [],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -359,7 +380,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactIntReturnsTrueWhenAttrsEqualToConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['lasers_count' => 9000]
+            ['lasers_count' => 9000],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -372,7 +394,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactFloatReturnsTrueWhenAttrsEqualToConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['lasers_count' => 9000.0]
+            ['lasers_count' => 9000.0],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -385,7 +408,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactIntReturnsFalseWhenAttrsNotEqualToConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['lasers_count' => 8000]
+            ['lasers_count' => 8000],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -398,7 +422,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactFloatReturnsFalseWhenAttrsNotEqualToConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['lasers_count' => 8000.0]
+            ['lasers_count' => 8000.0],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -411,7 +436,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactIntReturnsNullWhenAttrsIsDifferentTypeFromConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['lasers_count' => 'hi']
+            ['lasers_count' => 'hi'],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -421,7 +447,9 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['lasers_count' => true]
+
+            ['lasers_count' => true],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -434,7 +462,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactFloatReturnsNullWhenAttrsIsDifferentTypeFromConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-          ['lasers_count' => 'hi']
+            ['lasers_count' => 'hi'],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -444,7 +473,9 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-          ['lasers_count' => true]
+
+            ['lasers_count' => true],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -457,7 +488,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactIntReturnsNullWhenNoUserProvidedValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            []
+            [],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -470,7 +502,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactFloatReturnsNullWhenNoUserProvidedValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            []
+            [],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -483,7 +516,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactBoolReturnsTrueWhenAttrsEqualToConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['did_register_user' => false]
+            ['did_register_user' => false],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -496,7 +530,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactBoolReturnsFalseWhenAttrsNotEqualToConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['did_register_user' => true]
+            ['did_register_user' => true],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -509,7 +544,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactBoolReturnsNullWhenAttrsIsDifferentTypeFromConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['did_register_user' => 0]
+            ['did_register_user' => 0],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -522,7 +558,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactBoolReturnsNullWhenWhenNoUserProvidedValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            []
+            [],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -535,7 +572,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testSubstringReturnsTrueWhenConditionValueIsSubstringOfUserValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['headline_text' => 'Limited time, buy now!']
+            ['headline_text' => 'Limited time, buy now!'],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -548,7 +586,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testSubstringReturnsFalseWhenConditionValueIsNotSubstringOfUserValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['headline_text' => 'Breaking news!']
+            ['headline_text' => 'Breaking news!'],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -561,7 +600,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testSubstringReturnsNullWhenUserProvidedvalueNotAString()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['headline_text' => 10]
+            ['headline_text' => 10],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -574,7 +614,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testSubstringReturnsNullWhenNoUserProvidedValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            []
+            [],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -587,7 +628,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testGreaterThanIntReturnsTrueWhenUserValueGreaterThanConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.1]
+            ['meters_travelled' => 48.1],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -595,8 +637,10 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                   $this->gtIntCondition
             )
         );
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 49]
+            ['meters_travelled' => 49],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -609,7 +653,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testGreaterThanFloatReturnsTrueWhenUserValueGreaterThanConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.3]
+            ['meters_travelled' => 48.3],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -617,8 +662,10 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                   $this->gtFloatCondition
             )
         );
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 49]
+            ['meters_travelled' => 49],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -631,7 +678,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testGreaterThanIntReturnsFalseWhenUserValueNotGreaterThanConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 47.9]
+            ['meters_travelled' => 47.9],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -639,8 +687,10 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                   $this->gtIntCondition
             )
         );
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 47]
+            ['meters_travelled' => 47],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -653,7 +703,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testGreaterThanFloatReturnsFalseWhenUserValueNotGreaterThanConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.2]
+            ['meters_travelled' => 48.2],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -661,8 +712,10 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                   $this->gtFloatCondition
             )
         );
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48]
+            ['meters_travelled' => 48],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -675,7 +728,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testGreaterThanIntReturnsNullWhenUserValueIsNotANumber()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 'a long way']
+            ['meters_travelled' => 'a long way'],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -683,8 +737,10 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                   $this->gtIntCondition
             )
         );
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => false]
+            ['meters_travelled' => false],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -697,7 +753,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testGreaterThanFloatReturnsNullWhenUserValueIsNotANumber()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 'a long way']
+            ['meters_travelled' => 'a long way'],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -705,8 +762,10 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                   $this->gtFloatCondition
             )
         );
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => false]
+            ['meters_travelled' => false],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -719,7 +778,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testGreaterThanIntReturnsNullWhenNoUserProvidedValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            []
+            [],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -732,7 +792,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testGreaterThanFloatReturnsNullWhenNoUserProvidedValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            []
+            [],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -745,16 +806,19 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testLessThanIntReturnsTrueWhenUserValueLessThanConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 47.9]
+            ['meters_travelled' => 47.9],
+            $this->loggerMock
         );
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltIntCondition
+                $this->ltIntCondition
             )
         );
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 47]
+            ['meters_travelled' => 47],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -767,7 +831,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testLessThanFloatReturnsTrueWhenUserValueLessThanConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.1]
+            ['meters_travelled' => 48.1],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -776,7 +841,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48]
+            ['meters_travelled' => 48],
+            $this->loggerMock
         );
 
         $this->assertTrue(
@@ -789,7 +855,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testLessThanIntReturnsFalseWhenUserValueNotLessThanConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.1]
+            ['meters_travelled' => 48.1],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -798,7 +865,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 49]
+            ['meters_travelled' => 49],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -811,7 +879,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testLessThanFloatReturnsFalseWhenUserValueNotLessThanConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.2]
+            ['meters_travelled' => 48.2],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -820,7 +889,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 49]
+            ['meters_travelled' => 49],
+            $this->loggerMock
         );
 
         $this->assertFalse(
@@ -833,7 +903,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testLessThanIntReturnsNullWhenUserValueIsNotANumber()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 'a long way']
+            ['meters_travelled' => 'a long way'],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -843,7 +914,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => false]
+            ['meters_travelled' => false],
+            $this->loggerMock
         );
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
@@ -855,7 +927,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testLessThanFloatReturnsNullWhenUserValueIsNotANumber()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 'a long way']
+            ['meters_travelled' => 'a long way'],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -864,7 +937,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => false]
+            ['meters_travelled' => false],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -877,7 +951,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testLessThanIntReturnsNullWhenNoUserProvidedValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            []
+            [],
+            $this->loggerMock
         );
 
         $this->assertNull(
@@ -890,7 +965,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testLessThanFloatReturnsNullWhenNoUserProvidedValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            []
+            [],
+            $this->loggerMock
         );
 
         $this->assertNull(

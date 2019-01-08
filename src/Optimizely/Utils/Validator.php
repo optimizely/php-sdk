@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ namespace Optimizely\Utils;
 use JsonSchema;
 use Monolog\Logger;
 use Optimizely\Entity\Experiment;
+use Optimizely\Enums\AudienceEvaluationLogs;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\ProjectConfig;
 use Optimizely\Utils\ConditionTreeEvaluator;
@@ -83,10 +84,10 @@ class Validator
         if (!(is_int($value) || is_float($value))) {
             return false;
         }
-       
+
         if (is_nan($value) || is_infinite($value)) {
             return false;
-        }        
+        }
 
         if (abs($value) > pow(2, 53)) {
             return false;
@@ -134,10 +135,11 @@ class Validator
      * @param $config ProjectConfig Configuration for the project.
      * @param $experiment Experiment Entity representing the experiment.
      * @param $userAttributes array Attributes of the user.
+     *  @param $logger LoggerInterface.
      *
      * @return boolean Representing whether user meets audience conditions to be in experiment or not.
      */
-    public static function isUserInExperiment($config, $experiment, $userAttributes)
+    public static function isUserInExperiment($config, $experiment, $userAttributes, $logger)
     {
         $audienceConditions = $experiment->getAudienceConditions();
         if ($audienceConditions === null) {
@@ -146,28 +148,65 @@ class Validator
 
         // Return true if experiment is not targeted to any audience.
         if (empty($audienceConditions)) {
+            $logger->log(Logger::INFO, sprintf(
+                  AudienceEvaluationLogs::NO_AUDIENCE_ATTACHED,
+                  $experiment->getKey()
+            ));
             return true;
         }
+
+        $logger->log(Logger::DEBUG, sprintf(
+            AudienceEvaluationLogs::EVALUATING_AUDIENCES,
+            $experiment->getKey(),
+            json_encode($audienceConditions)
+        ));
+
+        $logger->log(Logger::DEBUG, sprintf(
+            AudienceEvaluationLogs::USER_ATTRIBUTES,
+            json_encode($userAttributes)
+        ));
 
         if ($userAttributes === null) {
             $userAttributes = [];
         }
 
-        $customAttrCondEval = new CustomAttributeConditionEvaluator($userAttributes);
+        $customAttrCondEval = new CustomAttributeConditionEvaluator($userAttributes, $logger);
         $evaluateCustomAttr = function($leafCondition) use ($customAttrCondEval) {
             return $customAttrCondEval->evaluate($leafCondition);
         };
 
-        $evaluateAudience = function($audienceId) use ($config, $evaluateCustomAttr) {
-            $conditionTreeEvaluator = new ConditionTreeEvaluator();
+        $evaluateAudience = function($audienceId) use ($config, $evaluateCustomAttr, $logger) {
             $audience = $config->getAudience($audienceId);
-            return $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
+            $logger->log(Logger::DEBUG, sprintf(
+                AudienceEvaluationLogs::EVALUATING_AUDIENCE_WITH_CONDITIONS,
+                $audienceId,
+                json_encode($audience->getConditionsList())
+            ));
+
+            $conditionTreeEvaluator = new ConditionTreeEvaluator();
+            $result = $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
+            $resultLog = $result === null ? 'UNKNOWN' : ucfirst(var_export($result, true));
+
+            $logger->log(Logger::DEBUG, sprintf(
+                AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT,
+                $audienceId,
+                $resultLog
+            ));
+
+            return $result;
         };
 
         $conditionTreeEvaluator = new ConditionTreeEvaluator();
         $evalResult = $conditionTreeEvaluator->evaluate($audienceConditions, $evaluateAudience);
-        
-        return $evalResult || false;
+        $evalResult = $evalResult || false;
+
+        $logger->log(Logger::INFO, sprintf(
+            AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
+            $experiment->getKey(),
+            ucfirst(var_export($evalResult, true))
+        ));
+
+        return $evalResult;
     }
 
     /**

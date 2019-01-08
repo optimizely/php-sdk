@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017-2018, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('log'))
             ->getMock();
 
+        $this->collectedLogs = [];
+        $this->collectLogsForAssertion = function($a, $b) {
+           $this->collectedLogs[] = array($a,$b);
+        };
+
         $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
 
         // Mock bucketer
@@ -87,7 +92,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket');
 
         $pausedExperiment = $this->config->getExperimentFromKey('paused_experiment');
-        
+
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -384,19 +389,13 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
         $expectedVariation = new Variation('7722370027', 'control');
 
-        $callIndex = 0;
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
             ->willReturn($expectedVariation);
-        $this->loggerMock->expects($this->at($callIndex++))
+
+        $this->loggerMock->expects($this->any())
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'No previously activated variation of experiment "test_experiment" for user "testUserId" found in user profile.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".');
+            ->will($this->returnCallback($this->collectLogsForAssertion));
 
         $storedUserProfile = array(
             'user_id' => $userId,
@@ -426,6 +425,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
+
+        // Verify Logs
+        $this->assertContains([Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId)], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, 'No previously activated variation of experiment "test_experiment" for user "testUserId" found in user profile.'], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".'], $this->collectedLogs);
     }
 
     public function testGetVariationBucketsIfStoredVariationIsInvalid()
@@ -434,19 +438,13 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
         $expectedVariation = new Variation('7722370027', 'control');
 
-        $callIndex = 0;
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
             ->willReturn($expectedVariation);
-        $this->loggerMock->expects($this->at($callIndex++))
+
+        $this->loggerMock->expects($this->any())
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'User "testUserId" was previously bucketed into variation with ID "invalid" for experiment "test_experiment", but no matching variation was found for that user. We will re-bucket the user.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".');
+            ->will($this->returnCallback($this->collectLogsForAssertion));
 
         $storedUserProfile = array(
             'user_id' => $userId,
@@ -480,6 +478,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
+
+        // Verify Logs
+        $this->assertContains([Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId)], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, 'User "testUserId" was previously bucketed into variation with ID "invalid" for experiment "test_experiment", but no matching variation was found for that user. We will re-bucket the user.'], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".'], $this->collectedLogs);
     }
 
     public function testGetVariationBucketsIfUserProfileServiceLookupThrows()
@@ -488,19 +491,13 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
         $expectedVariation = new Variation('7722370027', 'control');
 
-        $callIndex = 0;
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
             ->willReturn($expectedVariation);
-        $this->loggerMock->expects($this->at($callIndex++))
+
+        $this->loggerMock->expects($this->any())
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::ERROR, 'The User Profile Service lookup method failed: I am error.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".');
+            ->will($this->returnCallback($this->collectLogsForAssertion));
 
         $storedUserProfile = array(
             'user_id' => $userId,
@@ -534,6 +531,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
+
+        // Verify Logs
+        $this->assertContains([Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId)], $this->collectedLogs);
+        $this->assertContains([Logger::ERROR, 'The User Profile Service lookup method failed: I am error.'], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".'], $this->collectedLogs);
     }
 
     public function testGetVariationBucketsIfUserProfileServiceSaveThrows()
@@ -542,19 +544,13 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
         $expectedVariation = new Variation('7722370027', 'control');
 
-        $callIndex = 0;
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
             ->willReturn($expectedVariation);
-        $this->loggerMock->expects($this->at($callIndex++))
+
+        $this->loggerMock->expects($this->any())
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'No user profile found for user with ID "testUserId".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::WARNING, 'Failed to save variation "control" of experiment "test_experiment" for user "testUserId".');
+            ->will($this->returnCallback($this->collectLogsForAssertion));
 
         $storedUserProfile = array(
             'user_id' => $userId,
@@ -579,6 +575,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
+
+        // Verify Logs
+        $this->assertContains([Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId)], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, 'No user profile found for user with ID "testUserId".'], $this->collectedLogs);
+        $this->assertContains([Logger::WARNING, 'Failed to save variation "control" of experiment "test_experiment" for user "testUserId".'], $this->collectedLogs);
     }
 
     public function testGetVariationUserWithSetForcedVariation()
@@ -686,7 +687,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $variationKey = $optlyObject->getVariation($this->experimentKey, $userId, $userAttributesWithBucketingId);
         $this->assertEquals($this->variationKeyControl, $variationKey, sprintf('Variation "%s" does not match expected user profile variation "%s".', $variationKey, $this->variationKeyControl));
     }
-    
+
     // should return nil and log a message when the feature flag's experiment ids array is empty
     public function testGetVariationForFeatureExperimentGivenNullExperimentIds()
     {
@@ -750,7 +751,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->decisionServiceMock->expects($this->at(0))
             ->method('getVariation')
             ->will($this->returnValue($variation));
-        
+
         $featureFlag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
         $expected_decision = new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_EXPERIMENT);
 
@@ -900,7 +901,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $decisionServiceMock
             ->method('getVariationForFeatureRollout')
             ->will($this->returnValue(null));
-        
+
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(
@@ -955,7 +956,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $this->decisionService = new DecisionService($this->loggerMock, $configMock);
-  
+
         $featureFlag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
         $rollout_id = $featureFlag->getRolloutId();
         $rollout = $this->config->getRolloutFromId($rollout_id);
@@ -970,7 +971,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     // ============== when the user qualifies for targeting rule (audience match) ======================
-    
+
     //  should return the variation the user is bucketed into when the user is bucketed into the targeting rule
     public function testGetVariationForFeatureRolloutWhenUserIsBucketedInTheTargetingRule()
     {
@@ -1066,17 +1067,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket')
             ->willReturn(null);
 
-        $this->loggerMock->expects($this->never())
-            ->method('log');
-
         $this->assertNull(
             $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes));
     }
 
     // ============== END of tests - when the user qualifies for targeting rule (audience match) ======================
-    
+
     // ===== - when the user does not qualify for the tageting rules (audience mismatch) ======
-    
+
     // should return expected variation when the user is attempted to be bucketed into all targeting rules
     // including Everyone Else rule
     public function testGetVariationForFeatureRolloutWhenUserDoesNotQualifyForAnyTargetingRule()
@@ -1107,24 +1105,18 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket')
             ->willReturn($expected_variation);
 
-        $this->loggerMock->expects($this->at(0))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment0->getKey()}'."
-            );
-
-        $this->loggerMock->expects($this->at(1))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment1->getKey()}'."
-            );
+        $this->loggerMock->expects($this->any())
+                        ->method('log')
+                        ->will($this->returnCallback($this->collectLogsForAssertion));
 
         $this->assertEquals(
             $expected_decision,
             $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes)
         );
+
+        // Verify Logs
+        $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment0->getKey()}'."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment1->getKey()}'."], $this->collectedLogs);
     }
 
     public function testGetVariationForFeatureRolloutWhenUserDoesNotQualifyForAnyTargetingRuleOrEveryoneElseRule()
@@ -1136,11 +1128,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $experiment1 = $rollout->getExperiments()[1];
         // Everyone Else Rule
         $experiment2 = $rollout->getExperiments()[2];
-        
+
         // Set an AudienceId for everyone else/last rule so that user does not qualify for audience
         $experiment2->setAudienceIds(["11155"]);
         $expected_variation = $experiment2->getVariations()[0];
-        
+
         // Provide null attributes so that user does not qualify for audience
         $user_attributes = [];
         $this->decisionService = new DecisionService($this->loggerMock, $this->config);
@@ -1152,27 +1144,15 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->bucketerMock->expects($this->never())
             ->method('bucket');
 
-        $this->loggerMock->expects($this->at(0))
+        $this->loggerMock->expects($this->any())
             ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment0->getKey()}'."
-            );
-
-        $this->loggerMock->expects($this->at(1))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment1->getKey()}'."
-            );
-
-        $this->loggerMock->expects($this->at(2))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment2->getKey()}'."
-        );    
+            ->will($this->returnCallback($this->collectLogsForAssertion));
 
         $this->assertNull($this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes));
+
+        // Verify Logs
+        $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment0->getKey()}'."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment1->getKey()}'."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment2->getKey()}'."], $this->collectedLogs);
     }
 }

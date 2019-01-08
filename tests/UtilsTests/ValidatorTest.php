@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,7 +216,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             Validator::isUserInExperiment(
                 $configMock,
                 $experiment,
-                null
+                null,
+                $this->loggerMock
             )
         );
 
@@ -224,7 +225,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             Validator::isUserInExperiment(
                 $configMock,
                 $experiment,
-                []
+                [],
+                $this->loggerMock
             )
         );
     }
@@ -236,7 +238,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             Validator::isUserInExperiment(
                 $config,
                 $config->getExperimentFromKey('test_experiment'),
-                ['device_type' => 'iPhone', 'location' => 'San Francisco']
+                ['device_type' => 'iPhone', 'location' => 'San Francisco'],
+                $this->loggerMock
             )
         );
     }
@@ -248,7 +251,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             Validator::isUserInExperiment(
                 $config,
                 $config->getExperimentFromKey('test_experiment'),
-                ['device_type' => 'Android', 'location' => 'San Francisco']
+                ['device_type' => 'Android', 'location' => 'San Francisco'],
+                $this->loggerMock
             )
         );
     }
@@ -266,7 +270,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             Validator::isUserInExperiment(
                 $config,
                 $experiment,
-                []
+                [],
+                $this->loggerMock
             )
         );
 
@@ -277,7 +282,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             Validator::isUserInExperiment(
                 $config,
                 $experiment,
-                []
+                [],
+                $this->loggerMock
             )
         );
 
@@ -288,10 +294,11 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             Validator::isUserInExperiment(
                 $config,
                 $experiment,
-                []
+                [],
+                $this->loggerMock
             )
         );
-        
+
     }
 
     // test that isUserInExperiment returns false when some audience is attached to experiment
@@ -304,12 +311,13 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         // Both audience Ids and audience conditions exist. Audience Ids is ignored.
         $experiment->setAudienceIds(['7718080042']);
         $experiment->setAudienceConditions(['11155']);
-        
+
         $this->assertFalse(
             Validator::isUserInExperiment(
                 $config,
                 $experiment,
-                ['device_type' => 'Android', 'location' => 'San Francisco']
+                ['device_type' => 'Android', 'location' => 'San Francisco'],
+                $this->loggerMock
             )
         );
 
@@ -317,12 +325,13 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $experiment = $config->getExperimentFromKey('test_experiment');
         $experiment->setAudienceIds(['11155']);
         $experiment->setAudienceConditions(null);
-        
+
         $this->assertFalse(
             Validator::isUserInExperiment(
                 $config,
                 $experiment,
-                ['device_type' => 'iPhone', 'location' => 'San Francisco']
+                ['device_type' => 'iPhone', 'location' => 'San Francisco'],
+                $this->loggerMock
             )
         );
     }
@@ -336,12 +345,13 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         // Both audience Ids and audience conditions exist. Audience Ids is ignored.
         $experiment->setAudienceIds([]);
         $experiment->setAudienceConditions('7718080042');
-        
+
         $this->assertTrue(
             Validator::isUserInExperiment(
                 $config,
                 $experiment,
-                ['device_type' => 'iPhone', 'location' => 'San Francisco']
+                ['device_type' => 'iPhone', 'location' => 'San Francisco'],
+                $this->loggerMock
             )
         );
     }
@@ -373,7 +383,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             Validator::isUserInExperiment(
                 $configMock,
                 $experiment,
-                ['device_type' => 'iPhone', 'location' => 'San Francisco']
+                ['device_type' => 'iPhone', 'location' => 'San Francisco'],
+                $this->loggerMock
             )
         );
     }
@@ -429,7 +440,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             Validator::isUserInExperiment(
                 $configMock,
                 $experiment,
-                ['should_do_it' => true, 'house' => 'foo']
+                ['should_do_it' => true, 'house' => 'foo'],
+                $this->loggerMock
             )
         );
     }
