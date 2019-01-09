@@ -355,6 +355,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $experiment->setAudienceIds([]);
         $experiment->setAudienceConditions(["or", "unknown_audience_id", "7718080042"]);
         
+        // User qualifies for audience with ID "7718080042".
         $this->assertTrue(
             Validator::isUserInExperiment(
                 $config,
