@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,12 @@ class Validator
 
         $evaluateAudience = function($audienceId) use ($config, $evaluateCustomAttr) {
             $conditionTreeEvaluator = new ConditionTreeEvaluator();
+
             $audience = $config->getAudience($audienceId);
+            if ($audience === null) {
+                return null;
+            }
+
             return $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
         };
 

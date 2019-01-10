@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -337,6 +337,25 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $experiment->setAudienceIds([]);
         $experiment->setAudienceConditions('7718080042');
         
+        $this->assertTrue(
+            Validator::isUserInExperiment(
+                $config,
+                $experiment,
+                ['device_type' => 'iPhone', 'location' => 'San Francisco']
+            )
+        );
+    }
+
+    public function testIsUserInExperimentWithUnknownAudienceId()
+    {
+        $config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
+        $experiment = $config->getExperimentFromKey('test_experiment');
+
+        // Both audience Ids and audience conditions exist. Audience Ids is ignored.
+        $experiment->setAudienceIds([]);
+        $experiment->setAudienceConditions(["or", "unknown_audience_id", "7718080042"]);
+        
+        // User qualifies for audience with ID "7718080042".
         $this->assertTrue(
             Validator::isUserInExperiment(
                 $config,

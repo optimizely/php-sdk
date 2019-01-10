@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -546,7 +546,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->method('handleError')
             ->with(new InvalidAudienceException('Provided audience is not in datafile.'));
 
-        $this->assertEquals(new Audience(), $this->config->getAudience('invalid_id'));
+        $this->assertNull($this->config->getAudience('invalid_id'));
     }
 
     public function testGetAttributeValidKey()
