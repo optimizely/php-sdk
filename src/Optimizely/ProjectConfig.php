@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, 2018, Optimizely
+ * Copyright 2016, 2018-2019 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -455,7 +455,7 @@ class ProjectConfig
      * @param $audienceId string ID of the audience.
      *
      * @return Audience Entity corresponding to the ID.
-     *         Dummy entity is returned if ID is invalid.
+     *         Null is returned if ID is invalid.
      */
     public function getAudience($audienceId)
     {
@@ -465,7 +465,8 @@ class ProjectConfig
 
         $this->_logger->log(Logger::ERROR, sprintf('Audience ID "%s" is not in datafile.', $audienceId));
         $this->_errorHandler->handleError(new InvalidAudienceException('Provided audience is not in datafile.'));
-        return new Audience();
+
+        return null;
     }
 
     /**
