@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ class EventBuilder
             ANONYMIZE_IP => $config->getAnonymizeIP()
         ];
 
-        if(!is_null($attributes)) {
+        if (!is_null($attributes)) {
             foreach ($attributes as $attributeKey => $attributeValue) {
                 // Omit attributes that are not supported by the log endpoint.
                 if (Validator::isAttributeValid($attributeKey, $attributeValue)) {
@@ -184,15 +184,13 @@ class EventBuilder
         $decisions = [];
 
         foreach ($experimentVariationMap as $experimentId => $variationId) {
-            
-            
             $experiment = $config->getExperimentFromId($experimentId);
             $eventEntity = $config->getEvent($eventKey);
 
-            $decision = [                
+            $decision = [
                 CAMPAIGN_ID => $experiment->getLayerId(),
                 EXPERIMENT_ID => $experiment->getId(),
-                VARIATION_ID => $variationId                
+                VARIATION_ID => $variationId
             ];
             $decisions [] = $decision;
         }
@@ -201,7 +199,7 @@ class EventBuilder
             ENTITY_ID => $eventEntity->getId(),
             TIMESTAMP => time()*1000,
             UUID => GeneratorUtils::getRandomUuid(),
-            KEY => $eventKey            
+            KEY => $eventKey
         ];
 
         if (!is_null($eventTags)) {
@@ -215,9 +213,9 @@ class EventBuilder
                 $eventDict[EventTagUtils::NUMERIC_EVENT_METRIC_NAME] = $eventValue;
             }
 
-            if(count($eventTags) > 0) {
+            if (count($eventTags) > 0) {
                 $eventDict['tags'] = $eventTags;
-            }            
+            }
         }
 
         $singleSnapshot[DECISIONS] = $decisions;

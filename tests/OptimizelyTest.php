@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     const OUTPUT_STREAM = 'output';
 
     private $datafile;
+    
     private $eventBuilderMock;
     private $loggerMock;
     private $optimizelyObject;
@@ -63,7 +64,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
         $this->optimizelyObject = new Optimizely($this->datafile, null, $this->loggerMock);
         $this->optimizelyTypedAudienceObject = new Optimizely(
-            $this->typedAudiencesDataFile, null, $this->loggerMock
+            $this->typedAudiencesDataFile,
+            null,
+            $this->loggerMock
         );
 
         $this->projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
@@ -637,7 +640,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         //Should be included via exact match number audience with id '3468206646'
         $this->assertEquals('A', $optimizelyMock->activate('typed_audience_experiment', 'test_user', $userAttributes));
-
     }
 
     public function testActivateWithAttributesTypedAudienceMismatch()

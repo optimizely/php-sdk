@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,10 +230,10 @@ class Optimizely
     }
 
     /**
-     * @param  string Experiment key
-     * @param  string Variation key
-     * @param  string User ID
-     * @param  array Associative array of user attributes
+     * @param string Experiment key
+     * @param string Variation key
+     * @param string User ID
+     * @param array Associative array of user attributes
      */
     protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
     {
@@ -302,7 +302,7 @@ class Optimizely
                 self::EXPERIMENT_KEY =>$experimentKey,
                 self::USER_ID => $userId
             ]
-        	)
+        )
         ) {
             return null;
         }
@@ -338,7 +338,7 @@ class Optimizely
                 self::EVENT_KEY =>$eventKey,
                 self::USER_ID => $userId
             ]
-        	)
+        )
         ) {
             return null;
         }
@@ -435,7 +435,7 @@ class Optimizely
                 self::EXPERIMENT_KEY =>$experimentKey,
                 self::USER_ID => $userId
             ]
-        	)
+        )
         ) {
             return null;
         }
@@ -475,7 +475,8 @@ class Optimizely
                 self::EXPERIMENT_KEY =>$experimentKey,
                 self::USER_ID => $userId
             ]
-        )) {
+        )
+        ) {
             return false;
         }
         return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
@@ -496,7 +497,8 @@ class Optimizely
                 self::EXPERIMENT_KEY =>$experimentKey,
                 self::USER_ID => $userId
             ]
-        )) {
+        )
+        ) {
             return null;
         }
 
@@ -530,7 +532,7 @@ class Optimizely
                 self::FEATURE_FLAG_KEY =>$featureFlagKey,
                 self::USER_ID => $userId
             ]
-            )
+        )
         ) {
             return false;
         }
@@ -585,7 +587,7 @@ class Optimizely
             [
                 self::USER_ID => $userId
             ]
-            )
+        )
         ) {
             return $enabledFeatureKeys;
         }
@@ -630,7 +632,7 @@ class Optimizely
                 self::VARIABLE_KEY => $variableKey,
                 self::USER_ID => $userId
             ]
-            )
+        )
         ) {
             return null;
         }
@@ -804,14 +806,14 @@ class Optimizely
     }
 
     /**
-    * Calls Validator::validateNonEmptyString for each value in array
-    * Logs for each invalid value
-    *
-    * @param array values to validate
-    * @param logger
-    *
-    * @return bool True if all of the values are valid, False otherwise
-    */
+     * Calls Validator::validateNonEmptyString for each value in array
+     * Logs for each invalid value
+     *
+     * @param array values to validate
+     * @param logger
+     *
+     * @return bool True if all of the values are valid, False otherwise
+     */
     protected function validateInputs(array $values, $logLevel = Logger::ERROR)
     {
         $isValid = true;

@@ -61,11 +61,11 @@ class Validator
      */
     public static function areAttributesValid($attributes)
     {
-        if(!is_array($attributes)){
+        if (!is_array($attributes)) {
             return false;
         }
 
-        if (empty($attributes)){
+        if (empty($attributes)) {
             return true;
         }
         // At least one key string to be an associative array.
@@ -86,7 +86,7 @@ class Validator
        
         if (is_nan($value) || is_infinite($value)) {
             return false;
-        }        
+        }
 
         if (abs($value) > pow(2, 53)) {
             return false;
@@ -154,11 +154,11 @@ class Validator
         }
 
         $customAttrCondEval = new CustomAttributeConditionEvaluator($userAttributes);
-        $evaluateCustomAttr = function($leafCondition) use ($customAttrCondEval) {
+        $evaluateCustomAttr = function ($leafCondition) use ($customAttrCondEval) {
             return $customAttrCondEval->evaluate($leafCondition);
         };
 
-        $evaluateAudience = function($audienceId) use ($config, $evaluateCustomAttr) {
+        $evaluateAudience = function ($audienceId) use ($config, $evaluateCustomAttr) {
             $conditionTreeEvaluator = new ConditionTreeEvaluator();
 
             $audience = $config->getAudience($audienceId);
@@ -224,12 +224,12 @@ class Validator
     }
 
     /**
-     * Method to verify that both values belong to same type. 
+     * Method to verify that both values belong to same type.
      * Float/Double and Integer are considered similar.
-     * 
-     * @param  mixed  $firstVal
-     * @param  mixed  $secondVal
-     * 
+     *
+     * @param mixed $firstVal
+     * @param mixed $secondVal
+     *
      * @return bool   True if values belong to similar types. Otherwise, False.
      */
     public static function areValuesSameType($firstVal, $secondVal)
@@ -238,8 +238,8 @@ class Validator
         $secondValType = gettype($secondVal);
         $numberTypes = array('double', 'integer');
 
-        if(in_array($firstValType, $numberTypes) && in_array($secondValType, $numberTypes)) {
-            return True;
+        if (in_array($firstValType, $numberTypes) && in_array($secondValType, $numberTypes)) {
+            return true;
         }
 
         return $firstValType == $secondValType;
@@ -247,12 +247,13 @@ class Validator
 
     /**
      * Returns true only if given input is an array with all of it's keys of type string.
+     *
      * @param  mixed $arr
      * @return bool  True if array contains all string keys. Otherwise, false.
      */
     public static function doesArrayContainOnlyStringKeys($arr)
     {
-        if(!is_array($arr) || empty($arr)) {
+        if (!is_array($arr) || empty($arr)) {
             return false;
         }
 

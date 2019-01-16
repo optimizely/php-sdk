@@ -6,31 +6,39 @@ php:
   - '7.1'
   - '7.2'
   - '7.3'
-before_install:
-- composer install --dev
+install: "composer install"
 addons:
   srcclr: true
 script:
 - mkdir -p build/logs
 - ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-after_script:
-- vendor/bin/php-coveralls -v
+after_script: "vendor/bin/php-coveralls -v"
 
-# Integration tests need to run first to reset the PR build status to pending
+# Linting and Integration tests need to run first to reset the PR build status to pending
 stages:
+  - 'Linting'
   - 'Integration tests'
   - 'Test'
 
 jobs:
   include:
+    - stage: 'Linting'
+      language: php
+      php: '7.0'
+      install: 'composer require "squizlabs/php_codesniffer=*"'
+      script: 'composer lint'
+      after_script: skip
+      after_success: travis_terminate 0
     - stage: 'Integration tests'
+      merge_mode: replace
       env: SDK=php
+      cache: false
       language: python
-      before_install: skip
       install:
         - "pip install awscli"
       before_script:
         - "aws s3 cp s3://optimizely-travisci-artifacts/ci/trigger_fullstack-sdk-compat.sh ci/ && chmod u+x ci/trigger_fullstack-sdk-compat.sh"
       script:
         - "ci/trigger_fullstack-sdk-compat.sh"
-      after_success: skip
+      after_script: skip
+      after_success: travis_terminate 0

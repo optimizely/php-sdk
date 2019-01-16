@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+namespace Optimizely\Tests;
 
 use Monolog\Logger;
 use Optimizely\Logger\NoOpLogger;
 
-class NoOpLoggerTest extends PHPUnit_Framework_TestCase
+class NoOpLoggerTest extends \PHPUnit_Framework_TestCase
 {
     public function testNoOpLogger()
     {

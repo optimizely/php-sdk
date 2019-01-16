@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ define(
         }
       ],
       "audienceIds": [
-        
+
       ],
       "variations": [
         {
@@ -94,7 +94,7 @@ define(
         }
       ],
       "forcedVariations": {
-        
+
       },
       "id": "7716830585"
     },
@@ -107,7 +107,7 @@ define(
       ],
       "id": "122230",
       "forcedVariations": {
-        
+
       },
       "trafficAllocation": [
         {
@@ -195,11 +195,11 @@ define(
       "status": "Running",
       "layerId": "5",
       "audienceIds": [
-        
+
       ],
       "id": "122235",
       "forcedVariations": {
-        
+
       },
       "trafficAllocation": [
         {
@@ -241,11 +241,11 @@ define(
       "status": "Running",
       "layerId": "5",
       "audienceIds": [
-        
+
       ],
       "id": "122238",
       "forcedVariations": {
-        
+
       },
       "trafficAllocation": [
         {
@@ -287,11 +287,11 @@ define(
       "status": "Running",
       "layerId": "6",
       "audienceIds": [
-        
+
       ],
       "id": "122241",
       "forcedVariations": {
-        
+
       },
       "trafficAllocation": [
         {
@@ -375,7 +375,7 @@ define(
             }
           ],
           "audienceIds": [
-            
+
           ],
           "variations": [
             {
@@ -421,7 +421,7 @@ define(
             }
           ],
           "audienceIds": [
-            
+
           ],
           "variations": [
             {
@@ -448,7 +448,7 @@ define(
             }
           ],
           "forcedVariations": {
-            
+
           },
           "id": "7718750065"
         }
@@ -522,7 +522,7 @@ define(
         "7718750065"
       ],
       "variables": [
-        
+
       ]
     },
     {
@@ -562,7 +562,7 @@ define(
       "key": "boolean_single_variable_feature",
       "rolloutId": "166660",
       "experimentIds": [
-        
+
       ],
       "variables": [
         {
@@ -633,10 +633,10 @@ define(
       "key": "empty_feature",
       "rolloutId": "",
       "experimentIds": [
-        
+
       ],
       "variables": [
-        
+
       ]
     }
   ],
@@ -706,7 +706,7 @@ define(
           "status": "Running",
           "layerId": "166660",
           "audienceIds": [
-            
+
           ],
           "variations": [
             {
@@ -746,7 +746,7 @@ define(
               "id": "177775",
               "key": "177775",
               "variables": [
-                
+
               ],
               "featureEnabled": true
             }
@@ -764,14 +764,14 @@ define(
           "status": "Running",
           "layerId": "166661",
           "audienceIds": [
-            
+
           ],
           "variations": [
             {
               "id": "177780",
               "key": "177780",
               "variables": [
-                
+
               ],
               "featureEnabled": true
             }
@@ -844,8 +844,8 @@ define(
 );
 
 define(
-  'DATAFILE_WITH_TYPED_AUDIENCES',
-  '{
+    'DATAFILE_WITH_TYPED_AUDIENCES',
+    '{
       "version": "4",
       "rollouts": [
         {
@@ -1285,23 +1285,23 @@ class OptimizelyTester extends Optimizely
 
 class FireNotificationTester
 {
-    public function decision_callback_no_args()
+    public function decisionCallbackNoArgs()
     {
     }
 
-    public function decision_callback_no_args_2()
+    public function decisionCallbackNoArgs2()
     {
     }
 
-    public function decision_callback_with_args($anInt, $aDouble, $aString, $anArray, $aFunction)
+    public function decisionCallbackWithArgs($anInt, $aDouble, $aString, $anArray, $aFunction)
     {
     }
 
-    public function decision_callback_with_args_2($anInt, $aDouble, $aString, $anArray, $aFunction)
+    public function decisionCallbackWithArgs2($anInt, $aDouble, $aString, $anArray, $aFunction)
     {
     }
 
-    public function track_callback_no_args()
+    public function trackCallbackNoArgs()
     {
     }
 }

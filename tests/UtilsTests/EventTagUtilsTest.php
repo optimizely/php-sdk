@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017-2018, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
 {
     // The size of a float is platform-dependent, although a maximum of ~1.8e308 with a precision of roughly 14 decimal digits is a common value (the 64 bit IEEE format). http://php.net/manual/en/language.types.float.php
     // PHP_FLOAT_MAX - Available as of PHP7.2.0 http://php.net/manual/en/reserved.constants.php
-    const max_float = 1.8e307;
-    const min_float = -1.8e307;
+    const MAX_FLOAT = 1.8e307;
+    const MIN_FLOAT = -1.8e307;
     protected $loggerMock;
 
     protected function setUp()
@@ -174,7 +174,7 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => 'abcd'), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => true), $this->loggerMock));
-        $this->assertNull(EventTagUtils::getNumericValue(array('value' => array(1, 2, 3)),$this->loggerMock));
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => array(1, 2, 3)), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => false), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => array()), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => '1,234'), $this->loggerMock));
@@ -189,7 +189,7 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => floatval(NAN)), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => floatval(INF)), $this->loggerMock));
         $this->assertNull(EventTagUtils::getNumericValue(array('value' => floatval(-INF)), $this->loggerMock));
-        $this->assertNull(EventTagUtils::getNumericValue(array('value' => (self::max_float*10)), $this->loggerMock));
+        $this->assertNull(EventTagUtils::getNumericValue(array('value' => (self::MAX_FLOAT*10)), $this->loggerMock));
     }
 
     // Test that the correct numeric value is returned
@@ -214,13 +214,13 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::INFO, "The numeric metric value ".self::max_float." will be sent to results.");
-        $this->assertSame(self::max_float, EventTagUtils::getNumericValue(array('value' => self::max_float), $this->loggerMock));
+            ->with(Logger::INFO, "The numeric metric value ".self::MAX_FLOAT." will be sent to results.");
+        $this->assertSame(self::MAX_FLOAT, EventTagUtils::getNumericValue(array('value' => self::MAX_FLOAT), $this->loggerMock));
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::INFO, "The numeric metric value ".self::min_float." will be sent to results.");
-        $this->assertSame(self::min_float, EventTagUtils::getNumericValue(array('value' => self::min_float), $this->loggerMock));
+            ->with(Logger::INFO, "The numeric metric value ".self::MIN_FLOAT." will be sent to results.");
+        $this->assertSame(self::MIN_FLOAT, EventTagUtils::getNumericValue(array('value' => self::MIN_FLOAT), $this->loggerMock));
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')

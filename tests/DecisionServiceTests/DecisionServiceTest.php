@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017-2018, Optimizely
+ * Copyright 2017-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1070,7 +1070,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log');
 
         $this->assertNull(
-            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes));
+            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes)
+        );
     }
 
     // ============== END of tests - when the user qualifies for targeting rule (audience match) ======================
@@ -1171,7 +1172,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->with(
                 Logger::DEBUG,
                 "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment2->getKey()}'."
-        );    
+            );
 
         $this->assertNull($this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes));
     }

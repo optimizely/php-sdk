@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017-2018, Optimizely Inc and Contributors
+ * Copyright 2017-2019, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ class NotificationCenter
     /**
      * Adds a notification callback for a notification type to the notification center
      *
-     * @param string $notification_type     One of the constants defined in NotificationType
+     * @param string   $notification_type     One of the constants defined in NotificationType
      * @param callable $notification_callback A valid PHP callback
      *
      * @return null  Given invalid notification type/callback
@@ -122,12 +122,13 @@ class NotificationCenter
      *
      * @deprecated Use 'clearNotificationListeners' instead.
      */
-    public function clearNotifications($notification_type){
-      $this->_logger->log(
-        Logger::WARNING,
-        "'clearNotifications' is deprecated. Call 'clearNotificationListeners' instead."
-      );
-      $this->clearNotificationListeners($notification_type);
+    public function clearNotifications($notification_type)
+    {
+        $this->_logger->log(
+            Logger::WARNING,
+            "'clearNotifications' is deprecated. Call 'clearNotificationListeners' instead."
+        );
+        $this->clearNotificationListeners($notification_type);
     }
 
     /**
@@ -152,12 +153,13 @@ class NotificationCenter
      *
      * @deprecated Use 'clearAllNotificationListeners' instead.
      */
-    public function cleanAllNotifications(){
-      $this->_logger->log(
-        Logger::WARNING,
-        "'cleanAllNotifications' is deprecated. Call 'clearAllNotificationListeners' instead."
-      );
-      $this->clearAllNotificationListeners();
+    public function cleanAllNotifications()
+    {
+        $this->_logger->log(
+            Logger::WARNING,
+            "'cleanAllNotifications' is deprecated. Call 'clearAllNotificationListeners' instead."
+        );
+        $this->clearAllNotificationListeners();
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2018, Optimizely
+ * Copyright 2018-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->browserConditionSafari
+                $this->browserConditionSafari
             )
         );
     }
@@ -130,7 +130,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->browserConditionSafari
+                $this->browserConditionSafari
             )
         );
     }
@@ -150,25 +150,25 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->browserConditionSafari
+                $this->browserConditionSafari
             )
         );
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->booleanCondition
+                $this->booleanCondition
             )
         );
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->integerCondition
+                $this->integerCondition
             )
         );
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->doubleCondition
+                $this->doubleCondition
             )
         );
     }
@@ -189,7 +189,6 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                 ]
             )
         );
-
     }
 
     public function testEvaluateAssumesExactWhenConditionMatchPropertyIsNull()
@@ -288,7 +287,6 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                 $this->existsCondition
             )
         );
-
     }
 
     public function testExistsReturnsTrueWhenUserProvidedValueIsBoolean()
@@ -312,7 +310,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactStringCondition
+                $this->exactStringCondition
             )
         );
     }
@@ -325,7 +323,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactStringCondition
+                $this->exactStringCondition
             )
         );
     }
@@ -338,7 +336,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactStringCondition
+                $this->exactStringCondition
             )
         );
     }
@@ -364,7 +362,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactIntCondition
+                $this->exactIntCondition
             )
         );
     }
@@ -377,7 +375,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactFloatCondition
+                $this->exactFloatCondition
             )
         );
     }
@@ -390,7 +388,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactIntCondition
+                $this->exactIntCondition
             )
         );
     }
@@ -403,7 +401,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactFloatCondition
+                $this->exactFloatCondition
             )
         );
     }
@@ -416,7 +414,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactIntCondition
+                $this->exactIntCondition
             )
         );
 
@@ -426,7 +424,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactIntCondition
+                $this->exactIntCondition
             )
         );
     }
@@ -434,23 +432,23 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     public function testExactFloatReturnsNullWhenAttrsIsDifferentTypeFromConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-          ['lasers_count' => 'hi']
+            ['lasers_count' => 'hi']
         );
 
         $this->assertNull(
-          $customAttrConditionEvaluator->evaluate(
+            $customAttrConditionEvaluator->evaluate(
                 $this->exactFloatCondition
-          )
+            )
         );
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-          ['lasers_count' => true]
+            ['lasers_count' => true]
         );
 
         $this->assertNull(
-          $customAttrConditionEvaluator->evaluate(
+            $customAttrConditionEvaluator->evaluate(
                 $this->exactFloatCondition
-          )
+            )
         );
     }
 
@@ -488,7 +486,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactBoolCondition
+                $this->exactBoolCondition
             )
         );
     }
@@ -501,7 +499,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactBoolCondition
+                $this->exactBoolCondition
             )
         );
     }
@@ -514,7 +512,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactBoolCondition
+                $this->exactBoolCondition
             )
         );
     }
@@ -527,7 +525,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->exactBoolCondition
+                $this->exactBoolCondition
             )
         );
     }
@@ -540,7 +538,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->substringCondition
+                $this->substringCondition
             )
         );
     }
@@ -553,7 +551,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->substringCondition
+                $this->substringCondition
             )
         );
     }
@@ -566,7 +564,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->substringCondition
+                $this->substringCondition
             )
         );
     }
@@ -579,7 +577,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->substringCondition
+                $this->substringCondition
             )
         );
     }
@@ -592,7 +590,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtIntCondition
+                $this->gtIntCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -601,7 +599,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtIntCondition
+                $this->gtIntCondition
             )
         );
     }
@@ -614,7 +612,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtFloatCondition
+                $this->gtFloatCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -623,7 +621,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtFloatCondition
+                $this->gtFloatCondition
             )
         );
     }
@@ -636,7 +634,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtIntCondition
+                $this->gtIntCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -645,7 +643,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtIntCondition
+                $this->gtIntCondition
             )
         );
     }
@@ -658,7 +656,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtFloatCondition
+                $this->gtFloatCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -667,7 +665,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtFloatCondition
+                $this->gtFloatCondition
             )
         );
     }
@@ -680,7 +678,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtIntCondition
+                $this->gtIntCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -689,7 +687,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtIntCondition
+                $this->gtIntCondition
             )
         );
     }
@@ -702,7 +700,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtFloatCondition
+                $this->gtFloatCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -711,7 +709,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtFloatCondition
+                $this->gtFloatCondition
             )
         );
     }
@@ -724,7 +722,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtIntCondition
+                $this->gtIntCondition
             )
         );
     }
@@ -737,7 +735,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->gtFloatCondition
+                $this->gtFloatCondition
             )
         );
     }
@@ -750,7 +748,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltIntCondition
+                $this->ltIntCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -759,7 +757,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltIntCondition
+                $this->ltIntCondition
             )
         );
     }
@@ -772,7 +770,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltFloatCondition
+                $this->ltFloatCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -781,7 +779,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltFloatCondition
+                $this->ltFloatCondition
             )
         );
     }
@@ -794,7 +792,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltIntCondition
+                $this->ltIntCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -803,7 +801,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltIntCondition
+                $this->ltIntCondition
             )
         );
     }
@@ -816,7 +814,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltFloatCondition
+                $this->ltFloatCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -825,7 +823,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltFloatCondition
+                $this->ltFloatCondition
             )
         );
     }
@@ -838,7 +836,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltIntCondition
+                $this->ltIntCondition
             )
         );
 
@@ -847,7 +845,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltIntCondition
+                $this->ltIntCondition
             )
         );
     }
@@ -860,7 +858,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltFloatCondition
+                $this->ltFloatCondition
             )
         );
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -869,7 +867,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltFloatCondition
+                $this->ltFloatCondition
             )
         );
     }
@@ -882,7 +880,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltIntCondition
+                $this->ltIntCondition
             )
         );
     }
@@ -895,7 +893,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                  $this->ltFloatCondition
+                $this->ltFloatCondition
             )
         );
     }
