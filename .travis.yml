@@ -25,7 +25,7 @@ jobs:
     - stage: 'Linting'
       language: php
       php: '7.0'
-      install: 'composer global require "squizlabs/php_codesniffer=*"'
+      install: 'composer require "squizlabs/php_codesniffer=*"'
       script: 'composer lint'
       after_script: skip
       after_success: travis_terminate 0
