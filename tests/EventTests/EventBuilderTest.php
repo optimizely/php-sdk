@@ -869,10 +869,11 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     {
         array_unshift(
             $this->expectedEventParams['visitors'][0]['attributes'],
-            [ 'entity_id' => '$opt_user_agent',
-            'key' => '$opt_user_agent',
-            'type' => 'custom',
-            'value' => 'Firefox',
+            [ 
+                'entity_id' => '$opt_user_agent',
+                'key' => '$opt_user_agent',
+                'type' => 'custom',
+                'value' => 'Firefox',
             ]
         );
 

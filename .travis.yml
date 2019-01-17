@@ -14,7 +14,7 @@ script:
 - ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 after_script: "vendor/bin/php-coveralls -v"
 
-# Linting and Integration tests need to run first to reset the PR build status to pending
+# Linting and integration tests need to run first to reset the PR build status to pending
 stages:
   - 'Linting'
   - 'Integration tests'
