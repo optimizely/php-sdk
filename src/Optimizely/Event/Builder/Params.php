@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ define('CLIENT_ENGINE', 'client_name');
 define('CLIENT_VERSION', 'client_version');
 define('CUSTOM_ATTRIBUTE_FEATURE_TYPE', 'custom');
 define('DECISIONS', 'decisions');
+define('ENRICH_DECISIONS', 'enrich_decisions');
 define('ENTITY_ID', 'entity_id');
 define('EVENTS', 'events');;
 define('EXPERIMENT_ID', 'experiment_id');
