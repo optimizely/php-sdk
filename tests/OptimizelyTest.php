@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -342,7 +342,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setConstructorArgs(array($this->datafile, new ValidEventDispatcher(), $this->loggerMock, $errorHandlerMock))
             ->setMethods(array('sendImpressionEvent'))
             ->getMock();
-            
+
         // verify that sendImpression isn't called
         $optimizelyMock->expects($this->never())
             ->method('sendImpressionEvent');
@@ -432,7 +432,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 Logger::INFO,
                 'User "user_1" is in variation group_exp_1_var_2 of experiment group_experiment_1.'
             );
-      
+
         // Verify that sendImpression is called with expected params
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
@@ -485,7 +485,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 Logger::INFO,
                 'User "user_1" is in variation group_exp_1_var_2 of experiment group_experiment_1.'
             );
-    
+
         // Verify that sendImpression is called with expected params
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
@@ -557,7 +557,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 Logger::INFO,
                 'User "test_user" is in variation control of experiment test_experiment.'
             );
-        
+
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
@@ -1140,7 +1140,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::ERROR, 'Event key "unknown_key" is not in datafile.');
 
-
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::ERROR, 'Not tracking user "test_user" for event "unknown_key".');
@@ -1148,13 +1147,60 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->optimizelyObject->track('unknown_key', 'test_user');
     }
 
-    public function testActivateGivenEventKeyWithNoExperiments()
+    public function testTrackGivenEventKeyWithNoExperiments()
     {
-        $this->loggerMock->expects($this->once())
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfig,
+                'unlinked_event',
+                'test_user',
+                null,
+                null
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($this->optimizelyObject, $this->eventBuilderMock);
+
+        $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::INFO, 'There are no valid experiments for event "unlinked_event" to track.');
+            ->with(Logger::INFO, 'Tracking event "unlinked_event" for user "test_user".');
 
         $this->optimizelyObject->track('unlinked_event', 'test_user');
+    }
+
+    public function testTrackGivenEventKeyWithPausedExperiment()
+    {
+        $pausedExpEvent = $this->projectConfig->getEvent('purchase');
+        // Experiment with ID 7716830585 is paused. 
+        $pausedExpEvent->setExperimentIds(['7716830585']);
+
+        $config = new \ReflectionProperty(Optimizely::class, '_config');
+        $config->setAccessible(true);
+        $config->setValue($this->optimizelyObject, $this->projectConfig);
+
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfig,
+                'purchase',
+                'test_user',
+                null,
+                null
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($this->optimizelyObject, $this->eventBuilderMock);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, 'Tracking event "purchase" for user "test_user".');
+
+        $this->optimizelyObject->track('purchase', 'test_user');
     }
 
     public function testTrackEventDispatchFailure()
@@ -1168,7 +1214,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ["7718750065" => "7725250007"],
                 'test_user',
                 null,
                 null
@@ -1187,7 +1232,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('dispatchEvent')
             ->will($this->throwException(new Exception));
 
-        $this->loggerMock->expects($this->at(16))
+        $this->loggerMock->expects($this->at(2))
             ->method('log')
             ->with(Logger::ERROR, 'Unable to dispatch conversion event. Error ');
 
@@ -1201,7 +1246,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ["7718750065" => "7725250007"],
                 'test_user',
                 null,
                 null
@@ -1209,80 +1253,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $callIndex = 0;
-        $this->loggerMock->expects($this->exactly(16))
+        $this->loggerMock->expects($this->exactly(2))
             ->method('log');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "test_experiment".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is not in experiment group_experiment_1 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "group_experiment_1".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in experiment group_experiment_2 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Experiment "paused_experiment" is not running.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "paused_experiment".'
-            );
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(
@@ -1336,7 +1308,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ["7718750065" => "7725250007"],
                 'test_user',
                 null,
                 null
@@ -1344,83 +1315,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $callIndex = 0;
-        $this->loggerMock->expects($this->exactly(17))
+        $this->loggerMock->expects($this->exactly(3))
             ->method('log');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "test_experiment".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is not in experiment group_experiment_1 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "group_experiment_1".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in experiment group_experiment_2 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Experiment "paused_experiment" is not running.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "paused_experiment".'
-            );
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(
@@ -1435,7 +1334,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
-       
+
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -1444,7 +1343,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             null,
             new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
         );
-        
+
         $this->notificationCenterMock->expects($this->once())
             ->method('sendNotifications')
             ->with(
@@ -1476,10 +1375,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                [
-                    '7716830082' => '7722370027',
-                    '7718750065' => '7725250007'
-                ],
                 'test_user',
                 $userAttributes,
                 null
@@ -1487,80 +1382,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $callIndex = 0;
-        $this->loggerMock->expects($this->exactly(16))
+        $this->loggerMock->expects($this->exactly(2))
             ->method('log');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in variation control of experiment test_experiment.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is not in experiment group_experiment_1 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "group_experiment_1".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in experiment group_experiment_2 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Experiment "paused_experiment" is not running.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "paused_experiment".'
-            );
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(
@@ -1584,7 +1407,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             null,
             new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
         );
-        
+
         $this->notificationCenterMock->expects($this->once())
             ->method('sendNotifications')
             ->with(
@@ -1609,7 +1432,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ['7718750065' => '7725250007'],
                 'test_user',
                 null,
                 array('revenue' => 42)
@@ -1617,77 +1439,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $callIndex = 0;
-        $this->loggerMock->expects($this->exactly(16))
+        $this->loggerMock->expects($this->exactly(2))
             ->method('log');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "test_experiment".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is not in experiment group_experiment_1 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "group_experiment_1".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in experiment group_experiment_2 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Experiment "paused_experiment" is not running.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "paused_experiment".'
-            );
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(
@@ -1702,7 +1455,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
-        
+
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -1711,7 +1464,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             array('revenue' => 42),
             new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
         );
-        
+
         $this->notificationCenterMock->expects($this->once())
             ->method('sendNotifications')
             ->with(
@@ -1736,7 +1489,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ['7718750065' => '7725250007'],
                 'test_user',
                 null,
                 array('revenue' => '4200')
@@ -1744,50 +1496,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $callIndex = 0;
-        $this->loggerMock->expects($this->exactly(16))
+        $this->loggerMock->expects($this->exactly(2))
             ->method('log');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'Not tracking user "test_user" for experiment "test_experiment".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'Not tracking user "test_user" for experiment "group_experiment_1".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'User "test_user" is in experiment group_experiment_2 of group 7722400015.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'Experiment "paused_experiment" is not running.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::INFO, 'Not tracking user "test_user" for experiment "paused_experiment".');
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::INFO, 'Tracking event "purchase" for user "test_user".');
@@ -1805,7 +1515,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             array('revenue' => '4200'),
             new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
         );
-        
+
         $this->notificationCenterMock->expects($this->once())
             ->method('sendNotifications')
             ->with(
@@ -1836,10 +1546,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                [
-                    '7716830082' => '7722370027',
-                    '7718750065' => '7725250007'
-                ],
                 'test_user',
                 $userAttributes,
                 array('revenue' => 42)
@@ -1847,80 +1553,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $callIndex = 0;
-        $this->loggerMock->expects($this->exactly(16))
+        $this->loggerMock->expects($this->exactly(2))
             ->method('log');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in variation control of experiment test_experiment.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is not in experiment group_experiment_1 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "group_experiment_1".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in experiment group_experiment_2 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Experiment "paused_experiment" is not running.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "test_user" for experiment "paused_experiment".'
-            );
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(
@@ -1935,7 +1569,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
-        
+
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
             'purchase',
@@ -1944,7 +1578,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             array('revenue' => 42),
             new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
         );
-        
+
         $this->notificationCenterMock->expects($this->once())
             ->method('sendNotifications')
             ->with(
@@ -1960,6 +1594,186 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call track
         $optlyObject->track('purchase', 'test_user', $userAttributes, array('revenue' => 42));
+    }
+
+    public function testTrackWithAttributesTypedAudienceMatch()
+    {
+        $userAttributes = [
+            'house' => 'Welcome to Slytherin!'
+        ];
+
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfigForTypedAudience,
+                'item_bought',
+                'test_user',
+                $userAttributes,
+                array('revenue' => 42)
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            'item_bought',
+            'test_user',
+            $userAttributes,
+            array('revenue' => 42),
+            new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
+        );
+
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::TRACK,
+                $arrayParam
+            );
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Should be included via substring match string audience with id '3988293898'
+        $optlyObject->track('item_bought', 'test_user', $userAttributes, array('revenue' => 42));
+    }
+
+    public function testTrackWithAttributesTypedAudienceMismatch()
+    {
+        $userAttributes = [
+            'house' => 'Hufflepuff!'
+        ];
+
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfigForTypedAudience,
+                'item_bought',
+                'test_user',
+                $userAttributes,
+                array('revenue' => 42)
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            'item_bought',
+            'test_user',
+            $userAttributes,
+            array('revenue' => 42),
+            new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
+        );
+
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::TRACK,
+                $arrayParam
+            );
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Call track
+        $optlyObject->track('item_bought', 'test_user', $userAttributes, array('revenue' => 42));
+    }
+
+    public function testTrackWithAttributesComplexAudienceMatch()
+    {
+        $userAttributes = [
+            'house' => 'Gryffindor',
+            'should_do_it' => true
+        ];
+
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfigForTypedAudience,
+                'user_signed_up',
+                'test_user',
+                $userAttributes,
+                array('revenue' => 42)
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            'user_signed_up',
+            'test_user',
+            $userAttributes,
+            array('revenue' => 42),
+            new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
+        );
+
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::TRACK,
+                $arrayParam
+            );
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Should be included via exact match string audience with id '3468206642', and
+        // exact match boolean audience with id '3468206643'
+        $optlyObject->track('user_signed_up', 'test_user', $userAttributes, array('revenue' => 42));
+    }
+
+    public function testTrackWithAttributesComplexAudienceMismatch()
+    {
+        $userAttributes = [
+            'house' => 'Gryffindor',
+            'should_do_it' => false
+        ];
+
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfigForTypedAudience,
+                'user_signed_up',
+                'test_user',
+                $userAttributes,
+                array('revenue' => 42)
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            'user_signed_up',
+            'test_user',
+            $userAttributes,
+            array('revenue' => 42),
+            new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
+        );
+
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::TRACK,
+                $arrayParam
+            );
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
+
+        // Should be excluded - exact match boolean audience with id '3468206643' does not match,
+        // so the overall conditions fail
+        $optlyObject->track('user_signed_up', 'test_user', $userAttributes, array('revenue' => 42));
     }
 
     public function testTrackWithAttributesTypedAudienceMatch()
@@ -2079,10 +1893,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                [
-                    '7716830082' => '7721010009',
-                    '7718750065' => '7725250007'
-                ],
                 '',
                 $userAttributes,
                 array('revenue' => 42)
@@ -2090,80 +1900,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $callIndex = 0;
-        $this->loggerMock->expects($this->exactly(16))
+        $this->loggerMock->expects($this->exactly(2))
             ->method('log');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'Assigned bucket 7428 to user "" with bucketing ID "".');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "" is in variation variation of experiment test_experiment.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 2339 to user "" with bucketing ID "".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "" is not in experiment group_experiment_1 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "" for experiment "group_experiment_1".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(Logger::DEBUG, 'User "" is not in the forced variation map.');
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 2339 to user "" with bucketing ID "".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "" is in experiment group_experiment_2 of group 7722400015.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::DEBUG,
-                'Assigned bucket 5641 to user "" with bucketing ID "".'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "" is in variation group_exp_2_var_2 of experiment group_experiment_2.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Experiment "paused_experiment" is not running.'
-            );
-        $this->loggerMock->expects($this->at($callIndex++))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'Not tracking user "" for experiment "paused_experiment".'
-            );
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(
