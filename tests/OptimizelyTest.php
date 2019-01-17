@@ -1142,7 +1142,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::ERROR, 'Not tracking user "test_user" for event "unknown_key".');
+            ->with(Logger::INFO, 'Not tracking user "test_user" for event "unknown_key".');
 
         $this->optimizelyObject->track('unknown_key', 'test_user');
     }
