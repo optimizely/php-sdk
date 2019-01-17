@@ -313,7 +313,7 @@ class Optimizely
         $event = $this->_config->getEvent($eventKey);
 
         if (is_null($event->getKey())) {
-            $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for event "%s".', $userId, $eventKey));
+            $this->_logger->log(Logger::ERROR, sprintf('Not tracking user "%s" for event "%s".', $userId, $eventKey));
             return;
         }
 
@@ -336,36 +336,36 @@ class Optimizely
             )
         );
 
-          try {
-              $this->_eventDispatcher->dispatchEvent($conversionEvent);
-          } catch (Throwable $exception) {
-              $this->_logger->log(
-                  Logger::ERROR,
-                  sprintf(
-                      'Unable to dispatch conversion event. Error %s',
-                      $exception->getMessage()
-                  )
-              );
-          } catch (Exception $exception) {
-              $this->_logger->log(
-                  Logger::ERROR,
-                  sprintf(
-                      'Unable to dispatch conversion event. Error %s',
-                      $exception->getMessage()
-                  )
-              );
-          }
+        try {
+            $this->_eventDispatcher->dispatchEvent($conversionEvent);
+        } catch (Throwable $exception) {
+            $this->_logger->log(
+                Logger::ERROR,
+                sprintf(
+                    'Unable to dispatch conversion event. Error %s',
+                    $exception->getMessage()
+                )
+            );
+        } catch (Exception $exception) {
+            $this->_logger->log(
+                Logger::ERROR,
+                sprintf(
+                    'Unable to dispatch conversion event. Error %s',
+                    $exception->getMessage()
+                )
+            );
+        }
 
-          $this->notificationCenter->sendNotifications(
-              NotificationType::TRACK,
-              array(
-                  $eventKey,
-                  $userId,
-                  $attributes,
-                  $eventTags,
-                  $conversionEvent
-              )
-          );
+        $this->notificationCenter->sendNotifications(
+            NotificationType::TRACK,
+            array(
+                $eventKey,
+                $userId,
+                $attributes,
+                $eventTags,
+                $conversionEvent
+            )
+        );
     }
 
     /**
