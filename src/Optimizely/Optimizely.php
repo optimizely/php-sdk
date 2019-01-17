@@ -313,7 +313,7 @@ class Optimizely
         $event = $this->_config->getEvent($eventKey);
 
         if (is_null($event->getKey())) {
-            $this->_logger->log(Logger::ERROR, sprintf('Not tracking user "%s" for event "%s".', $userId, $eventKey));
+            $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for event "%s".', $userId, $eventKey));
             return;
         }
 

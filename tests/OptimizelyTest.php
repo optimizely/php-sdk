@@ -1142,7 +1142,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::ERROR, 'Not tracking user "test_user" for event "unknown_key".');
+            ->with(Logger::INFO, 'Not tracking user "test_user" for event "unknown_key".');
 
         $this->optimizelyObject->track('unknown_key', 'test_user');
     }
@@ -1766,110 +1766,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 $arrayParam
             );
         $optlyObject->notificationCenter = $this->notificationCenterMock;
-
-        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
-        $eventBuilder->setAccessible(true);
-        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
-
-        // Should be excluded - exact match boolean audience with id '3468206643' does not match,
-        // so the overall conditions fail
-        $optlyObject->track('user_signed_up', 'test_user', $userAttributes, array('revenue' => 42));
-    }
-
-    public function testTrackWithAttributesTypedAudienceMatch()
-    {
-        $userAttributes = [
-            'house' => 'Welcome to Slytherin!'
-        ];
-
-        $this->eventBuilderMock->expects($this->once())
-            ->method('createConversionEvent')
-            ->with(
-                $this->projectConfigForTypedAudience,
-                'item_bought',
-                [
-                    '11564051718' => '11617170975',
-                    '1323241597' => '1423767503'
-                ],
-                'test_user',
-                $userAttributes,
-                array('revenue' => 42)
-            )
-            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
-
-        $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
-
-        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
-        $eventBuilder->setAccessible(true);
-        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
-
-        // Should be included via substring match string audience with id '3988293898'
-        $optlyObject->track('item_bought', 'test_user', $userAttributes, array('revenue' => 42));
-    }
-
-    public function testTrackWithAttributesTypedAudienceMismatch()
-    {
-        $userAttributes = [
-            'house' => 'Hufflepuff!'
-        ];
-
-        $this->eventBuilderMock->expects($this->never())
-            ->method('createConversionEvent');
-
-        $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
-
-        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
-        $eventBuilder->setAccessible(true);
-        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
-
-        // Call track
-        $optlyObject->track('item_bought', 'test_user', $userAttributes, array('revenue' => 42));
-    }
-
-    public function testTrackWithAttributesComplexAudienceMatch()
-    {
-        $userAttributes = [
-            'house' => 'Gryffindor',
-            'should_do_it' => true
-        ];
-
-        $this->eventBuilderMock->expects($this->once())
-            ->method('createConversionEvent')
-            ->with(
-                $this->projectConfigForTypedAudience,
-                'user_signed_up',
-                [
-                    '1323241598' => '1423767504',
-                    '1323241599' => '1423767505'
-                ],
-                'test_user',
-                $userAttributes,
-                array('revenue' => 42)
-            )
-            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
-
-        $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
-
-        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
-        $eventBuilder->setAccessible(true);
-        $eventBuilder->setValue($optlyObject, $this->eventBuilderMock);
-
-        // Should be included via exact match string audience with id '3468206642', and
-        // exact match boolean audience with id '3468206643'
-        $optlyObject->track('user_signed_up', 'test_user', $userAttributes, array('revenue' => 42));
-    }
-
-    public function testTrackWithAttributesComplexAudienceMismatch()
-    {
-        $userAttributes = [
-            'house' => 'Gryffindor',
-            'should_do_it' => false
-        ];
-
-        $this->eventBuilderMock->expects($this->never())
-            ->method('createConversionEvent');
-
-        $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
