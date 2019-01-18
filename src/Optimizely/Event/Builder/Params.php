@@ -24,6 +24,7 @@ define('CLIENT_ENGINE', 'client_name');
 define('CLIENT_VERSION', 'client_version');
 define('CUSTOM_ATTRIBUTE_FEATURE_TYPE', 'custom');
 define('DECISIONS', 'decisions');
+define('ENRICH_DECISIONS', 'enrich_decisions');
 define('ENTITY_ID', 'entity_id');
 define('EVENTS', 'events');
 define('EXPERIMENT_ID', 'experiment_id');

@@ -193,47 +193,10 @@ class Optimizely
     }
 
     /**
-     * Get the experiments that we should be tracking for the given event. A valid experiment
-     * is one that is in "Running" state and into which the user has been bucketed.
-     *
-     * @param $event string Event key representing the event which needs to be recorded.
-     * @param $user string ID for user.
-     * @param $attributes array Attributes of the user.
-     *
-     * @return Array Of objects where each object contains the ID of the experiment to track and the ID of the variation the user is bucketed into.
-     */
-    private function getValidExperimentsForEvent($event, $userId, $attributes = null)
-    {
-        $validExperiments = [];
-        foreach ($event->getExperimentIds() as $experimentId) {
-            $experiment = $this->_config->getExperimentFromId($experimentId);
-            $experimentKey = $experiment->getKey();
-            $variationKey = $this->getVariation($experimentKey, $userId, $attributes);
-
-            if (is_null($variationKey)) {
-                $this->_logger->log(
-                    Logger::INFO,
-                    sprintf(
-                        'Not tracking user "%s" for experiment "%s".',
-                        $userId,
-                        $experimentKey
-                    )
-                );
-                continue;
-            }
-
-            $variation = $this->_config->getVariationFromKey($experimentKey, $variationKey);
-            $validExperiments[$experimentId] = $variation->getId();
-        }
-
-        return $validExperiments;
-    }
-
-    /**
-     * @param string Experiment key
-     * @param string Variation key
-     * @param string User ID
-     * @param array Associative array of user attributes
+     * @param  string Experiment key
+     * @param  string Variation key
+     * @param  string User ID
+     * @param  array Associative array of user attributes
      */
     protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
     {
@@ -350,68 +313,59 @@ class Optimizely
         $event = $this->_config->getEvent($eventKey);
 
         if (is_null($event->getKey())) {
-            $this->_logger->log(Logger::ERROR, sprintf('Not tracking user "%s" for event "%s".', $userId, $eventKey));
+            $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for event "%s".', $userId, $eventKey));
             return;
         }
 
-        // Filter out experiments that are not running or when user(s) do not meet conditions.
-        $experimentVariationMap = $this->getValidExperimentsForEvent($event, $userId, $attributes);
-        if (!empty($experimentVariationMap)) {
-            $conversionEvent = $this->_eventBuilder
-                ->createConversionEvent(
-                    $this->_config,
-                    $eventKey,
-                    $experimentVariationMap,
-                    $userId,
-                    $attributes,
-                    $eventTags
-                );
-            $this->_logger->log(Logger::INFO, sprintf('Tracking event "%s" for user "%s".', $eventKey, $userId));
+        $conversionEvent = $this->_eventBuilder
+            ->createConversionEvent(
+                $this->_config,
+                $eventKey,
+                $userId,
+                $attributes,
+                $eventTags
+            );
+        
+        $this->_logger->log(Logger::INFO, sprintf('Tracking event "%s" for user "%s".', $eventKey, $userId));
+        $this->_logger->log(
+            Logger::DEBUG,
+            sprintf(
+                'Dispatching conversion event to URL %s with params %s.',
+                $conversionEvent->getUrl(),
+                json_encode($conversionEvent->getParams())
+            )
+        );
+
+        try {
+            $this->_eventDispatcher->dispatchEvent($conversionEvent);
+        } catch (Throwable $exception) {
             $this->_logger->log(
-                Logger::DEBUG,
+                Logger::ERROR,
                 sprintf(
-                    'Dispatching conversion event to URL %s with params %s.',
-                    $conversionEvent->getUrl(),
-                    json_encode($conversionEvent->getParams())
+                    'Unable to dispatch conversion event. Error %s',
+                    $exception->getMessage()
                 )
             );
-
-            try {
-                $this->_eventDispatcher->dispatchEvent($conversionEvent);
-            } catch (Throwable $exception) {
-                $this->_logger->log(
-                    Logger::ERROR,
-                    sprintf(
-                        'Unable to dispatch conversion event. Error %s',
-                        $exception->getMessage()
-                    )
-                );
-            } catch (Exception $exception) {
-                $this->_logger->log(
-                    Logger::ERROR,
-                    sprintf(
-                        'Unable to dispatch conversion event. Error %s',
-                        $exception->getMessage()
-                    )
-                );
-            }
-
-            $this->notificationCenter->sendNotifications(
-                NotificationType::TRACK,
-                array(
-                    $eventKey,
-                    $userId,
-                    $attributes,
-                    $eventTags,
-                    $conversionEvent
-                )
-            );
-        } else {
+        } catch (Exception $exception) {
             $this->_logger->log(
-                Logger::INFO,
-                sprintf('There are no valid experiments for event "%s" to track.', $eventKey)
+                Logger::ERROR,
+                sprintf(
+                    'Unable to dispatch conversion event. Error %s',
+                    $exception->getMessage()
+                )
             );
         }
+
+        $this->notificationCenter->sendNotifications(
+            NotificationType::TRACK,
+            array(
+                $eventKey,
+                $userId,
+                $attributes,
+                $eventTags,
+                $conversionEvent
+            )
+        );
     }
 
     /**
@@ -475,8 +429,7 @@ class Optimizely
                 self::EXPERIMENT_KEY =>$experimentKey,
                 self::USER_ID => $userId
             ]
-        )
-        ) {
+        )) {
             return false;
         }
         return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
@@ -497,8 +450,7 @@ class Optimizely
                 self::EXPERIMENT_KEY =>$experimentKey,
                 self::USER_ID => $userId
             ]
-        )
-        ) {
+        )) {
             return null;
         }
 
@@ -806,14 +758,14 @@ class Optimizely
     }
 
     /**
-     * Calls Validator::validateNonEmptyString for each value in array
-     * Logs for each invalid value
-     *
-     * @param array values to validate
-     * @param logger
-     *
-     * @return bool True if all of the values are valid, False otherwise
-     */
+    * Calls Validator::validateNonEmptyString for each value in array
+    * Logs for each invalid value
+    *
+    * @param array values to validate
+    * @param logger
+    *
+    * @return bool True if all of the values are valid, False otherwise
+    */
     protected function validateInputs(array $values, $logLevel = Logger::ERROR)
     {
         $isValid = true;

@@ -96,7 +96,8 @@ class EventBuilder
             REVISION => $config->getRevision(),
             CLIENT_ENGINE => self::SDK_TYPE,
             CLIENT_VERSION => self::SDK_VERSION,
-            ANONYMIZE_IP => $config->getAnonymizeIP()
+            ANONYMIZE_IP => $config->getAnonymizeIP(),
+            ENRICH_DECISIONS => true
         ];
 
         if (!is_null($attributes)) {
@@ -170,36 +171,21 @@ class EventBuilder
     /**
      * Helper function to get parameters specific to conversion event.
      *
-     * @param $config ProjectConfig Configuration for the project.
-     * @param $eventKey string Key representing the event.
-     * @param $experimentVariationMap array Map of experiment ID to the ID of the variation that the user is bucketed into.
+     * @param $eventEntity Event representing event entity.
      * @param $eventTags array Hash representing metadata associated with the event.
      *
      * @return array Hash representing parameters particular to conversion event.
      */
-    private function getConversionParams($config, $eventKey, $experimentVariationMap, $eventTags)
+    private function getConversionParams($eventEntity, $eventTags)
     {
         $conversionParams = [];
         $singleSnapshot = [];
-        $decisions = [];
-
-        foreach ($experimentVariationMap as $experimentId => $variationId) {
-            $experiment = $config->getExperimentFromId($experimentId);
-            $eventEntity = $config->getEvent($eventKey);
-
-            $decision = [
-                CAMPAIGN_ID => $experiment->getLayerId(),
-                EXPERIMENT_ID => $experiment->getId(),
-                VARIATION_ID => $variationId
-            ];
-            $decisions [] = $decision;
-        }
 
         $eventDict = [
             ENTITY_ID => $eventEntity->getId(),
             TIMESTAMP => time()*1000,
             UUID => GeneratorUtils::getRandomUuid(),
-            KEY => $eventKey
+            KEY => $eventEntity->getKey()
         ];
 
         if (!is_null($eventTags)) {
@@ -218,7 +204,6 @@ class EventBuilder
             }
         }
 
-        $singleSnapshot[DECISIONS] = $decisions;
         $singleSnapshot[EVENTS] [] = $eventDict;
         $conversionParams [] = $singleSnapshot;
 
@@ -254,17 +239,17 @@ class EventBuilder
      *
      * @param $config ProjectConfig Configuration for the project.
      * @param $eventKey string Key representing the event.
-     * @param $experimentVariationMap array Map of experiment ID to the ID of the variation that the user is bucketed into.
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.
      * @param $eventTags array Hash representing metadata associated with the event.
      *
      * @return LogEvent Event object to be sent to dispatcher.
      */
-    public function createConversionEvent($config, $eventKey, $experimentVariationMap, $userId, $attributes, $eventTags)
+    public function createConversionEvent($config, $eventKey, $userId, $attributes, $eventTags)
     {
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
-        $conversionParams = $this->getConversionParams($config, $eventKey, $experimentVariationMap, $eventTags);
+        $eventEntity = $config->getEvent($eventKey);
+        $conversionParams = $this->getConversionParams($eventEntity, $eventTags);
 
         $eventParams[VISITORS][0][SNAPSHOTS] = $conversionParams;
         return new LogEvent(self::$ENDPOINT, $eventParams, self::$HTTP_VERB, self::$HTTP_HEADERS);
