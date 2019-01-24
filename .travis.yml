@@ -40,5 +40,4 @@ jobs:
         - "aws s3 cp s3://optimizely-travisci-artifacts/ci/trigger_fullstack-sdk-compat.sh ci/ && chmod u+x ci/trigger_fullstack-sdk-compat.sh"
       script:
         - "ci/trigger_fullstack-sdk-compat.sh"
-      after_script: skip
       after_success: travis_terminate 0
