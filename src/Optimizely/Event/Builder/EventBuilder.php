@@ -100,7 +100,7 @@ class EventBuilder
             ENRICH_DECISIONS => true
         ];
 
-        if(!is_null($attributes)) {
+        if (!is_null($attributes)) {
             foreach ($attributes as $attributeKey => $attributeValue) {
                 // Omit attributes that are not supported by the log endpoint.
                 if (Validator::isAttributeValid($attributeKey, $attributeValue)) {
@@ -199,7 +199,7 @@ class EventBuilder
                 $eventDict[EventTagUtils::NUMERIC_EVENT_METRIC_NAME] = $eventValue;
             }
 
-            if(count($eventTags) > 0) {
+            if (count($eventTags) > 0) {
                 $eventDict['tags'] = $eventTags;
             }
         }

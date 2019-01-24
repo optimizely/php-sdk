@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely
+ * Copyright 2017, 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,21 +33,21 @@ class VariableTypeUtils
         $return_value = null;
 
         switch ($variableType) {
-        case FeatureVariable::BOOLEAN_TYPE:
-            $return_value = strtolower($value) == "true";
-            break;
+            case FeatureVariable::BOOLEAN_TYPE:
+                $return_value = strtolower($value) == "true";
+                break;
 
-        case FeatureVariable::INTEGER_TYPE:
-            if (ctype_digit($value)) {
-                $return_value = (int) $value;
-            }
-            break;
+            case FeatureVariable::INTEGER_TYPE:
+                if (ctype_digit($value)) {
+                    $return_value = (int) $value;
+                }
+                break;
 
-        case FeatureVariable::DOUBLE_TYPE:
-            if (is_numeric($value)) {
-                $return_value = (float) $value;
-            }
-            break;
+            case FeatureVariable::DOUBLE_TYPE:
+                if (is_numeric($value)) {
+                    $return_value = (float) $value;
+                }
+                break;
         }
 
         if (is_null($return_value) && $logger) {

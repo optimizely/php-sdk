@@ -148,28 +148,33 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateImpressionEventWithAttributesNoValue()
     {
-        array_unshift($this->expectedImpressionEventParams['visitors'][0]['attributes'],
+        array_unshift(
+            $this->expectedImpressionEventParams['visitors'][0]['attributes'],
             [
                 'entity_id' => '7723280020',
                 'key' => 'device_type',
                 'type' => 'custom',
                 'value' => 'iPhone',
-            ],[
+            ],
+            [
                 'entity_id' => '7723340007',
                 'key' => 'boolean_key',
                 'type' => 'custom',
                 'value' => true
-            ],[
+            ],
+            [
                 'entity_id' => '7723340008',
                 'key' => 'double_key',
                 'type' => 'custom',
                 'value' => 5.5
-            ],[
+            ],
+            [
                 'entity_id' => '7723340009',
                 'key' => 'integer_key',
                 'type' => 'custom',
                 'value' => 5
-            ]);
+            ]
+        );
 
         $this->expectedLogEvent = new LogEvent(
             $this->expectedEventUrl,
@@ -202,12 +207,14 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateImpressionEventWithFalseAttributesNoValue()
     {
-        array_unshift($this->expectedImpressionEventParams['visitors'][0]['attributes'],
-          [ 'entity_id' => '7723280020',
+        array_unshift(
+            $this->expectedImpressionEventParams['visitors'][0]['attributes'],
+            [ 'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
             'value' => 'false',
-          ]);
+            ]
+        );
 
         $expectedLogEvent = new LogEvent(
             $this->expectedEventUrl,
@@ -237,12 +244,14 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateImpressionEventWithZeroAttributesNoValue()
     {
-        array_unshift($this->expectedImpressionEventParams['visitors'][0]['attributes'],
-          [ 'entity_id' => '7723280020',
+        array_unshift(
+            $this->expectedImpressionEventParams['visitors'][0]['attributes'],
+            [ 'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
             'value' => 0,
-          ]);
+            ]
+        );
 
         $expectedLogEvent = new LogEvent(
             $this->expectedEventUrl,
@@ -335,13 +344,15 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateImpressionEventWithInvalidAttributeTypes()
     {
-        array_unshift($this->expectedImpressionEventParams['visitors'][0]['attributes'],
+        array_unshift(
+            $this->expectedImpressionEventParams['visitors'][0]['attributes'],
             [
                 'entity_id' => '7723280020',
                 'key' => 'device_type',
                 'type' => 'custom',
                 'value' => 'iPhone',
-            ],[
+            ],
+            [
                 'entity_id' => '7723340008',
                 'key' => 'double_key',
                 'type' => 'custom',
@@ -495,12 +506,14 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventWithAttributesNoValue()
     {
-        array_unshift($this->expectedEventParams['visitors'][0]['attributes'],
-          [ 'entity_id' => '7723280020',
+        array_unshift(
+            $this->expectedEventParams['visitors'][0]['attributes'],
+            [ 'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
             'value' => 'iPhone',
-          ]);
+            ]
+        );
 
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
           [
@@ -605,12 +618,14 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventWithAttributesWithValue()
     {
-        array_unshift($this->expectedEventParams['visitors'][0]['attributes'],
-          [ 'entity_id' => '7723280020',
+        array_unshift(
+            $this->expectedEventParams['visitors'][0]['attributes'],
+            [ 'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
             'value' => 'iPhone',
-          ]);
+            ]
+        );
 
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
            [
@@ -657,12 +672,14 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventWithAttributesWithNumericTag()
     {
-        array_unshift($this->expectedEventParams['visitors'][0]['attributes'],
-          [ 'entity_id' => '7723280020',
+        array_unshift(
+            $this->expectedEventParams['visitors'][0]['attributes'],
+            [ 'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
             'value' => 'iPhone',
-          ]);
+            ]
+        );
 
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
            [
@@ -744,18 +761,21 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     // (since this custom attribute entity is not generated by GAE)
     public function testCreateImpressionEventWithBucketingIDAttribute()
     {
-        array_unshift($this->expectedImpressionEventParams['visitors'][0]['attributes'],
-          [
+        array_unshift(
+            $this->expectedImpressionEventParams['visitors'][0]['attributes'],
+            [
             'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
             'value' => 'iPhone'
-          ],[
+            ],
+            [
             'entity_id' => '$opt_bucketing_id',
             'key' => '$opt_bucketing_id',
             'type' => 'custom',
             'value' => 'variation'
-          ]);
+            ]
+        );
 
         $expectedLogEvent = new LogEvent(
             $this->expectedEventUrl,
@@ -785,18 +805,21 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventWithBucketingIDAttribute()
     {
-        array_unshift($this->expectedEventParams['visitors'][0]['attributes'],
-          [
+        array_unshift(
+            $this->expectedEventParams['visitors'][0]['attributes'],
+            [
             'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
             'value' => 'iPhone',
-          ],[
+            ],
+            [
             'entity_id' => '$opt_bucketing_id',
             'key' => '$opt_bucketing_id',
             'type' => 'custom',
             'value' => 'variation',
-          ]);
+            ]
+        );
 
         $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
            [
@@ -834,14 +857,16 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateConversionEventWithUserAgentAttribute()
     {
-       array_unshift($this->expectedEventParams['visitors'][0]['attributes'],
-          [ 'entity_id' => '$opt_user_agent',
+        array_unshift(
+            $this->expectedEventParams['visitors'][0]['attributes'],
+            [ 'entity_id' => '$opt_user_agent',
             'key' => '$opt_user_agent',
             'type' => 'custom',
             'value' => 'Firefox',
-          ]);
+            ]
+        );
 
-      $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
+        $this->expectedEventParams['visitors'][0]['snapshots'][0]['events'][0] =
         [
           'entity_id'=> '7718020063',
           'timestamp'=> $this->timestamp,
@@ -849,27 +874,27 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
           'key'=> 'purchase'
         ];
 
-      $expectedLogEvent = new LogEvent(
-          $this->expectedEventUrl,
-          $this->expectedEventParams,
-          $this->expectedEventHttpVerb,
-          $this->expectedEventHeaders
-      );
+        $expectedLogEvent = new LogEvent(
+            $this->expectedEventUrl,
+            $this->expectedEventParams,
+            $this->expectedEventHttpVerb,
+            $this->expectedEventHeaders
+        );
 
-      $userAttributes = [
+        $userAttributes = [
           '$opt_user_agent' => 'Firefox'
-      ];
-      $logEvent = $this->eventBuilder->createConversionEvent(
-          $this->config,
-          'purchase',
-          $this->testUserId,
-          $userAttributes,
-          null
-      );
+        ];
+        $logEvent = $this->eventBuilder->createConversionEvent(
+            $this->config,
+            'purchase',
+            $this->testUserId,
+            $userAttributes,
+            null
+        );
 
-      $logEvent = $this->fakeParamsToReconcile($logEvent);
-      $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
-      $this->assertTrue($result[0], $result[1]);
+        $logEvent = $this->fakeParamsToReconcile($logEvent);
+        $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
+        $this->assertTrue($result[0], $result[1]);
     }
 
     public function testCreateConversionEventWhenEventUsedInMultipleExp()
@@ -890,18 +915,21 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'tags' => $eventTags,
         ];
 
-        array_unshift($this->expectedEventParams['visitors'][0]['attributes'],
+        array_unshift(
+            $this->expectedEventParams['visitors'][0]['attributes'],
             [
                 'entity_id' => '7723280020',
                 'key' => 'device_type',
                 'type' => 'custom',
                 'value' => 'iPhone'
-            ],[
+            ],
+            [
                 'entity_id' => '7723340004',
                 'key' => 'location',
                 'type' => 'custom',
                 'value' => 'SF'
-            ]);
+            ]
+        );
 
         $userAttributes = [
             'device_type' => 'iPhone',
@@ -909,22 +937,21 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         ];
 
         $logEvent = $this->eventBuilder->createConversionEvent(
-                $this->config,
-                'multi_exp_event',
-                $this->testUserId,
-                $userAttributes,
-                $eventTags
-            );
+            $this->config,
+            'multi_exp_event',
+            $this->testUserId,
+            $userAttributes,
+            $eventTags
+        );
         $expectedLogEvent = new LogEvent(
-                $this->expectedEventUrl,
-                $this->expectedEventParams,
-                $this->expectedEventHttpVerb,
-                $this->expectedEventHeaders
+            $this->expectedEventUrl,
+            $this->expectedEventParams,
+            $this->expectedEventHttpVerb,
+            $this->expectedEventHeaders
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
         $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
         $this->assertTrue($result[0], $result[1]);
-
     }
 }

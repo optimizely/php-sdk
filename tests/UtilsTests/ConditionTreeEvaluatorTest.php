@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2018, Optimizely
+ * Copyright 2018-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,24 +47,28 @@ class ConditionTreeEvaluatorTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Helper method to create a callback that returns passed arguments on consecutive calls.
-     * 
+     *
      * @param  mixed $a
      * @param  mixed $b
      * @param  mixed $c
-     * 
-     * @return callable 
+     *
+     * @return callable
      */
-    protected function getLeafEvaluator($a, $b = null, $c = null) {
+    protected function getLeafEvaluator($a, $b = null, $c = null)
+    {
         $numOfCalls = 0;
 
         $leafEvaluator = function ($some_arg) use (&$numOfCalls, $a, $b, $c) {
             $numOfCalls++;
-            if($numOfCalls == 1)
+            if ($numOfCalls == 1) {
                 return $a;
-            if($numOfCalls == 2)
+            }
+            if ($numOfCalls == 2) {
                 return $b;
-            if($numOfCalls == 3)
+            }
+            if ($numOfCalls == 3) {
                 return $c;
+            }
 
             return null;
         };
@@ -336,5 +340,4 @@ class ConditionTreeEvaluatorTest extends \PHPUnit_Framework_TestCase
             )
         );
     }
-
 }

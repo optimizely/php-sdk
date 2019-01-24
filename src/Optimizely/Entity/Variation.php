@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ class Variation
     }
 
     /**
-     * @param  string Variable ID
+     * @param string Variable ID
      *
      * @return VariableUsage Variable usage instance corresponding to given variable ID
      */

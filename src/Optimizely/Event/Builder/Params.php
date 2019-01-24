@@ -26,7 +26,7 @@ define('CUSTOM_ATTRIBUTE_FEATURE_TYPE', 'custom');
 define('DECISIONS', 'decisions');
 define('ENRICH_DECISIONS', 'enrich_decisions');
 define('ENTITY_ID', 'entity_id');
-define('EVENTS', 'events');;
+define('EVENTS', 'events');
 define('EXPERIMENT_ID', 'experiment_id');
 define('KEY', 'key');
 define('PROJECT_ID', 'project_id');

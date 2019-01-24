@@ -265,7 +265,7 @@ class Optimizely
                 self::EXPERIMENT_KEY =>$experimentKey,
                 self::USER_ID => $userId
             ]
-        	)
+        )
         ) {
             return null;
         }
@@ -301,7 +301,7 @@ class Optimizely
                 self::EVENT_KEY =>$eventKey,
                 self::USER_ID => $userId
             ]
-        	)
+        )
         ) {
             return null;
         }
@@ -389,7 +389,7 @@ class Optimizely
                 self::EXPERIMENT_KEY =>$experimentKey,
                 self::USER_ID => $userId
             ]
-        	)
+        )
         ) {
             return null;
         }
@@ -484,7 +484,7 @@ class Optimizely
                 self::FEATURE_FLAG_KEY =>$featureFlagKey,
                 self::USER_ID => $userId
             ]
-            )
+        )
         ) {
             return false;
         }
@@ -539,7 +539,7 @@ class Optimizely
             [
                 self::USER_ID => $userId
             ]
-            )
+        )
         ) {
             return $enabledFeatureKeys;
         }
@@ -584,7 +584,7 @@ class Optimizely
                 self::VARIABLE_KEY => $variableKey,
                 self::USER_ID => $userId
             ]
-            )
+        )
         ) {
             return null;
         }

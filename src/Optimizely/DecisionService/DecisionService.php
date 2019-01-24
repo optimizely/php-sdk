@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017-2018, Optimizely Inc and Contributors
+ * Copyright 2017-2019, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,8 +93,8 @@ class DecisionService
     {
         $bucketingIdKey = ControlAttributes::BUCKETING_ID;
 
-        if (isset($userAttributes[$bucketingIdKey])){
-            if (is_string($userAttributes[$bucketingIdKey])){
+        if (isset($userAttributes[$bucketingIdKey])) {
+            if (is_string($userAttributes[$bucketingIdKey])) {
                 return $userAttributes[$bucketingIdKey];
             }
             $this->_logger->log(Logger::WARNING, 'Bucketing ID attribute is not a string. Defaulted to user ID.');
@@ -308,7 +308,7 @@ class DecisionService
             break;
         }
         // Evaluate Everyone Else Rule / Last Rule now
-        $experiment = $rolloutRules[sizeof($rolloutRules)-1];        
+        $experiment = $rolloutRules[sizeof($rolloutRules)-1];
         
         // Evaluate if user meets the audience condition of Everyone Else Rule / Last Rule now
         if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes)) {

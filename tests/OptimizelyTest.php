@@ -41,6 +41,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     const OUTPUT_STREAM = 'output';
 
     private $datafile;
+    
     private $eventBuilderMock;
     private $loggerMock;
     private $optimizelyObject;
@@ -63,7 +64,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
         $this->optimizelyObject = new Optimizely($this->datafile, null, $this->loggerMock);
         $this->optimizelyTypedAudienceObject = new Optimizely(
-            $this->typedAudiencesDataFile, null, $this->loggerMock
+            $this->typedAudiencesDataFile,
+            null,
+            $this->loggerMock
         );
 
         $this->projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
@@ -637,7 +640,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         //Should be included via exact match number audience with id '3468206646'
         $this->assertEquals('A', $optimizelyMock->activate('typed_audience_experiment', 'test_user', $userAttributes));
-
     }
 
     public function testActivateWithAttributesTypedAudienceMismatch()
@@ -1174,7 +1176,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testTrackGivenEventKeyWithPausedExperiment()
     {
         $pausedExpEvent = $this->projectConfig->getEvent('purchase');
-        // Experiment with ID 7716830585 is paused. 
+        // Experiment with ID 7716830585 is paused.
         $pausedExpEvent->setExperimentIds(['7716830585']);
 
         $config = new \ReflectionProperty(Optimizely::class, '_config');
