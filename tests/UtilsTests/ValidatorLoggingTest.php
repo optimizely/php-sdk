@@ -23,93 +23,99 @@
  use Optimizely\ProjectConfig;
  use Optimizely\Utils\Validator;
 
- class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
- {
-     protected function setUp()
-     {
-         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
-             ->setMethods(array('log'))
-             ->getMock();
+class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
+{
+    protected function setUp()
+    {
+        $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
+            ->setMethods(array('log'))
+            ->getMock();
 
-         $this->config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $this->config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
 
-         $this->typedConfig = new ProjectConfig(DATAFILE_WITH_TYPED_AUDIENCES, new NoOpLogger(), new NoOpErrorHandler());
+        $this->typedConfig = new ProjectConfig(DATAFILE_WITH_TYPED_AUDIENCES, new NoOpLogger(), new NoOpErrorHandler());
 
-         $this->collectedLogs = [];
+        $this->collectedLogs = [];
 
-         $this->collectLogsForAssertion = function($a, $b) {
+        $this->collectLogsForAssertion = function ($a, $b) {
             $this->collectedLogs[] = array($a,$b);
-         };
-     }
+        };
+    }
 
-     public function testIsUserInExperimentWithNoAudience()
-     {
-         $experiment = $this->config->getExperimentFromKey('test_experiment');
-         $experiment->setAudienceIds([]);
-         $experiment->setAudienceConditions([]);
-
-         $this->loggerMock->expects($this->once())
-             ->method('log')
-             ->with(Logger::INFO, "No Audience attached to experiment \"test_experiment\". Evaluated to True.");
-
-         $this->assertTrue(Validator::isUserInExperiment($this->config, $experiment, [], $this->loggerMock));
-     }
-
-     public function testIsUserInExperimentEvaluatesAudienceIds()
-     {
-         $userAttributes = [
-            "test_attribute" => "test_value_1"
-         ];
-
-         $experiment = $this->config->getExperimentFromKey('test_experiment');
-         $experiment->setAudienceIds(['11155']);
-         $experiment->setAudienceConditions(null);
-
-         $this->loggerMock->expects($this->any())
-                          ->method('log')
-                          ->will($this->returnCallback($this->collectLogsForAssertion));
-
-        Validator::isUserInExperiment($this->config, $experiment, $userAttributes, $this->loggerMock);
-
-        $this->assertContains([Logger::DEBUG, "Evaluating audiences for experiment \"test_experiment\": \"[\"11155\"]\"."], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, "Starting to evaluate audience \"11155\" with conditions:" +
-                              " \"[\"and\",[\"or\",[\"or\",{\"name\":\"browser_type\",\"type\":\"custom_attribute\",\"value\":\"chrome\"}]]]\"."],
-                              $this->collectedLogs
-                            );
-        $this->assertContains([Logger::DEBUG, "Audience \"11155\" evaluated to UNKNOWN."], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to False."], $this->collectedLogs);
-     }
-
-     public function testIsUserInExperimenEvaluatesAudienceConditions()
-     {
-        $experiment = $this->typedConfig->getExperimentFromKey('audience_combinations_experiment');
+    public function testIsUserInExperimentWithNoAudience()
+    {
+        $experiment = $this->config->getExperimentFromKey('test_experiment');
         $experiment->setAudienceIds([]);
-        $experiment->setAudienceConditions(['or', ['or', '3468206642', '3988293898']]);
+        $experiment->setAudienceConditions([]);
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::INFO, "No Audience attached to experiment \"test_experiment\". Evaluated to True.");
+
+        $this->assertTrue(Validator::isUserInExperiment($this->config, $experiment, [], $this->loggerMock));
+    }
+
+    public function testIsUserInExperimentEvaluatesAudienceIds()
+    {
+        $userAttributes = [
+           "test_attribute" => "test_value_1"
+        ];
+
+        $experiment = $this->config->getExperimentFromKey('test_experiment');
+        $experiment->setAudienceIds(['11155']);
+        $experiment->setAudienceConditions(null);
 
         $this->loggerMock->expects($this->any())
                          ->method('log')
                          ->will($this->returnCallback($this->collectLogsForAssertion));
 
-       Validator::isUserInExperiment($this->typedConfig, $experiment, ["house" => "I am in Slytherin"], $this->loggerMock);
+        Validator::isUserInExperiment($this->config, $experiment, $userAttributes, $this->loggerMock);
 
-       $this->assertContains([Logger::DEBUG, "Evaluating audiences for experiment \"audience_combinations_experiment\":" +
-                              " \"[\"or\",[\"or\",\"3468206642\",\"3988293898\"]]\"."],
-                              $this->collectedLogs
-                            );
-       $this->assertContains([Logger::DEBUG, "Starting to evaluate audience \"3468206642\" with conditions:" +
-                              " \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"value\":\"Gryffindor\"}]]]\"."],
-                              $this->collectedLogs
-                            );
-       $this->assertContains([Logger::DEBUG, "Audience \"3468206642\" evaluated to False."],
-                               $this->collectedLogs
-                             );
-       $this->assertContains([Logger::DEBUG, "Starting to evaluate audience \"3988293898\" with conditions:" +
-                              " \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"match\":\"substring\",\"value\":\"Slytherin\"}]]]\"."],
-                              $this->collectedLogs
-                            );
-       $this->assertContains([Logger::DEBUG, "Audience \"3988293898\" evaluated to True."],
-                             $this->collectedLogs
-                            );
-       $this->assertContains([Logger::INFO, "Audiences for experiment \"audience_combinations_experiment\" collectively evaluated to True."], $this->collectedLogs);
-     }
- }
+        $this->assertContains([Logger::DEBUG, "Evaluating audiences for experiment \"test_experiment\": \"[\"11155\"]\"."], $this->collectedLogs);
+        $this->assertContains(
+            [Logger::DEBUG, "Starting to evaluate audience \"11155\" with conditions:" +
+                             " \"[\"and\",[\"or\",[\"or\",{\"name\":\"browser_type\",\"type\":\"custom_attribute\",\"value\":\"chrome\"}]]]\"."],
+            $this->collectedLogs
+        );
+        $this->assertContains([Logger::DEBUG, "Audience \"11155\" evaluated to UNKNOWN."], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to False."], $this->collectedLogs);
+    }
+
+    public function testIsUserInExperimenEvaluatesAudienceConditions()
+    {
+        $experiment = $this->typedConfig->getExperimentFromKey('audience_combinations_experiment');
+        $experiment->setAudienceIds([]);
+        $experiment->setAudienceConditions(['or', ['or', '3468206642', '3988293898']]);
+
+        $this->loggerMock->expects($this->any())
+                        ->method('log')
+                        ->will($this->returnCallback($this->collectLogsForAssertion));
+
+        Validator::isUserInExperiment($this->typedConfig, $experiment, ["house" => "I am in Slytherin"], $this->loggerMock);
+
+        $this->assertContains(
+            [Logger::DEBUG, "Evaluating audiences for experiment \"audience_combinations_experiment\":" +
+                             " \"[\"or\",[\"or\",\"3468206642\",\"3988293898\"]]\"."],
+            $this->collectedLogs
+        );
+        $this->assertContains(
+            [Logger::DEBUG, "Starting to evaluate audience \"3468206642\" with conditions:" +
+                             " \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"value\":\"Gryffindor\"}]]]\"."],
+            $this->collectedLogs
+        );
+        $this->assertContains(
+            [Logger::DEBUG, "Audience \"3468206642\" evaluated to False."],
+            $this->collectedLogs
+        );
+        $this->assertContains(
+            [Logger::DEBUG, "Starting to evaluate audience \"3988293898\" with conditions:" +
+                             " \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"match\":\"substring\",\"value\":\"Slytherin\"}]]]\"."],
+            $this->collectedLogs
+        );
+        $this->assertContains(
+            [Logger::DEBUG, "Audience \"3988293898\" evaluated to True."],
+            $this->collectedLogs
+        );
+        $this->assertContains([Logger::INFO, "Audiences for experiment \"audience_combinations_experiment\" collectively evaluated to True."], $this->collectedLogs);
+    }
+}

@@ -48,9 +48,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
 
         $this->loggerMock->expects($this->once())
                         ->method('log')
-                        ->with($logLevel,
+                        ->with(
+                            $logLevel,
                             "Audience condition \"{\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"regex\"}\" uses an unknown match type. You may need to upgrade to a newer release of the Optimizely SDK."
-                          );
+                        );
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -72,9 +73,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
 
         $this->loggerMock->expects($this->once())
                         ->method('log')
-                        ->with($logLevel,
+                        ->with(
+                            $logLevel,
                             "Audience condition \"{\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"sdk_version\",\"match\":\"exact\"}\" uses an unknown condition type. You may need to upgrade to anewer release of the Optimizely SDK."
-                          );
+                        );
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }

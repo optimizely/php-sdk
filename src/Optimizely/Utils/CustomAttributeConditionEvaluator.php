@@ -56,7 +56,7 @@ class CustomAttributeConditionEvaluator
     protected function setNullForMissingKeys(array $leafCondition)
     {
         $keys = ['type', 'match', 'value'];
-        foreach($keys as $key) {
+        foreach ($keys as $key) {
             $leafCondition[$key] = isset($leafCondition[$key]) ? $leafCondition[$key]: null;
         }
 
@@ -102,7 +102,7 @@ class CustomAttributeConditionEvaluator
      */
     protected function isValueValidForExactConditions($value)
     {
-        if(is_string($value) || is_bool($value) || Validator::isFiniteNumber($value)) {
+        if (is_string($value) || is_bool($value) || Validator::isFiniteNumber($value)) {
             return true;
         }
 
@@ -126,11 +126,11 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if(!$this->isValueValidForExactConditions($conditionValue)) {
+        if (!$this->isValueValidForExactConditions($conditionValue)) {
             return null;
         }
 
-        if(!$this->isValueValidForExactConditions($userValue) || !Validator::areValuesSameType($conditionValue, $userValue)) {
+        if (!$this->isValueValidForExactConditions($userValue) || !Validator::areValuesSameType($conditionValue, $userValue)) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
@@ -175,11 +175,11 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if(!Validator::isFiniteNumber($conditionValue)) {
+        if (!Validator::isFiniteNumber($conditionValue)) {
             return null;
         }
 
-        if(!Validator::isFiniteNumber($userValue)) {
+        if (!Validator::isFiniteNumber($userValue)) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
@@ -208,11 +208,11 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if(!Validator::isFiniteNumber($conditionValue)) {
+        if (!Validator::isFiniteNumber($conditionValue)) {
             return null;
         }
 
-        if(!Validator::isFiniteNumber($userValue)) {
+        if (!Validator::isFiniteNumber($userValue)) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
@@ -241,11 +241,11 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if(!is_string($conditionValue)) {
+        if (!is_string($conditionValue)) {
             return null;
         }
 
-        if(!is_string($userValue)) {
+        if (!is_string($userValue)) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
@@ -270,7 +270,7 @@ class CustomAttributeConditionEvaluator
     {
         $leafCondition = $this->setNullForMissingKeys($leafCondition);
 
-        if($leafCondition['type'] !== self::CUSTOM_ATTRIBUTE_CONDITION_TYPE) {
+        if ($leafCondition['type'] !== self::CUSTOM_ATTRIBUTE_CONDITION_TYPE) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::UNKNOWN_CONDITION_TYPE,
                 json_encode($leafCondition)
@@ -278,13 +278,13 @@ class CustomAttributeConditionEvaluator
             return null;
         }
 
-        if(($leafCondition['match']) === null) {
+        if (($leafCondition['match']) === null) {
             $conditionMatch = self::EXACT_MATCH_TYPE;
         } else {
             $conditionMatch = $leafCondition['match'];
         }
 
-        if(!in_array($conditionMatch, $this->getMatchTypes())) {
+        if (!in_array($conditionMatch, $this->getMatchTypes())) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::UNKNOWN_MATCH_TYPE,
                 json_encode($leafCondition)
@@ -294,19 +294,19 @@ class CustomAttributeConditionEvaluator
 
         $conditionName = $leafCondition['name'];
 
-        if($leafCondition['match'] !== self::EXISTS_MATCH_TYPE) {
-            if(!array_key_exists($conditionName, $this->userAttributes)) {
+        if ($leafCondition['match'] !== self::EXISTS_MATCH_TYPE) {
+            if (!array_key_exists($conditionName, $this->userAttributes)) {
                 $this->logger->log(Logger::DEBUG, sprintf(
                     logs::MISSING_ATTRIBUTE_VALUE,
                     json_encode($leafCondition),
                     $conditionName
                 ));
                 return null;
-            }else{
+            } else {
                 $userValue = $this->userAttributes[$conditionName];
             }
 
-            if($userValue === null) {
+            if ($userValue === null) {
                 $this->logger->log(Logger::WARNING, sprintf(
                     logs::NULL_ATTRIBUTE_VALUE,
                     json_encode($leafCondition),

@@ -62,11 +62,11 @@ class Validator
      */
     public static function areAttributesValid($attributes)
     {
-        if(!is_array($attributes)){
+        if (!is_array($attributes)) {
             return false;
         }
 
-        if (empty($attributes)){
+        if (empty($attributes)) {
             return true;
         }
         // At least one key string to be an associative array.
@@ -149,8 +149,8 @@ class Validator
         // Return true if experiment is not targeted to any audience.
         if (empty($audienceConditions)) {
             $logger->log(Logger::INFO, sprintf(
-                  AudienceEvaluationLogs::NO_AUDIENCE_ATTACHED,
-                  $experiment->getKey()
+                AudienceEvaluationLogs::NO_AUDIENCE_ATTACHED,
+                $experiment->getKey()
             ));
             return true;
         }
@@ -166,11 +166,11 @@ class Validator
         }
 
         $customAttrCondEval = new CustomAttributeConditionEvaluator($userAttributes, $logger);
-        $evaluateCustomAttr = function($leafCondition) use ($customAttrCondEval) {
+        $evaluateCustomAttr = function ($leafCondition) use ($customAttrCondEval) {
             return $customAttrCondEval->evaluate($leafCondition);
         };
 
-        $evaluateAudience = function($audienceId) use ($config, $evaluateCustomAttr, $logger) {
+        $evaluateAudience = function ($audienceId) use ($config, $evaluateCustomAttr, $logger) {
             $audience = $config->getAudience($audienceId);
             $logger->log(Logger::DEBUG, sprintf(
                 AudienceEvaluationLogs::EVALUATING_AUDIENCE_WITH_CONDITIONS,
@@ -267,8 +267,8 @@ class Validator
         $secondValType = gettype($secondVal);
         $numberTypes = array('double', 'integer');
 
-        if(in_array($firstValType, $numberTypes) && in_array($secondValType, $numberTypes)) {
-            return True;
+        if (in_array($firstValType, $numberTypes) && in_array($secondValType, $numberTypes)) {
+            return true;
         }
 
         return $firstValType == $secondValType;
@@ -281,7 +281,7 @@ class Validator
      */
     public static function doesArrayContainOnlyStringKeys($arr)
     {
-        if(!is_array($arr) || empty($arr)) {
+        if (!is_array($arr) || empty($arr)) {
             return false;
         }
 

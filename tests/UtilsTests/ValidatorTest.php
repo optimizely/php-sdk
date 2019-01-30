@@ -135,10 +135,10 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Validator::IsFiniteNumber(INF));
         $this->assertFalse(Validator::IsFiniteNumber(-INF));
         $this->assertFalse(Validator::IsFiniteNumber(NAN));
-        $this->assertFalse(Validator::IsFiniteNumber(pow(2,53) + 1));
-        $this->assertFalse(Validator::IsFiniteNumber(-pow(2,53) - 1));
-        $this->assertFalse(Validator::IsFiniteNumber(pow(2,53) + 2.0));
-        $this->assertFalse(Validator::IsFiniteNumber(-pow(2,53) - 2.0));
+        $this->assertFalse(Validator::IsFiniteNumber(pow(2, 53) + 1));
+        $this->assertFalse(Validator::IsFiniteNumber(-pow(2, 53) - 1));
+        $this->assertFalse(Validator::IsFiniteNumber(pow(2, 53) + 2.0));
+        $this->assertFalse(Validator::IsFiniteNumber(-pow(2, 53) - 2.0));
     }
 
     public function testIsFiniteNumberWithValidValues()
@@ -147,9 +147,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(Validator::IsFiniteNumber(5));
         $this->assertTrue(Validator::IsFiniteNumber(5.5));
         // float pow(2,53) + 1.0 evaluates to float pow(2,53)
-        $this->assertTrue(Validator::IsFiniteNumber(pow(2,53) + 1.0));
-        $this->assertTrue(Validator::IsFiniteNumber(-pow(2,53) - 1.0));
-        $this->assertTrue(Validator::IsFiniteNumber(pow(2,53)));
+        $this->assertTrue(Validator::IsFiniteNumber(pow(2, 53) + 1.0));
+        $this->assertTrue(Validator::IsFiniteNumber(-pow(2, 53) - 1.0));
+        $this->assertTrue(Validator::IsFiniteNumber(pow(2, 53)));
     }
 
     public function testAreEventTagsValidValidEventTags()
@@ -298,7 +298,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $this->loggerMock
             )
         );
-
     }
 
     // test that isUserInExperiment returns false when some audience is attached to experiment
@@ -478,8 +477,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     {
         // Valid values
         $this->assertTrue(Validator::doesArrayContainOnlyStringKeys(
-            ["name"=> "favorite_ice_cream", "type"=> "custom_attribute", "match"=> "exists"])
-        );
+            ["name"=> "favorite_ice_cream", "type"=> "custom_attribute", "match"=> "exists"]
+        ));
 
         // Invalid values
         $this->assertFalse(Validator::doesArrayContainOnlyStringKeys([]));

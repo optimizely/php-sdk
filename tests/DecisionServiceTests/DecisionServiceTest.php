@@ -62,8 +62,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $this->collectedLogs = [];
-        $this->collectLogsForAssertion = function($a, $b) {
-           $this->collectedLogs[] = array($a,$b);
+        $this->collectLogsForAssertion = function ($a, $b) {
+            $this->collectedLogs[] = array($a,$b);
         };
 
         $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
@@ -1068,7 +1068,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn(null);
 
         $this->assertNull(
-            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes));
+            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes)
+        );
     }
 
     // ============== END of tests - when the user qualifies for targeting rule (audience match) ======================
