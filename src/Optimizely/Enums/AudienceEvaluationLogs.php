@@ -19,15 +19,15 @@ namespace Optimizely\Enums;
 
 class AudienceEvaluationLogs
 {
-    const AUDIENCE_EVALUATION_RESULT = "Audience \"%s\" evaluated as %s.";
-    const AUDIENCE_EVALUATION_RESULT_COMBINED = "Audiences for experiment \"%s\" collectively evaluated as %s.";
+    const AUDIENCE_EVALUATION_RESULT = "Audience \"%s\" evaluated to %s.";
+    const AUDIENCE_EVALUATION_RESULT_COMBINED = "Audiences for experiment \"%s\" collectively evaluated to %s.";
     const EVALUATING_AUDIENCES = "Evaluating audiences for experiment \"%s\": \"%s\".";
     const EVALUATING_AUDIENCE_WITH_CONDITIONS = "Starting to evaluate audience \"%s\" with conditions: \"%s\".";
-    const MISMATCH_TYPE = "Audience condition %s evaluated as UNKNOWN because the value for user attribute \"%s\" is \"%s\" while expected is \"%s\".";
-    const MISSING_ATTRIBUTE_VALUE = "Audience condition %s evaluated as UNKNOWN because no value was passed for user attribute \"%s\".";
-    const NO_AUDIENCE_ATTACHED = "No Audience attached to experiment \"%s\". Evaluated as True.";
-    const UNEXPECTED_TYPE = "Audience condition %s evaluated as UNKNOWN because the value for user attribute \"%s\" is inapplicable: \"%s\".";
-    const UNKNOWN_CONDITION_TYPE = "Audience condition \"%s\" has an unknown condition type.";
-    const UNKNOWN_MATCH_TYPE = "Audience condition \"%s\" uses an unknown match type.";
-    const USER_ATTRIBUTES = "User attributes: \"%s\".";
+    const MISSING_ATTRIBUTE_VALUE = "Audience condition %s evaluated to UNKNOWN because no value was passed for user attribute \"%s\".";
+    const NO_AUDIENCE_ATTACHED = "No Audience attached to experiment \"%s\". Evaluated to True.";
+    const NULL_ATTRIBUTE_VALUE = "Audience condition \"%s\" evaluated to UNKNOWN because a null value was passed for user attribute \"%s\".";
+    const UNEXPECTED_TYPE = "Audience condition %s evaluated to UNKNOWN because a value of type \"%s\" was passed for user attribute \"%s\".";
+
+    const UNKNOWN_CONDITION_TYPE = "Audience condition \"%s\" uses an unknown condition type. You may need to upgrade to anewer release of the Optimizely SDK.";
+    const UNKNOWN_MATCH_TYPE = "Audience condition \"%s\" uses an unknown match type. You may need to upgrade to a newer release of the Optimizely SDK.";
 }

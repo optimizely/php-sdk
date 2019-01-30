@@ -41,6 +41,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     const OUTPUT_STREAM = 'output';
 
     private $datafile;
+    
     private $eventBuilderMock;
     private $loggerMock;
     private $optimizelyObject;
@@ -61,15 +62,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))
             ->getMock();
-
-        $this->collectedLogs = [];
-        $this->collectLogsForAssertion = function($a, $b) {
-           $this->collectedLogs[] = array($a,$b);
-        };
-
         $this->optimizelyObject = new Optimizely($this->datafile, null, $this->loggerMock);
         $this->optimizelyTypedAudienceObject = new Optimizely(
-            $this->typedAudiencesDataFile, null, $this->loggerMock
+            $this->typedAudiencesDataFile,
+            null,
+            $this->loggerMock
         );
 
         $this->projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
@@ -300,9 +297,21 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('sendImpressionEvent'))
             ->getMock();
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, 'User "" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 7428 to user "" with bucketing ID "".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "" is in variation variation of experiment test_experiment.'
+            );
 
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->exactly(1))
@@ -311,13 +320,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call activate
         $this->assertEquals('variation', $optimizelyMock->activate('test_experiment', '', $userAttributes));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 7428 to user "" with bucketing ID "".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "" is in variation variation of experiment test_experiment.'], $this->collectedLogs);
-
-
     }
 
 
@@ -363,9 +365,24 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->eventBuilderMock->expects($this->never())
             ->method('createImpressionEvent');
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(4))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, 'User "not_in_variation_user" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 8495 to user "not_in_variation_user" with bucketing ID "not_in_variation_user".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "not_in_variation_user" is in no variation.'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO, 'Not activating user "not_in_variation_user".');
 
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
             ->setConstructorArgs(array($this->datafile, new ValidEventDispatcher(), $this->loggerMock))
@@ -382,12 +399,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call activate
         $this->assertNull($optimizelyMock->activate('test_experiment', 'not_in_variation_user', $userAttributes));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "not_in_variation_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 8495 to user "not_in_variation_user" with bucketing ID "not_in_variation_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "not_in_variation_user" is in no variation.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not activating user "not_in_variation_user".'], $this->collectedLogs);
     }
 
     public function testActivateNoAudienceNoAttributes()
@@ -397,9 +408,33 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('sendImpressionEvent'))
             ->getMock();
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(5))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, 'User "user_1" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 1922 to user "user_1" with bucketing ID "user_1".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "user_1" is in experiment group_experiment_1 of group 7722400015.'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Assigned bucket 9525 to user "user_1" with bucketing ID "user_1".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "user_1" is in variation group_exp_1_var_2 of experiment group_experiment_1.'
+            );
 
         // Verify that sendImpression is called with expected params
         $optimizelyMock->expects($this->exactly(1))
@@ -408,13 +443,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call activate
         $this->assertSame('group_exp_1_var_2', $optimizelyMock->activate('group_experiment_1', 'user_1'));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "user_1" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 1922 to user "user_1" with bucketing ID "user_1".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "user_1" is in experiment group_experiment_1 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 9525 to user "user_1" with bucketing ID "user_1".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "user_1" is in variation group_exp_1_var_2 of experiment group_experiment_1.'], $this->collectedLogs);
     }
 
     public function testActivateNoAudienceNoAttributesAfterSetForcedVariation()
@@ -430,9 +458,36 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('sendImpressionEvent'))
             ->getMock();
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(6))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'User "user_1" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 1922 to user "user_1" with bucketing ID "user_1".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "user_1" is in experiment group_experiment_1 of group 7722400015.'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Assigned bucket 9525 to user "user_1" with bucketing ID "user_1".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "user_1" is in variation group_exp_1_var_2 of experiment group_experiment_1.'
+            );
 
         // Verify that sendImpression is called with expected params
         $optimizelyMock->expects($this->exactly(1))
@@ -444,14 +499,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call activate
         $this->assertEquals('group_exp_1_var_2', $optimizelyMock->activate('group_experiment_1', 'user_1'));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId)], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "user_1" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 1922 to user "user_1" with bucketing ID "user_1".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "user_1" is in experiment group_experiment_1 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 9525 to user "user_1" with bucketing ID "user_1".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "user_1" is in variation group_exp_1_var_2 of experiment group_experiment_1.'], $this->collectedLogs);
     }
 
     public function testActivateAudienceNoAttributes()
@@ -465,17 +512,24 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optimizelyMock->expects($this->never())
             ->method('sendImpressionEvent');
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'Not activating user "test_user".'
+            );
 
         // Call activate
         $this->assertNull($optimizelyMock->activate('test_experiment', 'test_user'));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not activating user "test_user".'], $this->collectedLogs);
     }
 
     public function testActivateWithAttributes()
@@ -491,22 +545,29 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('sendImpressionEvent'))
             ->getMock();
 
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "test_user" is in variation control of experiment test_experiment.'
+            );
+
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
             ->with('test_experiment', 'control', 'test_user', $userAttributes);
 
-        $this->loggerMock->expects($this->any())
-            ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
-
         // Call activate
         $this->assertEquals('control', $optimizelyMock->activate('test_experiment', 'test_user', $userAttributes));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in variation control of experiment test_experiment.'], $this->collectedLogs);
     }
 
     public function testActivateWithAttributesOfDifferentTypes()
@@ -524,9 +585,21 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('sendImpressionEvent'))
             ->getMock();
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "test_user" is in variation control of experiment test_experiment.'
+            );
 
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->exactly(1))
@@ -535,11 +608,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call activate
         $this->assertEquals('control', $optimizelyMock->activate('test_experiment', 'test_user', $userAttributes));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in variation control of experiment test_experiment.'], $this->collectedLogs);
     }
 
     public function testActivateWithAttributesTypedAudienceMatch()
@@ -572,7 +640,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         //Should be included via exact match number audience with id '3468206646'
         $this->assertEquals('A', $optimizelyMock->activate('typed_audience_experiment', 'test_user', $userAttributes));
-
     }
 
     public function testActivateWithAttributesTypedAudienceMismatch()
@@ -746,9 +813,21 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationAudienceMatch()
     {
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'User "test_user" is in variation control of experiment test_experiment.'
+            );
 
         $this->assertEquals(
             'control',
@@ -758,11 +837,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 ['device_type' => 'iPhone', 'location' => 'San Francisco']
             )
         );
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in variation control of experiment test_experiment.'], $this->collectedLogs);
     }
 
     public function testGetVariationAudienceMatchAfterSetForcedVariation()
@@ -777,29 +851,33 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'location' => 'San Francisco',
         ];
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
 
         $this->assertTrue($this->optimizelyObject->setForcedVariation($experimentKey, $userId, $variationKey), 'Set variation for paused experiment should have failed.');
         $this->assertEquals($variationKey, $this->optimizelyObject->getVariation($experimentKey, $userId));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId)], $this->collectedLogs);
-    $this->assertContains([Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId)], $this->collectedLogs);
     }
 
     public function testGetVariationAudienceNoMatch()
     {
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
 
         $this->assertNull($this->optimizelyObject->getVariation('test_experiment', 'test_user'));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".'], $this->collectedLogs);
     }
 
     public function testGetVariationExperimentNotRunning()
@@ -877,22 +955,33 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // Last check to happen is the audience condition check so we make sure we get to that check since
         // the user is not whitelisted
-        $this->loggerMock->expects($this->any(2))
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".');
 
         $this->assertNull($this->optimizelyObject->getVariation('test_experiment', 'test_user'));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".'], $this->collectedLogs);
     }
 
     public function testValidatePreconditionsUserNotInForcedVariationInExperiment()
     {
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, 'User "test_user" is not in the forced variation map.');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::INFO, 'User "test_user" is in variation control of experiment test_experiment.');
 
         $this->assertEquals(
             'control',
@@ -902,11 +991,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 ['device_type' => 'iPhone', 'location' => 'San Francisco']
             )
         );
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in variation control of experiment test_experiment.'], $this->collectedLogs);
     }
 
     public function testTrackInvalidOptimizelyObject()
@@ -1058,21 +1142,67 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::ERROR, 'Event key "unknown_key" is not in datafile.');
 
-
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::ERROR, 'Not tracking user "test_user" for event "unknown_key".');
+            ->with(Logger::INFO, 'Not tracking user "test_user" for event "unknown_key".');
 
         $this->optimizelyObject->track('unknown_key', 'test_user');
     }
 
-    public function testActivateGivenEventKeyWithNoExperiments()
+    public function testTrackGivenEventKeyWithNoExperiments()
     {
-        $this->loggerMock->expects($this->once())
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfig,
+                'unlinked_event',
+                'test_user',
+                null,
+                null
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($this->optimizelyObject, $this->eventBuilderMock);
+
+        $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::INFO, 'There are no valid experiments for event "unlinked_event" to track.');
+            ->with(Logger::INFO, 'Tracking event "unlinked_event" for user "test_user".');
 
         $this->optimizelyObject->track('unlinked_event', 'test_user');
+    }
+
+    public function testTrackGivenEventKeyWithPausedExperiment()
+    {
+        $pausedExpEvent = $this->projectConfig->getEvent('purchase');
+        // Experiment with ID 7716830585 is paused.
+        $pausedExpEvent->setExperimentIds(['7716830585']);
+
+        $config = new \ReflectionProperty(Optimizely::class, '_config');
+        $config->setAccessible(true);
+        $config->setValue($this->optimizelyObject, $this->projectConfig);
+
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfig,
+                'purchase',
+                'test_user',
+                null,
+                null
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
+
+        $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
+        $eventBuilder->setAccessible(true);
+        $eventBuilder->setValue($this->optimizelyObject, $this->eventBuilderMock);
+
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::INFO, 'Tracking event "purchase" for user "test_user".');
+
+        $this->optimizelyObject->track('purchase', 'test_user');
     }
 
     public function testTrackEventDispatchFailure()
@@ -1086,7 +1216,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ["7718750065" => "7725250007"],
                 'test_user',
                 null,
                 null
@@ -1105,13 +1234,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('dispatchEvent')
             ->will($this->throwException(new Exception));
 
-        $this->loggerMock->expects($this->any())
+        $this->loggerMock->expects($this->at(2))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::ERROR, 'Unable to dispatch conversion event. Error ');
 
         $this->optimizelyObject->track('purchase', 'test_user');
-
-        $this->assertContains([Logger::ERROR, 'Unable to dispatch conversion event. Error '], $this->collectedLogs);
     }
 
     public function testTrackNoAttributesNoEventValue()
@@ -1121,16 +1248,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ["7718750065" => "7725250007"],
                 'test_user',
                 null,
                 null
             )
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(
+                Logger::INFO,
+                'Tracking event "purchase" for user "test_user".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
+            );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1157,24 +1295,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call track
         $optlyObject->track('purchase', 'test_user');
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "test_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "group_experiment_1".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in experiment group_experiment_2 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Experiment "paused_experiment" is not running.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "paused_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Tracking event "purchase" for user "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'], $this->collectedLogs);
     }
 
     public function testTrackNoAttributesNoEventValueAfterSetForcedVariation()
@@ -1190,16 +1310,30 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ["7718750065" => "7725250007"],
                 'test_user',
                 null,
                 null
             )
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'Tracking event "purchase" for user "test_user".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
+            );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1228,25 +1362,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call track
         $optlyObject->track('purchase', 'test_user');
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId)], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "test_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "group_experiment_1".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in experiment group_experiment_2 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Experiment "paused_experiment" is not running.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "paused_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Tracking event "purchase" for user "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'], $this->collectedLogs);
     }
 
     public function testTrackWithAttributesNoEventValue()
@@ -1262,19 +1377,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                [
-                    '7716830082' => '7722370027',
-                    '7718750065' => '7725250007'
-                ],
                 'test_user',
                 $userAttributes,
                 null
             )
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(
+                Logger::INFO,
+                'Tracking event "purchase" for user "test_user".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
+            );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1311,16 +1434,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ['7718750065' => '7725250007'],
                 'test_user',
                 null,
                 array('revenue' => 42)
             )
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
-        $this->loggerMock->expects($this->any())
-                        ->method('log')
-                        ->will($this->returnCallback($this->collectLogsForAssertion));
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::INFO,
+                'Tracking event "purchase" for user "test_user".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
+            );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1348,24 +1482,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call track
         $optlyObject->track('purchase', 'test_user', null, array('revenue' => 42));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "test_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "group_experiment_1".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in experiment group_experiment_2 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Experiment "paused_experiment" is not running.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "paused_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Tracking event "purchase" for user "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'], $this->collectedLogs);
     }
 
     public function testTrackNoAttributesWithInvalidEventValue()
@@ -1375,16 +1491,21 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                ['7718750065' => '7725250007'],
                 'test_user',
                 null,
                 array('revenue' => '4200')
             )
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(Logger::INFO, 'Tracking event "purchase" for user "test_user".');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, 'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.');
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1412,23 +1533,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call track
         $optlyObject->track('purchase', 'test_user', null, array('revenue' => '4200'));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" does not meet conditions to be in experiment "test_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "test_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "group_experiment_1".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in experiment group_experiment_2 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Experiment "paused_experiment" is not running.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "paused_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Tracking event "purchase" for user "test_user".'], $this->collectedLogs);
     }
 
     public function testTrackWithAttributesWithEventValue()
@@ -1444,19 +1548,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                [
-                    '7716830082' => '7722370027',
-                    '7718750065' => '7725250007'
-                ],
                 'test_user',
                 $userAttributes,
                 array('revenue' => 42)
             )
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(
+                Logger::INFO,
+                'Tracking event "purchase" for user "test_user".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
+            );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1484,24 +1596,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call track
         $optlyObject->track('purchase', 'test_user', $userAttributes, array('revenue' => 42));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 3037 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in variation control of experiment test_experiment.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is not in experiment group_experiment_1 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "group_experiment_1".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "test_user" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 4517 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in experiment group_experiment_2 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 9871 to user "test_user" with bucketing ID "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "test_user" is in variation group_exp_2_var_2 of experiment group_experiment_2.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Experiment "paused_experiment" is not running.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "test_user" for experiment "paused_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Tracking event "purchase" for user "test_user".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'], $this->collectedLogs);
     }
 
     public function testTrackWithAttributesTypedAudienceMatch()
@@ -1515,10 +1609,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfigForTypedAudience,
                 'item_bought',
-                [
-                    '11564051718' => '11617170975',
-                    '1323241597' => '1423767503'
-                ],
                 'test_user',
                 $userAttributes,
                 array('revenue' => 42)
@@ -1526,6 +1616,23 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            'item_bought',
+            'test_user',
+            $userAttributes,
+            array('revenue' => 42),
+            new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
+        );
+
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::TRACK,
+                $arrayParam
+            );
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -1541,10 +1648,35 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'house' => 'Hufflepuff!'
         ];
 
-        $this->eventBuilderMock->expects($this->never())
-            ->method('createConversionEvent');
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfigForTypedAudience,
+                'item_bought',
+                'test_user',
+                $userAttributes,
+                array('revenue' => 42)
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            'item_bought',
+            'test_user',
+            $userAttributes,
+            array('revenue' => 42),
+            new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
+        );
+
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::TRACK,
+                $arrayParam
+            );
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -1566,10 +1698,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfigForTypedAudience,
                 'user_signed_up',
-                [
-                    '1323241598' => '1423767504',
-                    '1323241599' => '1423767505'
-                ],
                 'test_user',
                 $userAttributes,
                 array('revenue' => 42)
@@ -1577,6 +1705,23 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            'user_signed_up',
+            'test_user',
+            $userAttributes,
+            array('revenue' => 42),
+            new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
+        );
+
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::TRACK,
+                $arrayParam
+            );
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -1594,10 +1739,35 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'should_do_it' => false
         ];
 
-        $this->eventBuilderMock->expects($this->never())
-            ->method('createConversionEvent');
+        $this->eventBuilderMock->expects($this->once())
+            ->method('createConversionEvent')
+            ->with(
+                $this->projectConfigForTypedAudience,
+                'user_signed_up',
+                'test_user',
+                $userAttributes,
+                array('revenue' => 42)
+            )
+            ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
         $optlyObject = new Optimizely($this->typedAudiencesDataFile, new ValidEventDispatcher(), $this->loggerMock);
+
+        // Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            'user_signed_up',
+            'test_user',
+            $userAttributes,
+            array('revenue' => 42),
+            new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', [])
+        );
+
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::TRACK,
+                $arrayParam
+            );
+        $optlyObject->notificationCenter = $this->notificationCenterMock;
 
         $eventBuilder = new \ReflectionProperty(Optimizely::class, '_eventBuilder');
         $eventBuilder->setAccessible(true);
@@ -1621,19 +1791,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 $this->projectConfig,
                 'purchase',
-                [
-                    '7716830082' => '7721010009',
-                    '7718750065' => '7725250007'
-                ],
                 '',
                 $userAttributes,
                 array('revenue' => 42)
             )
             ->willReturn(new LogEvent('logx.optimizely.com/track', ['param1' => 'val1'], 'POST', []));
 
-        $this->loggerMock->expects($this->any())
+        $callIndex = 0;
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->will($this->returnCallback($this->collectLogsForAssertion));
+            ->with(
+                Logger::INFO,
+                'Tracking event "purchase" for user "".'
+            );
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(
+                Logger::DEBUG,
+                'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'
+            );
 
         $optlyObject = new Optimizely($this->datafile, new ValidEventDispatcher(), $this->loggerMock);
 
@@ -1661,25 +1839,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call track
         $optlyObject->track('purchase', '', $userAttributes, array('revenue' => 42));
-
-        // Verify Logs
-        $this->assertContains([Logger::DEBUG, 'User "" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 7428 to user "" with bucketing ID "".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "" is in variation variation of experiment test_experiment.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 2339 to user "" with bucketing ID "".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "" is not in experiment group_experiment_1 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "" for experiment "group_experiment_1".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'User "" is not in the forced variation map.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 2339 to user "" with bucketing ID "".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "" is in experiment group_experiment_2 of group 7722400015.'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Assigned bucket 5641 to user "" with bucketing ID "".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "" is in variation group_exp_2_var_2 of experiment group_experiment_2.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Experiment "paused_experiment" is not running.'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Not tracking user "" for experiment "paused_experiment".'], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'Tracking event "purchase" for user "".'], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, 'Dispatching conversion event to URL logx.optimizely.com/track with params {"param1":"val1"}.'], $this->collectedLogs);
-
     }
 
     // check that a null variation key clears the forced variation

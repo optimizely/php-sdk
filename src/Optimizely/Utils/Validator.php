@@ -161,11 +161,6 @@ class Validator
             json_encode($audienceConditions)
         ));
 
-        $logger->log(Logger::DEBUG, sprintf(
-            AudienceEvaluationLogs::USER_ATTRIBUTES,
-            json_encode($userAttributes)
-        ));
-
         if ($userAttributes === null) {
             $userAttributes = [];
         }
@@ -185,12 +180,12 @@ class Validator
 
             $conditionTreeEvaluator = new ConditionTreeEvaluator();
             $result = $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
-            $resultLog = $result === null ? 'UNKNOWN' : ucfirst(var_export($result, true));
+            $resultStr = $result === null ? 'UNKNOWN' : ucfirst(var_export($result, true));
 
             $logger->log(Logger::DEBUG, sprintf(
                 AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT,
                 $audienceId,
-                $resultLog
+                $resultStr
             ));
 
             return $result;
@@ -258,12 +253,12 @@ class Validator
     }
 
     /**
-     * Method to verify that both values belong to same type. 
+     * Method to verify that both values belong to same type.
      * Float/Double and Integer are considered similar.
-     * 
+     *
      * @param  mixed  $firstVal
      * @param  mixed  $secondVal
-     * 
+     *
      * @return bool   True if values belong to similar types. Otherwise, False.
      */
     public static function areValuesSameType($firstVal, $secondVal)

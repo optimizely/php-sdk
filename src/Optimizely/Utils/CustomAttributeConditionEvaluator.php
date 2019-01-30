@@ -130,23 +130,12 @@ class CustomAttributeConditionEvaluator
             return null;
         }
 
-        if(!$this->isValueValidForExactConditions($userValue)) {
+        if(!$this->isValueValidForExactConditions($userValue) || !Validator::areValuesSameType($conditionValue, $userValue)) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
-                $conditionName,
-                json_encode($userValue)
-            ));
-            return null;
-        }
-
-        if(!Validator::areValuesSameType($conditionValue, $userValue)) {
-            $this->logger->log(Logger::DEBUG, sprintf(
-                logs::MISMATCH_TYPE,
-                json_encode($condition),
-                $conditionName,
                 gettype($userValue),
-                gettype($conditionValue)
+                $conditionName
             ));
             return null;
         }
@@ -194,8 +183,8 @@ class CustomAttributeConditionEvaluator
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
-                $conditionName,
-                json_encode($userValue)
+                gettype($userValue),
+                $conditionName
             ));
             return null;
         }
@@ -227,8 +216,8 @@ class CustomAttributeConditionEvaluator
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
-                $conditionName,
-                json_encode($userValue)
+                gettype($userValue),
+                $conditionName
             ));
             return null;
         }
@@ -260,8 +249,8 @@ class CustomAttributeConditionEvaluator
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
-                $conditionName,
-                json_encode($userValue)
+                gettype($userValue),
+                $conditionName
             ));
             return null;
         }
@@ -304,15 +293,27 @@ class CustomAttributeConditionEvaluator
         }
 
         $conditionName = $leafCondition['name'];
-        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if($userValue === null and $leafCondition['match'] !== self::EXISTS_MATCH_TYPE) {
-            $this->logger->log(Logger::DEBUG, sprintf(
-                logs::MISSING_ATTRIBUTE_VALUE,
-                json_encode($leafCondition),
-                $conditionName
-            ));
-            return null;
+        if($leafCondition['match'] !== self::EXISTS_MATCH_TYPE) {
+            if(!array_key_exists($conditionName, $this->userAttributes)) {
+                $this->logger->log(Logger::DEBUG, sprintf(
+                    logs::MISSING_ATTRIBUTE_VALUE,
+                    json_encode($leafCondition),
+                    $conditionName
+                ));
+                return null;
+            }else{
+                $userValue = $this->userAttributes[$conditionName];
+            }
+
+            if($userValue === null) {
+                $this->logger->log(Logger::WARNING, sprintf(
+                    logs::NULL_ATTRIBUTE_VALUE,
+                    json_encode($leafCondition),
+                    $conditionName
+                ));
+                return null;
+            }
         }
 
         $evaluatorForMatch = $this->getEvaluatorByMatchType($conditionMatch);

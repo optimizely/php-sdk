@@ -50,7 +50,7 @@
 
          $this->loggerMock->expects($this->once())
              ->method('log')
-             ->with(Logger::INFO, "No Audience attached to experiment \"test_experiment\". Evaluated as True.");
+             ->with(Logger::INFO, "No Audience attached to experiment \"test_experiment\". Evaluated to True.");
 
          $this->assertTrue(Validator::isUserInExperiment($this->config, $experiment, [], $this->loggerMock));
      }
@@ -72,12 +72,12 @@
         Validator::isUserInExperiment($this->config, $experiment, $userAttributes, $this->loggerMock);
 
         $this->assertContains([Logger::DEBUG, "Evaluating audiences for experiment \"test_experiment\": \"[\"11155\"]\"."], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, "User attributes: \"{\"test_attribute\":\"test_value_1\"}\"."], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, "Starting to evaluate audience \"11155\" with conditions: \"[\"and\",[\"or\",[\"or\",{\"name\":\"browser_type\",\"type\":\"custom_attribute\",\"value\":\"chrome\"}]]]\"."],
+        $this->assertContains([Logger::DEBUG, "Starting to evaluate audience \"11155\" with conditions:" +
+                              " \"[\"and\",[\"or\",[\"or\",{\"name\":\"browser_type\",\"type\":\"custom_attribute\",\"value\":\"chrome\"}]]]\"."],
                               $this->collectedLogs
                             );
-        $this->assertContains([Logger::DEBUG, "Audience \"11155\" evaluated as UNKNOWN."], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated as False."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "Audience \"11155\" evaluated to UNKNOWN."], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to False."], $this->collectedLogs);
      }
 
      public function testIsUserInExperimenEvaluatesAudienceConditions()
@@ -92,25 +92,24 @@
 
        Validator::isUserInExperiment($this->typedConfig, $experiment, ["house" => "I am in Slytherin"], $this->loggerMock);
 
-       $this->assertContains([Logger::DEBUG, "Evaluating audiences for experiment \"audience_combinations_experiment\": \"[\"or\",[\"or\",\"3468206642\",\"3988293898\"]]\"."],
+       $this->assertContains([Logger::DEBUG, "Evaluating audiences for experiment \"audience_combinations_experiment\":" +
+                              " \"[\"or\",[\"or\",\"3468206642\",\"3988293898\"]]\"."],
                               $this->collectedLogs
                             );
-       $this->assertContains([Logger::DEBUG, "User attributes: \"{\"house\":\"I am in Slytherin\"}\"."],
-                             $this->collectedLogs
-                           );
-       $this->assertContains([Logger::DEBUG, "Starting to evaluate audience \"3468206642\" with conditions: \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"value\":\"Gryffindor\"}]]]\"."],
+       $this->assertContains([Logger::DEBUG, "Starting to evaluate audience \"3468206642\" with conditions:" +
+                              " \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"value\":\"Gryffindor\"}]]]\"."],
                               $this->collectedLogs
                             );
-
-       $this->assertContains([Logger::DEBUG, "Audience \"3468206642\" evaluated as False."],
+       $this->assertContains([Logger::DEBUG, "Audience \"3468206642\" evaluated to False."],
                                $this->collectedLogs
                              );
-       $this->assertContains([Logger::DEBUG, "Starting to evaluate audience \"3988293898\" with conditions: \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"match\":\"substring\",\"value\":\"Slytherin\"}]]]\"."],
+       $this->assertContains([Logger::DEBUG, "Starting to evaluate audience \"3988293898\" with conditions:" +
+                              " \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"match\":\"substring\",\"value\":\"Slytherin\"}]]]\"."],
                               $this->collectedLogs
                             );
-       $this->assertContains([Logger::DEBUG, "Audience \"3988293898\" evaluated as True."],
+       $this->assertContains([Logger::DEBUG, "Audience \"3988293898\" evaluated to True."],
                              $this->collectedLogs
                             );
-       $this->assertContains([Logger::INFO, "Audiences for experiment \"audience_combinations_experiment\" collectively evaluated as True."], $this->collectedLogs);
+       $this->assertContains([Logger::INFO, "Audiences for experiment \"audience_combinations_experiment\" collectively evaluated to True."], $this->collectedLogs);
      }
  }
