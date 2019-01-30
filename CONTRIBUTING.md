@@ -17,6 +17,11 @@ We welcome contributions and feedback! All contributors must sign our [Contribut
 
 * **All code must have test coverage.** We use PHPUnit. Changes in functionality should have accompanying unit tests. Bug fixes should have accompanying regression tests.
 * Tests are located in `tests` with one file per class.
+* Lint your code with PHP CodeSniffer before submitting.
+
+## Style
+We enforce [PSR-2](https://www.php-fig.org/psr/psr-2/) rules with some minor [deviations](phpcs.xml). Run linter by executing `composer lint` and autocorrect lint errors by executing `composer beautify`.
+
 
 ## License
 

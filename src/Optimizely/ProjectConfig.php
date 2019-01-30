@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, 2018, Optimizely
+ * Copyright 2016, 2018-2019 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,7 +196,7 @@ class ProjectConfig
         $this->_logger = $logger;
         $this->_errorHandler = $errorHandler;
         $this->_version = $config['version'];
-        if(!in_array($this->_version, $supportedVersions)){
+        if (!in_array($this->_version, $supportedVersions)) {
             throw new InvalidDatafileVersionException(
                 "This version of the PHP SDK does not support the given datafile version: {$this->_version}."
             );
@@ -256,7 +256,7 @@ class ProjectConfig
         }
 
         // Conditions in typedAudiences are not expected to be string-encoded so they don't need
-        // to be decoded unlike audiences. 
+        // to be decoded unlike audiences.
         foreach (array_values($typedAudienceIdMap) as $typedAudience) {
             $typedAudience->setConditionsList($typedAudience->getConditions());
         }
@@ -402,7 +402,7 @@ class ProjectConfig
     }
 
     /**
-     * @param  String $featureKey Key of the feature flag
+     * @param String $featureKey Key of the feature flag
      *
      * @return FeatureFlag Entity corresponding to the key.
      */
@@ -418,7 +418,7 @@ class ProjectConfig
     }
 
     /**
-     * @param  String $rolloutId
+     * @param String $rolloutId
      *
      * @return Rollout
      */
@@ -455,7 +455,7 @@ class ProjectConfig
      * @param $audienceId string ID of the audience.
      *
      * @return Audience Entity corresponding to the ID.
-     *         Dummy entity is returned if ID is invalid.
+     *         Null is returned if ID is invalid.
      */
     public function getAudience($audienceId)
     {
@@ -465,7 +465,8 @@ class ProjectConfig
 
         $this->_logger->log(Logger::ERROR, sprintf('Audience ID "%s" is not in datafile.', $audienceId));
         $this->_errorHandler->handleError(new InvalidAudienceException('Provided audience is not in datafile.'));
-        return new Audience();
+
+        return null;
     }
 
     /**
@@ -576,8 +577,6 @@ class ProjectConfig
 
         $this->_logger->log(
             Logger::ERROR,
-   
-
             sprintf(
                 'No variable key "%s" defined in datafile for feature flag "%s".',
                 $variableKey,

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016,2018 Optimizely
+ * Copyright 2016, 2018-2019 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ class DefaultLogger implements LoggerInterface
     /**
      * DefaultLogger constructor.
      *
-     * @param int $minLevel Minimum level of messages to be logged.
-     * @param string $stream The PHP stream to log output.
+     * @param int    $minLevel Minimum level of messages to be logged.
+     * @param string $stream   The PHP stream to log output.
      */
     public function __construct($minLevel = Logger::INFO, $stream = "stdout")
     {
