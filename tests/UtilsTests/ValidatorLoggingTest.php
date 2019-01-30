@@ -73,8 +73,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
 
         $this->assertContains([Logger::DEBUG, "Evaluating audiences for experiment \"test_experiment\": \"[\"11155\"]\"."], $this->collectedLogs);
         $this->assertContains(
-            [Logger::DEBUG, "Starting to evaluate audience \"11155\" with conditions:" +
-                             " \"[\"and\",[\"or\",[\"or\",{\"name\":\"browser_type\",\"type\":\"custom_attribute\",\"value\":\"chrome\"}]]]\"."],
+            [Logger::DEBUG, "Starting to evaluate audience \"11155\" with conditions: \"[\"and\",[\"or\",[\"or\",{\"name\":\"browser_type\",\"type\":\"custom_attribute\",\"value\":\"chrome\"}]]]\"."],
             $this->collectedLogs
         );
         $this->assertContains([Logger::DEBUG, "Audience \"11155\" evaluated to UNKNOWN."], $this->collectedLogs);
@@ -94,13 +93,11 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
         Validator::isUserInExperiment($this->typedConfig, $experiment, ["house" => "I am in Slytherin"], $this->loggerMock);
 
         $this->assertContains(
-            [Logger::DEBUG, "Evaluating audiences for experiment \"audience_combinations_experiment\":" +
-                             " \"[\"or\",[\"or\",\"3468206642\",\"3988293898\"]]\"."],
+            [Logger::DEBUG, "Evaluating audiences for experiment \"audience_combinations_experiment\": \"[\"or\",[\"or\",\"3468206642\",\"3988293898\"]]\"."],
             $this->collectedLogs
         );
         $this->assertContains(
-            [Logger::DEBUG, "Starting to evaluate audience \"3468206642\" with conditions:" +
-                             " \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"value\":\"Gryffindor\"}]]]\"."],
+            [Logger::DEBUG, "Starting to evaluate audience \"3468206642\" with conditions: \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"value\":\"Gryffindor\"}]]]\"."],
             $this->collectedLogs
         );
         $this->assertContains(
@@ -108,8 +105,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             $this->collectedLogs
         );
         $this->assertContains(
-            [Logger::DEBUG, "Starting to evaluate audience \"3988293898\" with conditions:" +
-                             " \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"match\":\"substring\",\"value\":\"Slytherin\"}]]]\"."],
+            [Logger::DEBUG, "Starting to evaluate audience \"3988293898\" with conditions: \"[\"and\",[\"or\",[\"or\",{\"name\":\"house\",\"type\":\"custom_attribute\",\"match\":\"substring\",\"value\":\"Slytherin\"}]]]\"."],
             $this->collectedLogs
         );
         $this->assertContains(
