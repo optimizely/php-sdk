@@ -172,6 +172,10 @@ class Validator
 
         $evaluateAudience = function ($audienceId) use ($config, $evaluateCustomAttr, $logger) {
             $audience = $config->getAudience($audienceId);
+            if ($audience === null) {
+                return null;
+            }
+            
             $logger->log(Logger::DEBUG, sprintf(
                 AudienceEvaluationLogs::EVALUATING_AUDIENCE_WITH_CONDITIONS,
                 $audienceId,

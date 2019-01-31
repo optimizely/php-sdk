@@ -344,7 +344,27 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         // Both audience Ids and audience conditions exist. Audience Ids is ignored.
         $experiment->setAudienceIds([]);
         $experiment->setAudienceConditions('7718080042');
+        
+        $this->assertTrue(
+            Validator::isUserInExperiment(
+                $config,
+                $experiment,
+                ['device_type' => 'iPhone', 'location' => 'San Francisco'],
+                $this->loggerMock
+            )
+        );
+    }
 
+    public function testIsUserInExperimentWithUnknownAudienceId()
+    {
+        $config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
+        $experiment = $config->getExperimentFromKey('test_experiment');
+
+        // Both audience Ids and audience conditions exist. Audience Ids is ignored.
+        $experiment->setAudienceIds([]);
+        $experiment->setAudienceConditions(["or", "unknown_audience_id", "7718080042"]);
+        
+        // User qualifies for audience with ID "7718080042".
         $this->assertTrue(
             Validator::isUserInExperiment(
                 $config,
