@@ -126,12 +126,25 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
+        if ((is_int($userValue) || is_float($userValue)) && (abs($userValue) > pow(2, 53))) {
+            $this->logger->log(Logger::DEBUG, sprintf(
+                logs::INFINITE_ATTRIBUTE_VALUE,
+                json_encode($condition),
+                $userValue
+            ));
+            return null;
+        }
+
         if (!$this->isValueValidForExactConditions($conditionValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
             return null;
         }
 
         if (!$this->isValueValidForExactConditions($userValue) || !Validator::areValuesSameType($conditionValue, $userValue)) {
-            $this->logger->log(Logger::WARNING, sprintf(
+            $this->logger->log(Logger::DEBUG, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
                 gettype($userValue),
@@ -175,12 +188,25 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
+        if ((is_int($userValue) || is_float($userValue)) && (abs($userValue) > pow(2, 53))) {
+            $this->logger->log(Logger::DEBUG, sprintf(
+                logs::INFINITE_ATTRIBUTE_VALUE,
+                json_encode($condition),
+                $userValue
+            ));
+            return null;
+        }
+
         if (!Validator::isFiniteNumber($conditionValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
             return null;
         }
 
         if (!Validator::isFiniteNumber($userValue)) {
-            $this->logger->log(Logger::WARNING, sprintf(
+            $this->logger->log(Logger::DEBUG, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
                 gettype($userValue),
@@ -208,12 +234,25 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
+        if ((is_int($userValue) || is_float($userValue)) && (abs($userValue) > pow(2, 53))) {
+            $this->logger->log(Logger::DEBUG, sprintf(
+                logs::INFINITE_ATTRIBUTE_VALUE,
+                json_encode($condition),
+                $userValue
+            ));
+            return null;
+        }
+
         if (!Validator::isFiniteNumber($conditionValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
             return null;
         }
 
         if (!Validator::isFiniteNumber($userValue)) {
-            $this->logger->log(Logger::WARNING, sprintf(
+            $this->logger->log(Logger::DEBUG, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
                 gettype($userValue),
@@ -242,11 +281,15 @@ class CustomAttributeConditionEvaluator
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
         if (!is_string($conditionValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
             return null;
         }
 
         if (!is_string($userValue)) {
-            $this->logger->log(Logger::WARNING, sprintf(
+            $this->logger->log(Logger::DEBUG, sprintf(
                 logs::UNEXPECTED_TYPE,
                 json_encode($condition),
                 gettype($userValue),
