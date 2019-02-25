@@ -21,11 +21,10 @@ class AudienceEvaluationLogs
 {
     const AUDIENCE_EVALUATION_RESULT = "Audience \"%s\" evaluated to %s.";
     const AUDIENCE_EVALUATION_RESULT_COMBINED = "Audiences for experiment \"%s\" collectively evaluated to %s.";
-    const EVALUATING_AUDIENCES = "Evaluating audiences for experiment \"%s\": \"%s\".";
-    const EVALUATING_AUDIENCE_WITH_CONDITIONS = "Starting to evaluate audience \"%s\" with conditions: \"%s\".";
+    const EVALUATING_AUDIENCES_COMBINED = "Evaluating audiences for experiment \"%s\": %s.";
+    const EVALUATING_AUDIENCE = "Starting to evaluate audience \"%s\" with conditions: \"%s\".";
     const INFINITE_ATTRIBUTE_VALUE = "Audience condition %s evaluated to UNKNOWN for user attribute \"%s\" is not in the range [-2^53, +2^53].";
     const MISSING_ATTRIBUTE_VALUE = "Audience condition %s evaluated to UNKNOWN because no value was passed for user attribute \"%s\".";
-    const NO_AUDIENCE_ATTACHED = "No Audience attached to experiment \"%s\". Evaluated to True.";
     const NULL_ATTRIBUTE_VALUE = "Audience condition \"%s\" evaluated to UNKNOWN because a null value was passed for user attribute \"%s\".";
     const UNEXPECTED_TYPE = "Audience condition %s evaluated to UNKNOWN because a value of type \"%s\" was passed for user attribute \"%s\".";
 

@@ -126,11 +126,11 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if ((is_int($userValue) || is_float($userValue)) && (abs($userValue) > pow(2, 53))) {
+        if ((is_int($userValue) || is_float($userValue)) && !Validator::isFiniteNumber($userValue)) {
             $this->logger->log(Logger::DEBUG, sprintf(
                 logs::INFINITE_ATTRIBUTE_VALUE,
                 json_encode($condition),
-                $userValue
+                $conditionName
             ));
             return null;
         }
@@ -188,11 +188,11 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if ((is_int($userValue) || is_float($userValue)) && (abs($userValue) > pow(2, 53))) {
+        if ((is_int($userValue) || is_float($userValue)) && !Validator::isFiniteNumber($userValue)) {
             $this->logger->log(Logger::DEBUG, sprintf(
                 logs::INFINITE_ATTRIBUTE_VALUE,
                 json_encode($condition),
-                $userValue
+                $conditionName
             ));
             return null;
         }
@@ -234,11 +234,11 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if ((is_int($userValue) || is_float($userValue)) && (abs($userValue) > pow(2, 53))) {
+        if ((is_int($userValue) || is_float($userValue)) && !Validator::isFiniteNumber($userValue)) {
             $this->logger->log(Logger::DEBUG, sprintf(
                 logs::INFINITE_ATTRIBUTE_VALUE,
                 json_encode($condition),
-                $userValue
+                $conditionName
             ));
             return null;
         }

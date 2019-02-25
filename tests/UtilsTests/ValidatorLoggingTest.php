@@ -48,9 +48,13 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
         $experiment->setAudienceIds([]);
         $experiment->setAudienceConditions([]);
 
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::INFO, "No Audience attached to experiment \"test_experiment\". Evaluated to True.");
+            ->with(Logger::DEBUG, "Evaluating audiences for experiment \"test_experiment\": [].");
+
+        $this->loggerMock->expects($this->at(1))
+            ->method('log')
+            ->with(Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to True.");
 
         $this->assertTrue(Validator::isUserInExperiment($this->config, $experiment, [], $this->loggerMock));
     }
@@ -71,12 +75,12 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
 
         Validator::isUserInExperiment($this->config, $experiment, $userAttributes, $this->loggerMock);
 
-        $this->assertContains([Logger::DEBUG, "Evaluating audiences for experiment \"test_experiment\": \"[\"11155\"]\"."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "Evaluating audiences for experiment \"test_experiment\": [\"11155\"]."], $this->collectedLogs);
         $this->assertContains(
             [Logger::DEBUG, "Starting to evaluate audience \"11155\" with conditions: \"[\"and\",[\"or\",[\"or\",{\"name\":\"browser_type\",\"type\":\"custom_attribute\",\"value\":\"chrome\"}]]]\"."],
             $this->collectedLogs
         );
-        $this->assertContains([Logger::DEBUG, "Audience \"11155\" evaluated to UNKNOWN."], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, "Audience \"11155\" evaluated to UNKNOWN."], $this->collectedLogs);
         $this->assertContains([Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to False."], $this->collectedLogs);
     }
 
@@ -93,7 +97,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
         Validator::isUserInExperiment($this->typedConfig, $experiment, ["house" => "I am in Slytherin"], $this->loggerMock);
 
         $this->assertContains(
-            [Logger::DEBUG, "Evaluating audiences for experiment \"audience_combinations_experiment\": \"[\"or\",[\"or\",\"3468206642\",\"3988293898\"]]\"."],
+            [Logger::DEBUG, "Evaluating audiences for experiment \"audience_combinations_experiment\": [\"or\",[\"or\",\"3468206642\",\"3988293898\"]]."],
             $this->collectedLogs
         );
         $this->assertContains(
@@ -101,7 +105,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             $this->collectedLogs
         );
         $this->assertContains(
-            [Logger::DEBUG, "Audience \"3468206642\" evaluated to False."],
+            [Logger::INFO, "Audience \"3468206642\" evaluated to FALSE."],
             $this->collectedLogs
         );
         $this->assertContains(
@@ -109,7 +113,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             $this->collectedLogs
         );
         $this->assertContains(
-            [Logger::DEBUG, "Audience \"3988293898\" evaluated to True."],
+            [Logger::INFO, "Audience \"3988293898\" evaluated to TRUE."],
             $this->collectedLogs
         );
         $this->assertContains([Logger::INFO, "Audiences for experiment \"audience_combinations_experiment\" collectively evaluated to True."], $this->collectedLogs);

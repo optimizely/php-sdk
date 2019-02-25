@@ -146,20 +146,20 @@ class Validator
             $audienceConditions = $experiment->getAudienceIds();
         }
 
-        // Return true if experiment is not targeted to any audience.
-        if (empty($audienceConditions)) {
-            $logger->log(Logger::INFO, sprintf(
-                AudienceEvaluationLogs::NO_AUDIENCE_ATTACHED,
-                $experiment->getKey()
-            ));
-            return true;
-        }
-
         $logger->log(Logger::DEBUG, sprintf(
-            AudienceEvaluationLogs::EVALUATING_AUDIENCES,
+            AudienceEvaluationLogs::EVALUATING_AUDIENCES_COMBINED,
             $experiment->getKey(),
             json_encode($audienceConditions)
         ));
+
+        // Return true if experiment is not targeted to any audience.
+        if (empty($audienceConditions)) {
+            $logger->log(Logger::INFO, sprintf(
+                AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
+                $experiment->getKey(), 'True'
+            ));
+            return true;
+        }
 
         if ($userAttributes === null) {
             $userAttributes = [];
@@ -177,16 +177,16 @@ class Validator
             }
             
             $logger->log(Logger::DEBUG, sprintf(
-                AudienceEvaluationLogs::EVALUATING_AUDIENCE_WITH_CONDITIONS,
+                AudienceEvaluationLogs::EVALUATING_AUDIENCE,
                 $audienceId,
                 json_encode($audience->getConditionsList())
             ));
 
             $conditionTreeEvaluator = new ConditionTreeEvaluator();
             $result = $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
-            $resultStr = $result === null ? 'UNKNOWN' : ucfirst(var_export($result, true));
+            $resultStr = $result === null ? 'UNKNOWN' : strtoupper(var_export($result, true));
 
-            $logger->log(Logger::DEBUG, sprintf(
+            $logger->log(Logger::INFO, sprintf(
                 AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT,
                 $audienceId,
                 $resultStr

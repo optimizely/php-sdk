@@ -386,7 +386,7 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
 
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with($logLevel, "Audience condition {\"name\":\"favorite_constellation\",\"value\":900,\"type\":\"custom_attribute\",\"match\":\"exact\"} evaluated to UNKNOWN for user attribute \"9007199254740993\" is not in the range [-2^53, +2^53].");
+            ->with($logLevel, "Audience condition {\"name\":\"favorite_constellation\",\"value\":900,\"type\":\"custom_attribute\",\"match\":\"exact\"} evaluated to UNKNOWN for user attribute \"favorite_constellation\" is not in the range [-2^53, +2^53].");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -430,7 +430,7 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
 
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":900,\"type\":\"custom_attribute\",\"match\":\"gt\"} evaluated to UNKNOWN for user attribute \"9007199254740993\" is not in the range [-2^53, +2^53].");
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":900,\"type\":\"custom_attribute\",\"match\":\"gt\"} evaluated to UNKNOWN for user attribute \"meters_travelled\" is not in the range [-2^53, +2^53].");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -474,7 +474,7 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
 
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":900,\"type\":\"custom_attribute\",\"match\":\"lt\"} evaluated to UNKNOWN for user attribute \"9007199254740993\" is not in the range [-2^53, +2^53].");
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":900,\"type\":\"custom_attribute\",\"match\":\"lt\"} evaluated to UNKNOWN for user attribute \"meters_travelled\" is not in the range [-2^53, +2^53].");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
