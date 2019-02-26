@@ -157,7 +157,7 @@ class Validator
             $logger->log(Logger::INFO, sprintf(
                 AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
                 $experiment->getKey(),
-                'True'
+                'TRUE'
             ));
             return true;
         }

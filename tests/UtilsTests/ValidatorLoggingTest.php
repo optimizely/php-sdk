@@ -54,7 +54,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
 
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to True.");
+            ->with(Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to TRUE.");
 
         $this->assertTrue(Validator::isUserInExperiment($this->config, $experiment, [], $this->loggerMock));
     }
