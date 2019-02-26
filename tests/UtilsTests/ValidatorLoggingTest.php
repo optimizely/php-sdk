@@ -81,7 +81,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             $this->collectedLogs
         );
         $this->assertContains([Logger::INFO, "Audience \"11155\" evaluated to UNKNOWN."], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to False."], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to FALSE."], $this->collectedLogs);
     }
 
     public function testIsUserInExperimenEvaluatesAudienceConditions()
@@ -116,6 +116,6 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             [Logger::INFO, "Audience \"3988293898\" evaluated to TRUE."],
             $this->collectedLogs
         );
-        $this->assertContains([Logger::INFO, "Audiences for experiment \"audience_combinations_experiment\" collectively evaluated to True."], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, "Audiences for experiment \"audience_combinations_experiment\" collectively evaluated to TRUE."], $this->collectedLogs);
     }
 }

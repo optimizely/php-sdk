@@ -135,7 +135,7 @@ class Validator
      * @param $config ProjectConfig Configuration for the project.
      * @param $experiment Experiment Entity representing the experiment.
      * @param $userAttributes array Attributes of the user.
-     *  @param $logger LoggerInterface.
+     * @param $logger LoggerInterface.
      *
      * @return boolean Representing whether user meets audience conditions to be in experiment or not.
      */
@@ -156,7 +156,8 @@ class Validator
         if (empty($audienceConditions)) {
             $logger->log(Logger::INFO, sprintf(
                 AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
-                $experiment->getKey(), 'True'
+                $experiment->getKey(),
+                'True'
             ));
             return true;
         }
@@ -202,7 +203,7 @@ class Validator
         $logger->log(Logger::INFO, sprintf(
             AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
             $experiment->getKey(),
-            ucfirst(var_export($evalResult, true))
+            strtoupper(var_export($evalResult, true))
         ));
 
         return $evalResult;
