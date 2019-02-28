@@ -22,7 +22,7 @@ class AudienceEvaluationLogs
     const AUDIENCE_EVALUATION_RESULT = "Audience \"%s\" evaluated to %s.";
     const AUDIENCE_EVALUATION_RESULT_COMBINED = "Audiences for experiment \"%s\" collectively evaluated to %s.";
     const EVALUATING_AUDIENCES_COMBINED = "Evaluating audiences for experiment \"%s\": %s.";
-    const EVALUATING_AUDIENCE = "Starting to evaluate audience \"%s\" with conditions: \"%s\".";
+    const EVALUATING_AUDIENCE = "Starting to evaluate audience \"%s\" with conditions: %s.";
     const INFINITE_ATTRIBUTE_VALUE = "Audience condition %s evaluated to UNKNOWN for user attribute \"%s\" is not in the range [-2^53, +2^53].";
     const MISSING_ATTRIBUTE_VALUE = "Audience condition %s evaluated to UNKNOWN because no value was passed for user attribute \"%s\".";
     const NULL_ATTRIBUTE_VALUE = "Audience condition \"%s\" evaluated to UNKNOWN because a null value was passed for user attribute \"%s\".";
