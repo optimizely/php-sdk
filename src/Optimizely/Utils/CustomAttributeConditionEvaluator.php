@@ -348,12 +348,10 @@ class CustomAttributeConditionEvaluator
                     $conditionName
                 ));
                 return null;
-            } else {
-                $userValue = $this->userAttributes[$conditionName];
             }
 
-            if ($userValue === null) {
-                $this->logger->log(Logger::WARNING, sprintf(
+            if (!isset($this->userAttributes[$conditionName])) {
+                $this->logger->log(Logger::DEBUG, sprintf(
                     logs::NULL_ATTRIBUTE_VALUE,
                     json_encode($leafCondition),
                     $conditionName
