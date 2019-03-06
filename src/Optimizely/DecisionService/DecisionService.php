@@ -145,7 +145,7 @@ class DecisionService
             }
         }
 
-        if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $attributes)) {
+        if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $attributes, $this->_logger)) {
             $this->_logger->log(
                 Logger::INFO,
                 sprintf('User "%s" does not meet conditions to be in experiment "%s".', $userId, $experiment->getKey())
@@ -188,10 +188,10 @@ class DecisionService
                 Logger::INFO,
                 "User '{$userId}' is bucketed into rollout for feature flag '{$featureFlag->getKey()}'."
             );
-      
+
             return $decision;
         }
-            
+
         $this->_logger->log(
             Logger::INFO,
             "User '{$userId}' is not bucketed into rollout for feature flag '{$featureFlag->getKey()}'."
@@ -291,7 +291,7 @@ class DecisionService
             $experiment = $rolloutRules[$i];
 
             // Evaluate if user meets the audience condition of this rollout rule
-            if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes)) {
+            if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes, $this->_logger)) {
                 $this->_logger->log(
                     Logger::DEBUG,
                     sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey())
@@ -309,16 +309,16 @@ class DecisionService
         }
         // Evaluate Everyone Else Rule / Last Rule now
         $experiment = $rolloutRules[sizeof($rolloutRules)-1];
-        
+
         // Evaluate if user meets the audience condition of Everyone Else Rule / Last Rule now
-        if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes)) {
+        if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes, $this->_logger)) {
             $this->_logger->log(
                 Logger::DEBUG,
                 sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey())
             );
             return null;
         }
-        
+
         $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketing_id, $userId);
         if ($variation && $variation->getKey()) {
             return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
