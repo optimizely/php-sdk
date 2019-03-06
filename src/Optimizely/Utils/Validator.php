@@ -19,6 +19,7 @@ namespace Optimizely\Utils;
 use JsonSchema;
 use Monolog\Logger;
 use Optimizely\Entity\Experiment;
+use Optimizely\Enums\AudienceEvaluationLogs;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\ProjectConfig;
 use Optimizely\Utils\ConditionTreeEvaluator;
@@ -83,7 +84,7 @@ class Validator
         if (!(is_int($value) || is_float($value))) {
             return false;
         }
-       
+
         if (is_nan($value) || is_infinite($value)) {
             return false;
         }
@@ -134,18 +135,30 @@ class Validator
      * @param $config ProjectConfig Configuration for the project.
      * @param $experiment Experiment Entity representing the experiment.
      * @param $userAttributes array Attributes of the user.
+     * @param $logger LoggerInterface.
      *
      * @return boolean Representing whether user meets audience conditions to be in experiment or not.
      */
-    public static function isUserInExperiment($config, $experiment, $userAttributes)
+    public static function isUserInExperiment($config, $experiment, $userAttributes, $logger)
     {
         $audienceConditions = $experiment->getAudienceConditions();
         if ($audienceConditions === null) {
             $audienceConditions = $experiment->getAudienceIds();
         }
 
+        $logger->log(Logger::DEBUG, sprintf(
+            AudienceEvaluationLogs::EVALUATING_AUDIENCES_COMBINED,
+            $experiment->getKey(),
+            json_encode($audienceConditions)
+        ));
+
         // Return true if experiment is not targeted to any audience.
         if (empty($audienceConditions)) {
+            $logger->log(Logger::INFO, sprintf(
+                AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
+                $experiment->getKey(),
+                'TRUE'
+            ));
             return true;
         }
 
@@ -153,26 +166,47 @@ class Validator
             $userAttributes = [];
         }
 
-        $customAttrCondEval = new CustomAttributeConditionEvaluator($userAttributes);
+        $customAttrCondEval = new CustomAttributeConditionEvaluator($userAttributes, $logger);
         $evaluateCustomAttr = function ($leafCondition) use ($customAttrCondEval) {
             return $customAttrCondEval->evaluate($leafCondition);
         };
 
-        $evaluateAudience = function ($audienceId) use ($config, $evaluateCustomAttr) {
-            $conditionTreeEvaluator = new ConditionTreeEvaluator();
-
+        $evaluateAudience = function ($audienceId) use ($config, $evaluateCustomAttr, $logger) {
             $audience = $config->getAudience($audienceId);
             if ($audience === null) {
                 return null;
             }
+            
+            $logger->log(Logger::DEBUG, sprintf(
+                AudienceEvaluationLogs::EVALUATING_AUDIENCE,
+                $audienceId,
+                json_encode($audience->getConditionsList())
+            ));
 
-            return $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
+            $conditionTreeEvaluator = new ConditionTreeEvaluator();
+            $result = $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
+            $resultStr = $result === null ? 'UNKNOWN' : strtoupper(var_export($result, true));
+
+            $logger->log(Logger::INFO, sprintf(
+                AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT,
+                $audienceId,
+                $resultStr
+            ));
+
+            return $result;
         };
 
         $conditionTreeEvaluator = new ConditionTreeEvaluator();
         $evalResult = $conditionTreeEvaluator->evaluate($audienceConditions, $evaluateAudience);
-        
-        return $evalResult || false;
+        $evalResult = $evalResult || false;
+
+        $logger->log(Logger::INFO, sprintf(
+            AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
+            $experiment->getKey(),
+            strtoupper(var_export($evalResult, true))
+        ));
+
+        return $evalResult;
     }
 
     /**
@@ -227,8 +261,8 @@ class Validator
      * Method to verify that both values belong to same type.
      * Float/Double and Integer are considered similar.
      *
-     * @param mixed $firstVal
-     * @param mixed $secondVal
+     * @param  mixed  $firstVal
+     * @param  mixed  $secondVal
      *
      * @return bool   True if values belong to similar types. Otherwise, False.
      */
@@ -247,7 +281,6 @@ class Validator
 
     /**
      * Returns true only if given input is an array with all of it's keys of type string.
-     *
      * @param  mixed $arr
      * @return bool  True if array contains all string keys. Otherwise, false.
      */

@@ -17,6 +17,8 @@
 
 namespace Optimizely\Utils;
 
+use Monolog\Logger;
+use Optimizely\Enums\AudienceEvaluationLogs as logs;
 use Optimizely\Utils\Validator;
 
 class CustomAttributeConditionEvaluator
@@ -31,17 +33,19 @@ class CustomAttributeConditionEvaluator
 
     /**
      * @var UserAttributes
-     */
+    */
     protected $userAttributes;
 
     /**
      * CustomAttributeConditionEvaluator constructor
      *
      * @param array $userAttributes Associative array of user attributes to values.
+     * @param $logger LoggerInterface.
      */
-    public function __construct(array $userAttributes)
+    public function __construct(array $userAttributes, $logger)
     {
         $this->userAttributes = $userAttributes;
+        $this->logger = $logger;
     }
 
     /**
@@ -73,7 +77,7 @@ class CustomAttributeConditionEvaluator
     /**
      * Gets the evaluator method name for the given match type.
      *
-     * @param string $matchType Match type for which to get evaluator.
+     * @param  string $matchType Match type for which to get evaluator.
      *
      * @return string Corresponding evaluator method name.
      */
@@ -92,13 +96,13 @@ class CustomAttributeConditionEvaluator
     /**
      * Checks if the given input is a valid value for exact condition evaluation.
      *
-     * @param $value Input to check.
+     * @param  $value Input to check.
      *
-     * @return boolean true if given input is a string/boolean/finite number, false otherwise.
+     * @return boolean true if given input is a string/boolean/number, false otherwise.
      */
-    protected function isValueValidForExactConditions($value)
+    protected function isValueTypeValidForExactConditions($value)
     {
-        if (is_string($value) || is_bool($value) || Validator::isFiniteNumber($value)) {
+        if (is_string($value) || is_bool($value) || is_int($value) || is_float($value)) {
             return true;
         }
 
@@ -108,7 +112,7 @@ class CustomAttributeConditionEvaluator
     /**
      * Evaluate the given exact match condition for the given user attributes.
      *
-     * @param object $condition
+     * @param  object $condition
      *
      * @return null|boolean true if the user attribute value is equal (===) to the condition value,
      *                      false if the user attribute value is not equal (!==) to the condition value,
@@ -122,11 +126,34 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if (!$this->isValueValidForExactConditions($userValue)
-            || !$this->isValueValidForExactConditions($conditionValue)
-            || !Validator::areValuesSameType($conditionValue, $userValue)
-        ) {
-                return null;
+        if (!$this->isValueTypeValidForExactConditions($conditionValue) ||
+            ((is_int($conditionValue) || is_float($conditionValue)) && !Validator::isFiniteNumber($conditionValue))) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
+            return null;
+        }
+
+        if (!$this->isValueTypeValidForExactConditions($userValue) ||
+            !Validator::areValuesSameType($conditionValue, $userValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNEXPECTED_TYPE,
+                json_encode($condition),
+                gettype($userValue),
+                $conditionName
+            ));
+            return null;
+        }
+
+        if ((is_int($userValue) || is_float($userValue)) &&
+            !Validator::isFiniteNumber($userValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::INFINITE_ATTRIBUTE_VALUE,
+                json_encode($condition),
+                $conditionName
+            ));
+            return null;
         }
 
         return $conditionValue == $userValue;
@@ -135,7 +162,7 @@ class CustomAttributeConditionEvaluator
     /**
      * Evaluate the given exists match condition for the given user attributes.
      *
-     * @param object $condition
+     * @param  object $condition
      *
      * @return null|boolean true if both:
      *                           1) the user attributes have a value for the given condition, and
@@ -151,7 +178,7 @@ class CustomAttributeConditionEvaluator
     /**
      * Evaluate the given greater than match condition for the given user attributes.
      *
-     * @param object $condition
+     * @param  object $condition
      *
      * @return boolean true if the user attribute value is greater than the condition value,
      *                 false if the user attribute value is less than or equal to the condition value,
@@ -164,7 +191,30 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if (!Validator::isFiniteNumber($userValue) || !Validator::isFiniteNumber($conditionValue)) {
+        if (!Validator::isFiniteNumber($conditionValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
+            return null;
+        }
+
+        if (!(is_int($userValue) || is_float($userValue))) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNEXPECTED_TYPE,
+                json_encode($condition),
+                gettype($userValue),
+                $conditionName
+            ));
+            return null;
+        }
+
+        if (!Validator::isFiniteNumber($userValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::INFINITE_ATTRIBUTE_VALUE,
+                json_encode($condition),
+                $conditionName
+            ));
             return null;
         }
 
@@ -174,7 +224,7 @@ class CustomAttributeConditionEvaluator
     /**
      * Evaluate the given less than match condition for the given user attributes.
      *
-     * @param object $condition
+     * @param  object $condition
      *
      * @return boolean true if the user attribute value is less than the condition value,
      *                 false if the user attribute value is greater than or equal to the condition value,
@@ -187,7 +237,30 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if (!Validator::isFiniteNumber($userValue) || !Validator::isFiniteNumber($conditionValue)) {
+        if (!Validator::isFiniteNumber($conditionValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
+            return null;
+        }
+
+        if (!(is_int($userValue) || is_float($userValue))) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNEXPECTED_TYPE,
+                json_encode($condition),
+                gettype($userValue),
+                $conditionName
+            ));
+            return null;
+        }
+
+        if (!Validator::isFiniteNumber($userValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::INFINITE_ATTRIBUTE_VALUE,
+                json_encode($condition),
+                $conditionName
+            ));
             return null;
         }
 
@@ -195,22 +268,36 @@ class CustomAttributeConditionEvaluator
     }
 
      /**
-      * Evaluate the given substring than match condition for the given user attributes.
-      *
-      * @param object $condition
-      *
-      * @return boolean true if the condition value is a substring of the user attribute value,
-      *                 false if the condition value is not a substring of the user attribute value,
-      *                 null if the condition value isn't a string or the user attribute value
-      *                 isn't a string.
-      */
+     * Evaluate the given substring than match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if the condition value is a substring of the user attribute value,
+     *                 false if the condition value is not a substring of the user attribute value,
+     *                 null if the condition value isn't a string or the user attribute value
+     *                 isn't a string.
+     */
     protected function substringEvaluator($condition)
     {
         $conditionName = $condition['name'];
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
 
-        if (!is_string($userValue) || !is_string($conditionValue)) {
+        if (!is_string($conditionValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
+            return null;
+        }
+
+        if (!is_string($userValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNEXPECTED_TYPE,
+                json_encode($condition),
+                gettype($userValue),
+                $conditionName
+            ));
             return null;
         }
 
@@ -220,7 +307,7 @@ class CustomAttributeConditionEvaluator
     /**
      * Function to evaluate audience conditions against user's attributes.
      *
-     * @param array $leafCondition Condition to be evaluated.
+     * @param array $leafCondition  Condition to be evaluated.
      *
      * @return null|boolean true/false if the given user attributes match/don't match the given conditions,
      * null if the given user attributes and conditions can't be evaluated.
@@ -230,6 +317,10 @@ class CustomAttributeConditionEvaluator
         $leafCondition = $this->setNullForMissingKeys($leafCondition);
 
         if ($leafCondition['type'] !== self::CUSTOM_ATTRIBUTE_CONDITION_TYPE) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_TYPE,
+                json_encode($leafCondition)
+            ));
             return null;
         }
 
@@ -240,7 +331,33 @@ class CustomAttributeConditionEvaluator
         }
 
         if (!in_array($conditionMatch, $this->getMatchTypes())) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_MATCH_TYPE,
+                json_encode($leafCondition)
+            ));
             return null;
+        }
+
+        $conditionName = $leafCondition['name'];
+
+        if ($leafCondition['match'] !== self::EXISTS_MATCH_TYPE) {
+            if (!array_key_exists($conditionName, $this->userAttributes)) {
+                $this->logger->log(Logger::DEBUG, sprintf(
+                    logs::MISSING_ATTRIBUTE_VALUE,
+                    json_encode($leafCondition),
+                    $conditionName
+                ));
+                return null;
+            }
+
+            if (!isset($this->userAttributes[$conditionName])) {
+                $this->logger->log(Logger::DEBUG, sprintf(
+                    logs::NULL_ATTRIBUTE_VALUE,
+                    json_encode($leafCondition),
+                    $conditionName
+                ));
+                return null;
+            }
         }
 
         $evaluatorForMatch = $this->getEvaluatorByMatchType($conditionMatch);
