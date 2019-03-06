@@ -24,13 +24,13 @@ The 3.0 release improves event tracking and supports additional audience targeti
 
 ### Breaking Changes:
 * Previously, notification listeners were only given string-valued user attributes because only strings could be passed into various method calls. That is no longer the case. You may pass non-string attribute values, and if you do, you must update your notification listeners to be able to receive whatever values you pass in.
-  * We're also renaming `clearNotifications` and `cleanAllNotifications` methods. They're now called `clearNotificationListeners` and `clearAllNotificationListeners`, respectively. The original methods are now deprecated and will be dropped in a future release. ([#120](https://github.com/optimizely/php-sdk/pull/120))
+  * We're also renaming the `clearNotifications` and `cleanAllNotifications` methods. They're now called `clearNotificationListeners` and `clearAllNotificationListeners`, respectively. The original methods are now deprecated and will be dropped in a future release. ([#120](https://github.com/optimizely/php-sdk/pull/120))
 
 ### Bug Fixes:
 * Experiments and features can no longer activate when a negatively targeted attribute has a missing, null, or malformed value.
   * Audience conditions (except for the new `exists` matcher) no longer resolve to `false` when they fail to find an legitimate value for the targeted user attribute. The result remains `null` (unknown). Therefore, an audience that negates such a condition (using the `"not"` operator) can no longer resolve to `true` unless there is an unrelated branch in the condition tree that itself resolves to `true`.
 * All methods now validate that user IDs are strings and that experiment keys, feature keys, feature variable keys, and event keys are non-empty strings.
-* Ignore the user's whitelisted variation if it has been stopped. ([#123](Ignore the user’s whitelisted variation if it has been stopped. (#123))
+* Ignore the user's whitelisted variation if it has been stopped. ([#123](https://github.com/optimizely/php-sdk/pull/123))
 
 ## 2.2.1
 November 14th, 2018
