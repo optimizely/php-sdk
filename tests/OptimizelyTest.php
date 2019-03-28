@@ -20,6 +20,7 @@ use Exception;
 use Monolog\Logger;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
+use Optimizely\Enums\DecisionInfoTypes;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
 use Optimizely\Exceptions\InvalidAttributeException;
@@ -2174,7 +2175,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($optimizelyObj->isFeatureEnabled('mutex_group_feature', "user_id"));
     }
 
-    public function testIsFeatureEnabledGivenGetVariationForFeatureReturnsNull()
+    public function testIsFeatureEnabledGivenGetVariationForFeatureReturnsRolloutDecision()
     {
         // should return false when no variation is returned for user
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
@@ -2191,10 +2192,16 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $decisionService->setAccessible(true);
         $decisionService->setValue($optimizelyMock, $decisionServiceMock);
 
-        // mock getVariationForFeature to return null
+        // mock getVariationForFeature to return rolloutDecision
+        $expectedDecision = new FeatureDecision(
+            null,
+            null,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')
-            ->will($this->returnValue(null));
+            ->will($this->returnValue($expectedDecision));
 
         // assert that impression event is not sent
         $optimizelyMock->expects($this->never())
@@ -2729,9 +2736,16 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $decisionService->setAccessible(true);
         $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
 
+        // mock getVariationForFeature to return rolloutDecision
+        $expectedDecision = new FeatureDecision(
+            null,
+            null,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')
-            ->will($this->returnValue(null));
+            ->will($this->returnValue($expectedDecision));
 
         $this->loggerMock->expects($this->exactly(1))
             ->method('log')
@@ -2879,9 +2893,16 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $decisionService->setAccessible(true);
         $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
 
+        // mock getVariationForFeature to return rolloutDecision
+        $expectedDecision = new FeatureDecision(
+            null,
+            null,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
         $decisionServiceMock->expects($this->exactly(1))
             ->method('getVariationForFeature')
-            ->will($this->returnValue(null));
+            ->will($this->returnValue($expectedDecision));
 
         $this->loggerMock->expects($this->exactly(1))
             ->method('log')
@@ -3112,6 +3133,268 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Should be excluded - no audiences match with no attributes
         $this->assertSame(10, $this->optimizelyTypedAudienceObject->getFeatureVariableInteger('feat2_with_var', 'z', 'user1', $userAttributes));
+    }
+
+    public function testGetFeatureVariableValueForTypeCallsDecisionListenerGivenUserInExperimentAndFeatureFlagIsEnabled()
+    {
+        // should return specific value
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+        $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
+        $expectedVariation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
+        $expectedDecision = new FeatureDecision(
+            $experiment,
+            $expectedVariation,
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+        );
+
+        $decisionServiceMock->expects($this->once())
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expectedDecision));
+
+        $this->assertTrue($expectedVariation->getFeatureEnabled());
+        $arrayParam = array(
+            DecisionInfoTypes::FEATURE_VARIABLE,
+            'user_id',
+            [],
+            (object) array(
+                'featureKey'=>'double_single_variable_feature',
+                'featureEnabled'=> true,
+                'variableKey'=> 'double_variable',
+                'variableType'=> 'double',
+                'variableValue'=> '42.42',
+                'source'=> 'EXPERIMENT',
+                'sourceExperimentKey'=> 'test_experiment_double_feature',
+                'sourceVariationKey'=> 'control'
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+
+        $this->optimizelyObject->notificationCenter = $this->notificationCenterMock;
+
+        $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', [], 'double');
+    }
+
+    public function testGetFeatureVariableValueForTypeCallsDecisionListenerGivenUserInExperimentAndFeatureFlagIsNotEnabled()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone'
+        ];
+
+        // should return specific value
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+        $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_double_feature');
+        $expectedVariation = $this->projectConfig->getVariationFromKey('test_experiment_double_feature', 'control');
+        $expectedVariation->setFeatureEnabled(false);
+        $expectedDecision = new FeatureDecision(
+            $experiment,
+            $expectedVariation,
+            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+        );
+
+        $decisionServiceMock->expects($this->once())
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expectedDecision));
+
+        // assert variation's 'featureEnabled' is set to false
+        $this->assertFalse($expectedVariation->getFeatureEnabled());
+
+        $arrayParam = array(
+            DecisionInfoTypes::FEATURE_VARIABLE,
+            'user_id',
+            $userAttributes,
+            (object) array(
+                'featureKey'=>'double_single_variable_feature',
+                'featureEnabled'=> false,
+                'variableKey'=> 'double_variable',
+                'variableType'=> 'double',
+                'variableValue'=> '42.42',
+                'source'=> 'EXPERIMENT',
+                'sourceExperimentKey'=> 'test_experiment_double_feature',
+                'sourceVariationKey'=> 'control'
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+
+        $this->optimizelyObject->notificationCenter = $this->notificationCenterMock;
+        
+        $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', $userAttributes, 'double');
+    }
+
+    public function testGetFeatureVariableValueCallsDecisionListenerGivenUserInRolloutAndFeatureFlagIsEnabled()
+    {
+        // should return specific value
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+        $featureFlag = $this->projectConfig->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rolloutId = $featureFlag->getRolloutId();
+        $rollout = $this->projectConfig->getRolloutFromId($rolloutId);
+        $experiment = $rollout->getExperiments()[0];
+        $expectedVariation = $experiment->getVariations()[0];
+        $expectedDecision = new FeatureDecision(
+            $experiment,
+            $expectedVariation,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+        $decisionServiceMock->expects($this->once())
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expectedDecision));
+
+        $this->assertTrue($expectedVariation->getFeatureEnabled());
+
+        $arrayParam = array(
+            DecisionInfoTypes::FEATURE_VARIABLE,
+            'user_id',
+            [],
+            (object) array(
+                'featureKey'=>'boolean_single_variable_feature',
+                'featureEnabled'=> true,
+                'variableKey'=> 'boolean_variable',
+                'variableType'=> 'boolean',
+                'variableValue'=> 'true',
+                'source'=> 'ROLLOUT',
+                'sourceExperimentKey'=> null,
+                'sourceVariationKey'=> null
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+
+        $this->optimizelyObject->notificationCenter = $this->notificationCenterMock;
+
+        $this->optimizelyObject->getFeatureVariableBoolean('boolean_single_variable_feature', 'boolean_variable', 'user_id', []);
+    }
+
+    public function testGetFeatureVariableValueCallsDecisionListenerGivenUserInRolloutAndFeatureFlagIsNotEnabled()
+    {
+        // should return specific value
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+        $featureFlag = $this->projectConfig->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rolloutId = $featureFlag->getRolloutId();
+        $rollout = $this->projectConfig->getRolloutFromId($rolloutId);
+        $experiment = $rollout->getExperiments()[0];
+        $expectedVariation = $experiment->getVariations()[0];
+        $expectedVariation->setFeatureEnabled(false);
+        $expectedDecision = new FeatureDecision(
+            $experiment,
+            $expectedVariation,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+        $decisionServiceMock->expects($this->once())
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expectedDecision));
+
+        $this->assertFalse($expectedVariation->getFeatureEnabled());
+
+        $arrayParam = array(
+            DecisionInfoTypes::FEATURE_VARIABLE,
+            'user_id',
+            [],
+            (object) array(
+                'featureKey'=>'boolean_single_variable_feature',
+                'featureEnabled'=> false,
+                'variableKey'=> 'boolean_variable',
+                'variableType'=> 'boolean',
+                'variableValue'=> 'true',
+                'source'=> 'ROLLOUT',
+                'sourceExperimentKey'=> null,
+                'sourceVariationKey'=> null
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+
+        $this->optimizelyObject->notificationCenter = $this->notificationCenterMock;
+
+        $this->optimizelyObject->getFeatureVariableBoolean('boolean_single_variable_feature', 'boolean_variable', 'user_id', []);
+    }
+
+    public function testGetFeatureVariableValueForTypeCallsDecisionListenerWhenUserNeitherInExperimentNorInRollout()
+    {
+        // should return default value
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+
+        // mock getVariationForFeature to return rolloutDecision
+        $expectedDecision = new FeatureDecision(
+            null,
+            null,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expectedDecision));
+
+        $arrayParam = array(
+            DecisionInfoTypes::FEATURE_VARIABLE,
+            'user_id',
+            [],
+            (object) array(
+                'featureKey'=>'double_single_variable_feature',
+                'featureEnabled'=> false,
+                'variableKey'=> 'double_variable',
+                'variableType'=> 'double',
+                'variableValue'=> '14.99',
+                'source'=> 'ROLLOUT',
+                'sourceExperimentKey'=> null,
+                'sourceVariationKey'=> null
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+
+        $this->optimizelyObject->notificationCenter = $this->notificationCenterMock;
+
+        $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', [], 'double');
     }
 
     public function testSendImpressionEventWithNoAttributes()

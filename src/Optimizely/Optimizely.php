@@ -27,6 +27,7 @@ use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureVariable;
+use Optimizely\Enums\DecisionInfoTypes;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
@@ -501,7 +502,7 @@ class Optimizely
         }
 
         $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
-        if (!$decision) {
+        if ($decision->getVariation() === null) {
             $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
             return false;
         }
@@ -609,20 +610,27 @@ class Optimizely
             return null;
         }
 
+        $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
         $variableValue = $variable->getDefaultValue();
 
-        if (!$decision) {
+        if ($decision->getVariation() === null) {
             $this->_logger->log(
                 Logger::INFO,
                 "User '{$userId}'is not in any variation, ".
                 "returning default value '{$variableValue}'."
             );
         } else {
+            $experiment = $decision->getExperiment();
             $variation = $decision->getVariation();
-            $variable_usage = $variation->getVariableUsageById($variable->getId());
-            if ($variable_usage) {
-                $variableValue = $variable_usage->getValue();
+            $featureEnabled = $variation->getFeatureEnabled();
+            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
+                $experimentKey = $experiment->getKey();
+                $variationKey = $variation->getKey();
+            }
+            $variableUsage = $variation->getVariableUsageById($variable->getId());
+            if ($variableUsage) {
+                $variableValue = $variableUsage->getValue();
                 $this->_logger->log(
                     Logger::INFO,
                     "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
@@ -636,6 +644,26 @@ class Optimizely
                 );
             }
         }
+
+        $attributes = $attributes ?: [];
+        $this->notificationCenter->sendNotifications(
+            NotificationType::DECISION,
+            array(
+                DecisionInfoTypes::FEATURE_VARIABLE,
+                $userId,
+                $attributes,
+                (object) array(
+                    'featureKey'=>$featureFlagKey,
+                    'featureEnabled'=> $featureEnabled,
+                    'variableKey'=> $variableKey,
+                    'variableType'=> $variableType,
+                    'variableValue'=> $variableValue,
+                    'source'=> $decision->getSource(),
+                    'sourceExperimentKey'=> isset($experimentKey) ? $experimentKey : null,
+                    'sourceVariationKey'=> isset($variationKey) ? $variationKey : null
+                )
+            )
+        );
 
         return $variableValue;
     }
