@@ -58,7 +58,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                       'key'=> 'campaign_activated'
                     ]]
                   ]],
-                  'visitor_id'=> 'testUserId',
+                  'visitor_id'=> '"testUserId"',
                   'attributes'=> [[
                     'entity_id' => '$opt_bot_filtering',
                     'key' => '$opt_bot_filtering',

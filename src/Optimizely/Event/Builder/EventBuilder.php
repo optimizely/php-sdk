@@ -85,7 +85,7 @@ class EventBuilder
     {
         $visitor = [
             SNAPSHOTS=> [],
-            VISITOR_ID => $userId,
+            VISITOR_ID => escapeshellarg($userId),
             ATTRIBUTES => []
         ];
 
