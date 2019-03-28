@@ -20,6 +20,7 @@ use Exception;
 use Monolog\Logger;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
+use Optimizely\Enums\DecisionInfoTypes;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
 use Optimizely\Exceptions\InvalidAttributeException;
@@ -661,6 +662,72 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call activate
         $this->assertNull($optimizelyMock->activate('paused_experiment', 'test_user', null));
+    }
+
+    public function testActivateCallsDecisionListenerWhenUserInExperiment()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco'
+        ];
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, new ValidEventDispatcher(), $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $arrayParam = array(
+            DecisionInfoTypes::EXPERIMENT,
+            'test_user',
+            [
+                'device_type' => 'iPhone',
+                'company' => 'Optimizely',
+                'location' => 'San Francisco'
+            ],
+            (object) array(
+                'experimentKey'=> 'test_experiment',
+                'variationKey'=> 'control'
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+        $optimizelyMock->notificationCenter = $this->notificationCenterMock;
+
+        // Call activate
+        $optimizelyMock->activate('test_experiment', 'test_user', $userAttributes);
+    }
+
+    public function testActivateCallsDecisionListenerWhenUserNotInExperiment()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, new ValidEventDispatcher(), $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $arrayParam = array(
+            DecisionInfoTypes::EXPERIMENT,
+            'test_user',
+            [],
+            (object) array(
+                'experimentKey'=> 'test_experiment',
+                'variationKey'=> null
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+        $optimizelyMock->notificationCenter = $this->notificationCenterMock;
+
+        // Call activate
+        $optimizelyMock->activate('test_experiment', 'test_user');
     }
 
     public function testGetVariationInvalidOptimizelyObject()
@@ -2094,6 +2161,76 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // confirm that invalid experiment with the bucketing ID returns null
         $variationKey = $optlyObject->getVariation("invalidExperimentKey", $this->userId, $userAttributesWithBucketingId);
         $this->assertNull($variationKey, sprintf('Invalid variation key "%s" for getVariation with bucketing ID "%s".', $variationKey, $this->testBucketingIdControl));
+    }
+
+    public function testGetVariationCallsDecisionListenerWhenUserInExperiment()
+    {
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'company' => 'Optimizely',
+            'location' => 'San Francisco'
+        ];
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, new ValidEventDispatcher(), $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $arrayParam = array(
+            DecisionInfoTypes::EXPERIMENT,
+            'test_user',
+            [
+                'device_type' => 'iPhone',
+                'company' => 'Optimizely',
+                'location' => 'San Francisco'
+            ],
+            (object) array(
+                'experimentKey'=> 'test_experiment',
+                'variationKey'=> 'control'
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+        $optimizelyMock->notificationCenter = $this->notificationCenterMock;
+
+        // Call getVariation
+        $optimizelyMock->getVariation('test_experiment', 'test_user', $userAttributes);
+    }
+
+    public function testGetVariationCallsDecisionListenerWhenUserNotInExperiment()
+    {
+        $userAttributes = [
+            'device_type' => 'android'
+        ];
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, new ValidEventDispatcher(), $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $arrayParam = array(
+            DecisionInfoTypes::EXPERIMENT,
+            'test_user',
+            ['device_type' => 'android'],
+            (object) array(
+                'experimentKey'=> 'test_experiment',
+                'variationKey'=> null
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+        $optimizelyMock->notificationCenter = $this->notificationCenterMock;
+
+        // Call getVariation
+        $optimizelyMock->getVariation('test_experiment', 'test_user', $userAttributes);
     }
 
     public function testIsFeatureEnabledGivenInvalidDataFile()

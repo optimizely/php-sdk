@@ -27,6 +27,7 @@ use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureVariable;
+use Optimizely\Enums\DecisionInfoTypes;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
@@ -405,11 +406,23 @@ class Optimizely
         }
 
         $variation = $this->_decisionService->getVariation($experiment, $userId, $attributes);
-        if (is_null($variation)) {
-            return null;
-        }
+        $variationKey = ($variation === null) ? null : $variation->getKey();
 
-        return $variation->getKey();
+        $attributes = $attributes ?: [];
+        $this->notificationCenter->sendNotifications(
+            NotificationType::DECISION,
+            array(
+                DecisionInfoTypes::EXPERIMENT,
+                $userId,
+                $attributes,
+                (object) array(
+                    'experimentKey'=> $experiment->getKey(),
+                    'variationKey'=> $variationKey
+                )
+            )
+        );
+
+        return $variationKey;
     }
 
     /**
