@@ -154,7 +154,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'entity_id' => '7723280020',
                 'key' => 'device_type',
                 'type' => 'custom',
-                'value' => 'iPhone',
+                'value' => '"iPhone"',
             ],
             [
                 'entity_id' => '7723340007',
@@ -212,7 +212,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [ 'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
-            'value' => 'false',
+            'value' => '"false"',
             ]
         );
 
@@ -312,7 +312,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'entity_id' => '$opt_user_agent',
             'key' => '$opt_user_agent',
             'type' => 'custom',
-            'value' => 'Edge',
+            'value' => '"Edge"',
           ],[
             'entity_id' => '$opt_bot_filtering',
             'key' => '$opt_bot_filtering',
@@ -350,7 +350,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'entity_id' => '7723280020',
                 'key' => 'device_type',
                 'type' => 'custom',
-                'value' => 'iPhone',
+                'value' => '"iPhone"',
             ],
             [
                 'entity_id' => '7723340008',
@@ -393,7 +393,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'entity_id' => '$opt_user_agent',
             'key' => '$opt_user_agent',
             'type' => 'custom',
-            'value' => 'Chrome',
+            'value' => '"Chrome"',
           ],[
             'entity_id' => '$opt_bot_filtering',
             'key' => '$opt_bot_filtering',
@@ -440,7 +440,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'entity_id' => '$opt_user_agent',
             'key' => '$opt_user_agent',
             'type' => 'custom',
-            'value' => 'Chrome',
+            'value' => '"Chrome"',
           ]];
 
         $this->expectedLogEvent = new LogEvent(
@@ -511,7 +511,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [ 'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
-            'value' => 'iPhone',
+            'value' => '"iPhone"',
             ]
         );
 
@@ -623,7 +623,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [ 'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
-            'value' => 'iPhone',
+            'value' => '"iPhone"',
             ]
         );
 
@@ -677,7 +677,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [ 'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
-            'value' => 'iPhone',
+            'value' => '"iPhone"',
             ]
         );
 
@@ -767,13 +767,13 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
-            'value' => 'iPhone'
+            'value' => '"iPhone"'
             ],
             [
             'entity_id' => '$opt_bucketing_id',
             'key' => '$opt_bucketing_id',
             'type' => 'custom',
-            'value' => 'variation'
+            'value' => '"variation"'
             ]
         );
 
@@ -811,13 +811,13 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'entity_id' => '7723280020',
             'key' => 'device_type',
             'type' => 'custom',
-            'value' => 'iPhone',
+            'value' => '"iPhone"',
             ],
             [
             'entity_id' => '$opt_bucketing_id',
             'key' => '$opt_bucketing_id',
             'type' => 'custom',
-            'value' => 'variation',
+            'value' => '"variation"',
             ]
         );
 
@@ -862,7 +862,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             [ 'entity_id' => '$opt_user_agent',
             'key' => '$opt_user_agent',
             'type' => 'custom',
-            'value' => 'Firefox',
+            'value' => '"Firefox"',
             ]
         );
 
@@ -921,13 +921,13 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 'entity_id' => '7723280020',
                 'key' => 'device_type',
                 'type' => 'custom',
-                'value' => 'iPhone'
+                'value' => '"iPhone"'
             ],
             [
                 'entity_id' => '7723340004',
                 'key' => 'location',
                 'type' => 'custom',
-                'value' => 'SF'
+                'value' => '"SF"'
             ]
         );
 

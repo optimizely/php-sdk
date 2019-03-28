@@ -106,6 +106,8 @@ class EventBuilder
                 if (Validator::isAttributeValid($attributeKey, $attributeValue)) {
                     $attributeEntity = $config->getAttribute($attributeKey);
                     if ($attributeEntity instanceof Attribute) {
+                        // escape single quotes if attribute value is of type string.
+                        $attributeValue = is_string($attributeValue) ? escapeshellarg($attributeValue): $attributeValue;
                         $feature = [
                             ENTITY_ID => $attributeEntity->getId(),
                             KEY => $attributeKey,
