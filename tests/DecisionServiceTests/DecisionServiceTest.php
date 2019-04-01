@@ -909,14 +909,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "User 'user_1' is not bucketed into rollout for feature flag 'string_single_variable_feature'."
             );
 
-
         // mock getVariationForFeature to return rolloutDecision
         $expectedDecision = new FeatureDecision(
             null,
             null,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
-
         $this->assertEquals(
             $decisionServiceMock->getVariationForFeature($featureFlag, 'user_1', []),
             $expectedDecision
