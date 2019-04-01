@@ -638,18 +638,27 @@ class Optimizely
                 "returning default value '{$variableValue}'."
             );
         } else {
-            $variable_usage = $variation->getVariableUsageById($variable->getId());
-            if ($variable_usage) {
-                $variableValue = $variable_usage->getValue();
-                $this->_logger->log(
-                    Logger::INFO,
-                    "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
-                    "of feature flag '{$featureFlagKey}'"
-                );
+            $variation = $decision->getVariation();
+            if ($variation->getFeatureEnabled()) {
+                $variableUsage = $variation->getVariableUsageById($variable->getId());
+                if ($variableUsage) {
+                    $variableValue = $variableUsage->getValue();
+                    $this->_logger->log(
+                        Logger::INFO,
+                        "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
+                        "of feature flag '{$featureFlagKey}'"
+                    );
+                } else {
+                    $this->_logger->log(
+                        Logger::INFO,
+                        "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}', ".
+                        "returning default value '{$variableValue}'."
+                    );
+                }
             } else {
                 $this->_logger->log(
                     Logger::INFO,
-                    "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}', ".
+                    "Feature '{$featureFlagKey}' for variation '{$variation->getKey()}' is not enabled, ".
                     "returning default value '{$variableValue}'."
                 );
             }
