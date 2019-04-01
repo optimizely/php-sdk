@@ -623,23 +623,26 @@ class Optimizely
         } else {
             $experiment = $decision->getExperiment();
             $variation = $decision->getVariation();
-            $featureEnabled = $variation->getFeatureEnabled();
-            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
-                $experimentKey = $experiment->getKey();
-                $variationKey = $variation->getKey();
-            }
-            $variableUsage = $variation->getVariableUsageById($variable->getId());
-            if ($variableUsage) {
-                $variableValue = $variableUsage->getValue();
-                $this->_logger->log(
-                    Logger::INFO,
-                    "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
-                    "of feature flag '{$featureFlagKey}'"
-                );
+            if ($variation->getFeatureEnabled()) {
+                $variableUsage = $variation->getVariableUsageById($variable->getId());
+                if ($variableUsage) {
+                    $variableValue = $variableUsage->getValue();
+                    $this->_logger->log(
+                        Logger::INFO,
+                        "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
+                        "of feature flag '{$featureFlagKey}'"
+                    );
+                } else {
+                    $this->_logger->log(
+                        Logger::INFO,
+                        "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}', ".
+                        "returning default value '{$variableValue}'."
+                    );
+                }
             } else {
                 $this->_logger->log(
                     Logger::INFO,
-                    "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}', ".
+                    "Feature '{$featureFlagKey}' for variation '{$variation->getKey()}' is not enabled, ".
                     "returning default value '{$variableValue}'."
                 );
             }
