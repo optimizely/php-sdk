@@ -27,25 +27,6 @@ use Optimizely\Event\LogEvent;
  */
 class CurlEventDispatcher implements EventDispatcherInterface
 {
-    public function dispatchEvent(LogEvent $event)
-    {
-        $cmd = "curl";
-        $cmd.= " -X ".$event->getHttpVerb();
-        foreach ($event->getHeaders() as $type => $value) {
-            $cmd.= " -H '".$type.": ".$value."'";
-        }
-
-        $eventParams = $this->sanitizeEventPayload($event->getParams());
-
-        $cmd.= " -d '".json_encode($eventParams)."'";
-        $cmd.= " '".$event->getUrl()."' > /dev/null 2>&1 &";
-        exec($cmd, $output, $exit_code);
-
-        if ($exit_code !== 0) {
-            throw new Exception('Curl command failed.');
-        }
-    }
-
     /**
      * Escapes certain user provided values from event payload which includes
      * 1. user ID.
@@ -99,5 +80,24 @@ class CurlEventDispatcher implements EventDispatcherInterface
         $params['visitors'][0]['snapshots'][0]['events'][0]['tags'] = $escapedEventTags;
 
         return $params;
+    }
+
+    public function dispatchEvent(LogEvent $event)
+    {
+        $cmd = "curl";
+        $cmd.= " -X ".$event->getHttpVerb();
+        foreach ($event->getHeaders() as $type => $value) {
+            $cmd.= " -H '".$type.": ".$value."'";
+        }
+
+        $eventParams = $this->sanitizeEventPayload($event->getParams());
+
+        $cmd.= " -d '".json_encode($eventParams)."'";
+        $cmd.= " '".$event->getUrl()."' > /dev/null 2>&1 &";
+        exec($cmd, $output, $exit_code);
+
+        if ($exit_code !== 0) {
+            throw new Exception('Curl command failed.');
+        }
     }
 }
