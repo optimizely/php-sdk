@@ -197,7 +197,7 @@ class DecisionService
             "User '{$userId}' is not bucketed into rollout for feature flag '{$featureFlag->getKey()}'."
         );
 
-        return null;
+        return new FeatureDecision(null, null, FeatureDecision::DECISION_SOURCE_ROLLOUT);
     }
 
     /**

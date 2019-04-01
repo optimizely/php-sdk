@@ -27,6 +27,7 @@ use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureVariable;
+use Optimizely\Enums\DecisionInfoTypes;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
@@ -500,24 +501,41 @@ class Optimizely
             return false;
         }
 
+        $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
-        if (!$decision) {
-            $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
-            return false;
-        }
-
-        $experiment = $decision->getExperiment();
         $variation = $decision->getVariation();
-
-        if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
-            $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
-        } else {
-            $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
+        if ($variation) {
+            $experiment = $decision->getExperiment();
+            $featureEnabled = $variation->getFeatureEnabled();
+            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
+                $experimentKey = $experiment->getKey();
+                $variationKey = $variation->getKey();
+                $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+            } else {
+                $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
+            }
         }
 
-        if ($variation->getFeatureEnabled()) {
+        $attributes = is_null($attributes) ? [] : $attributes;
+        $this->notificationCenter->sendNotifications(
+            NotificationType::DECISION,
+            array(
+                DecisionInfoTypes::FEATURE,
+                $userId,
+                $attributes,
+                (object) array(
+                    'featureKey'=>$featureFlagKey,
+                    'featureEnabled'=> $featureEnabled,
+                    'source'=> $decision->getSource(),
+                    'sourceExperimentKey'=> isset($experimentKey) ? $experimentKey : null,
+                    'sourceVariationKey'=> isset($variationKey) ? $variationKey : null
+                )
+            )
+        );
+
+        if ($featureEnabled == true) {
             $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
-            return true;
+            return $featureEnabled;
         }
 
         $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
@@ -611,8 +629,9 @@ class Optimizely
 
         $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
         $variableValue = $variable->getDefaultValue();
+        $variation = $decision->getVariation();
 
-        if (!$decision) {
+        if ($variation === null) {
             $this->_logger->log(
                 Logger::INFO,
                 "User '{$userId}'is not in any variation, ".
