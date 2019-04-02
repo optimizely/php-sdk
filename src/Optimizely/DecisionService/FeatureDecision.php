@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely Inc and Contributors
+ * Copyright 2017, 2019 Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ namespace Optimizely\DecisionService;
 
 class FeatureDecision
 {
-    const DECISION_SOURCE_EXPERIMENT = 'experiment';
-    const DECISION_SOURCE_ROLLOUT = 'rollout';
+    const DECISION_SOURCE_EXPERIMENT = 'EXPERIMENT';
+    const DECISION_SOURCE_ROLLOUT = 'ROLLOUT';
 
     /**
      * The experiment in this decision.
