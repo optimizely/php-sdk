@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely Inc and Contributors
+ * Copyright 2017, 2019, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ class NotificationType
 {
     // format is EVENT: list of parameters to callback.
     const ACTIVATE = "ACTIVATE:experiment, user_id, attributes, variation, event";
+    const DECISION = "DECISION:type, user_id, attributes, decision_info";
     const TRACK = "TRACK:event_key, user_id, attributes, event_tags, event";
 
     public static function isNotificationTypeValid($notification_type)
