@@ -3829,7 +3829,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> false,
                 'variableKey'=> 'double_variable',
                 'variableType'=> 'double',
-                'variableValue'=> '42.42',
+                'variableValue'=> '14.99',
                 'source'=> 'EXPERIMENT',
                 'sourceExperimentKey'=> 'test_experiment_double_feature',
                 'sourceVariationKey'=> 'control'

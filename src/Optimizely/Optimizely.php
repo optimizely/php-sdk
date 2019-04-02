@@ -503,12 +503,6 @@ class Optimizely
 
         $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
-        if ($decision->getVariation() === null) {
-            $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
-            return false;
-        }
-
-        $experiment = $decision->getExperiment();
         $variation = $decision->getVariation();
         if ($variation) {
             $experiment = $decision->getExperiment();
@@ -636,7 +630,6 @@ class Optimizely
         $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
         $variableValue = $variable->getDefaultValue();
-        $variation = $decision->getVariation();
 
         if ($decision->getVariation() === null) {
             $this->_logger->log(
@@ -647,7 +640,14 @@ class Optimizely
         } else {
             $experiment = $decision->getExperiment();
             $variation = $decision->getVariation();
-            if ($variation->getFeatureEnabled()) {
+            $featureEnabled = $variation->getFeatureEnabled();
+
+            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
+                $experimentKey = $experiment->getKey();
+                $variationKey = $variation->getKey();
+            }
+
+            if ($featureEnabled) {
                 $variableUsage = $variation->getVariableUsageById($variable->getId());
                 if ($variableUsage) {
                     $variableValue = $variableUsage->getValue();
