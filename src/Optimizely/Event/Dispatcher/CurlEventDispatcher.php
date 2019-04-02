@@ -50,34 +50,36 @@ class CurlEventDispatcher implements EventDispatcherInterface
             return $val;
         }
 
-        // user ID
-        $params['visitors'][0]['visitor_id'] = escapeshellarg($params['visitors'][0]['visitor_id']);
+        foreach ($params['visitors'] as &$visitor) {
+            // user ID
+            $visitor['visitor_id'] = escapeshellarg($visitor['visitor_id']);
 
-        // string type attribute values
-        $attributes = $params['visitors'][0]['attributes'];
-        $escapedAttributes = [];
+            // string type attribute values
+            $attributes = $visitor['attributes'];
+            $escapedAttributes = [];
 
-        foreach ($attributes as $attr) {
-            $attr['value'] = escapeIfString($attr['value']);
-             array_push($escapedAttributes, $attr);
-        }
-
-        $params['visitors'][0]['attributes'] = $escapedAttributes;
-
-        // event tags if present
-        if (isset($params['visitors'][0]['snapshots'][0]['events'][0]['tags'])) {
-            $eventTags = $params['visitors'][0]['snapshots'][0]['events'][0]['tags'];
-            $escapedEventTags = [];
-
-            foreach ($eventTags as $key => $value) {
-                $key = escapeIfString($key);
-                $value = escapeIfString($value);
-
-                $escapedEventTags[$key] = $value;
+            foreach ($attributes as $attr) {
+                $attr['value'] = escapeIfString($attr['value']);
+                 array_push($escapedAttributes, $attr);
             }
-        }
 
-        $params['visitors'][0]['snapshots'][0]['events'][0]['tags'] = $escapedEventTags;
+            $visitor['attributes'] = $escapedAttributes;
+
+            // event tags if present
+            if (isset($visitor['snapshots'][0]['events'][0]['tags'])) {
+                $eventTags = $visitor['snapshots'][0]['events'][0]['tags'];
+                $escapedEventTags = [];
+
+                foreach ($eventTags as $key => $value) {
+                    $key = escapeIfString($key);
+                    $value = escapeIfString($value);
+
+                    $escapedEventTags[$key] = $value;
+                }
+            }
+
+            $visitor['snapshots'][0]['events'][0]['tags'] = $escapedEventTags;
+        }
 
         return $params;
     }
