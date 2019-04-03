@@ -513,24 +513,41 @@ class Optimizely
             return false;
         }
 
+        $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
-        if (!$decision) {
-            $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
-            return false;
-        }
-
-        $experiment = $decision->getExperiment();
         $variation = $decision->getVariation();
-
-        if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
-            $this->sendImpressionEvent($experiment->getKey(), $variation->getKey(), $userId, $attributes);
-        } else {
-            $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
+        if ($variation) {
+            $experiment = $decision->getExperiment();
+            $featureEnabled = $variation->getFeatureEnabled();
+            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
+                $experimentKey = $experiment->getKey();
+                $variationKey = $variation->getKey();
+                $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+            } else {
+                $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
+            }
         }
 
-        if ($variation->getFeatureEnabled()) {
+        $attributes = is_null($attributes) ? [] : $attributes;
+        $this->notificationCenter->sendNotifications(
+            NotificationType::DECISION,
+            array(
+                DecisionInfoTypes::FEATURE,
+                $userId,
+                $attributes,
+                (object) array(
+                    'featureKey'=>$featureFlagKey,
+                    'featureEnabled'=> $featureEnabled,
+                    'source'=> $decision->getSource(),
+                    'sourceExperimentKey'=> isset($experimentKey) ? $experimentKey : null,
+                    'sourceVariationKey'=> isset($variationKey) ? $variationKey : null
+                )
+            )
+        );
+
+        if ($featureEnabled == true) {
             $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is enabled for user '{$userId}'.");
-            return true;
+            return $featureEnabled;
         }
 
         $this->_logger->log(Logger::INFO, "Feature Flag '{$featureFlagKey}' is not enabled for user '{$userId}'.");
@@ -622,18 +639,27 @@ class Optimizely
             return null;
         }
 
+        $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
         $variableValue = $variable->getDefaultValue();
 
-        if (!$decision) {
+        if ($decision->getVariation() === null) {
             $this->_logger->log(
                 Logger::INFO,
                 "User '{$userId}'is not in any variation, ".
                 "returning default value '{$variableValue}'."
             );
         } else {
+            $experiment = $decision->getExperiment();
             $variation = $decision->getVariation();
-            if ($variation->getFeatureEnabled()) {
+            $featureEnabled = $variation->getFeatureEnabled();
+
+            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
+                $experimentKey = $experiment->getKey();
+                $variationKey = $variation->getKey();
+            }
+
+            if ($featureEnabled) {
                 $variableUsage = $variation->getVariableUsageById($variable->getId());
                 if ($variableUsage) {
                     $variableValue = $variableUsage->getValue();
@@ -657,6 +683,26 @@ class Optimizely
                 );
             }
         }
+
+        $attributes = $attributes ?: [];
+        $this->notificationCenter->sendNotifications(
+            NotificationType::DECISION,
+            array(
+                DecisionInfoTypes::FEATURE_VARIABLE,
+                $userId,
+                $attributes,
+                (object) array(
+                    'featureKey'=>$featureFlagKey,
+                    'featureEnabled'=> $featureEnabled,
+                    'variableKey'=> $variableKey,
+                    'variableType'=> $variableType,
+                    'variableValue'=> $variableValue,
+                    'source'=> $decision->getSource(),
+                    'sourceExperimentKey'=> isset($experimentKey) ? $experimentKey : null,
+                    'sourceVariationKey'=> isset($variationKey) ? $variationKey : null
+                )
+            )
+        );
 
         return $variableValue;
     }
