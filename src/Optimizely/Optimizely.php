@@ -627,19 +627,27 @@ class Optimizely
             return null;
         }
 
+        $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
         $variableValue = $variable->getDefaultValue();
-        $variation = $decision->getVariation();
 
-        if ($variation === null) {
+        if ($decision->getVariation() === null) {
             $this->_logger->log(
                 Logger::INFO,
                 "User '{$userId}'is not in any variation, ".
                 "returning default value '{$variableValue}'."
             );
         } else {
+            $experiment = $decision->getExperiment();
             $variation = $decision->getVariation();
-            if ($variation->getFeatureEnabled()) {
+            $featureEnabled = $variation->getFeatureEnabled();
+
+            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
+                $experimentKey = $experiment->getKey();
+                $variationKey = $variation->getKey();
+            }
+
+            if ($featureEnabled) {
                 $variableUsage = $variation->getVariableUsageById($variable->getId());
                 if ($variableUsage) {
                     $variableValue = $variableUsage->getValue();
@@ -663,6 +671,26 @@ class Optimizely
                 );
             }
         }
+
+        $attributes = $attributes ?: [];
+        $this->notificationCenter->sendNotifications(
+            NotificationType::DECISION,
+            array(
+                DecisionInfoTypes::FEATURE_VARIABLE,
+                $userId,
+                $attributes,
+                (object) array(
+                    'featureKey'=>$featureFlagKey,
+                    'featureEnabled'=> $featureEnabled,
+                    'variableKey'=> $variableKey,
+                    'variableType'=> $variableType,
+                    'variableValue'=> $variableValue,
+                    'source'=> $decision->getSource(),
+                    'sourceExperimentKey'=> isset($experimentKey) ? $experimentKey : null,
+                    'sourceVariationKey'=> isset($variationKey) ? $variationKey : null
+                )
+            )
+        );
 
         return $variableValue;
     }
