@@ -28,6 +28,22 @@ use Optimizely\Event\LogEvent;
 class CurlEventDispatcher implements EventDispatcherInterface
 {
     /**
+     * Calls escapeshellarg on arg if arg is of type string.
+     *
+     * @param  mixed $val arg to escape.
+     *
+     * @return mixed arg as it is or escaped if it's a string.
+     */
+    protected function escapeIfString($val)
+    {
+        if (is_string($val)) {
+            return escapeshellarg($val);
+        }
+
+        return $val;
+    }
+
+    /**
      * Escapes certain user provided values from event payload which includes
      * 1. user ID.
      * 2. attribute values of type string.
@@ -40,16 +56,6 @@ class CurlEventDispatcher implements EventDispatcherInterface
      **/
     public function sanitizeEventPayload(array $params)
     {
-
-        function escapeIfString($val)
-        {
-            if (is_string($val)) {
-                return escapeshellarg($val);
-            }
-
-            return $val;
-        }
-
         foreach ($params['visitors'] as &$visitor) {
             // user ID
             $visitor['visitor_id'] = escapeshellarg($visitor['visitor_id']);
@@ -59,20 +65,21 @@ class CurlEventDispatcher implements EventDispatcherInterface
             $escapedAttributes = [];
 
             foreach ($attributes as $attr) {
-                $attr['value'] = escapeIfString($attr['value']);
+                $attr['value'] = $this->escapeIfString($attr['value']);
                  array_push($escapedAttributes, $attr);
             }
 
             $visitor['attributes'] = $escapedAttributes;
 
             // event tags if present
+            $escapedEventTags = [];
+
             if (isset($visitor['snapshots'][0]['events'][0]['tags'])) {
                 $eventTags = $visitor['snapshots'][0]['events'][0]['tags'];
-                $escapedEventTags = [];
 
                 foreach ($eventTags as $key => $value) {
-                    $key = escapeIfString($key);
-                    $value = escapeIfString($value);
+                    $key = $this->escapeIfString($key);
+                    $value = $this->escapeIfString($value);
 
                     $escapedEventTags[$key] = $value;
                 }
