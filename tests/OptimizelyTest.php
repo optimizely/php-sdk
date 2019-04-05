@@ -3419,7 +3419,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', [], 'double'),
-            '14.99'
+            14.99
         );
     }
 
@@ -3457,7 +3457,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', [], 'double'),
-            '42.42'
+            42.42
         );
     }
 
@@ -3496,7 +3496,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', [], 'double'),
-            '14.99'
+            14.99
         );
     }
 
@@ -3618,7 +3618,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 [],
                 'double'
             ),
-            '14.99'
+            14.99
         );
     }
 
@@ -3654,7 +3654,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', '', [], 'double'),
-            '14.99'
+            14.99
         );
     }
 
@@ -3666,7 +3666,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         // assert that getFeatureVariableValueForType is called with expected arguments and mock to return 'true'
-        $map = [['boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean', 'true']];
+        $map = [['boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean', true]];
         $optimizelyMock->expects($this->exactly(1))
             ->method('getFeatureVariableValueForType')
             ->with('boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean')
@@ -3683,7 +3683,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         // assert that getFeatureVariableValueForType is called with expected arguments and mock to return any string but 'true'
-        $map = [['boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean', '14.33']];
+        $map = [['boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean', false]];
         $optimizelyMock->expects($this->exactly(1))
             ->method('getFeatureVariableValueForType')
             ->with('boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean')
@@ -3700,7 +3700,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a numeric string
-        $map = [['integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer', '90']];
+        $map = [['integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer', 90]];
         $optimizelyMock->expects($this->exactly(1))
             ->method('getFeatureVariableValueForType')
             ->with('integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer')
@@ -3720,7 +3720,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a non-numeric string
-        $map = [['integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer', 'abc90']];
+        $map = [['integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer', null]];
         $optimizelyMock->expects($this->exactly(1))
             ->method('getFeatureVariableValueForType')
             ->with('integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer')
@@ -3737,7 +3737,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a numeric string
-        $map = [['double_single_variable_feature', 'double_variable', 'user_id', [], 'double', '5.789']];
+        $map = [['double_single_variable_feature', 'double_variable', 'user_id', [], 'double', 5.789]];
         $optimizelyMock->expects($this->exactly(1))
             ->method('getFeatureVariableValueForType')
             ->with('double_single_variable_feature', 'double_variable', 'user_id', [], 'double')
@@ -3757,7 +3757,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a non-numeric string
-        $map = [['double_single_variable_feature', 'double_variable', 'user_id', [], 'double', 'abc5.789']];
+        $map = [['double_single_variable_feature', 'double_variable', 'user_id', [], 'double', null]];
         $optimizelyMock->expects($this->exactly(1))
             ->method('getFeatureVariableValueForType')
             ->with('double_single_variable_feature', 'double_variable', 'user_id', [], 'double')
@@ -3908,7 +3908,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> true,
                 'variableKey'=> 'double_variable',
                 'variableType'=> 'double',
-                'variableValue'=> '42.42',
+                'variableValue'=> 42.42,
                 'source'=> 'EXPERIMENT',
                 'sourceExperimentKey'=> 'test_experiment_double_feature',
                 'sourceVariationKey'=> 'control'
@@ -3965,7 +3965,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> false,
                 'variableKey'=> 'double_variable',
                 'variableType'=> 'double',
-                'variableValue'=> '14.99',
+                'variableValue'=> 14.99,
                 'source'=> 'EXPERIMENT',
                 'sourceExperimentKey'=> 'test_experiment_double_feature',
                 'sourceVariationKey'=> 'control'
@@ -4018,7 +4018,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> true,
                 'variableKey'=> 'boolean_variable',
                 'variableType'=> 'boolean',
-                'variableValue'=> 'true',
+                'variableValue'=> true,
                 'source'=> 'ROLLOUT',
                 'sourceExperimentKey'=> null,
                 'sourceVariationKey'=> null
@@ -4072,7 +4072,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> false,
                 'variableKey'=> 'boolean_variable',
                 'variableType'=> 'boolean',
-                'variableValue'=> 'true',
+                'variableValue'=> true,
                 'source'=> 'ROLLOUT',
                 'sourceExperimentKey'=> null,
                 'sourceVariationKey'=> null
@@ -4120,7 +4120,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> false,
                 'variableKey'=> 'double_variable',
                 'variableType'=> 'double',
-                'variableValue'=> '14.99',
+                'variableValue'=> 14.99,
                 'source'=> 'ROLLOUT',
                 'sourceExperimentKey'=> null,
                 'sourceVariationKey'=> null
