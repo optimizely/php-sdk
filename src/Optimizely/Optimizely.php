@@ -406,11 +406,23 @@ class Optimizely
         }
 
         $variation = $this->_decisionService->getVariation($experiment, $userId, $attributes);
-        if (is_null($variation)) {
-            return null;
-        }
+        $variationKey = ($variation === null) ? null : $variation->getKey();
 
-        return $variation->getKey();
+        $attributes = $attributes ?: [];
+        $this->notificationCenter->sendNotifications(
+            NotificationType::DECISION,
+            array(
+                DecisionInfoTypes::EXPERIMENT,
+                $userId,
+                $attributes,
+                (object) array(
+                    'experimentKey'=> $experiment->getKey(),
+                    'variationKey'=> $variationKey
+                )
+            )
+        );
+
+        return $variationKey;
     }
 
     /**
