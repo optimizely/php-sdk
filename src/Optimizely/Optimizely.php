@@ -684,6 +684,10 @@ class Optimizely
             }
         }
 
+        if (!is_null($variableValue)) {
+            $variableValue = VariableTypeUtils::castStringToType($variableValue, $variableType, $this->_logger);
+        }
+
         $attributes = $attributes ?: [];
         $this->notificationCenter->sendNotifications(
             NotificationType::DECISION,
@@ -719,19 +723,13 @@ class Optimizely
      */
     public function getFeatureVariableBoolean($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
-        $variableValue = $this->getFeatureVariableValueForType(
+        return $this->getFeatureVariableValueForType(
             $featureFlagKey,
             $variableKey,
             $userId,
             $attributes,
             FeatureVariable::BOOLEAN_TYPE
         );
-
-        if (!is_null($variableValue)) {
-            return VariableTypeUtils::castStringToType($variableValue, FeatureVariable::BOOLEAN_TYPE, $this->_logger);
-        }
-
-        return $variableValue;
     }
 
     /**
@@ -746,19 +744,13 @@ class Optimizely
      */
     public function getFeatureVariableInteger($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
-        $variableValue = $this->getFeatureVariableValueForType(
+        return $this->getFeatureVariableValueForType(
             $featureFlagKey,
             $variableKey,
             $userId,
             $attributes,
             FeatureVariable::INTEGER_TYPE
         );
-
-        if (!is_null($variableValue)) {
-            return VariableTypeUtils::castStringToType($variableValue, FeatureVariable::INTEGER_TYPE, $this->_logger);
-        }
-
-        return $variableValue;
     }
 
     /**
@@ -773,19 +765,13 @@ class Optimizely
      */
     public function getFeatureVariableDouble($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
-        $variableValue = $this->getFeatureVariableValueForType(
+        return $this->getFeatureVariableValueForType(
             $featureFlagKey,
             $variableKey,
             $userId,
             $attributes,
             FeatureVariable::DOUBLE_TYPE
         );
-
-        if (!is_null($variableValue)) {
-            return VariableTypeUtils::castStringToType($variableValue, FeatureVariable::DOUBLE_TYPE, $this->_logger);
-        }
-
-        return $variableValue;
     }
 
     /**
@@ -800,15 +786,13 @@ class Optimizely
      */
     public function getFeatureVariableString($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
-        $variableValue = $this->getFeatureVariableValueForType(
+        return $this->getFeatureVariableValueForType(
             $featureFlagKey,
             $variableKey,
             $userId,
             $attributes,
             FeatureVariable::STRING_TYPE
         );
-
-        return $variableValue;
     }
 
     /**

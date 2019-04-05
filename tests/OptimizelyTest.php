@@ -20,6 +20,7 @@ use Exception;
 use Monolog\Logger;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
+use Optimizely\Entity\FeatureVariable;
 use Optimizely\Enums\DecisionInfoTypes;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
@@ -3419,7 +3420,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', [], 'double'),
-            '14.99'
+            14.99
         );
     }
 
@@ -3457,7 +3458,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', [], 'double'),
-            '42.42'
+            42.42
         );
     }
 
@@ -3496,7 +3497,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', [], 'double'),
-            '14.99'
+            14.99
         );
     }
 
@@ -3618,7 +3619,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 [],
                 'double'
             ),
-            '14.99'
+            14.99
         );
     }
 
@@ -3654,7 +3655,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', '', [], 'double'),
-            '14.99'
+            14.99
         );
     }
 
@@ -3666,7 +3667,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         // assert that getFeatureVariableValueForType is called with expected arguments and mock to return 'true'
-        $map = [['boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean', 'true']];
+        $map = [['boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean', true]];
         $optimizelyMock->expects($this->exactly(1))
             ->method('getFeatureVariableValueForType')
             ->with('boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean')
@@ -3683,7 +3684,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         // assert that getFeatureVariableValueForType is called with expected arguments and mock to return any string but 'true'
-        $map = [['boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean', '14.33']];
+        $map = [['boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean', false]];
         $optimizelyMock->expects($this->exactly(1))
             ->method('getFeatureVariableValueForType')
             ->with('boolean_single_variable_feature', 'boolean_variable', 'user_id', [], 'boolean')
@@ -3694,76 +3695,164 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testGetFeatureVariableIntegerWhenCasted()
     {
-        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
-            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
-            ->setMethods(array('getFeatureVariableValueForType'))
+        $configMock = $this->getMockBuilder(ProjectConfig::class)
+            ->setConstructorArgs(array(DATAFILE, new NoOpLogger, new NoOpErrorHandler))
+            ->setMethods(array('getFeatureVariableFromKey'))
             ->getMock();
 
-        // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a numeric string
-        $map = [['integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer', '90']];
-        $optimizelyMock->expects($this->exactly(1))
-            ->method('getFeatureVariableValueForType')
-            ->with('integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer')
-            ->will($this->returnValueMap($map));
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $config = new \ReflectionProperty(Optimizely::class, '_config');
+        $config->setAccessible(true);
+        $config->setValue($this->optimizelyObject, $configMock);
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+
+        $expectedVariable = new FeatureVariable(null, 'integer_single_variable_feature', 'integer', '90');
+
+        $configMock->expects($this->once())
+            ->method('getFeatureVariableFromKey')
+            ->will($this->returnValue($expectedVariable));
+
+        $expectedDecision = new FeatureDecision(
+            null,
+            null,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
+        $decisionServiceMock->expects($this->once())
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expectedDecision));
 
         $this->assertSame(
-            $optimizelyMock->getFeatureVariableInteger('integer_single_variable_feature', 'integer_variable', 'user_id', []),
+            $this->optimizelyObject->getFeatureVariableInteger('integer_single_variable_feature', 'integer_variable', 'user_id', []),
             90
         );
     }
 
     public function testGetFeatureVariableIntegerWhenNotCasted()
     {
-        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
-            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
-            ->setMethods(array('getFeatureVariableValueForType'))
+        $configMock = $this->getMockBuilder(ProjectConfig::class)
+            ->setConstructorArgs(array(DATAFILE, new NoOpLogger, new NoOpErrorHandler))
+            ->setMethods(array('getFeatureVariableFromKey'))
             ->getMock();
 
-        // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a non-numeric string
-        $map = [['integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer', 'abc90']];
-        $optimizelyMock->expects($this->exactly(1))
-            ->method('getFeatureVariableValueForType')
-            ->with('integer_single_variable_feature', 'integer_variable', 'user_id', [], 'integer')
-            ->will($this->returnValueMap($map));
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
 
-        $this->assertNull($optimizelyMock->getFeatureVariableInteger('integer_single_variable_feature', 'integer_variable', 'user_id', []));
+        $config = new \ReflectionProperty(Optimizely::class, '_config');
+        $config->setAccessible(true);
+        $config->setValue($this->optimizelyObject, $configMock);
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+
+        $expectedVariable = new FeatureVariable(null, 'integer_single_variable_feature', 'integer', 'ab-90');
+
+        $configMock->expects($this->once())
+            ->method('getFeatureVariableFromKey')
+            ->will($this->returnValue($expectedVariable));
+
+        $expectedDecision = new FeatureDecision(
+            null,
+            null,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
+        $decisionServiceMock->expects($this->once())
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expectedDecision));
+
+        $this->assertNull($this->optimizelyObject->getFeatureVariableInteger('integer_single_variable_feature', 'integer_variable', 'user_id', []));
     }
 
     public function testGetFeatureVariableDoubleWhenCasted()
     {
-        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
-            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
-            ->setMethods(array('getFeatureVariableValueForType'))
+        $configMock = $this->getMockBuilder(ProjectConfig::class)
+            ->setConstructorArgs(array(DATAFILE, new NoOpLogger, new NoOpErrorHandler))
+            ->setMethods(array('getFeatureVariableFromKey'))
             ->getMock();
 
-        // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a numeric string
-        $map = [['double_single_variable_feature', 'double_variable', 'user_id', [], 'double', '5.789']];
-        $optimizelyMock->expects($this->exactly(1))
-            ->method('getFeatureVariableValueForType')
-            ->with('double_single_variable_feature', 'double_variable', 'user_id', [], 'double')
-            ->will($this->returnValueMap($map));
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $config = new \ReflectionProperty(Optimizely::class, '_config');
+        $config->setAccessible(true);
+        $config->setValue($this->optimizelyObject, $configMock);
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+
+        $expectedVariable = new FeatureVariable(null, 'double_single_variable_feature', 'double', '5.789');
+
+        $configMock->expects($this->once())
+            ->method('getFeatureVariableFromKey')
+            ->will($this->returnValue($expectedVariable));
+
+        $expectedDecision = new FeatureDecision(
+            null,
+            null,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
+        $decisionServiceMock->expects($this->once())
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expectedDecision));
 
         $this->assertSame(
-            $optimizelyMock->getFeatureVariableDouble('double_single_variable_feature', 'double_variable', 'user_id', []),
+            $this->optimizelyObject->getFeatureVariableDouble('double_single_variable_feature', 'double_variable', 'user_id', []),
             5.789
         );
     }
 
     public function testGetFeatureVariableDoubleWhenNotCasted()
     {
-        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
-            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
-            ->setMethods(array('getFeatureVariableValueForType'))
+        $configMock = $this->getMockBuilder(ProjectConfig::class)
+            ->setConstructorArgs(array(DATAFILE, new NoOpLogger, new NoOpErrorHandler))
+            ->setMethods(array('getFeatureVariableFromKey'))
             ->getMock();
 
-        // assert that getFeatureVariableValueForType is called with expected arguments and mock to return a non-numeric string
-        $map = [['double_single_variable_feature', 'double_variable', 'user_id', [], 'double', 'abc5.789']];
-        $optimizelyMock->expects($this->exactly(1))
-            ->method('getFeatureVariableValueForType')
-            ->with('double_single_variable_feature', 'double_variable', 'user_id', [], 'double')
-            ->will($this->returnValueMap($map));
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
 
-        $this->assertNull($optimizelyMock->getFeatureVariableDouble('double_single_variable_feature', 'double_variable', 'user_id', []));
+        $config = new \ReflectionProperty(Optimizely::class, '_config');
+        $config->setAccessible(true);
+        $config->setValue($this->optimizelyObject, $configMock);
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+
+        $expectedVariable = new FeatureVariable(null, 'double_single_variable_feature', 'double', 'ab-90');
+
+        $configMock->expects($this->once())
+            ->method('getFeatureVariableFromKey')
+            ->will($this->returnValue($expectedVariable));
+
+        $expectedDecision = new FeatureDecision(
+            null,
+            null,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
+        $decisionServiceMock->expects($this->once())
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expectedDecision));
+
+        $this->assertNull($this->optimizelyObject->getFeatureVariableDouble('double_single_variable_feature', 'double_variable', 'user_id', []));
     }
 
     public function testGetFeatureVariableString()
@@ -3908,7 +3997,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> true,
                 'variableKey'=> 'double_variable',
                 'variableType'=> 'double',
-                'variableValue'=> '42.42',
+                'variableValue'=> 42.42,
                 'source'=> 'EXPERIMENT',
                 'sourceExperimentKey'=> 'test_experiment_double_feature',
                 'sourceVariationKey'=> 'control'
@@ -3965,7 +4054,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> false,
                 'variableKey'=> 'double_variable',
                 'variableType'=> 'double',
-                'variableValue'=> '14.99',
+                'variableValue'=> 14.99,
                 'source'=> 'EXPERIMENT',
                 'sourceExperimentKey'=> 'test_experiment_double_feature',
                 'sourceVariationKey'=> 'control'
@@ -4018,7 +4107,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> true,
                 'variableKey'=> 'boolean_variable',
                 'variableType'=> 'boolean',
-                'variableValue'=> 'true',
+                'variableValue'=> true,
                 'source'=> 'ROLLOUT',
                 'sourceExperimentKey'=> null,
                 'sourceVariationKey'=> null
@@ -4072,7 +4161,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> false,
                 'variableKey'=> 'boolean_variable',
                 'variableType'=> 'boolean',
-                'variableValue'=> 'true',
+                'variableValue'=> true,
                 'source'=> 'ROLLOUT',
                 'sourceExperimentKey'=> null,
                 'sourceVariationKey'=> null
@@ -4120,7 +4209,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'featureEnabled'=> false,
                 'variableKey'=> 'double_variable',
                 'variableType'=> 'double',
-                'variableValue'=> '14.99',
+                'variableValue'=> 14.99,
                 'source'=> 'ROLLOUT',
                 'sourceExperimentKey'=> null,
                 'sourceVariationKey'=> null
