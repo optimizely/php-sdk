@@ -2,7 +2,8 @@
 April 19th, 2019
 
 ### Security Fix:
-ID: [opt-2019-0001](https://www.optimizely.com/security/advisories/opt-2019-0001)
+* Removed CurlEventDispatcher. ([#168](https://github.com/optimizely/php-sdk/pull/168))
+ID: [opt-q2019-0001](https://www.optimizely.com/security/advisories/opt-2019-0001)
 Overall CVSSv3: 6.0
 Optimizely Severity: High
 
