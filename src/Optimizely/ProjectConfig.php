@@ -183,6 +183,13 @@ class ProjectConfig
     private $_featureFlagVariableMap;
 
     /**
+     * Associative array of experiment ID to Feature ID(s) in the datafile.
+     *
+     * @var <String, Array>
+     */
+    private $_experimentFeatureMap;
+
+    /**
      * ProjectConfig constructor to load and set project configuration data.
      *
      * @param $datafile string JSON string representing the project.
@@ -289,6 +296,7 @@ class ProjectConfig
             $this->_featureKeyMap[$featureFlag->getKey()] = $featureFlag;
         }
 
+        $this->_experimentFeatureMap = [];
         if ($this->_featureKeyMap) {
             foreach ($this->_featureKeyMap as $featureKey => $featureFlag) {
                 $this->_featureFlagVariableMap[$featureKey] = ConfigParser::generateMap(
@@ -296,6 +304,11 @@ class ProjectConfig
                     'key',
                     FeatureVariable::class
                 );
+
+                $featureFlagId = $featureFlag->getId();
+                foreach ($featureFlag->getExperimentIds() as $experimentId) {
+                    $this->_experimentFeatureMap[$experimentId] = [$featureFlagId];
+                }
             }
         }
     }
@@ -679,5 +692,17 @@ class ProjectConfig
         $this->_logger->log(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
 
         return true;
+    }
+
+    /**
+     * Determines if given experiment is a feature test.
+     *
+     * @param string Experiment ID.
+     *
+     * @return boolean A boolean value that indicates if the experiment is a feature test.
+     */
+    public function isFeatureExperiment($experimentId)
+    {
+        return array_key_exists($experimentId, $this->_experimentFeatureMap);
     }
 }

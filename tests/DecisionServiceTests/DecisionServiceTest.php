@@ -753,7 +753,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($variation));
 
         $featureFlag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
-        $expected_decision = new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_EXPERIMENT);
+        $expected_decision = new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_FEATURE_TEST);
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -779,14 +779,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $mutex_exp = $this->config->getExperimentFromKey('group_experiment_1');
         $variation = $mutex_exp->getVariations()[0];
-        $expected_decision = new FeatureDecision($mutex_exp, $variation, FeatureDecision::DECISION_SOURCE_EXPERIMENT);
+        $expected_decision = new FeatureDecision($mutex_exp, $variation, FeatureDecision::DECISION_SOURCE_FEATURE_TEST);
 
-        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_feature');
+        $featureFlag = $this->config->getFeatureFlagFromKey('mutex_group_feature');
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(
                 Logger::INFO,
-                "The user 'user_1' is bucketed into experiment 'group_experiment_1' of feature 'boolean_feature'."
+                "The user 'user_1' is bucketed into experiment 'group_experiment_1' of feature 'mutex_group_feature'."
             );
         $this->assertEquals(
             $expected_decision,
@@ -830,7 +830,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $expected_experiment,
             $expected_variation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->at(0))

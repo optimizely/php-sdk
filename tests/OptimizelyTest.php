@@ -21,7 +21,7 @@ use Monolog\Logger;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\FeatureVariable;
-use Optimizely\Enums\DecisionInfoTypes;
+use Optimizely\Enums\DecisionNotificationTypes;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\LogEvent;
 use Optimizely\Exceptions\InvalidAttributeException;
@@ -679,7 +679,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $arrayParam = array(
-            DecisionInfoTypes::EXPERIMENT,
+            DecisionNotificationTypes::AB_TEST,
             'test_user',
             [
                 'device_type' => 'iPhone',
@@ -711,7 +711,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $arrayParam = array(
-            DecisionInfoTypes::EXPERIMENT,
+            DecisionNotificationTypes::AB_TEST,
             'test_user',
             [],
             (object) array(
@@ -2178,7 +2178,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $arrayParam = array(
-            DecisionInfoTypes::EXPERIMENT,
+            DecisionNotificationTypes::AB_TEST,
             'test_user',
             [
                 'device_type' => 'iPhone',
@@ -2214,7 +2214,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $arrayParam = array(
-            DecisionInfoTypes::EXPERIMENT,
+            DecisionNotificationTypes::AB_TEST,
             'test_user',
             ['device_type' => 'android'],
             (object) array(
@@ -2232,6 +2232,38 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Call getVariation
         $optimizelyMock->getVariation('test_experiment', 'test_user', $userAttributes);
+    }
+
+    public function testGetVariationCallsDecisionListenerWithTypeFeatureTest()
+    {
+        $userAttributes = [
+            'device_type' => 'android'
+        ];
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, new ValidEventDispatcher(), $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $arrayParam = array(
+            DecisionNotificationTypes::FEATURE_TEST,
+            'test_user',
+            ['device_type' => 'android'],
+            (object) array(
+                'experimentKey'=> 'test_experiment_with_feature_rollout',
+                'variationKey'=> 'control'
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+        $optimizelyMock->notificationCenter = $this->notificationCenterMock;
+
+        // Call getVariation
+        $optimizelyMock->getVariation('test_experiment_with_feature_rollout', 'test_user', $userAttributes);
     }
 
     public function testIsFeatureEnabledGivenInvalidDataFile()
@@ -2384,15 +2416,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
-            DecisionInfoTypes::FEATURE,
+            DecisionNotificationTypes::FEATURE,
             'user_id',
             [],
             (object) array(
                 'featureKey'=>'double_single_variable_feature',
                 'featureEnabled'=> false,
-                'source'=> 'ROLLOUT',
-                'sourceExperimentKey'=> null,
-                'sourceVariationKey'=> null
+                'source'=> 'rollout',
+                'sourceInfo'=> (object) array()
             )
         );
 
@@ -2434,7 +2465,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $experiment,
             $variation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -2479,7 +2510,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $experiment,
             $variation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -2488,15 +2519,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
-            DecisionInfoTypes::FEATURE,
+            DecisionNotificationTypes::FEATURE,
             'user_id',
             ['device_type' => 'iPhone'],
             (object) array(
                 'featureKey'=>'double_single_variable_feature',
                 'featureEnabled'=> true,
-                'source'=> 'EXPERIMENT',
-                'sourceExperimentKey'=> 'test_experiment_double_feature',
-                'sourceVariationKey'=> 'control'
+                'source'=> 'feature-test',
+                'sourceInfo' => (object) array(
+                    'experimentKey'=> 'test_experiment_double_feature',
+                    'variationKey'=> 'control'
+                )
             )
         );
 
@@ -2538,7 +2571,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $experiment,
             $variation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -2582,7 +2615,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $experiment,
             $variation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -2591,15 +2624,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
-            DecisionInfoTypes::FEATURE,
+            DecisionNotificationTypes::FEATURE,
             'user_id',
             [],
             (object) array(
                 'featureKey'=>'double_single_variable_feature',
                 'featureEnabled'=> false,
-                'source'=> 'EXPERIMENT',
-                'sourceExperimentKey'=> 'test_experiment_double_feature',
-                'sourceVariationKey'=> 'variation'
+                'source'=> 'feature-test',
+                'sourceInfo' => (object) array(
+                    'experimentKey'=> 'test_experiment_double_feature',
+                    'variationKey'=> 'variation'
+                )
             )
         );
 
@@ -2704,15 +2739,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
-            DecisionInfoTypes::FEATURE,
+            DecisionNotificationTypes::FEATURE,
             'user_id',
             ['device_type' => 'iPhone'],
             (object) array(
                 'featureKey'=>'boolean_single_variable_feature',
                 'featureEnabled'=> true,
-                'source'=> 'ROLLOUT',
-                'sourceExperimentKey'=> null,
-                'sourceVariationKey'=> null
+                'source'=> 'rollout',
+                'sourceInfo'=> (object) array()
             )
         );
 
@@ -2816,15 +2850,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // Verify that sendNotifications is called with expected params
         $arrayParam = array(
-            DecisionInfoTypes::FEATURE,
+            DecisionNotificationTypes::FEATURE,
             'user_id',
             [],
             (object) array(
                 'featureKey'=>'boolean_single_variable_feature',
                 'featureEnabled'=> false,
-                'source'=> 'ROLLOUT',
-                'sourceExperimentKey'=> null,
-                'sourceVariationKey'=> null
+                'source'=> 'rollout',
+                'sourceInfo'=> (object) array()
             )
         );
 
@@ -2920,7 +2953,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $experiment,
             $variation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -3096,12 +3129,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $decision1 = new FeatureDecision(
             $experiment,
             $enabledFeatureVariation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
         $decision2 = new FeatureDecision(
             $disabledFeatureExperiment,
             $disabledFeatureVariation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
         $decision3 = new FeatureDecision(
             $experiment,
@@ -3116,12 +3149,12 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $decision5 = new FeatureDecision(
             $experiment,
             $enabledFeatureVariation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
         $decision6 = new FeatureDecision(
             $disabledFeatureExperiment,
             $disabledFeatureVariation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
         $decision7 = new FeatureDecision(
             $experiment,
@@ -3154,15 +3187,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 NotificationType::DECISION,
                 array(
-                    DecisionInfoTypes::FEATURE,
+                    DecisionNotificationTypes::FEATURE,
                     'user_id',
                     [],
                     (object) array(
                         'featureKey'=>'boolean_feature',
                         'featureEnabled'=> true,
-                        'source'=> 'EXPERIMENT',
-                        'sourceExperimentKey'=> 'rollout_1_exp_1',
-                        'sourceVariationKey'=> '177771'
+                        'source'=> 'feature-test',
+                        'sourceInfo' => (object) array(
+                            'experimentKey'=> 'rollout_1_exp_1',
+                            'variationKey'=> '177771'
+                        )
                     )
                 )
             );
@@ -3172,15 +3207,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 NotificationType::DECISION,
                 array(
-                    DecisionInfoTypes::FEATURE,
+                    DecisionNotificationTypes::FEATURE,
                     'user_id',
                     [],
                     (object) array(
                         'featureKey'=>'double_single_variable_feature',
                         'featureEnabled'=> false,
-                        'source'=> 'EXPERIMENT',
-                        'sourceExperimentKey'=> 'test_experiment_double_feature',
-                        'sourceVariationKey'=> 'variation'
+                        'source'=> 'feature-test',
+                        'sourceInfo' => (object) array(
+                            'experimentKey'=> 'test_experiment_double_feature',
+                            'variationKey'=> 'variation'
+                        )
                     )
                 )
             );
@@ -3190,15 +3227,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 NotificationType::DECISION,
                 array(
-                    DecisionInfoTypes::FEATURE,
+                    DecisionNotificationTypes::FEATURE,
                     'user_id',
                     [],
                     (object) array(
                         'featureKey'=>'integer_single_variable_feature',
                         'featureEnabled'=> true,
-                        'source'=> 'ROLLOUT',
-                        'sourceExperimentKey'=> null,
-                        'sourceVariationKey'=> null
+                        'source'=> 'rollout',
+                        'sourceInfo'=> (object) array()
                     )
                 )
             );
@@ -3208,15 +3244,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 NotificationType::DECISION,
                 array(
-                    DecisionInfoTypes::FEATURE,
+                    DecisionNotificationTypes::FEATURE,
                     'user_id',
                     [],
                     (object) array(
                         'featureKey'=>'boolean_single_variable_feature',
                         'featureEnabled'=> false,
-                        'source'=> 'ROLLOUT',
-                        'sourceExperimentKey'=> null,
-                        'sourceVariationKey'=> null
+                        'source'=> 'rollout',
+                        'sourceInfo'=> (object) array()
                     )
                 )
             );
@@ -3226,15 +3261,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 NotificationType::DECISION,
                 array(
-                    DecisionInfoTypes::FEATURE,
+                    DecisionNotificationTypes::FEATURE,
                     'user_id',
                     [],
                     (object) array(
                         'featureKey'=>'string_single_variable_feature',
                         'featureEnabled'=> true,
-                        'source'=> 'EXPERIMENT',
-                        'sourceExperimentKey'=> 'rollout_1_exp_1',
-                        'sourceVariationKey'=> '177771'
+                        'source'=> 'feature-test',
+                        'sourceInfo' => (object) array(
+                            'experimentKey'=> 'rollout_1_exp_1',
+                            'variationKey'=> '177771'
+                        )
                     )
                 )
             );
@@ -3244,15 +3281,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 NotificationType::DECISION,
                 array(
-                    DecisionInfoTypes::FEATURE,
+                    DecisionNotificationTypes::FEATURE,
                     'user_id',
                     [],
                     (object) array(
                         'featureKey'=>'multi_variate_feature',
                         'featureEnabled'=> false,
-                        'source'=> 'EXPERIMENT',
-                        'sourceExperimentKey'=> 'test_experiment_double_feature',
-                        'sourceVariationKey'=> 'variation'
+                        'source'=> 'feature-test',
+                        'sourceInfo' => (object) array(
+                            'experimentKey'=> 'test_experiment_double_feature',
+                            'variationKey'=> 'variation'
+                        )
                     )
                 )
             );
@@ -3262,15 +3301,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 NotificationType::DECISION,
                 array(
-                    DecisionInfoTypes::FEATURE,
+                    DecisionNotificationTypes::FEATURE,
                     'user_id',
                     [],
                     (object) array(
                         'featureKey'=>'mutex_group_feature',
                         'featureEnabled'=> true,
-                        'source'=> 'ROLLOUT',
-                        'sourceExperimentKey'=> null,
-                        'sourceVariationKey'=> null
+                        'source'=> 'rollout',
+                        'sourceInfo'=> (object) array()
                     )
                 )
             );
@@ -3280,15 +3318,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->with(
                 NotificationType::DECISION,
                 array(
-                    DecisionInfoTypes::FEATURE,
+                    DecisionNotificationTypes::FEATURE,
                     'user_id',
                     [],
                     (object) array(
                         'featureKey'=>'empty_feature',
                         'featureEnabled'=> false,
-                        'source'=> 'ROLLOUT',
-                        'sourceExperimentKey'=> null,
-                        'sourceVariationKey'=> null
+                        'source'=> 'rollout',
+                        'sourceInfo'=> (object) array()
                     )
                 )
             );
@@ -3441,7 +3478,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $experiment,
             $variation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -3480,7 +3517,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $expectedDecision = new FeatureDecision(
             $experiment,
             $variation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -3597,7 +3634,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $experiment,
             $variation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->exactly(1))
@@ -3980,7 +4017,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $expectedDecision = new FeatureDecision(
             $experiment,
             $expectedVariation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->once())
@@ -3989,7 +4026,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($expectedVariation->getFeatureEnabled());
         $arrayParam = array(
-            DecisionInfoTypes::FEATURE_VARIABLE,
+            DecisionNotificationTypes::FEATURE_VARIABLE,
             'user_id',
             [],
             (object) array(
@@ -3998,9 +4035,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'variableKey'=> 'double_variable',
                 'variableType'=> 'double',
                 'variableValue'=> 42.42,
-                'source'=> 'EXPERIMENT',
-                'sourceExperimentKey'=> 'test_experiment_double_feature',
-                'sourceVariationKey'=> 'control'
+                'source'=> 'feature-test',
+                'sourceInfo' => (object) array(
+                    'experimentKey'=> 'test_experiment_double_feature',
+                    'variationKey'=> 'control'
+                )
             )
         );
         $this->notificationCenterMock->expects($this->once())
@@ -4035,7 +4074,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $expectedDecision = new FeatureDecision(
             $experiment,
             $expectedVariation,
-            FeatureDecision::DECISION_SOURCE_EXPERIMENT
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
 
         $decisionServiceMock->expects($this->once())
@@ -4046,7 +4085,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($expectedVariation->getFeatureEnabled());
 
         $arrayParam = array(
-            DecisionInfoTypes::FEATURE_VARIABLE,
+            DecisionNotificationTypes::FEATURE_VARIABLE,
             'user_id',
             $userAttributes,
             (object) array(
@@ -4055,9 +4094,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'variableKey'=> 'double_variable',
                 'variableType'=> 'double',
                 'variableValue'=> 14.99,
-                'source'=> 'EXPERIMENT',
-                'sourceExperimentKey'=> 'test_experiment_double_feature',
-                'sourceVariationKey'=> 'control'
+                'source'=> 'feature-test',
+                'sourceInfo' => (object) array(
+                    'experimentKey'=> 'test_experiment_double_feature',
+                    'variationKey'=> 'control'
+                )
             )
         );
         $this->notificationCenterMock->expects($this->once())
@@ -4099,7 +4140,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($expectedVariation->getFeatureEnabled());
 
         $arrayParam = array(
-            DecisionInfoTypes::FEATURE_VARIABLE,
+            DecisionNotificationTypes::FEATURE_VARIABLE,
             'user_id',
             [],
             (object) array(
@@ -4108,9 +4149,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'variableKey'=> 'boolean_variable',
                 'variableType'=> 'boolean',
                 'variableValue'=> true,
-                'source'=> 'ROLLOUT',
-                'sourceExperimentKey'=> null,
-                'sourceVariationKey'=> null
+                'source'=> 'rollout',
+                'sourceInfo'=> (object) array()
             )
         );
         $this->notificationCenterMock->expects($this->once())
@@ -4153,7 +4193,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($expectedVariation->getFeatureEnabled());
 
         $arrayParam = array(
-            DecisionInfoTypes::FEATURE_VARIABLE,
+            DecisionNotificationTypes::FEATURE_VARIABLE,
             'user_id',
             [],
             (object) array(
@@ -4162,9 +4202,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'variableKey'=> 'boolean_variable',
                 'variableType'=> 'boolean',
                 'variableValue'=> true,
-                'source'=> 'ROLLOUT',
-                'sourceExperimentKey'=> null,
-                'sourceVariationKey'=> null
+                'source'=> 'rollout',
+                'sourceInfo'=> (object) array()
             )
         );
         $this->notificationCenterMock->expects($this->once())
@@ -4201,7 +4240,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($expectedDecision));
 
         $arrayParam = array(
-            DecisionInfoTypes::FEATURE_VARIABLE,
+            DecisionNotificationTypes::FEATURE_VARIABLE,
             'user_id',
             [],
             (object) array(
@@ -4210,9 +4249,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'variableKey'=> 'double_variable',
                 'variableType'=> 'double',
                 'variableValue'=> 14.99,
-                'source'=> 'ROLLOUT',
-                'sourceExperimentKey'=> null,
-                'sourceVariationKey'=> null
+                'source'=> 'rollout',
+                'sourceInfo'=> (object) array()
             )
         );
         $this->notificationCenterMock->expects($this->once())

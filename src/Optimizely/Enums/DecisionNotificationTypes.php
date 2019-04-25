@@ -17,9 +17,10 @@
 
 namespace Optimizely\Enums;
 
-class DecisionInfoTypes
+class DecisionNotificationTypes
 {
-    const EXPERIMENT = "experiment";
+    const AB_TEST = "ab-test";
     const FEATURE = "feature";
-    const FEATURE_VARIABLE = "feature_variable";
+    const FEATURE_TEST = "feature-test";
+    const FEATURE_VARIABLE = "feature-variable";
 }

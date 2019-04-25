@@ -113,7 +113,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_multivariate' => $this->config->getExperimentFromKey('test_experiment_multivariate'),
             'test_experiment_with_feature_rollout' => $this->config->getExperimentFromKey('test_experiment_with_feature_rollout'),
             'test_experiment_double_feature' =>  $this->config->getExperimentFromKey('test_experiment_double_feature'),
-            'test_experiment_integer_feature' =>  $this->config->getExperimentFromKey('test_experiment_integer_feature')
+            'test_experiment_integer_feature' =>  $this->config->getExperimentFromKey('test_experiment_integer_feature'),
+            'test_experiment_2' =>  $this->config->getExperimentFromKey('test_experiment_2')
             ],
             $experimentKeyMap->getValue($this->config)
         );
@@ -130,7 +131,8 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             '122230' => $this->config->getExperimentFromId('122230'),
             '122235' => $this->config->getExperimentFromId('122235'),
             '122238' => $this->config->getExperimentFromId('122238'),
-            '122241' => $this->config->getExperimentFromId('122241')
+            '122241' => $this->config->getExperimentFromId('122241'),
+            '111133' => $this->config->getExperimentFromId('111133')
             ],
             $experimentIdMap->getValue($this->config)
         );
@@ -227,6 +229,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ],
             'rollout_2_exp_2' => [
                 '177780' => $this->config->getVariationFromKey('rollout_2_exp_2', '177780')
+            ],
+            'test_experiment_2' => [
+                'test_variation_1' => $this->config->getVariationFromKey('test_experiment_2', 'test_variation_1'),
+                'test_variation_2' => $this->config->getVariationFromKey('test_experiment_2', 'test_variation_2')
             ]
             ],
             $variationKeyMap->getValue($this->config)
@@ -285,6 +291,10 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ],
             'rollout_2_exp_2' => [
                 '177780' => $this->config->getVariationFromId('rollout_2_exp_2', '177780')
+            ],
+            'test_experiment_2' => [
+                '151239' => $this->config->getVariationFromId('test_experiment_2', '151239'),
+                '151240' => $this->config->getVariationFromId('test_experiment_2', '151240')
             ]
             ],
             $variationIdMap->getValue($this->config)
@@ -330,6 +340,22 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $actualVariation = $this->config->getVariationFromKey("test_experiment_multivariate", "Fred");
 
         $this->assertEquals($expectedVariation, $actualVariation);
+
+        // Check Experiment Feature Map
+        $experimentFeatureMap = new \ReflectionProperty(ProjectConfig::class, '_experimentFeatureMap');
+        $experimentFeatureMap->setAccessible(true);
+        $this->assertEquals(
+            [
+                '111133' => ['155549'],
+                '122238' => ['155550'],
+                '122241' => ['155552'],
+                '122235' => ['155557'],
+                '122230' => ['155559'],
+                '7723330021' => ['155562'],
+                '7718750065' => ['155562']
+            ],
+            $experimentFeatureMap->getValue($this->config)
+        );
     }
 
     public function testExceptionThrownForUnsupportedVersion()
@@ -815,5 +841,15 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->config->getForcedVariation($invalidExperimentKey, $userId);
         $this->config->getForcedVariation($pausedExperimentKey, $userId);
         $this->config->getForcedVariation($experimentKey, $userId);
+    }
+
+    // Test that a true is returned if experiment is a feature test, false otherwise.
+    public function testIsFeatureExperiment()
+    {
+        $experiment = $this->config->getExperimentFromKey('test_experiment');
+        $featureExperiment = $this->config->getExperimentFromKey('test_experiment_double_feature');
+
+        $this->assertTrue($this->config->isFeatureExperiment($featureExperiment->getId()));
+        $this->assertFalse($this->config->isFeatureExperiment($experiment->getId()));
     }
 }
