@@ -18,8 +18,8 @@ namespace Optimizely\DecisionService;
 
 class FeatureDecision
 {
-    const DECISION_SOURCE_EXPERIMENT = 'EXPERIMENT';
-    const DECISION_SOURCE_ROLLOUT = 'ROLLOUT';
+    const DECISION_SOURCE_FEATURE_TEST = 'feature-test';
+    const DECISION_SOURCE_ROLLOUT = 'rollout';
 
     /**
      * The experiment in this decision.
@@ -36,7 +36,7 @@ class FeatureDecision
     private $_variation;
 
     /**
-     * The source of the decision. Either DECISION_SOURCE_EXPERIMENT or DECISION_SOURCE_ROLLOUT
+     * The source of the decision. Either DECISION_SOURCE_FEATURE_TEST or DECISION_SOURCE_ROLLOUT
      *
      * @var string
      */

@@ -27,7 +27,7 @@ use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureVariable;
-use Optimizely\Enums\DecisionInfoTypes;
+use Optimizely\Enums\DecisionNotificationTypes;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
@@ -408,11 +408,17 @@ class Optimizely
         $variation = $this->_decisionService->getVariation($experiment, $userId, $attributes);
         $variationKey = ($variation === null) ? null : $variation->getKey();
 
+        if ($this->_config->isFeatureExperiment($experiment->getId())) {
+            $decisionNotificationType = DecisionNotificationTypes::FEATURE_TEST;
+        } else {
+            $decisionNotificationType = DecisionNotificationTypes::AB_TEST;
+        }
+
         $attributes = $attributes ?: [];
         $this->notificationCenter->sendNotifications(
             NotificationType::DECISION,
             array(
-                DecisionInfoTypes::EXPERIMENT,
+                $decisionNotificationType,
                 $userId,
                 $attributes,
                 (object) array(
@@ -519,9 +525,14 @@ class Optimizely
         if ($variation) {
             $experiment = $decision->getExperiment();
             $featureEnabled = $variation->getFeatureEnabled();
-            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
+            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_FEATURE_TEST) {
                 $experimentKey = $experiment->getKey();
                 $variationKey = $variation->getKey();
+                $sourceInfo = (object) array(
+                    'experimentKey'=> $experimentKey,
+                    'variationKey'=> $variationKey
+                );
+
                 $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
             } else {
                 $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
@@ -532,15 +543,14 @@ class Optimizely
         $this->notificationCenter->sendNotifications(
             NotificationType::DECISION,
             array(
-                DecisionInfoTypes::FEATURE,
+                DecisionNotificationTypes::FEATURE,
                 $userId,
                 $attributes,
                 (object) array(
                     'featureKey'=>$featureFlagKey,
                     'featureEnabled'=> $featureEnabled,
                     'source'=> $decision->getSource(),
-                    'sourceExperimentKey'=> isset($experimentKey) ? $experimentKey : null,
-                    'sourceVariationKey'=> isset($variationKey) ? $variationKey : null
+                    'sourceInfo'=> isset($sourceInfo) ? $sourceInfo : (object) array()
                 )
             )
         );
@@ -654,9 +664,11 @@ class Optimizely
             $variation = $decision->getVariation();
             $featureEnabled = $variation->getFeatureEnabled();
 
-            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_EXPERIMENT) {
-                $experimentKey = $experiment->getKey();
-                $variationKey = $variation->getKey();
+            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_FEATURE_TEST) {
+                $sourceInfo = (object) array(
+                    'experimentKey'=> $experiment->getKey(),
+                    'variationKey'=> $variation->getKey()
+                );
             }
 
             if ($featureEnabled) {
@@ -692,7 +704,7 @@ class Optimizely
         $this->notificationCenter->sendNotifications(
             NotificationType::DECISION,
             array(
-                DecisionInfoTypes::FEATURE_VARIABLE,
+                DecisionNotificationTypes::FEATURE_VARIABLE,
                 $userId,
                 $attributes,
                 (object) array(
@@ -702,8 +714,7 @@ class Optimizely
                     'variableType'=> $variableType,
                     'variableValue'=> $variableValue,
                     'source'=> $decision->getSource(),
-                    'sourceExperimentKey'=> isset($experimentKey) ? $experimentKey : null,
-                    'sourceVariationKey'=> isset($variationKey) ? $variationKey : null
+                    'sourceInfo'=> isset($sourceInfo) ? $sourceInfo : (object) array()
                 )
             )
         );

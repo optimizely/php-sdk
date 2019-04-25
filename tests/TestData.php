@@ -327,6 +327,41 @@ define(
           "featureEnabled": true
         }
       ]
+    }, {
+      "key": "test_experiment_2",
+      "status": "Running",
+      "layerId": "5",
+      "audienceIds": [],
+      "id": "111133",
+      "forcedVariations": {},
+      "trafficAllocation": [{
+        "entityId": "151239",
+        "endOfRange": 5000
+      }, {
+        "entityId": "151240",
+        "endOfRange": 10000
+      }],
+      "variations": [{
+        "id": "151239",
+        "key": "test_variation_1",
+        "featureEnabled": true,
+        "variables": [
+          {
+            "id": "155551",
+            "value": "42.42"
+          }
+        ]
+      }, {
+        "id": "151240",
+        "key": "test_variation_2",
+        "featureEnabled": true,
+        "variables": [
+          {
+            "id": "155551",
+            "value": "13.37"
+          }
+        ]
+      }]
     }
   ],
   "version": "4",
@@ -517,10 +552,7 @@ define(
       "id": "155549",
       "key": "boolean_feature",
       "rolloutId": "",
-      "experimentIds": [
-        "7723330021",
-        "7718750065"
-      ],
+      "experimentIds": ["111133"],
       "variables": [
 
       ]

@@ -238,7 +238,7 @@ class DecisionService
                     "The user '{$userId}' is bucketed into experiment '{$experiment->getKey()}' of feature '{$featureFlagKey}'."
                 );
 
-                return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_EXPERIMENT);
+                return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_FEATURE_TEST);
             }
         }
 
