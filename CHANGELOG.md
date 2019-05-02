@@ -1,5 +1,5 @@
 ## 3.1.0
-May 2nd, 2019
+May 3rd, 2019
 
 ### New Features:
 - Introduced Decision notification listener to be able to record:
@@ -9,6 +9,9 @@ May 2nd, 2019
 
 ### Bug Fixes:
 - Feature variable APIs return default variable value when featureEnabled property is false. ([#159](https://github.com/optimizely/php-sdk/pull/159))
+
+### Deprecated
+- Activate notification listener is deprecated as of this release. Recommendation is to use the new Decision notification listener. Activate notification listener will be removed in the next major release.
 
 ## 3.0.1
 April 19th, 2019

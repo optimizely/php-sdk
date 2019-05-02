@@ -18,9 +18,23 @@ namespace Optimizely\Notification;
 
 class NotificationType
 {
-    // format is EVENT: list of parameters to callback.
+    /*
+     * Notification triggered when an impression event is sent to Optimizely.
+     *
+     * @deprecated since 3.1.0
+     */
     const ACTIVATE = "ACTIVATE:experiment, user_id, attributes, variation, event";
+
+    /*
+     * Notification triggered when a decision is made in
+     * the system i.e. user activation, feature access
+     * or feature-variable value is retrieved.
+     */
     const DECISION = "DECISION:type, user_id, attributes, decision_info";
+
+    /*
+     * Notification triggered when a conversion event is sent to Optimizely.
+     */
     const TRACK = "TRACK:event_key, user_id, attributes, event_tags, event";
 
     public static function isNotificationTypeValid($notification_type)
