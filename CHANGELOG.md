@@ -1,3 +1,15 @@
+## 3.1.0
+May 2nd, 2019
+
+### New Features:
+- Introduced Decision notification listener to be able to record:
+    - Variation assignments for users activated in an experiment.
+    - Feature access for users.
+    - Feature variable value for users.
+
+### Bug Fixes:
+- Feature variable APIs return default variable value when featureEnabled property is false. ([#159](https://github.com/optimizely/php-sdk/pull/159))
+
 ## 3.0.1
 April 19th, 2019
 
