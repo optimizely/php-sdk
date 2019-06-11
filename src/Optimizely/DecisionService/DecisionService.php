@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017-2018, Optimizely Inc and Contributors
+ * Copyright 2017-2019, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -345,11 +345,13 @@ class DecisionService
         if (!is_null($forcedVariations) && isset($forcedVariations[$userId])) {
             $variationKey = $forcedVariations[$userId];
             $variation = $this->_projectConfig->getVariationFromKey($experiment->getKey(), $variationKey);
-            if ($variationKey) {
+            if ($variationKey && !empty($variation->getKey())) {
                 $this->_logger->log(
                     Logger::INFO,
                     sprintf('User "%s" is forced in variation "%s" of experiment "%s".', $userId, $variationKey, $experiment->getKey())
                 );
+            } else {
+                return null;
             }
             return $variation;
         }
