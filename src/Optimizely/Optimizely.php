@@ -143,7 +143,7 @@ class Optimizely
         }
 
         $this->_eventBuilder = new EventBuilder($this->_logger);
-        $this->_decisionService = new DecisionService($this->_logger, $this->_config, $userProfileService);
+        $this->_decisionService = new DecisionService($this->_logger, $userProfileService);
         $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
     }
 
@@ -405,7 +405,7 @@ class Optimizely
             return null;
         }
 
-        $variation = $this->_decisionService->getVariation($experiment, $userId, $attributes);
+        $variation = $this->_decisionService->getVariation($this->_config, $experiment, $userId, $attributes);
         $variationKey = ($variation === null) ? null : $variation->getKey();
 
         if ($this->_config->isFeatureExperiment($experiment->getId())) {
@@ -520,7 +520,7 @@ class Optimizely
         }
 
         $featureEnabled = false;
-        $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
+        $decision = $this->_decisionService->getVariationForFeature($this->_config, $featureFlag, $userId, $attributes);
         $variation = $decision->getVariation();
         if ($variation) {
             $experiment = $decision->getExperiment();
@@ -650,7 +650,7 @@ class Optimizely
         }
 
         $featureEnabled = false;
-        $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
+        $decision = $this->_decisionService->getVariationForFeature($this->_config, $featureFlag, $userId, $attributes);
         $variableValue = $variable->getDefaultValue();
 
         if ($decision->getVariation() === null) {

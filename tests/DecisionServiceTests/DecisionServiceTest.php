@@ -78,10 +78,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->userProvideServiceMock = $this->getMockBuilder(UserProfileServiceInterface::class)
             ->getMock();
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
+        $this->decisionService = new DecisionService($this->loggerMock);
 
         $this->decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->config))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariation'))
             ->getMock();
     }
@@ -97,7 +97,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($pausedExperiment, $this->testUserId);
+        $variation = $this->decisionService->getVariation($this->config, $pausedExperiment, $this->testUserId);
 
         $this->assertNull($variation);
     }
@@ -115,7 +115,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, $this->testUserId, $this->testUserAttributes);
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, $this->testUserId, $this->testUserAttributes);
 
         $this->assertEquals(
             $expectedVariation,
@@ -125,7 +125,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetBucketingIdWhenBucketingIdIsNotString()
     {
-        $decisionService = new DecisionTester($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $decisionService = new DecisionTester($this->loggerMock, $this->userProvideServiceMock);
         $userAttributesWithBucketingId = [
             'device_type' => 'iPhone',
             'company' => 'Optimizely',
@@ -142,7 +142,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetBucketingIdWhenBucketingIdIsNull()
     {
-        $decisionService = new DecisionTester($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $decisionService = new DecisionTester($this->loggerMock, $this->userProvideServiceMock);
         $userAttributesWithBucketingId = [
             'device_type' => 'iPhone',
             'company' => 'Optimizely',
@@ -158,7 +158,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetBucketingIdWhenBucketingIdIsString()
     {
-        $decisionService = new DecisionTester($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $decisionService = new DecisionTester($this->loggerMock, $this->userProvideServiceMock);
         $userAttributesWithBucketingId = [
             'device_type' => 'iPhone',
             'company' => 'Optimizely',
@@ -174,7 +174,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetBucketingIdWhenBucketingIdIsEmptyString()
     {
-        $decisionService = new DecisionTester($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $decisionService = new DecisionTester($this->loggerMock, $this->userProvideServiceMock);
         $userAttributesWithBucketingId = [
             'device_type' => 'iPhone',
             'company' => 'Optimizely',
@@ -207,7 +207,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, 'user1');
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1');
 
         $this->assertEquals(
             $expectedVariation,
@@ -244,7 +244,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, 'user1');
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1');
 
         $this->assertEquals(
             $expectedVariation,
@@ -270,7 +270,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, 'user1', $this->testUserAttributes);
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1', $this->testUserAttributes);
 
         $this->assertEquals(
             $expectedVariation,
@@ -301,7 +301,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, 'user1', $this->testUserAttributes);
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1', $this->testUserAttributes);
 
         $this->assertEquals(
             $expectedVariation,
@@ -322,7 +322,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, 'not_whitelisted_user', $this->testUserAttributes);
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, 'not_whitelisted_user', $this->testUserAttributes);
 
         $this->assertEquals(
             $expectedVariation,
@@ -341,7 +341,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, $this->testUserId); // no matching attributes
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, $this->testUserId); // no matching attributes
 
         $this->assertNull($variation);
     }
@@ -374,12 +374,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('lookup')
             ->willReturn($storedUserProfile);
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $this->decisionService = new DecisionService($this->loggerMock, $this->userProvideServiceMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, $userId);
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, $userId);
         $this->assertEquals($expectedVariation, $variation);
     }
 
@@ -418,12 +418,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $this->decisionService = new DecisionService($this->loggerMock, $this->userProvideServiceMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -471,12 +471,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $this->decisionService = new DecisionService($this->loggerMock, $this->userProvideServiceMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -524,12 +524,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $this->decisionService = new DecisionService($this->loggerMock, $this->userProvideServiceMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -568,12 +568,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('save')
             ->with($this->throwException(new Exception()));
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $this->decisionService = new DecisionService($this->loggerMock, $this->userProvideServiceMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        $variation = $this->decisionService->getVariation($runningExperiment, $userId, $this->testUserAttributes);
+        $variation = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -679,7 +679,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('lookup')
             ->willReturn($storedUserProfile);
 
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config, $this->userProvideServiceMock);
+        $this->decisionService = new DecisionService($this->loggerMock, $this->userProvideServiceMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -696,7 +696,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, "The feature flag 'empty_feature' is not used in any experiments.");
 
-        $this->assertNull($this->decisionService->getVariationForFeatureExperiment($featureFlag, 'user1', []));
+        $this->assertNull($this->decisionService->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []));
     }
 
     // should return nil and log a message when the experiment is not in the datafile
@@ -718,7 +718,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "The user 'user1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
             );
 
-        $this->assertNull($this->decisionService->getVariationForFeatureExperiment($featureFlag, 'user1', []));
+        $this->assertNull($this->decisionService->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []));
     }
 
     // should return nil and log when the user is not bucketed into the feature flag's experiments
@@ -739,7 +739,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "The user 'user1' is not bucketed into any of the experiments using the feature 'multi_variate_feature'."
             );
         $featureFlag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureExperiment($featureFlag, 'user1', []));
+        $this->assertNull($this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []));
     }
 
     //  should return the variation when the user is bucketed into a variation for the experiment on the feature flag
@@ -764,7 +764,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionServiceMock->getVariationForFeatureExperiment($featureFlag, 'user1', [])
+            $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', [])
         );
     }
 
@@ -790,7 +790,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             );
         $this->assertEquals(
             $expected_decision,
-            $this->decisionServiceMock->getVariationForFeatureExperiment($featureFlag, 'user_1', [])
+            $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user_1', [])
         );
     }
 
@@ -812,14 +812,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 Logger::INFO,
                 "The user 'user_1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
             );
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureExperiment($featureFlag, 'user_1', []));
+        $this->assertNull($this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user_1', []));
     }
 
     // should return the bucketed experiment and variation
     public function testGetVariationForFeatureWhenTheUserIsBucketedIntoFeatureExperiment()
     {
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->config))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeatureExperiment'))
             ->getMock();
 
@@ -839,7 +839,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $decisionServiceMock->getVariationForFeature($featureFlag, 'user_1', [])
+            $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, 'user_1', [])
         );
     }
 
@@ -847,7 +847,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     public function testGetVariationForFeatureWhenBucketedToFeatureRollout()
     {
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->config))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeatureExperiment','getVariationForFeatureRollout'))
             ->getMock();
 
@@ -880,7 +880,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $decisionServiceMock->getVariationForFeature($featureFlag, 'user_1', [])
+            $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, 'user_1', [])
         );
     }
 
@@ -888,7 +888,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     public function testGetVariationForFeatureWhenTheUserIsNeitherBucketedIntoFeatureExperimentNorToFeatureRollout()
     {
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->config))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeatureExperiment','getVariationForFeatureRollout'))
             ->getMock();
 
@@ -916,7 +916,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
         $this->assertEquals(
-            $decisionServiceMock->getVariationForFeature($featureFlag, 'user_1', []),
+            $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, 'user_1', []),
             $expectedDecision
         );
     }
@@ -934,7 +934,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "Feature flag 'boolean_feature' is not used in a rollout."
             );
 
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureRollout($featureFlag, 'user_1', []));
+        $this->assertNull($this->decisionServiceMock->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', []));
     }
 
     // should return null
@@ -952,7 +952,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 'Rollout with ID "invalid_rollout_id" is not in the datafile.'
             );
 
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureRollout($featureFlag, 'user_1', []));
+        $this->assertNull($this->decisionServiceMock->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', []));
     }
 
     // should return null
@@ -964,7 +964,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getRolloutFromId'))
             ->getMock();
 
-        $this->decisionService = new DecisionService($this->loggerMock, $configMock);
+        $this->decisionService = new DecisionService($this->loggerMock);
 
         $featureFlag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
         $rollout_id = $featureFlag->getRolloutId();
@@ -976,7 +976,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('getRolloutFromId')
             ->will($this->returnValue($experiment_less_rollout));
 
-        $this->assertNull($this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', []));
+        $this->assertNull($this->decisionService->getVariationForFeatureRollout($configMock, $featureFlag, 'user_1', []));
     }
 
     // ============== when the user qualifies for targeting rule (audience match) ======================
@@ -1008,7 +1008,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
         );
     }
 
@@ -1031,7 +1031,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         // Provide attributes such that user qualifies for audience
         $user_attributes = ["browser_type" => "chrome"];
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
+        $this->decisionService = new DecisionService($this->loggerMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -1046,7 +1046,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
         );
     }
 
@@ -1063,7 +1063,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         // Provide attributes such that user qualifies for audience
         $user_attributes = ["browser_type" => "chrome"];
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
+        $this->decisionService = new DecisionService($this->loggerMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -1077,7 +1077,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn(null);
 
         $this->assertNull(
-            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
         );
     }
 
@@ -1105,7 +1105,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         // Provide null attributes so that user does not qualify for audience
         $user_attributes = [];
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
+        $this->decisionService = new DecisionService($this->loggerMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -1121,7 +1121,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
         );
 
         // Verify Logs
@@ -1145,7 +1145,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         // Provide null attributes so that user does not qualify for audience
         $user_attributes = [];
-        $this->decisionService = new DecisionService($this->loggerMock, $this->config);
+        $this->decisionService = new DecisionService($this->loggerMock);
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
@@ -1158,7 +1158,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->will($this->returnCallback($this->collectLogsForAssertion));
 
-        $this->assertNull($this->decisionService->getVariationForFeatureRollout($featureFlag, 'user_1', $user_attributes));
+        $this->assertNull($this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes));
 
         // Verify Logs
         $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment0->getKey()}'."], $this->collectedLogs);
