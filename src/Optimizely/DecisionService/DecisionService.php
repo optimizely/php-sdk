@@ -346,7 +346,7 @@ class DecisionService
      *
      * @return Variation The variation which the given user and experiment should be forced into.
      */
-    public function getForcedVariation($projectConfig, $experimentKey, $userId)
+    public function getForcedVariation(ProjectConfig $projectConfig, $experimentKey, $userId)
     {
         if (!isset($this->_forcedVariationMap[$userId])) {
             $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
@@ -386,7 +386,7 @@ class DecisionService
      *
      * @return boolean A boolean value that indicates if the set completed successfully.
      */
-    public function setForcedVariation($projectConfig, $experimentKey, $userId, $variationKey)
+    public function setForcedVariation(ProjectConfig $projectConfig, $experimentKey, $userId, $variationKey)
     {
         // check for empty string Variation key
         if (!is_null($variationKey) && !Validator::validateNonEmptyString($variationKey)) {
