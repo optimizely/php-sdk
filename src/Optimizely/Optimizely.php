@@ -451,7 +451,7 @@ class Optimizely
         )) {
             return false;
         }
-        return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
+        return $this->_decisionService->setForcedVariation($this->_config, $experimentKey, $userId, $variationKey);
     }
 
     /**
@@ -473,7 +473,7 @@ class Optimizely
             return null;
         }
 
-        $forcedVariation = $this->_config->getForcedVariation($experimentKey, $userId);
+        $forcedVariation = $this->_decisionService->getForcedVariation($this->_config, $experimentKey, $userId);
         if (isset($forcedVariation)) {
             return $forcedVariation->getKey();
         } else {
