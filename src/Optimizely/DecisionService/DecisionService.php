@@ -106,7 +106,7 @@ class DecisionService
      *
      * @return Variation   Variation  which the user is bucketed into.
      */
-    public function getVariation($projectConfig, Experiment $experiment, $userId, $attributes = null)
+    public function getVariation(ProjectConfig $projectConfig, Experiment $experiment, $userId, $attributes = null)
     {
         $bucketingId = $this->getBucketingId($userId, $attributes);
 
@@ -165,7 +165,7 @@ class DecisionService
      * @return Decision  if getVariationForFeatureExperiment or getVariationForFeatureRollout returns a Decision
      *         null      otherwise
      */
-    public function getVariationForFeature($projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
+    public function getVariationForFeature(ProjectConfig $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
     {
         //Evaluate in this order:
         //1. Attempt to bucket user into experiment using feature flag.
@@ -206,7 +206,7 @@ class DecisionService
      * @return Decision  if a variation is returned for the user
      *         null  if feature flag is not used in any experiments or no variation is returned for the user
      */
-    public function getVariationForFeatureExperiment($projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
+    public function getVariationForFeatureExperiment(ProjectConfig $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
     {
         $featureFlagKey = $featureFlag->getKey();
         $experimentIds = $featureFlag->getExperimentIds();
@@ -261,7 +261,7 @@ class DecisionService
      *               no rollout found against the rollout ID or
      *               no variation is returned for the user
      */
-    public function getVariationForFeatureRollout($projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
+    public function getVariationForFeatureRollout(ProjectConfig $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
     {
         $bucketing_id = $this->getBucketingId($userId, $userAttributes);
         $featureFlagKey = $featureFlag->getKey();
@@ -333,7 +333,7 @@ class DecisionService
      *
      * @return null|Variation Representing the variation the user is forced into.
      */
-    private function getWhitelistedVariation($projectConfig, Experiment $experiment, $userId)
+    private function getWhitelistedVariation(ProjectConfig $projectConfig, Experiment $experiment, $userId)
     {
         // Check if user is whitelisted for a variation.
         $forcedVariations = $experiment->getForcedVariations();
@@ -400,7 +400,7 @@ class DecisionService
      *
      * @return null|Variation the stored variation or null if not found.
      */
-    private function getStoredVariation($projectConfig, Experiment $experiment, UserProfile $userProfile)
+    private function getStoredVariation(ProjectConfig $projectConfig, Experiment $experiment, UserProfile $userProfile)
     {
         $experimentKey = $experiment->getKey();
         $userId = $userProfile->getUserId();
