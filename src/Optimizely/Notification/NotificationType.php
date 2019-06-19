@@ -37,6 +37,11 @@ class NotificationType
      */
     const TRACK = "TRACK:event_key, user_id, attributes, event_tags, event";
 
+    /*
+     * Notification triggered when a config update event is sent to Optimizely.
+     */
+    const OPTIMIZELY_CONFIG_UPDATE = "OPTIMIZELY_CONFIG_UPDATE";
+
     public static function isNotificationTypeValid($notification_type)
     {
         $oClass = new \ReflectionClass(__CLASS__);
