@@ -18,7 +18,6 @@ namespace Optimizely\DecisionService;
 
 use Exception;
 use Monolog\Logger;
-use Optimizely\Optimizely;
 use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
@@ -26,13 +25,14 @@ use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
 use Optimizely\Enums\ControlAttributes;
 use Optimizely\Logger\LoggerInterface;
+use Optimizely\Optimizely;
 use Optimizely\ProjectConfig;
 use Optimizely\UserProfile\Decision;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\UserProfile\UserProfile;
 use Optimizely\UserProfile\UserProfileUtils;
-use Optimizely\Utils\Validator;
 use Optimizely\Utils\Errors;
+use Optimizely\Utils\Validator;
 
 /**
  * Optimizely's decision service that determines which variation of an experiment the user will be allocated to.
