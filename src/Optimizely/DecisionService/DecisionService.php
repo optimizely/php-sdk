@@ -413,8 +413,9 @@ class DecisionService
             );
             return null;
         }
-
-        if (!$this->_projectConfig->isVariationIdValid($experimentKey, $variationId)) {
+        
+        $variation = $this->_projectConfig->getVariationFromId($experimentKey, $variationId);
+        if (!($variation->getId())) {
             $this->_logger->log(
                 Logger::INFO,
                 sprintf(
@@ -427,7 +428,6 @@ class DecisionService
             return null;
         }
 
-        $variation = $this->_projectConfig->getVariationFromId($experimentKey, $variationId);
         $this->_logger->log(
             Logger::INFO,
             sprintf(

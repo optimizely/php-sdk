@@ -603,13 +603,7 @@ class DatafileProjectConfig implements ProjectConfig
         );
         return null;
     }
-
-    public function isVariationIdValid($experimentKey, $variationId)
-    {
-        return isset($this->_variationIdMap[$experimentKey]) &&
-            isset($this->_variationIdMap[$experimentKey][$variationId]);
-    }
-
+    
     /**
      * Gets the forced variation key for the given user and experiment.
      *

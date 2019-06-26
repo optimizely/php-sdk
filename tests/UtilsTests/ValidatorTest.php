@@ -18,10 +18,10 @@
 namespace Optimizely\Tests;
 
 use Monolog\Logger;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Entity\Audience;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Utils\Validator;
 
 class ValidatorTest extends \PHPUnit_Framework_TestCase

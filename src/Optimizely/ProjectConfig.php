@@ -145,9 +145,7 @@ interface ProjectConfig
      * @return FeatureVariable / null
      */
     public function getFeatureVariableFromKey($featureFlagKey, $variableKey);
-
-    public function isVariationIdValid($experimentKey, $variationId);
-
+    
     /**
      * Gets the forced variation key for the given user and experiment.
      *
