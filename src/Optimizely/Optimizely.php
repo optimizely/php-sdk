@@ -17,6 +17,7 @@
 namespace Optimizely;
 
 use Exception;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidEventTagException;
@@ -130,7 +131,7 @@ class Optimizely
         }
 
         try {
-            $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
+            $this->_config = new DatafileProjectConfig($datafile, $this->_logger, $this->_errorHandler);
         } catch (Exception $exception) {
             $this->_isValid = false;
             $defaultLogger = new DefaultLogger();

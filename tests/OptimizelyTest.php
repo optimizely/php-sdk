@@ -18,6 +18,7 @@ namespace Optimizely\Tests;
 
 use Exception;
 use Monolog\Logger;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\FeatureVariable;
@@ -31,7 +32,6 @@ use Optimizely\Exceptions\InvalidInputException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
-use Optimizely\ProjectConfig;
 use TypeError;
 use Optimizely\ErrorHandler\DefaultErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
@@ -77,8 +77,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             $this->loggerMock
         );
 
-        $this->projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
-        $this->projectConfigForTypedAudience = new ProjectConfig($this->typedAudiencesDataFile, $this->loggerMock, new NoOpErrorHandler());
+        $this->projectConfig = new DatafileProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
+        $this->projectConfigForTypedAudience = new DatafileProjectConfig($this->typedAudiencesDataFile, $this->loggerMock, new NoOpErrorHandler());
 
         // Mock EventBuilder
         $this->eventBuilderMock = $this->getMockBuilder(EventBuilder::class)
@@ -2327,7 +2327,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testIsFeatureEnabledGivenInvalidFeatureFlag()
     {
         // Create local config copy for this method to add error
-        $projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
+        $projectConfig = new DatafileProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
         $optimizelyObj = new Optimizely($this->datafile);
 
         $config = new \ReflectionProperty(Optimizely::class, '_config');
@@ -3732,7 +3732,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testGetFeatureVariableIntegerWhenCasted()
     {
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
+        $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, new NoOpLogger, new NoOpErrorHandler))
             ->setMethods(array('getFeatureVariableFromKey'))
             ->getMock();
@@ -3774,7 +3774,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testGetFeatureVariableIntegerWhenNotCasted()
     {
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
+        $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, new NoOpLogger, new NoOpErrorHandler))
             ->setMethods(array('getFeatureVariableFromKey'))
             ->getMock();
@@ -3813,7 +3813,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testGetFeatureVariableDoubleWhenCasted()
     {
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
+        $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, new NoOpLogger, new NoOpErrorHandler))
             ->setMethods(array('getFeatureVariableFromKey'))
             ->getMock();
@@ -3855,7 +3855,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
     public function testGetFeatureVariableDoubleWhenNotCasted()
     {
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
+        $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, new NoOpLogger, new NoOpErrorHandler))
             ->setMethods(array('getFeatureVariableFromKey'))
             ->getMock();

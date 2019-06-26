@@ -19,6 +19,7 @@ namespace Optimizely\Tests;
 use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
@@ -27,7 +28,6 @@ use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Optimizely;
-use Optimizely\ProjectConfig;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\Validator;
 
@@ -66,7 +66,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             $this->collectedLogs[] = array($a,$b);
         };
 
-        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
+        $this->config = new DatafileProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
 
         // Mock bucketer
         $this->bucketerMock = $this->getMockBuilder(Bucketer::class)
@@ -959,7 +959,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     public function testGetVariationForFeatureRolloutWhenRolloutDoesNotHaveExperiment()
     {
         // Mock Project Config
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
+        $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, $this->loggerMock, new NoOpErrorHandler()))
             ->setMethods(array('getRolloutFromId'))
             ->getMock();

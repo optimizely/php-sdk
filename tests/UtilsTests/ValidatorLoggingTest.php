@@ -20,7 +20,7 @@
  use Monolog\Logger;
  use Optimizely\ErrorHandler\NoOpErrorHandler;
  use Optimizely\Logger\NoOpLogger;
- use Optimizely\ProjectConfig;
+ use Optimizely\Config\DatafileProjectConfig;
  use Optimizely\Utils\Validator;
 
 class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
@@ -31,9 +31,9 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('log'))
             ->getMock();
 
-        $this->config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $this->config = new DatafileProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
 
-        $this->typedConfig = new ProjectConfig(DATAFILE_WITH_TYPED_AUDIENCES, new NoOpLogger(), new NoOpErrorHandler());
+        $this->typedConfig = new DatafileProjectConfig(DATAFILE_WITH_TYPED_AUDIENCES, new NoOpLogger(), new NoOpErrorHandler());
 
         $this->collectedLogs = [];
 

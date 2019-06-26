@@ -20,6 +20,7 @@ namespace Optimizely\Tests;
 require 'TestData.php';
 
 use Monolog\Logger;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Entity\Attribute;
 use Optimizely\Entity\Audience;
 use Optimizely\Entity\Event;
@@ -41,7 +42,6 @@ use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Optimizely;
-use Optimizely\ProjectConfig;
 use Optimizely\Utils\ConfigParser;
 
 class ProjectConfigTest extends \PHPUnit_Framework_TestCase
@@ -61,38 +61,38 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('handleError'))
             ->getMock();
 
-        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
+        $this->config = new DatafileProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
     }
 
     public function testInit()
     {
         // Check version
-        $version = new \ReflectionProperty(ProjectConfig::class, '_version');
+        $version = new \ReflectionProperty(DatafileProjectConfig::class, '_version');
         $version->setAccessible(true);
         $this->assertEquals('4', $version->getValue($this->config));
 
         // Check account ID
-        $accountId = new \ReflectionProperty(ProjectConfig::class, '_accountId');
+        $accountId = new \ReflectionProperty(DatafileProjectConfig::class, '_accountId');
         $accountId->setAccessible(true);
         $this->assertEquals('1592310167', $accountId->getValue($this->config));
 
         // Check project ID
-        $projectId = new \ReflectionProperty(ProjectConfig::class, '_projectId');
+        $projectId = new \ReflectionProperty(DatafileProjectConfig::class, '_projectId');
         $projectId->setAccessible(true);
         $this->assertEquals('7720880029', $projectId->getValue($this->config));
 
         // Check botFiltering
-        $botFiltering = new \ReflectionProperty(ProjectConfig::class, '_botFiltering');
+        $botFiltering = new \ReflectionProperty(DatafileProjectConfig::class, '_botFiltering');
         $botFiltering->setAccessible(true);
         $this->assertSame(true, $botFiltering->getValue($this->config));
 
         // Check revision
-        $revision = new \ReflectionProperty(ProjectConfig::class, '_revision');
+        $revision = new \ReflectionProperty(DatafileProjectConfig::class, '_revision');
         $revision->setAccessible(true);
         $this->assertEquals('15', $revision->getValue($this->config));
 
         // Check group ID map
-        $groupIdMap = new \ReflectionProperty(ProjectConfig::class, '_groupIdMap');
+        $groupIdMap = new \ReflectionProperty(DatafileProjectConfig::class, '_groupIdMap');
         $groupIdMap->setAccessible(true);
         $this->assertEquals(
             [
@@ -102,7 +102,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         );
 
         // Check experiment key map
-        $experimentKeyMap = new \ReflectionProperty(ProjectConfig::class, '_experimentKeyMap');
+        $experimentKeyMap = new \ReflectionProperty(DatafileProjectConfig::class, '_experimentKeyMap');
         $experimentKeyMap->setAccessible(true);
         $this->assertEquals(
             [
@@ -120,7 +120,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         );
 
         // Check experiment ID map
-        $experimentIdMap = new \ReflectionProperty(ProjectConfig::class, '_experimentIdMap');
+        $experimentIdMap = new \ReflectionProperty(DatafileProjectConfig::class, '_experimentIdMap');
         $experimentIdMap->setAccessible(true);
         $this->assertEquals(
             [
@@ -138,7 +138,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         );
 
         // Check event key map
-        $eventKeyMap = new \ReflectionProperty(ProjectConfig::class, '_eventKeyMap');
+        $eventKeyMap = new \ReflectionProperty(DatafileProjectConfig::class, '_eventKeyMap');
         $eventKeyMap->setAccessible(true);
         $this->assertEquals(
             [
@@ -150,7 +150,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         );
 
         // Check attribute key map
-        $attributeKeyMap = new \ReflectionProperty(ProjectConfig::class, '_attributeKeyMap');
+        $attributeKeyMap = new \ReflectionProperty(DatafileProjectConfig::class, '_attributeKeyMap');
         $attributeKeyMap->setAccessible(true);
         $this->assertEquals(
             [
@@ -165,7 +165,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         );
 
         // Check audience ID map
-        $audienceIdMap = new \ReflectionProperty(ProjectConfig::class, '_audienceIdMap');
+        $audienceIdMap = new \ReflectionProperty(DatafileProjectConfig::class, '_audienceIdMap');
         $audienceIdMap->setAccessible(true);
         $this->assertEquals(
             [
@@ -176,7 +176,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         );
 
         // Check variation key map
-        $variationKeyMap = new \ReflectionProperty(ProjectConfig::class, '_variationKeyMap');
+        $variationKeyMap = new \ReflectionProperty(DatafileProjectConfig::class, '_variationKeyMap');
         $variationKeyMap->setAccessible(true);
 
         $this->assertEquals(
@@ -239,7 +239,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         );
 
         // Check variation ID map
-        $variationIdMap = new \ReflectionProperty(ProjectConfig::class, '_variationIdMap');
+        $variationIdMap = new \ReflectionProperty(DatafileProjectConfig::class, '_variationIdMap');
         $variationIdMap->setAccessible(true);
         $this->assertEquals(
             [
@@ -302,7 +302,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
 
         // Check feature flag key map
-        $featureFlagKeyMap = new \ReflectionProperty(ProjectConfig::class, '_featureKeyMap');
+        $featureFlagKeyMap = new \ReflectionProperty(DatafileProjectConfig::class, '_featureKeyMap');
         $featureFlagKeyMap->setAccessible(true);
         $this->assertEquals(
             [
@@ -320,7 +320,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
 
         // Check rollout id map
-        $rolloutIdMap = new \ReflectionProperty(ProjectConfig::class, '_rolloutIdMap');
+        $rolloutIdMap = new \ReflectionProperty(DatafileProjectConfig::class, '_rolloutIdMap');
         $rolloutIdMap->setAccessible(true);
         $this->assertEquals(
             [
@@ -342,7 +342,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedVariation, $actualVariation);
 
         // Check Experiment Feature Map
-        $experimentFeatureMap = new \ReflectionProperty(ProjectConfig::class, '_experimentFeatureMap');
+        $experimentFeatureMap = new \ReflectionProperty(DatafileProjectConfig::class, '_experimentFeatureMap');
         $experimentFeatureMap->setAccessible(true);
         $this->assertEquals(
             [
@@ -366,7 +366,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             'This version of the PHP SDK does not support the given datafile version: 5.'
         );
 
-        $this->config = new ProjectConfig(
+        $this->config = new DatafileProjectConfig(
             UNSUPPORTED_DATAFILE,
             $this->loggerMock,
             $this->errorHandlerMock
@@ -415,7 +415,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetBotFiltering()
     {
-        $botFiltering = new \ReflectionProperty(ProjectConfig::class, '_botFiltering');
+        $botFiltering = new \ReflectionProperty(DatafileProjectConfig::class, '_botFiltering');
         $botFiltering->setAccessible(true);
         $this->assertSame($botFiltering->getValue($this->config), $this->config->getBotFiltering());
     }
@@ -536,7 +536,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetAudiencePrefersTypedAudiencesOverAudiences()
     {
-        $projectConfig = new ProjectConfig(
+        $projectConfig = new DatafileProjectConfig(
             DATAFILE_WITH_TYPED_AUDIENCES,
             $this->loggerMock,
             $this->errorHandlerMock
@@ -728,7 +728,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 
         $optlyObject->activate('test_experiment', 'test_user', $userAttributes);
 
-        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
+        $this->config = new DatafileProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
 
         // invalid experiment key should return a null variation
         $this->assertFalse($this->config->setForcedVariation($invalidExperimentKey, $userId, $variationKey));
@@ -794,7 +794,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
 
-        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
+        $this->config = new DatafileProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
 
         $this->config->setForcedVariation($invalidExperimentKey, $userId, $variationKey);
         $this->config->setForcedVariation($experimentKey, $userId, null);
@@ -834,7 +834,7 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
 
-        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
+        $this->config = new DatafileProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
 
         $this->config->setForcedVariation($experimentKey, $userId, $variationKey);
         $this->config->getForcedVariation($experimentKey, $invalidUserId);
