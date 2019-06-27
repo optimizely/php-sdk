@@ -51,12 +51,7 @@ class DecisionService
      * @var LoggerInterface
      */
     private $_logger;
-
-    /**
-     * @var ProjectConfig
-     */
-    private $_projectConfig;
-
+    
     /**
      * @var Bucketer
      */
@@ -70,13 +65,12 @@ class DecisionService
     /**
      * DecisionService constructor.
      *
-     * @param LoggerInterface $logger
-     * @param ProjectConfig   $projectConfig
+     * @param LoggerInterface       $logger
+     * @param UserProfileServiceInterface  $userProfileService
      */
-    public function __construct(LoggerInterface $logger, ProjectConfig $projectConfig, UserProfileServiceInterface $userProfileService = null)
+    public function __construct(LoggerInterface $logger, UserProfileServiceInterface $userProfileService = null)
     {
         $this->_logger = $logger;
-        $this->_projectConfig = $projectConfig;
         $this->_bucketer = new Bucketer($logger);
         $this->_userProfileService = $userProfileService;
     }
@@ -105,13 +99,14 @@ class DecisionService
     /**
      * Determine which variation to show the user.
      *
-     * @param $experiment  Experiment Experiment to get the variation for.
-     * @param $userId      string     User identifier.
-     * @param $attributes  array      Attributes of the user.
+     * @param $projectConfig    ProjectConfig   ProjectConfig instance.
+     * @param $experiment       Experiment      Experiment to get the variation for.
+     * @param $userId           string          User identifier.
+     * @param $attributes       array           Attributes of the user.
      *
      * @return Variation   Variation  which the user is bucketed into.
      */
-    public function getVariation(Experiment $experiment, $userId, $attributes = null)
+    public function getVariation(ProjectConfig $projectConfig, Experiment $experiment, $userId, $attributes = null)
     {
         $bucketingId = $this->getBucketingId($userId, $attributes);
 
@@ -121,13 +116,13 @@ class DecisionService
         }
 
         // check if a forced variation is set
-        $forcedVariation = $this->_projectConfig->getForcedVariation($experiment->getKey(), $userId);
+        $forcedVariation = $projectConfig->getForcedVariation($experiment->getKey(), $userId);
         if (!is_null($forcedVariation)) {
             return $forcedVariation;
         }
 
         // check if the user has been whitelisted
-        $variation = $this->getWhitelistedVariation($experiment, $userId);
+        $variation = $this->getWhitelistedVariation($projectConfig, $experiment, $userId);
         if (!is_null($variation)) {
             return $variation;
         }
@@ -138,14 +133,14 @@ class DecisionService
             $storedUserProfile = $this->getStoredUserProfile($userId);
             if (!is_null($storedUserProfile)) {
                 $userProfile = $storedUserProfile;
-                $variation = $this->getStoredVariation($experiment, $userProfile);
+                $variation = $this->getStoredVariation($projectConfig, $experiment, $userProfile);
                 if (!is_null($variation)) {
                     return $variation;
                 }
             }
         }
 
-        if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $attributes, $this->_logger)) {
+        if (!Validator::isUserInExperiment($projectConfig, $experiment, $attributes, $this->_logger)) {
             $this->_logger->log(
                 Logger::INFO,
                 sprintf('User "%s" does not meet conditions to be in experiment "%s".', $userId, $experiment->getKey())
@@ -153,7 +148,7 @@ class DecisionService
             return null;
         }
 
-        $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketingId, $userId);
+        $variation = $this->_bucketer->bucket($projectConfig, $experiment, $bucketingId, $userId);
         if (!is_null($variation)) {
             $this->saveVariation($experiment, $variation, $userProfile);
         }
@@ -163,26 +158,27 @@ class DecisionService
     /**
      * Get the variation the user is bucketed into for the given FeatureFlag
      *
-     * @param  FeatureFlag $featureFlag    The feature flag the user wants to access
-     * @param  string      $userId         user ID
-     * @param  array       $userAttributes user attributes
+     * @param  ProjectConfig $projectConfig  ProjectConfig instance.
+     * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
+     * @param  string        $userId         user ID
+     * @param  array         $userAttributes user attributes
      * @return Decision  if getVariationForFeatureExperiment or getVariationForFeatureRollout returns a Decision
      *         null      otherwise
      */
-    public function getVariationForFeature(FeatureFlag $featureFlag, $userId, $userAttributes)
+    public function getVariationForFeature(ProjectConfig $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
     {
         //Evaluate in this order:
         //1. Attempt to bucket user into experiment using feature flag.
         //2. Attempt to bucket user into rollout using the feature flag.
 
         // Check if the feature flag is under an experiment and the the user is bucketed into one of these experiments
-        $decision = $this->getVariationForFeatureExperiment($featureFlag, $userId, $userAttributes);
+        $decision = $this->getVariationForFeatureExperiment($projectConfig, $featureFlag, $userId, $userAttributes);
         if ($decision) {
             return $decision;
         }
 
         // Check if the feature flag has rollout and the user is bucketed into one of it's rules
-        $decision = $this->getVariationForFeatureRollout($featureFlag, $userId, $userAttributes);
+        $decision = $this->getVariationForFeatureRollout($projectConfig, $featureFlag, $userId, $userAttributes);
         if ($decision) {
             $this->_logger->log(
                 Logger::INFO,
@@ -203,13 +199,14 @@ class DecisionService
     /**
      * Get the variation if the user is bucketed for one of the experiments on this feature flag
      *
-     * @param  FeatureFlag $featureFlag    The feature flag the user wants to access
-     * @param  string      $userId         user id
-     * @param  array       $userAttributes user userAttributes
+     * @param  ProjectConfig $projectConfig  ProjectConfig instance.
+     * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
+     * @param  string        $userId         user id
+     * @param  array         $userAttributes user userAttributes
      * @return Decision  if a variation is returned for the user
      *         null  if feature flag is not used in any experiments or no variation is returned for the user
      */
-    public function getVariationForFeatureExperiment(FeatureFlag $featureFlag, $userId, $userAttributes)
+    public function getVariationForFeatureExperiment(ProjectConfig $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
     {
         $featureFlagKey = $featureFlag->getKey();
         $experimentIds = $featureFlag->getExperimentIds();
@@ -225,13 +222,13 @@ class DecisionService
 
         // Evaluate each experiment ID and return the first bucketed experiment variation
         foreach ($experimentIds as $experiment_id) {
-            $experiment = $this->_projectConfig->getExperimentFromId($experiment_id);
+            $experiment = $projectConfig->getExperimentFromId($experiment_id);
             if ($experiment && !($experiment->getKey())) {
                 // Error logged and exception thrown in ProjectConfig-getExperimentFromId
                 continue;
             }
 
-            $variation = $this->getVariation($experiment, $userId, $userAttributes);
+            $variation = $this->getVariation($projectConfig, $experiment, $userId, $userAttributes);
             if ($variation && $variation->getKey()) {
                 $this->_logger->log(
                     Logger::INFO,
@@ -255,15 +252,16 @@ class DecisionService
      * Evaluate the user for rules in priority order by seeing if the user satisfies the audience.
      * Fall back onto the everyone else rule if the user is ever excluded from a rule due to traffic allocation.
      *
-     * @param  FeatureFlag $featureFlag    The feature flag the user wants to access
-     * @param  string      $userId         user id
-     * @param  array       $userAttributes user userAttributes
+     * @param  ProjectConfig $projectConfig  ProjectConfig instance.
+     * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
+     * @param  string        $userId         user id
+     * @param  array         $userAttributes user userAttributes
      * @return Decision  if a variation is returned for the user
      *         null  if feature flag is not used in a rollout or
      *               no rollout found against the rollout ID or
      *               no variation is returned for the user
      */
-    public function getVariationForFeatureRollout(FeatureFlag $featureFlag, $userId, $userAttributes)
+    public function getVariationForFeatureRollout(ProjectConfig $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
     {
         $bucketing_id = $this->getBucketingId($userId, $userAttributes);
         $featureFlagKey = $featureFlag->getKey();
@@ -275,7 +273,7 @@ class DecisionService
             );
             return null;
         }
-        $rollout = $this->_projectConfig->getRolloutFromId($rollout_id);
+        $rollout = $projectConfig->getRolloutFromId($rollout_id);
         if ($rollout && !($rollout->getId())) {
             // Error logged and thrown in getRolloutFromId
             return null;
@@ -291,7 +289,7 @@ class DecisionService
             $experiment = $rolloutRules[$i];
 
             // Evaluate if user meets the audience condition of this rollout rule
-            if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes, $this->_logger)) {
+            if (!Validator::isUserInExperiment($projectConfig, $experiment, $userAttributes, $this->_logger)) {
                 $this->_logger->log(
                     Logger::DEBUG,
                     sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey())
@@ -301,7 +299,7 @@ class DecisionService
             }
 
             // Evaluate if user satisfies the traffic allocation for this rollout rule
-            $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketing_id, $userId);
+            $variation = $this->_bucketer->bucket($projectConfig, $experiment, $bucketing_id, $userId);
             if ($variation && $variation->getKey()) {
                 return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
             }
@@ -311,7 +309,7 @@ class DecisionService
         $experiment = $rolloutRules[sizeof($rolloutRules)-1];
 
         // Evaluate if user meets the audience condition of Everyone Else Rule / Last Rule now
-        if (!Validator::isUserInExperiment($this->_projectConfig, $experiment, $userAttributes, $this->_logger)) {
+        if (!Validator::isUserInExperiment($projectConfig, $experiment, $userAttributes, $this->_logger)) {
             $this->_logger->log(
                 Logger::DEBUG,
                 sprintf("User '%s' did not meet the audience conditions to be in rollout rule '%s'.", $userId, $experiment->getKey())
@@ -319,7 +317,7 @@ class DecisionService
             return null;
         }
 
-        $variation = $this->_bucketer->bucket($this->_projectConfig, $experiment, $bucketing_id, $userId);
+        $variation = $this->_bucketer->bucket($projectConfig, $experiment, $bucketing_id, $userId);
         if ($variation && $variation->getKey()) {
             return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
         }
@@ -329,18 +327,19 @@ class DecisionService
     /**
      * Determine variation the user has been forced into.
      *
-     * @param $experiment Experiment Experiment in which user is to be bucketed.
-     * @param $userId     string     string
+     * @param $projectConfig ProjectConfig  ProjectConfig instance.
+     * @param $experiment    Experiment     Experiment in which user is to be bucketed.
+     * @param $userId        string         string
      *
      * @return null|Variation Representing the variation the user is forced into.
      */
-    private function getWhitelistedVariation(Experiment $experiment, $userId)
+    private function getWhitelistedVariation(ProjectConfig $projectConfig, Experiment $experiment, $userId)
     {
         // Check if user is whitelisted for a variation.
         $forcedVariations = $experiment->getForcedVariations();
         if (!is_null($forcedVariations) && isset($forcedVariations[$userId])) {
             $variationKey = $forcedVariations[$userId];
-            $variation = $this->_projectConfig->getVariationFromKey($experiment->getKey(), $variationKey);
+            $variation = $projectConfig->getVariationFromKey($experiment->getKey(), $variationKey);
             if ($variationKey && !empty($variation->getKey())) {
                 $this->_logger->log(
                     Logger::INFO,
@@ -395,12 +394,13 @@ class DecisionService
     /**
      * Get the stored variation for the given experiment from the user profile.
      *
-     * @param $experiment  Experiment  The experiment for which we are getting the stored variation.
-     * @param $userProfile UserProfile The user profile from which we are getting the stored variation.
+     * @param $projectConfig ProjectConfig  ProjectConfig instance.
+     * @param $experiment    Experiment     The experiment for which we are getting the stored variation.
+     * @param $userProfile   UserProfile    The user profile from which we are getting the stored variation.
      *
      * @return null|Variation the stored variation or null if not found.
      */
-    private function getStoredVariation(Experiment $experiment, UserProfile $userProfile)
+    private function getStoredVariation(ProjectConfig $projectConfig, Experiment $experiment, UserProfile $userProfile)
     {
         $experimentKey = $experiment->getKey();
         $userId = $userProfile->getUserId();
@@ -414,7 +414,7 @@ class DecisionService
             return null;
         }
 
-        if (!$this->_projectConfig->isVariationIdValid($experimentKey, $variationId)) {
+        if (!$projectConfig->isVariationIdValid($experimentKey, $variationId)) {
             $this->_logger->log(
                 Logger::INFO,
                 sprintf(
@@ -427,7 +427,7 @@ class DecisionService
             return null;
         }
 
-        $variation = $this->_projectConfig->getVariationFromId($experimentKey, $variationId);
+        $variation = $projectConfig->getVariationFromId($experimentKey, $variationId);
         $this->_logger->log(
             Logger::INFO,
             sprintf(
