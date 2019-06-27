@@ -36,6 +36,7 @@ use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\UserProfile\UserProfileServiceInterface;
@@ -56,11 +57,6 @@ class Optimizely
     const USER_ID = 'User ID';
     const VARIABLE_KEY = 'Variable Key';
     const VARIATION_KEY = 'Variation Key';
-
-    /**
-     * @var ProjectConfig
-     */
-    private $_config;
 
     /**
      * @var DecisionService
@@ -93,6 +89,11 @@ class Optimizely
     private $_logger;
 
     /**
+     * @var ProjectConfigManager
+     */
+    private $_projectConfigManager;
+
+    /**
      * @var NotificationCenter
      */
     public $notificationCenter;
@@ -119,32 +120,20 @@ class Optimizely
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
-
-        if (!$this->validateDatafile($datafile, $skipJsonValidation)) {
-            $this->_isValid = false;
-            $defaultLogger = new DefaultLogger();
-
-            $defaultLogger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
-            $this->_logger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
-            return;
-        }
-
-        try {
-            $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
-        } catch (Exception $exception) {
-            $this->_isValid = false;
-            $defaultLogger = new DefaultLogger();
-            $errorMsg = $exception->getCode() == InvalidDatafileVersionException::class ? $exception->getMessage() : sprintf(Errors::INVALID_FORMAT, 'datafile');
-            $errorToHandle = $exception->getCode() == InvalidDatafileVersionException::class ? new InvalidDatafileVersionException($errorMsg) : new InvalidInputException($errorMsg);
-            $defaultLogger->log(Logger::ERROR, $errorMsg);
-            $this->_logger->log(Logger::ERROR, $errorMsg);
-            $this->_errorHandler->handleError($errorToHandle);
-            return;
-        }
-
+        $this->_projectConfigManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
+        $config = $this->getConfig();
         $this->_eventBuilder = new EventBuilder($this->_logger);
-        $this->_decisionService = new DecisionService($this->_logger, $this->_config, $userProfileService);
+        $this->_decisionService = new DecisionService($this->_logger, $config, $userProfileService);
         $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
+    }
+
+    /**
+     * Returns ProjectConfig instance.
+     * @return ProjectConfig ProjectConfig instance or null
+     */
+    private function getConfig()
+    {
+        return $this->_projectConfigManager !== null ? $this->_projectConfigManager->getConfig() : null;
     }
 
     /**
@@ -201,8 +190,9 @@ class Optimizely
      */
     protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
     {
+        $config = $this->getConfig();
         $impressionEvent = $this->_eventBuilder
-            ->createImpressionEvent($this->_config, $experimentKey, $variationKey, $userId, $attributes);
+            ->createImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
         $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
         $this->_logger->log(
             Logger::DEBUG,
@@ -236,10 +226,10 @@ class Optimizely
         $this->notificationCenter->sendNotifications(
             NotificationType::ACTIVATE,
             array(
-                $this->_config->getExperimentFromKey($experimentKey),
+                $config->getExperimentFromKey($experimentKey),
                 $userId,
                 $attributes,
-                $this->_config->getVariationFromKey($experimentKey, $variationKey),
+                $config->getVariationFromKey($experimentKey, $variationKey),
                 $impressionEvent
             )
         );
@@ -256,7 +246,8 @@ class Optimizely
      */
     public function activate($experimentKey, $userId, $attributes = null)
     {
-        if (!$this->_isValid) {
+        $config = $this->getConfig();
+        if ($config === null) {
             $this->_logger->log(Logger::ERROR, 'Datafile has invalid format. Failing "activate".');
             return null;
         }
@@ -292,7 +283,8 @@ class Optimizely
      */
     public function track($eventKey, $userId, $attributes = null, $eventTags = null)
     {
-        if (!$this->_isValid) {
+        $config = $this->getConfig();
+        if ($config === null) {
             $this->_logger->log(Logger::ERROR, 'Datafile has invalid format. Failing "track".');
             return;
         }
@@ -311,7 +303,7 @@ class Optimizely
             return;
         }
 
-        $event = $this->_config->getEvent($eventKey);
+        $event = $config->getEvent($eventKey);
 
         if (is_null($event->getKey())) {
             $this->_logger->log(Logger::INFO, sprintf('Not tracking user "%s" for event "%s".', $userId, $eventKey));
@@ -320,7 +312,7 @@ class Optimizely
 
         $conversionEvent = $this->_eventBuilder
             ->createConversionEvent(
-                $this->_config,
+                $config,
                 $eventKey,
                 $userId,
                 $attributes,
@@ -380,7 +372,8 @@ class Optimizely
      */
     public function getVariation($experimentKey, $userId, $attributes = null)
     {
-        if (!$this->_isValid) {
+        $config = $this->getConfig();
+        if ($config === null) {
             $this->_logger->log(Logger::ERROR, 'Datafile has invalid format. Failing "getVariation".');
             return null;
         }
@@ -395,7 +388,7 @@ class Optimizely
             return null;
         }
 
-        $experiment = $this->_config->getExperimentFromKey($experimentKey);
+        $experiment = $config->getExperimentFromKey($experimentKey);
 
         if (is_null($experiment->getKey())) {
             return null;
@@ -408,7 +401,7 @@ class Optimizely
         $variation = $this->_decisionService->getVariation($experiment, $userId, $attributes);
         $variationKey = ($variation === null) ? null : $variation->getKey();
 
-        if ($this->_config->isFeatureExperiment($experiment->getId())) {
+        if ($config->isFeatureExperiment($experiment->getId())) {
             $decisionNotificationType = DecisionNotificationTypes::FEATURE_TEST;
         } else {
             $decisionNotificationType = DecisionNotificationTypes::AB_TEST;
@@ -443,6 +436,12 @@ class Optimizely
      */
     public function setForcedVariation($experimentKey, $userId, $variationKey)
     {
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, 'Datafile has invalid format. Failing "getVariation".');
+            return null;
+        }
+
         if (!$this->validateInputs(
             [
                 self::EXPERIMENT_KEY =>$experimentKey,
@@ -451,7 +450,7 @@ class Optimizely
         )) {
             return false;
         }
-        return $this->_config->setForcedVariation($experimentKey, $userId, $variationKey);
+        return $config->setForcedVariation($experimentKey, $userId, $variationKey);
     }
 
     /**
@@ -464,6 +463,12 @@ class Optimizely
      */
     public function getForcedVariation($experimentKey, $userId)
     {
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, 'Datafile has invalid format. Failing "getVariation".');
+            return null;
+        }
+
         if (!$this->validateInputs(
             [
                 self::EXPERIMENT_KEY =>$experimentKey,
@@ -473,7 +478,7 @@ class Optimizely
             return null;
         }
 
-        $forcedVariation = $this->_config->getForcedVariation($experimentKey, $userId);
+        $forcedVariation = $config->getForcedVariation($experimentKey, $userId);
         if (isset($forcedVariation)) {
             return $forcedVariation->getKey();
         } else {
@@ -493,7 +498,8 @@ class Optimizely
      */
     public function isFeatureEnabled($featureFlagKey, $userId, $attributes = null)
     {
-        if (!$this->_isValid) {
+        $config = $this->getConfig();
+        if ($config === null) {
             $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'.");
             return false;
         }
@@ -508,14 +514,14 @@ class Optimizely
             return false;
         }
 
-        $featureFlag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
+        $featureFlag = $config->getFeatureFlagFromKey($featureFlagKey);
         if ($featureFlag && (!$featureFlag->getId())) {
             // Error logged in ProjectConfig - getFeatureFlagFromKey
             return false;
         }
 
         //validate feature flag
-        if (!Validator::isFeatureFlagValid($this->_config, $featureFlag)) {
+        if (!Validator::isFeatureFlagValid($config, $featureFlag)) {
             return false;
         }
 
@@ -584,12 +590,13 @@ class Optimizely
             return $enabledFeatureKeys;
         }
 
-        if (!$this->_isValid) {
+        $config = $this->getConfig();
+        if ($config === null) {
             $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".__FUNCTION__."'.");
             return $enabledFeatureKeys;
         }
 
-        $featureFlags = $this->_config->getFeatureFlags();
+        $featureFlags = $config->getFeatureFlags();
         foreach ($featureFlags as $feature) {
             $featureKey = $feature->getKey();
             if ($this->isFeatureEnabled($featureKey, $userId, $attributes) === true) {
@@ -618,6 +625,12 @@ class Optimizely
         $attributes = null,
         $variableType = null
     ) {
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, "Datafile has invalid format. Failing '".$this->getFeatureVariableMethodName($variableType)."'.");
+            return $enabledFeatureKeys;
+        }
+
         if (!$this->validateInputs(
             [
                 self::FEATURE_FLAG_KEY => $featureFlagKey,
@@ -629,13 +642,13 @@ class Optimizely
             return null;
         }
 
-        $featureFlag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
+        $featureFlag = $config->getFeatureFlagFromKey($featureFlagKey);
         if ($featureFlag && (!$featureFlag->getId())) {
             // Error logged in ProjectConfig - getFeatureFlagFromKey
             return null;
         }
 
-        $variable = $this->_config->getFeatureVariableFromKey($featureFlagKey, $variableKey);
+        $variable = $config->getFeatureVariableFromKey($featureFlagKey, $variableKey);
         if (!$variable) {
             // Error message logged in ProjectConfig- getFeatureVariableFromKey
             return null;
@@ -720,6 +733,22 @@ class Optimizely
         );
 
         return $variableValue;
+    }
+
+    private function getFeatureVariableMethodName($type)
+    {
+        switch ($type) {
+            case FeatureVariable::BOOLEAN_TYPE:
+                return "getFeatureVariableBoolean";
+            case FeatureVariable::INTEGER_TYPE:
+                return "getFeatureVariableInteger";
+            case FeatureVariable::DOUBLE_TYPE:
+                return "getFeatureVariableDouble";
+            case FeatureVariable::STRING_TYPE:
+                return "getFeatureVariableString";
+            default:
+                return null;
+        }
     }
 
     /**
@@ -816,7 +845,7 @@ class Optimizely
      */
     public function isValid()
     {
-        return $this->_isValid;
+        return $this->getConfig() !== null;
     }
 
     /**
