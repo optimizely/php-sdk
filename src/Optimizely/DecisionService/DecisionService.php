@@ -53,7 +53,7 @@ class DecisionService
      * @var LoggerInterface
      */
     private $_logger;
-    
+
     /**
      * @var Bucketer
      */
@@ -64,7 +64,7 @@ class DecisionService
      */
     private $_userProfileService;
 
-    
+
     /**
      * @var array Associative array of user IDs to an associative array
      * of experiments to variations. This contains all the forced variations
@@ -336,7 +336,7 @@ class DecisionService
         return null;
     }
 
-    
+
     /**
      * Gets the forced variation key for the given user and experiment.
      *
@@ -355,7 +355,7 @@ class DecisionService
 
         $experimentToVariationMap = $this->_forcedVariationMap[$userId];
         $experimentId = $projectConfig->getExperimentFromKey($experimentKey)->getId();
-        
+
         // check for null and empty string experiment ID
         if (strlen($experimentId) == 0) {
             // this case is logged in getExperimentFromKey
@@ -396,7 +396,7 @@ class DecisionService
 
         $experiment = $projectConfig->getExperimentFromKey($experimentKey);
         $experimentId = $experiment->getId();
-        
+
         // check if the experiment exists in the datafile (a new experiment is returned if it is not in the datafile)
         if (strlen($experimentId) == 0) {
             // this case is logged in getExperimentFromKey
@@ -412,7 +412,7 @@ class DecisionService
 
         $variation = $projectConfig->getVariationFromKey($experimentKey, $variationKey);
         $variationId = $variation->getId();
-        
+
         // check if the variation exists in the datafile (a new variation is returned if it is not in the datafile)
         if (strlen($variationId) == 0) {
             // this case is logged in getVariationFromKey
