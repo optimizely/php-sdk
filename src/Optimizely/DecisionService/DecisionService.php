@@ -25,11 +25,13 @@ use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
 use Optimizely\Enums\ControlAttributes;
 use Optimizely\Logger\LoggerInterface;
+use Optimizely\Optimizely;
 use Optimizely\ProjectConfig;
 use Optimizely\UserProfile\Decision;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\UserProfile\UserProfile;
 use Optimizely\UserProfile\UserProfileUtils;
+use Optimizely\Utils\Errors;
 use Optimizely\Utils\Validator;
 
 /**
@@ -51,7 +53,7 @@ class DecisionService
      * @var LoggerInterface
      */
     private $_logger;
-    
+
     /**
      * @var Bucketer
      */
@@ -61,6 +63,15 @@ class DecisionService
      * @var UserProfileServiceInterface
      */
     private $_userProfileService;
+
+
+    /**
+     * @var array Associative array of user IDs to an associative array
+     * of experiments to variations. This contains all the forced variations
+     * set by the user by calling setForcedVariation (it is not the same as the
+     * whitelisting forcedVariations data structure in the Experiments class).
+     */
+    private $_forcedVariationMap;
 
     /**
      * DecisionService constructor.
@@ -73,6 +84,7 @@ class DecisionService
         $this->_logger = $logger;
         $this->_bucketer = new Bucketer($logger);
         $this->_userProfileService = $userProfileService;
+        $this->_forcedVariationMap = [];
     }
 
     /**
@@ -116,7 +128,7 @@ class DecisionService
         }
 
         // check if a forced variation is set
-        $forcedVariation = $projectConfig->getForcedVariation($experiment->getKey(), $userId);
+        $forcedVariation = $this->getForcedVariation($projectConfig, $experiment->getKey(), $userId);
         if (!is_null($forcedVariation)) {
             return $forcedVariation;
         }
@@ -322,6 +334,94 @@ class DecisionService
             return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
         }
         return null;
+    }
+
+
+    /**
+     * Gets the forced variation key for the given user and experiment.
+     *
+     * @param $projectConfig ProjectConfig  ProjectConfig instance.
+     * @param $experimentKey string         Key for experiment.
+     * @param $userId        string         The user Id.
+     *
+     * @return Variation The variation which the given user and experiment should be forced into.
+     */
+    public function getForcedVariation(ProjectConfig $projectConfig, $experimentKey, $userId)
+    {
+        if (!isset($this->_forcedVariationMap[$userId])) {
+            $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
+            return null;
+        }
+
+        $experimentToVariationMap = $this->_forcedVariationMap[$userId];
+        $experimentId = $projectConfig->getExperimentFromKey($experimentKey)->getId();
+
+        // check for null and empty string experiment ID
+        if (strlen($experimentId) == 0) {
+            // this case is logged in getExperimentFromKey
+            return null;
+        }
+
+        if (!isset($experimentToVariationMap[$experimentId])) {
+            $this->_logger->log(Logger::DEBUG, sprintf('No experiment "%s" mapped to user "%s" in the forced variation map.', $experimentKey, $userId));
+            return null;
+        }
+
+        $variationId = $experimentToVariationMap[$experimentId];
+        $variation = $projectConfig->getVariationFromId($experimentKey, $variationId);
+        $variationKey = $variation->getKey();
+
+        $this->_logger->log(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
+        return $variation;
+    }
+
+    /**
+     * Sets an associative array of user IDs to an associative array of experiments
+     * to forced variations.
+     *
+     * @param $projectConfig ProjectConfig  ProjectConfig instance.
+     * @param $experimentKey string         Key for experiment.
+     * @param $userId        string         The user Id.
+     * @param $variationKey  string         Key for variation. If null, then clear the existing experiment-to-variation mapping.
+     *
+     * @return boolean A boolean value that indicates if the set completed successfully.
+     */
+    public function setForcedVariation(ProjectConfig $projectConfig, $experimentKey, $userId, $variationKey)
+    {
+        // check for empty string Variation key
+        if (!is_null($variationKey) && !Validator::validateNonEmptyString($variationKey)) {
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_FORMAT, Optimizely::VARIATION_KEY));
+            return false;
+        }
+
+        $experiment = $projectConfig->getExperimentFromKey($experimentKey);
+        $experimentId = $experiment->getId();
+
+        // check if the experiment exists in the datafile (a new experiment is returned if it is not in the datafile)
+        if (strlen($experimentId) == 0) {
+            // this case is logged in getExperimentFromKey
+            return false;
+        }
+
+        // clear the forced variation if the variation key is null
+        if (is_null($variationKey)) {
+            unset($this->_forcedVariationMap[$userId][$experimentId]);
+            $this->_logger->log(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
+            return true;
+        }
+
+        $variation = $projectConfig->getVariationFromKey($experimentKey, $variationKey);
+        $variationId = $variation->getId();
+
+        // check if the variation exists in the datafile (a new variation is returned if it is not in the datafile)
+        if (strlen($variationId) == 0) {
+            // this case is logged in getVariationFromKey
+            return false;
+        }
+
+        $this->_forcedVariationMap[$userId][$experimentId] = $variationId;
+        $this->_logger->log(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
+        return true;
     }
 
     /**

@@ -1165,4 +1165,142 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment1->getKey()}'."], $this->collectedLogs);
         $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment2->getKey()}'."], $this->collectedLogs);
     }
+
+    // test set/get forced variation for the following cases:
+    //      - valid and invalid user ID
+    //      - valid and invalid experiment key
+    //      - valid and invalid variation key, null variation key
+    public function testSetGetForcedVariation()
+    {
+        $userId = 'test_user';
+        $invalidUserId = 'invalid_user';
+        $experimentKey = 'test_experiment';
+        $experimentKey2 = 'group_experiment_1';
+        $invalidExperimentKey = 'invalid_experiment';
+        $variationKey = 'control';
+        $variationKey2 = 'group_exp_1_var_1';
+        $invalidVariationKey = 'invalid_variation';
+
+        $optlyObject = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+        $userAttributes = [
+            'device_type' => 'iPhone',
+            'location' => 'San Francisco'
+        ];
+
+        $optlyObject->activate('test_experiment', 'test_user', $userAttributes);
+
+        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
+
+        // invalid experiment key should return a null variation
+        $this->assertFalse($this->decisionService->setForcedVariation($this->config, $invalidExperimentKey, $userId, $variationKey));
+        $this->assertNull($this->decisionService->getForcedVariation($this->config, $invalidExperimentKey, $userId));
+
+        // setting a null variation should return a null variation
+        $this->assertTrue($this->decisionService->setForcedVariation($this->config, $experimentKey, $userId, null));
+        $this->assertNull($this->decisionService->getForcedVariation($this->config, $experimentKey, $userId));
+
+        // setting an invalid variation should return a null variation
+        $this->assertFalse($this->decisionService->setForcedVariation($this->config, $experimentKey, $userId, $invalidVariationKey));
+        $this->assertNull($this->decisionService->getForcedVariation($this->config, $experimentKey, $userId));
+
+        // confirm the forced variation is returned after a set
+        $this->assertTrue($this->decisionService->setForcedVariation($this->config, $experimentKey, $userId, $variationKey));
+        $forcedVariation = $this->decisionService->getForcedVariation($this->config, $experimentKey, $userId);
+        $this->assertEquals($variationKey, $forcedVariation->getKey());
+
+        // check multiple sets
+        $this->assertTrue($this->decisionService->setForcedVariation($this->config, $experimentKey2, $userId, $variationKey2));
+        $forcedVariation2 = $this->decisionService->getForcedVariation($this->config, $experimentKey2, $userId);
+        $this->assertEquals($variationKey2, $forcedVariation2->getKey());
+        // make sure the second set does not overwrite the first set
+        $forcedVariation = $this->decisionService->getForcedVariation($this->config, $experimentKey, $userId);
+        $this->assertEquals($variationKey, $forcedVariation->getKey());
+        // make sure unsetting the second experiment-to-variation mapping does not unset the
+        // first experiment-to-variation mapping
+        $this->assertTrue($this->decisionService->setForcedVariation($this->config, $experimentKey2, $userId, null));
+        $forcedVariation = $this->decisionService->getForcedVariation($this->config, $experimentKey, $userId);
+        $this->assertEquals($variationKey, $forcedVariation->getKey());
+
+        // an invalid user ID should return a null variation
+        $this->assertNull($this->decisionService->getForcedVariation($this->config, $experimentKey, $invalidUserId));
+    }
+
+    // test that all the logs in setForcedVariation are getting called
+    public function testSetForcedVariationLogs()
+    {
+        $userId = 'test_user';
+        $experimentKey = 'test_experiment';
+        $experimentId = '7716830082';
+        $invalidExperimentKey = 'invalid_experiment';
+        $variationKey = 'control';
+        $variationId = '7722370027';
+        $invalidVariationKey = 'invalid_variation';
+        $callIndex = 0;
+
+        $this->loggerMock->expects($this->exactly(5))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Variation mapped to experiment "%s" has been removed for user "%s".', $experimentKey, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Provided %s is in an invalid format.', Optimizely::VARIATION_KEY));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('No variation key "%s" defined in datafile for experiment "%s".', $invalidVariationKey, $experimentKey));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
+
+        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
+
+        $this->decisionService->setForcedVariation($this->config, $invalidExperimentKey, $userId, $variationKey);
+        $this->decisionService->setForcedVariation($this->config, $experimentKey, $userId, null);
+        $this->decisionService->setForcedVariation($this->config, $experimentKey, $userId, '');
+        $this->decisionService->setForcedVariation($this->config, $experimentKey, $userId, $invalidVariationKey);
+        $this->decisionService->setForcedVariation($this->config, $experimentKey, $userId, $variationKey);
+    }
+
+    // test that all the logs in getForcedVariation are getting called
+    public function testGetForcedVariationLogs()
+    {
+        $userId = 'test_user';
+        $invalidUserId = 'invalid_user';
+        $experimentKey = 'test_experiment';
+        $experimentId = '7716830082';
+        $invalidExperimentKey = 'invalid_experiment';
+        $pausedExperimentKey = 'paused_experiment';
+        $variationKey = 'control';
+        $variationId = '7722370027';
+        $callIndex = 0;
+
+        $this->loggerMock->expects($this->exactly(5))
+            ->method('log');
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Set variation "%s" for experiment "%s" and user "%s" in the forced variation map.', $variationId, $experimentId, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $invalidUserId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $invalidExperimentKey));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('No experiment "%s" mapped to user "%s" in the forced variation map.', $pausedExperimentKey, $userId));
+        $this->loggerMock->expects($this->at($callIndex++))
+            ->method('log')
+            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
+
+        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
+
+        $this->decisionService->setForcedVariation($this->config, $experimentKey, $userId, $variationKey);
+        $this->decisionService->getForcedVariation($this->config, $experimentKey, $invalidUserId);
+        $this->decisionService->getForcedVariation($this->config, $invalidExperimentKey, $userId);
+        $this->decisionService->getForcedVariation($this->config, $pausedExperimentKey, $userId);
+        $this->decisionService->getForcedVariation($this->config, $experimentKey, $userId);
+    }
 }
