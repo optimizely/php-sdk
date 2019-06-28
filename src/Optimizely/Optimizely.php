@@ -120,9 +120,14 @@ class Optimizely
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
+        $this->_eventBuilder = new EventBuilder($this->_logger);
         $this->_projectConfigManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
         $config = $this->getConfig();
-        $this->_eventBuilder = new EventBuilder($this->_logger);
+        if ($config === null) {
+            // ProjectConfig instance does not initialized successfully.
+            return;
+        }
+        
         $this->_decisionService = new DecisionService($this->_logger, $config, $userProfileService);
         $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
     }

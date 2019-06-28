@@ -32,6 +32,7 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\ProjectConfig;
+use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use TypeError;
 use Optimizely\ErrorHandler\DefaultErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
@@ -48,6 +49,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     private $loggerMock;
     private $optimizelyObject;
     private $projectConfig;
+    private $staticConfigManager;
 
     public function setUp()
     {
@@ -90,6 +92,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setConstructorArgs(array($this->loggerMock, new NoOpErrorHandler))
             ->setMethods(array('sendNotifications'))
             ->getMock();
+
+        $this->staticConfigManager = new StaticProjectConfigManager($this->datafile, true, $this->loggerMock, new NoOpErrorHandler);
     }
 
     public function testIsValidForInvalidOptimizelyObject()
@@ -1153,15 +1157,30 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->optimizelyObject->track('unlinked_event', 'test_user');
     }
 
+    /**
+     * Modify Optimizely object and set ProjectConfig in it.
+     */
+    private function setOptimizelyConfigObject($optimizely, $config, $configManager)
+    {
+        $projConfig = new \ReflectionProperty(StaticProjectConfigManager::class, '_config');
+        $projConfig->setAccessible(true);
+        $projConfig->setValue($configManager, $config);
+
+        $projConfigManager = new \ReflectionProperty(Optimizely::class, '_projectConfigManager');
+        $projConfigManager->setAccessible(true);
+        $projConfigManager->setValue($optimizely, $configManager);
+
+        return $optimizely;
+    }
+
     public function testTrackGivenEventKeyWithPausedExperiment()
     {
         $pausedExpEvent = $this->projectConfig->getEvent('purchase');
         // Experiment with ID 7716830585 is paused.
         $pausedExpEvent->setExperimentIds(['7716830585']);
 
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($this->optimizelyObject, $this->projectConfig);
+        $this->optimizelyObject = $this->setOptimizelyConfigObject($this->optimizelyObject, $this->projectConfig,
+        $this->staticConfigManager);
 
         $this->eventBuilderMock->expects($this->once())
             ->method('createConversionEvent')
@@ -2329,10 +2348,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Create local config copy for this method to add error
         $projectConfig = new ProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
         $optimizelyObj = new Optimizely($this->datafile);
-
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($optimizelyObj, $projectConfig);
+        $optimizelyObj = $this->setOptimizelyConfigObject($optimizelyObj, $projectConfig, $this->staticConfigManager);
 
         $featureFlag = $projectConfig->getFeatureFlagFromKey('mutex_group_feature');
         // Add such an experiment to the list of experiment ids, that does not belong to the same mutex group
@@ -3742,9 +3758,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($this->optimizelyObject, $configMock);
+        $this->setOptimizelyConfigObject($this->optimizelyObject, $configMock, $this->staticConfigManager);
 
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
         $decisionService->setAccessible(true);
@@ -3784,9 +3798,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($this->optimizelyObject, $configMock);
+        $this->setOptimizelyConfigObject($this->optimizelyObject, $configMock, $this->staticConfigManager);
 
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
         $decisionService->setAccessible(true);
@@ -3823,9 +3835,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($this->optimizelyObject, $configMock);
+        $this->setOptimizelyConfigObject($this->optimizelyObject, $configMock, $this->staticConfigManager);
 
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
         $decisionService->setAccessible(true);
@@ -3865,9 +3875,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($this->optimizelyObject, $configMock);
+        $this->setOptimizelyConfigObject($this->optimizelyObject, $configMock, $this->staticConfigManager);
 
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
         $decisionService->setAccessible(true);
