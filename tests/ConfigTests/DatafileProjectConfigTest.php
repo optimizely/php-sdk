@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-namespace Optimizely\Tests;
+namespace Optimizely\Config\Tests;
 
-require 'TestData.php';
+require (dirname(__FILE__).'/../TestData.php');
 
 use Monolog\Logger;
 use Optimizely\Config\DatafileProjectConfig;
@@ -42,9 +42,10 @@ use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Optimizely;
+use Optimizely\Tests\ValidEventDispatcher;
 use Optimizely\Utils\ConfigParser;
 
-class ProjectConfigTest extends \PHPUnit_Framework_TestCase
+class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
 {
     private $config;
     private $loggerMock;

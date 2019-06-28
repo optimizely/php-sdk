@@ -59,7 +59,7 @@ class Optimizely
     const VARIATION_KEY = 'Variation Key';
 
     /**
-     * @var ProjectConfig
+     * @var ProjectConfigInterface
      */
     private $_config;
 

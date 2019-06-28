@@ -19,13 +19,13 @@ namespace Optimizely\DecisionService;
 use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
+use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
 use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
 use Optimizely\Enums\ControlAttributes;
 use Optimizely\Logger\LoggerInterface;
-use Optimizely\ProjectConfig;
 use Optimizely\UserProfile\Decision;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\UserProfile\UserProfile;
@@ -53,7 +53,7 @@ class DecisionService
     private $_logger;
 
     /**
-     * @var ProjectConfig
+     * @var ProjectConfigInterface
      */
     private $_projectConfig;
 
@@ -71,9 +71,9 @@ class DecisionService
      * DecisionService constructor.
      *
      * @param LoggerInterface $logger
-     * @param ProjectConfig   $projectConfig
+     * @param ProjectConfigInterface   $projectConfig
      */
-    public function __construct(LoggerInterface $logger, ProjectConfig $projectConfig, UserProfileServiceInterface $userProfileService = null)
+    public function __construct(LoggerInterface $logger, ProjectConfigInterface $projectConfig, UserProfileServiceInterface $userProfileService = null)
     {
         $this->_logger = $logger;
         $this->_projectConfig = $projectConfig;

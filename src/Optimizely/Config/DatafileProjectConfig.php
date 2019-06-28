@@ -40,7 +40,6 @@ use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\LoggerInterface;
-use Optimizely\ProjectConfig;
 use Optimizely\Optimizely;
 use Optimizely\Utils\ConditionDecoder;
 use Optimizely\Utils\ConfigParser;
@@ -52,7 +51,7 @@ use Optimizely\Utils\Validator;
  *
  * @package Optimizely
  */
-class DatafileProjectConfig implements ProjectConfig
+class DatafileProjectConfig implements ProjectConfigInterface
 {
     const RESERVED_ATTRIBUTE_PREFIX = '$opt_';
     const V2 = '2';

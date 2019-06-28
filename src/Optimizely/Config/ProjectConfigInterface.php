@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-namespace Optimizely;
+namespace Optimizely\Config;
 
 /**
  * Interface ProjectConfig
  *
  * @package Optimizely
  */
-interface ProjectConfig
+interface ProjectConfigInterface
 {
     /**
      * @return string String representing account ID from the datafile.
