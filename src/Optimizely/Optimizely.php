@@ -511,7 +511,7 @@ class Optimizely
 
         $featureFlag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
         if ($featureFlag && (!$featureFlag->getId())) {
-            // Error logged in ProjectConfigInterface - getFeatureFlagFromKey
+            // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
             return false;
         }
 
@@ -632,7 +632,7 @@ class Optimizely
 
         $featureFlag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
         if ($featureFlag && (!$featureFlag->getId())) {
-            // Error logged in ProjectConfigInterface - getFeatureFlagFromKey
+            // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
             return null;
         }
 
