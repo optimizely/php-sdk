@@ -2353,7 +2353,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -2394,7 +2394,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -2447,7 +2447,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -2492,7 +2492,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -2553,7 +2553,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -2597,7 +2597,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -2659,7 +2659,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -2711,7 +2711,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -2770,7 +2770,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -2821,7 +2821,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -2938,7 +2938,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3108,7 +3108,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3430,7 +3430,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // should return default value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3465,7 +3465,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3503,7 +3503,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3542,7 +3542,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3580,7 +3580,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3620,7 +3620,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // should return default value
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3664,7 +3664,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // should return default value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3738,7 +3738,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3780,7 +3780,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3819,7 +3819,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -3861,7 +3861,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
@@ -4006,7 +4006,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
@@ -4062,7 +4062,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
@@ -4117,7 +4117,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
@@ -4169,7 +4169,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
@@ -4222,7 +4222,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         // should return default value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
-            ->setConstructorArgs(array($this->loggerMock, $this->projectConfig))
+            ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
