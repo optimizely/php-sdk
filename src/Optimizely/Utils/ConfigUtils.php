@@ -23,42 +23,47 @@ use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidInputException;
 use Optimizely\Logger\LoggerInterface;
+use Optimizely\Logger\DefaultLogger;
 use Optimizely\ProjectConfig;
 
 class ConfigUtils
 {
-	/**
-	 * Create ProjectConfig based on datafile string.
-	 * 
-	 * @param string 		  		$datafile			JSON string representing the Optimizely project.
-	 * @param bool   		  		$skipJsonValidation	boolean representing whether JSON schema validation needs to be performed.
-	 * @param LoggerInterface 		$logger            	Logger instance
-	 * @param ErrorHandlerInterface $errorHandler       ErrorHandler instance.
-	 * @return ProjectConfig ProjectConfig instance or null;
-	 */
-	public static function createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler)
-	{
-		if (!$skipJsonValidation) {
-			if (!Validator::validateJsonSchema($datafile)) {
-				$logger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
-				return null;
-			}
-		}
+    /**
+     * Create ProjectConfig based on datafile string.
+     *
+     * @param string                $datafile           JSON string representing the Optimizely project.
+     * @param bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
+     * @param LoggerInterface       $logger             Logger instance
+     * @param ErrorHandlerInterface $errorHandler       ErrorHandler instance.
+     * @return ProjectConfig ProjectConfig instance or null;
+     */
+    public static function createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler)
+    {
+        if (!$skipJsonValidation) {
+            if (!Validator::validateJsonSchema($datafile)) {
+                $defaultLogger = new DefaultLogger();
+                $defaultLogger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
+                $logger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
+                return null;
+            }
+        }
 
-		try {
-			$config = new ProjectConfig($datafile, $logger, $errorHandler);
-		} catch (Exception $exception) {
-			$errorMsg = $exception->getCode() == InvalidDatafileVersionException::class ? $exception->getMessage() : sprintf(Errors::INVALID_FORMAT, 'datafile');
-			$errorToHandle = $exception->getCode() == InvalidDatafileVersionException::class ? new InvalidDatafileVersionException($errorMsg) : new InvalidInputException($errorMsg);
-			$logger->log(Logger::ERROR, $errorMsg);
-			$errorHandler->handleError($errorToHandle);
-			return null;
-		}
+        try {
+            $config = new ProjectConfig($datafile, $logger, $errorHandler);
+        } catch (Exception $exception) {
+            $defaultLogger = new DefaultLogger();
+            $errorMsg = $exception->getCode() == InvalidDatafileVersionException::class ? $exception->getMessage() : sprintf(Errors::INVALID_FORMAT, 'datafile');
+            $errorToHandle = $exception->getCode() == InvalidDatafileVersionException::class ? new InvalidDatafileVersionException($errorMsg) : new InvalidInputException($errorMsg);
+            $defaultLogger->log(Logger::ERROR, $errorMsg);
+            $logger->log(Logger::ERROR, $errorMsg);
+            $errorHandler->handleError($errorToHandle);
+            return null;
+        }
 
-		return $config;
-	}
+        return $config;
+    }
 
-	/**
+    /**
      * @param $entities array Entities to be stored as objects.
      * @param $entityId string ID to be used in generating map.
      * @param $entityClass string Class of entities.

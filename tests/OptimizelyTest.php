@@ -1179,8 +1179,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Experiment with ID 7716830585 is paused.
         $pausedExpEvent->setExperimentIds(['7716830585']);
 
-        $this->optimizelyObject = $this->setOptimizelyConfigObject($this->optimizelyObject, $this->projectConfig,
-        $this->staticConfigManager);
+        $this->optimizelyObject = $this->setOptimizelyConfigObject(
+            $this->optimizelyObject,
+            $this->projectConfig,
+            $this->staticConfigManager
+        );
 
         $this->eventBuilderMock->expects($this->once())
             ->method('createConversionEvent')

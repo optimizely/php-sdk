@@ -22,5 +22,5 @@ namespace Optimizely\ProjectConfigManager;
  */
 interface ProjectConfigManagerInterface
 {
-  public function getConfig();
+    public function getConfig();
 }

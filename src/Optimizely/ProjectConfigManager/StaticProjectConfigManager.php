@@ -26,41 +26,42 @@ use Optimizely\Utils\ConfigUtils;
  */
 class StaticProjectConfigManager implements ProjectConfigManagerInterface
 {
-	/**
+    /**
      * @var ProjectConfig JSON datafile string.
      */
-	private $_config;
-	
-	/**
+    private $_config;
+    
+    /**
      * @var LoggerInterface JSON datafile string.
      */
-	private $_logger;
-	
-	/**
+    private $_logger;
+    
+    /**
      * @var ErrorHandlerInterface JSON datafile string.
      */
-	private $_errorHandler;
+    private $_errorHandler;
 
     /**
      * Initialize config manager. Datafile has to be provided to use.
-     * 
+     *
      * @param string                $datafile           JSON string representing the Optimizely project.
-	 * @param bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
+     * @param bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
      * @param LoggerInterface       $loggger            Logger instance
      * @param ErrorHandlerInterface $errorHandler       ErrorHandler instance.
      */
-	public function __construct($datafile, $skipJsonValidation, $loggger, $errorHandler)
+    public function __construct($datafile, $skipJsonValidation, $loggger, $errorHandler)
     {
-		$this->_logger = $loggger;
-		$this->_errorHandler = $errorHandler;
-		$this->_config = ConfigUtils::createProjectConfigFromDatafile($datafile, $skipJsonValidation, $loggger, $errorHandler);
-	}
+        $this->_logger = $loggger;
+        $this->_errorHandler = $errorHandler;
+        $this->_config = ConfigUtils::createProjectConfigFromDatafile($datafile, $skipJsonValidation, $loggger, $errorHandler);
+    }
 
-	/**
-	 * Returns instance of ProjectConfig.
-	 * @return null|ProjectConfig ProjectConfig instance. 
-	 */
-	public function getConfig() {
-		return $this->_config;
-	}
+    /**
+     * Returns instance of ProjectConfig.
+     * @return null|ProjectConfig ProjectConfig instance.
+     */
+    public function getConfig()
+    {
+        return $this->_config;
+    }
 }
