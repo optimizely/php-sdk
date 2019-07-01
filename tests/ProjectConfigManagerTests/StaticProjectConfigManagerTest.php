@@ -21,6 +21,7 @@ use Monolog\Logger;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\ProjectConfig;
 use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 
 class StaticProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
@@ -66,7 +67,8 @@ class StaticProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testStaticProjectConfigManagerWithValidDatafile()
     {
+        $config = new ProjectConfig(DATAFILE, $this->loggerMock, $this->errorHandlerMock);
         $configManager = new StaticProjectConfigManager(DATAFILE, false, $this->loggerMock, $this->errorHandlerMock);
-        $this->assertNotNull($configManager->getConfig());
+        $this->assertEquals($config, $configManager->getConfig());
     }
 }

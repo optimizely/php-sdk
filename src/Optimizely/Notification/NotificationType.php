@@ -36,7 +36,7 @@ class NotificationType
      * Notification triggered when a conversion event is sent to Optimizely.
      */
     const TRACK = "TRACK:event_key, user_id, attributes, event_tags, event";
-    
+
     public static function isNotificationTypeValid($notification_type)
     {
         $oClass = new \ReflectionClass(__CLASS__);
