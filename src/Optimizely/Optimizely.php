@@ -122,13 +122,8 @@ class Optimizely
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
         $this->_eventBuilder = new EventBuilder($this->_logger);
         $this->_projectConfigManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
-        $config = $this->getConfig();
-        if ($config === null) {
-            // ProjectConfig instance does not initialized successfully.
-            return;
-        }
-        
-        $this->_decisionService = new DecisionService($this->_logger, $config, $userProfileService);
+        $this->_eventBuilder = new EventBuilder($this->_logger);
+        $this->_decisionService = new DecisionService($this->_logger, $userProfileService);
         $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
     }
 
@@ -403,7 +398,7 @@ class Optimizely
             return null;
         }
 
-        $variation = $this->_decisionService->getVariation($experiment, $userId, $attributes);
+        $variation = $this->_decisionService->getVariation($this->_config, $experiment, $userId, $attributes);
         $variationKey = ($variation === null) ? null : $variation->getKey();
 
         if ($config->isFeatureExperiment($experiment->getId())) {
@@ -455,7 +450,7 @@ class Optimizely
         )) {
             return false;
         }
-        return $config->setForcedVariation($experimentKey, $userId, $variationKey);
+        return $this->_decisionService->setForcedVariation($this->_config, $experimentKey, $userId, $variationKey);
     }
 
     /**
@@ -483,7 +478,7 @@ class Optimizely
             return null;
         }
 
-        $forcedVariation = $config->getForcedVariation($experimentKey, $userId);
+        $forcedVariation = $this->_decisionService->getForcedVariation($this->_config, $experimentKey, $userId);
         if (isset($forcedVariation)) {
             return $forcedVariation->getKey();
         } else {
@@ -531,7 +526,7 @@ class Optimizely
         }
 
         $featureEnabled = false;
-        $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
+        $decision = $this->_decisionService->getVariationForFeature($this->_config, $featureFlag, $userId, $attributes);
         $variation = $decision->getVariation();
         if ($variation) {
             $experiment = $decision->getExperiment();
@@ -668,7 +663,7 @@ class Optimizely
         }
 
         $featureEnabled = false;
-        $decision = $this->_decisionService->getVariationForFeature($featureFlag, $userId, $attributes);
+        $decision = $this->_decisionService->getVariationForFeature($this->_config, $featureFlag, $userId, $attributes);
         $variableValue = $variable->getDefaultValue();
 
         if ($decision->getVariation() === null) {
