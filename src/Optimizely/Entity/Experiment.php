@@ -17,7 +17,7 @@
 
 namespace Optimizely\Entity;
 
-use Optimizely\Utils\ConfigParser;
+use Optimizely\Utils\ConfigUtils;
 
 class Experiment
 {
@@ -207,7 +207,7 @@ class Experiment
      */
     public function setVariations($variations)
     {
-        $this->_variations = ConfigParser::generateMap($variations, null, Variation::class);
+        $this->_variations = ConfigUtils::generateMap($variations, null, Variation::class);
     }
 
     /**
@@ -287,7 +287,7 @@ class Experiment
      */
     public function setTrafficAllocation($trafficAllocation)
     {
-        $this->_trafficAllocation = ConfigParser::generateMap($trafficAllocation, null, TrafficAllocation::class);
+        $this->_trafficAllocation = ConfigUtils::generateMap($trafficAllocation, null, TrafficAllocation::class);
     }
 
     /**

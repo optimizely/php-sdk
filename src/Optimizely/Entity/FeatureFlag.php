@@ -17,7 +17,7 @@
 
 namespace Optimizely\Entity;
 
-use Optimizely\Utils\ConfigParser;
+use Optimizely\Utils\ConfigUtils;
 
 class FeatureFlag
 {
@@ -64,7 +64,7 @@ class FeatureFlag
         $this->_key = $key;
         $this->_rolloutId = $rolloutId;
         $this->_experimentIds = $experimentIds;
-        $this->_variables = ConfigParser::generateMap($variables, null, FeatureVariable::class);
+        $this->_variables = ConfigUtils::generateMap($variables, null, FeatureVariable::class);
     }
 
     /**
@@ -144,6 +144,6 @@ class FeatureFlag
      */
     public function setVariables($variables)
     {
-        $this->_variables = ConfigParser::generateMap($variables, null, FeatureVariable::class);
+        $this->_variables = ConfigUtils::generateMap($variables, null, FeatureVariable::class);
     }
 }

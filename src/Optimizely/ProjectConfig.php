@@ -41,7 +41,7 @@ use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Utils\ConditionDecoder;
-use Optimizely\Utils\ConfigParser;
+use Optimizely\Utils\ConfigUtils;
 use Optimizely\Utils\Errors;
 use Optimizely\Utils\Validator;
 
@@ -216,17 +216,17 @@ class ProjectConfig
         $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
         $featureFlags = isset($config['featureFlags']) ? $config['featureFlags']: [];
 
-        $this->_groupIdMap = ConfigParser::generateMap($groups, 'id', Group::class);
-        $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);
-        $this->_eventKeyMap = ConfigParser::generateMap($events, 'key', Event::class);
-        $this->_attributeKeyMap = ConfigParser::generateMap($attributes, 'key', Attribute::class);
-        $typedAudienceIdMap = ConfigParser::generateMap($typedAudiences, 'id', Audience::class);
-        $this->_audienceIdMap = ConfigParser::generateMap($audiences, 'id', Audience::class);
-        $this->_rollouts = ConfigParser::generateMap($rollouts, null, Rollout::class);
-        $this->_featureFlags = ConfigParser::generateMap($featureFlags, null, FeatureFlag::class);
+        $this->_groupIdMap = ConfigUtils::generateMap($groups, 'id', Group::class);
+        $this->_experimentKeyMap = ConfigUtils::generateMap($experiments, 'key', Experiment::class);
+        $this->_eventKeyMap = ConfigUtils::generateMap($events, 'key', Event::class);
+        $this->_attributeKeyMap = ConfigUtils::generateMap($attributes, 'key', Attribute::class);
+        $typedAudienceIdMap = ConfigUtils::generateMap($typedAudiences, 'id', Audience::class);
+        $this->_audienceIdMap = ConfigUtils::generateMap($audiences, 'id', Audience::class);
+        $this->_rollouts = ConfigUtils::generateMap($rollouts, null, Rollout::class);
+        $this->_featureFlags = ConfigUtils::generateMap($featureFlags, null, FeatureFlag::class);
 
         foreach (array_values($this->_groupIdMap) as $group) {
-            $experimentsInGroup = ConfigParser::generateMap($group->getExperiments(), 'key', Experiment::class);
+            $experimentsInGroup = ConfigUtils::generateMap($group->getExperiments(), 'key', Experiment::class);
             foreach (array_values($experimentsInGroup) as $experiment) {
                 $experiment->setGroupId($group->getId());
                 $experiment->setGroupPolicy($group->getPolicy());
@@ -290,7 +290,7 @@ class ProjectConfig
         $this->_experimentFeatureMap = [];
         if ($this->_featureKeyMap) {
             foreach ($this->_featureKeyMap as $featureKey => $featureFlag) {
-                $this->_featureFlagVariableMap[$featureKey] = ConfigParser::generateMap(
+                $this->_featureFlagVariableMap[$featureKey] = ConfigUtils::generateMap(
                     $featureFlag->getVariables(),
                     'key',
                     FeatureVariable::class

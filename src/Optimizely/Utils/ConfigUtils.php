@@ -57,4 +57,38 @@ class ConfigUtils
 
 		return $config;
 	}
+
+	/**
+     * @param $entities array Entities to be stored as objects.
+     * @param $entityId string ID to be used in generating map.
+     * @param $entityClass string Class of entities.
+     *
+     * @return array Map mapping entity identifier to the entity.
+     */
+    public static function generateMap($entities, $entityId, $entityClass)
+    {
+        $entityMap = [];
+        foreach ($entities as $entity) {
+            if ($entity instanceof $entityClass) {
+                $entityObject = $entity;
+            } else {
+                $entityObject = new $entityClass;
+                foreach ($entity as $key => $value) {
+                    $propSetter = 'set'.ucfirst($key);
+                    if (method_exists($entityObject, $propSetter)) {
+                        $entityObject->$propSetter($value);
+                    }
+                }
+            }
+
+            if (is_null($entityId)) {
+                array_push($entityMap, $entityObject);
+            } else {
+                $propKeyGetter = 'get'.ucfirst($entityId);
+                $entityMap[$entityObject->$propKeyGetter()] = $entityObject;
+            }
+        }
+
+        return $entityMap;
+    }
 }

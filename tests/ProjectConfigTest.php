@@ -42,7 +42,7 @@ use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Optimizely;
 use Optimizely\ProjectConfig;
-use Optimizely\Utils\ConfigParser;
+use Optimizely\Utils\ConfigUtils;
 
 class ProjectConfigTest extends \PHPUnit_Framework_TestCase
 {
@@ -390,13 +390,13 @@ class ProjectConfigTest extends \PHPUnit_Framework_TestCase
             ]
           ];
 
-        $variationIdMap = ConfigParser::generateMap($data, 'id', Variation::class);
+        $variationIdMap = ConfigUtils::generateMap($data, 'id', Variation::class);
 
         $variation = $variationIdMap["177771"];
         $this->assertEquals("177771", $variation->getId());
         $this->assertEquals("my_var", $variation->getKey());
 
-        $variableUsageMap = ConfigParser::generateMap($variables, null, VariableUsage::class);
+        $variableUsageMap = ConfigUtils::generateMap($variables, null, VariableUsage::class);
         $this->assertEquals($variableUsageMap, $variation->getVariables());
 
         // assert featureEnabled by default is set to false when property not provided in data file

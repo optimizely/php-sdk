@@ -17,7 +17,7 @@
 
 namespace Optimizely\Entity;
 
-use Optimizely\Utils\ConfigParser;
+use Optimizely\Utils\ConfigUtils;
 
 class Variation
 {
@@ -53,7 +53,7 @@ class Variation
         $this->_key = $key;
         $this->_featureEnabled = $featureEnabled;
 
-        $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances, null, VariableUsage::class);
+        $this->_variableUsageInstances = ConfigUtils::generateMap($variableUsageInstances, null, VariableUsage::class);
 
         $this->generateVariableIdToVariableUsageMap();
     }
@@ -133,7 +133,7 @@ class Variation
      */
     public function setVariables($variableUsageInstances)
     {
-        $this->_variableUsageInstances = ConfigParser::generateMap($variableUsageInstances, null, VariableUsage::class);
+        $this->_variableUsageInstances = ConfigUtils::generateMap($variableUsageInstances, null, VariableUsage::class);
         $this->generateVariableIdToVariableUsageMap();
     }
 
