@@ -17,8 +17,11 @@
 
 namespace Optimizely\Utils;
 
+use Exception;
 use Monolog\Logger;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
+use Optimizely\Exceptions\InvalidDatafileVersionException;
+use Optimizely\Exceptions\InvalidInputException;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\ProjectConfig;
 
