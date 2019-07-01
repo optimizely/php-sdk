@@ -398,7 +398,7 @@ class Optimizely
             return null;
         }
 
-        $variation = $this->_decisionService->getVariation($this->_config, $experiment, $userId, $attributes);
+        $variation = $this->_decisionService->getVariation($config, $experiment, $userId, $attributes);
         $variationKey = ($variation === null) ? null : $variation->getKey();
 
         if ($config->isFeatureExperiment($experiment->getId())) {
@@ -450,7 +450,7 @@ class Optimizely
         )) {
             return false;
         }
-        return $this->_decisionService->setForcedVariation($this->_config, $experimentKey, $userId, $variationKey);
+        return $this->_decisionService->setForcedVariation($config, $experimentKey, $userId, $variationKey);
     }
 
     /**
@@ -478,7 +478,7 @@ class Optimizely
             return null;
         }
 
-        $forcedVariation = $this->_decisionService->getForcedVariation($this->_config, $experimentKey, $userId);
+        $forcedVariation = $this->_decisionService->getForcedVariation($config, $experimentKey, $userId);
         if (isset($forcedVariation)) {
             return $forcedVariation->getKey();
         } else {
@@ -526,7 +526,7 @@ class Optimizely
         }
 
         $featureEnabled = false;
-        $decision = $this->_decisionService->getVariationForFeature($this->_config, $featureFlag, $userId, $attributes);
+        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
         $variation = $decision->getVariation();
         if ($variation) {
             $experiment = $decision->getExperiment();
@@ -663,7 +663,7 @@ class Optimizely
         }
 
         $featureEnabled = false;
-        $decision = $this->_decisionService->getVariationForFeature($this->_config, $featureFlag, $userId, $attributes);
+        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
         $variableValue = $variable->getDefaultValue();
 
         if ($decision->getVariation() === null) {
