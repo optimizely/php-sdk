@@ -164,15 +164,15 @@ class Optimizely
         return true;
     }
 
-    /** 
-     * @param  string           Experiment key
-     * @param  string           Variation key
-     * @param  string           User ID
-     * @param  array            Associative array of user attributes
+    /**
+     * @param  string Experiment key
+     * @param  string Variation key
+     * @param  string User ID
+     * @param  array Associative array of user attributes
      */
     protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
     {
-        // TODO: Config should be passed as param when this is called from activate but 
+        // TODO: Config should be passed as param when this is called from activate but
         // since PHP is single-threaded we can leave this for now.
         $config = $this->getConfig();
         
@@ -357,7 +357,7 @@ class Optimizely
      */
     public function getVariation($experimentKey, $userId, $attributes = null)
     {
-        // TODO: Config should be passed as param when this is called from activate but 
+        // TODO: Config should be passed as param when this is called from activate but
         // since PHP is single-threaded we can leave this for now.
         $config = $this->getConfig();
         if ($config === null) {

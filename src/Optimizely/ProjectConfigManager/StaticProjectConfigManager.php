@@ -46,7 +46,7 @@ class StaticProjectConfigManager implements ProjectConfigManagerInterface
      *
      * @param string                $datafile           JSON string representing the Optimizely project.
      * @param bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
-     * @param LoggerInterface       $logger            	Logger instance
+     * @param LoggerInterface       $logger             Logger instance
      * @param ErrorHandlerInterface $errorHandler       ErrorHandler instance.
      */
     public function __construct($datafile, $skipJsonValidation, $logger, $errorHandler)
