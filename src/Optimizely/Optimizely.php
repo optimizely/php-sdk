@@ -33,6 +33,7 @@ use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\ProjectConfigManager\ProjectConfigManagerInterface;
 use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
@@ -86,7 +87,7 @@ class Optimizely
     private $_logger;
 
     /**
-     * @var ProjectConfigManager
+     * @var ProjectConfigManagerInterface
      */
     private $_projectConfigManager;
 
@@ -111,16 +112,21 @@ class Optimizely
         LoggerInterface $logger = null,
         ErrorHandlerInterface $errorHandler = null,
         $skipJsonValidation = false,
-        UserProfileServiceInterface $userProfileService = null
+        UserProfileServiceInterface $userProfileService = null,
+        ProjectConfigManagerInterface $configManager = null
     ) {
         $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
         $this->_eventBuilder = new EventBuilder($this->_logger);
-        $this->_projectConfigManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
         $this->_decisionService = new DecisionService($this->_logger, $userProfileService);
         $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
+        $this->_projectConfigManager = $configManager;
+
+        if ($this->_projectConfigManager === null) {
+            $this->_projectConfigManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
+        }
     }
 
     /**
