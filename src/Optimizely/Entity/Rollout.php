@@ -17,7 +17,7 @@
 
 namespace Optimizely\Entity;
 
-use Optimizely\Utils\ConfigUtils;
+use Optimizely\Utils\ConfigParser;
 
 class Rollout
 {
@@ -39,7 +39,7 @@ class Rollout
     public function __construct($id = null, $experiments = [])
     {
         $this->_id = $id;
-        $this->_experiments = ConfigUtils::generateMap($experiments, null, Experiment::class);
+        $this->_experiments = ConfigParser::generateMap($experiments, null, Experiment::class);
     }
 
     /**
@@ -71,6 +71,6 @@ class Rollout
      */
     public function setExperiments($experiments)
     {
-        $this->_experiments = ConfigUtils::generateMap($experiments, null, Experiment::class);
+        $this->_experiments = ConfigParser::generateMap($experiments, null, Experiment::class);
     }
 }

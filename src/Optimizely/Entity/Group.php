@@ -17,7 +17,7 @@
 
 namespace Optimizely\Entity;
 
-use Optimizely\Utils\ConfigUtils;
+use Optimizely\Utils\ConfigParser;
 
 class Group
 {
@@ -111,6 +111,6 @@ class Group
      */
     public function setTrafficAllocation($trafficAllocation)
     {
-        $this->_trafficAllocation = ConfigUtils::generateMap($trafficAllocation, null, TrafficAllocation::class);
+        $this->_trafficAllocation = ConfigParser::generateMap($trafficAllocation, null, TrafficAllocation::class);
     }
 }

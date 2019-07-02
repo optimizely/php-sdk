@@ -19,7 +19,7 @@ namespace Optimizely\ProjectConfigManager;
 
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\Logger\LoggerInterface;
-use Optimizely\Utils\ConfigUtils;
+use Optimizely\ProjectConfig;
 
 /**
  * Project config manager that returns ProjectConfig based on provided datafile.
@@ -53,7 +53,7 @@ class StaticProjectConfigManager implements ProjectConfigManagerInterface
     {
         $this->_logger = $logger;
         $this->_errorHandler = $errorHandler;
-        $this->_config = ConfigUtils::createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler);
+        $this->_config = ProjectConfig::createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler);
     }
 
     /**

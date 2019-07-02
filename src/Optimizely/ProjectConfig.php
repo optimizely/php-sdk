@@ -17,6 +17,7 @@
 
 namespace Optimizely;
 
+use Exception;
 use Monolog\Logger;
 use Optimizely\Entity\Attribute;
 use Optimizely\Entity\Audience;
@@ -37,11 +38,13 @@ use Optimizely\Exceptions\InvalidExperimentException;
 use Optimizely\Exceptions\InvalidFeatureFlagException;
 use Optimizely\Exceptions\InvalidFeatureVariableException;
 use Optimizely\Exceptions\InvalidGroupException;
+use Optimizely\Exceptions\InvalidInputException;
 use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\LoggerInterface;
+use Optimizely\Logger\DefaultLogger;
 use Optimizely\Utils\ConditionDecoder;
-use Optimizely\Utils\ConfigUtils;
+use Optimizely\Utils\ConfigParser;
 use Optimizely\Utils\Errors;
 use Optimizely\Utils\Validator;
 
@@ -216,17 +219,17 @@ class ProjectConfig
         $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
         $featureFlags = isset($config['featureFlags']) ? $config['featureFlags']: [];
 
-        $this->_groupIdMap = ConfigUtils::generateMap($groups, 'id', Group::class);
-        $this->_experimentKeyMap = ConfigUtils::generateMap($experiments, 'key', Experiment::class);
-        $this->_eventKeyMap = ConfigUtils::generateMap($events, 'key', Event::class);
-        $this->_attributeKeyMap = ConfigUtils::generateMap($attributes, 'key', Attribute::class);
-        $typedAudienceIdMap = ConfigUtils::generateMap($typedAudiences, 'id', Audience::class);
-        $this->_audienceIdMap = ConfigUtils::generateMap($audiences, 'id', Audience::class);
-        $this->_rollouts = ConfigUtils::generateMap($rollouts, null, Rollout::class);
-        $this->_featureFlags = ConfigUtils::generateMap($featureFlags, null, FeatureFlag::class);
+        $this->_groupIdMap = ConfigParser::generateMap($groups, 'id', Group::class);
+        $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);
+        $this->_eventKeyMap = ConfigParser::generateMap($events, 'key', Event::class);
+        $this->_attributeKeyMap = ConfigParser::generateMap($attributes, 'key', Attribute::class);
+        $typedAudienceIdMap = ConfigParser::generateMap($typedAudiences, 'id', Audience::class);
+        $this->_audienceIdMap = ConfigParser::generateMap($audiences, 'id', Audience::class);
+        $this->_rollouts = ConfigParser::generateMap($rollouts, null, Rollout::class);
+        $this->_featureFlags = ConfigParser::generateMap($featureFlags, null, FeatureFlag::class);
 
         foreach (array_values($this->_groupIdMap) as $group) {
-            $experimentsInGroup = ConfigUtils::generateMap($group->getExperiments(), 'key', Experiment::class);
+            $experimentsInGroup = ConfigParser::generateMap($group->getExperiments(), 'key', Experiment::class);
             foreach (array_values($experimentsInGroup) as $experiment) {
                 $experiment->setGroupId($group->getId());
                 $experiment->setGroupPolicy($group->getPolicy());
@@ -290,7 +293,7 @@ class ProjectConfig
         $this->_experimentFeatureMap = [];
         if ($this->_featureKeyMap) {
             foreach ($this->_featureKeyMap as $featureKey => $featureFlag) {
-                $this->_featureFlagVariableMap[$featureKey] = ConfigUtils::generateMap(
+                $this->_featureFlagVariableMap[$featureKey] = ConfigParser::generateMap(
                     $featureFlag->getVariables(),
                     'key',
                     FeatureVariable::class
@@ -302,6 +305,41 @@ class ProjectConfig
                 }
             }
         }
+    }
+
+    /**
+     * Create ProjectConfig based on datafile string.
+     *
+     * @param string                $datafile           JSON string representing the Optimizely project.
+     * @param bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
+     * @param LoggerInterface       $logger             Logger instance
+     * @param ErrorHandlerInterface $errorHandler       ErrorHandler instance.
+     * @return ProjectConfig ProjectConfig instance or null;
+     */
+    public static function createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler)
+    {
+        if (!$skipJsonValidation) {
+            if (!Validator::validateJsonSchema($datafile)) {
+                $defaultLogger = new DefaultLogger();
+                $defaultLogger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
+                $logger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
+                return null;
+            }
+        }
+
+        try {
+            $config = new ProjectConfig($datafile, $logger, $errorHandler);
+        } catch (Exception $exception) {
+            $defaultLogger = new DefaultLogger();
+            $errorMsg = $exception->getCode() == InvalidDatafileVersionException::class ? $exception->getMessage() : sprintf(Errors::INVALID_FORMAT, 'datafile');
+            $errorToHandle = $exception->getCode() == InvalidDatafileVersionException::class ? new InvalidDatafileVersionException($errorMsg) : new InvalidInputException($errorMsg);
+            $defaultLogger->log(Logger::ERROR, $errorMsg);
+            $logger->log(Logger::ERROR, $errorMsg);
+            $errorHandler->handleError($errorToHandle);
+            return null;
+        }
+
+        return $config;
     }
 
     /**
