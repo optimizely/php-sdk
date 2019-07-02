@@ -136,7 +136,7 @@ class FeatureVariable
     /**
      * Returns feature variable method name based on
      * feature variable type.
-     * 
+     *
      * @param String $type Feature variable type.
      */
     public static function getFeatureVariableMethodName($type)
