@@ -614,7 +614,7 @@ class Optimizely
     ) {
         $config = $this->getConfig();
         if ($config === null) {
-            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, $this->getFeatureVariableMethodName($variableType)));
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, FeatureVariable::getFeatureVariableMethodName($variableType)));
             return null;
         }
 
@@ -720,22 +720,6 @@ class Optimizely
         );
 
         return $variableValue;
-    }
-
-    private function getFeatureVariableMethodName($type)
-    {
-        switch ($type) {
-            case FeatureVariable::BOOLEAN_TYPE:
-                return "getFeatureVariableBoolean";
-            case FeatureVariable::INTEGER_TYPE:
-                return "getFeatureVariableInteger";
-            case FeatureVariable::DOUBLE_TYPE:
-                return "getFeatureVariableDouble";
-            case FeatureVariable::STRING_TYPE:
-                return "getFeatureVariableString";
-            default:
-                return null;
-        }
     }
 
     /**
