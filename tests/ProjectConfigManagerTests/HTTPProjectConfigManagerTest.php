@@ -78,8 +78,8 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
             true,
             null,
             false,
-            $this->loggerMock,
-            $this->errorHandlerMock
+            null,
+            null
         );
 
         $config = $configManager->getConfig();
@@ -180,6 +180,21 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertEquals($config, $configManagerMock->getConfig());
+    }
+
+    public function testGetConfigReturnsNullWhenFetchedDatafileIsNotJson()
+    {
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManager::class)
+            ->setConstructorArgs(array(null, $this->url, null, true, null, false,
+                                    $this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('fetchDatafile'))
+            ->getMock();
+        
+        $configManagerMock->expects($this->any())
+            ->method('fetchDatafile')
+            ->willReturn("Dracarys");
+
+        $this->assertNull($configManagerMock->getConfig());
     }
 
     public function testGetConfigReturnsProvidedDatafileWhenHttpClientReturnsInvalidFile()

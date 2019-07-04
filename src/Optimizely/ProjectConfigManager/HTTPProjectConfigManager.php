@@ -20,8 +20,8 @@ namespace Optimizely\ProjectConfigManager;
 use Exception;
 use GuzzleHttp\Client as HttpClient;
 use Monolog\Logger;
-use Optimizely\ErrorHandler\DefaultErrorHandler;
-use Optimizely\Logger\DefaultLogger;
+use Optimizely\ErrorHandler\NoOpErrorHandler;
+use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfig;
 use Optimizely\Utils\Validator;
 
