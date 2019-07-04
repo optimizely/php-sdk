@@ -32,6 +32,7 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\ProjectConfig;
+use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
 use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use TypeError;
 use Optimizely\ErrorHandler\DefaultErrorHandler;
@@ -109,6 +110,33 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $this->staticConfigManager = new StaticProjectConfigManager($this->datafile, true, $this->loggerMock, new NoOpErrorHandler);
+    }
+
+    public function testActivateWorksWithHTTPConfigManager()
+    {
+        $configManager = new HTTPProjectConfigManager(
+            null,
+            "https://cdn.optimizely.com/json/10192104166.json",
+            null,
+            true,
+            $this->datafile,
+            false,
+            $this->loggerMock,
+            new NoOpErrorHandler
+        );
+
+        $optimizely = new Optimizely(
+            null,
+            null,
+            $this->loggerMock,
+            null,
+            true,
+            null,
+            $configManager
+        );
+
+        // Call activate
+        $this->assertEquals('one_step_checkout', $optimizely->activate('checkout_flow_experiment', 'test_user'));
     }
 
     public function testIsValidForInvalidOptimizelyObject()
