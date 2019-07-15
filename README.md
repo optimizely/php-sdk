@@ -26,15 +26,18 @@ To access the Feature Management configuration in the Optimizely dashboard, plea
 ### Using the SDK
 See the Optimizely Full Stack [developer documentation](https://developers.optimizely.com/x/solutions/sdks/reference/?language=php) to learn how to set up your first Full Stack project and use the SDK.
 
+#### ProjectConfigManagerInterface
+[`ProjectConfigManagerInterface`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/ProjectConfigManagerInterface.php) exposes method for retrieving `ProjectConfig` instance.
+
 #### HTTPProjectConfigManager
 
 [`HTTPProjectConfigManager`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/HTTPProjectConfigManager.php)
-is an implementation of [`ProjectConfigManagerInterface`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/ProjectConfigManagerInterface.php) interface.
+is an implementation of `ProjectConfigManagerInterface` interface.
 
 The `fetch` method makes an HTTP GET request to the configured URL to download the
 project datafile and initialize an instance of the ProjectConfig.
 
-Calling `fetch` will update the internal ProjectConfig instance that will be returned by `getConfig`.
+Calling `fetch` will update the internal ProjectConfig instance that will be returned by calling `getConfig`.
 
 ##### Use HTTPProjectConfigManager
 
