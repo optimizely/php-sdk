@@ -19,6 +19,7 @@ after_script: "vendor/bin/php-coveralls -v"
 stages:
   - 'Linting'
   - 'Integration tests'
+  - 'Benchmarking tests'
   - 'Test'
 
 jobs:
@@ -30,7 +31,8 @@ jobs:
       script: 'composer lint'
       after_script: skip
       after_success: travis_terminate 0
-    - stage: 'Integration tests'
+    - &integrationtest
+      stage: 'Integration tests'
       merge_mode: replace
       env: SDK=php
       cache: false
@@ -39,5 +41,10 @@ jobs:
       before_script:
         - mkdir $HOME/travisci-tools && pushd $HOME/travisci-tools && git init && git pull https://$CI_USER_TOKEN@github.com/optimizely/travisci-tools.git && popd
       script:
-        - "$HOME/travisci-tools/fsc-trigger/trigger_fullstack-sdk-compat.sh"
+        - "$HOME/travisci-tools/trigger-script-with-status-update.sh"
       after_success: travis_terminate 0
+    - <<: *integrationtest
+      stage: 'Benchmarking tests'
+      env: SDK=php FULLSTACK_TEST_REPO=Benchmarking
+      script:
+        - "$HOME/travisci-tools/trigger-script-with-status-update.sh yasir/bench-exp-support"
