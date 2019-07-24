@@ -4336,7 +4336,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Dispatching impression event to URL logx.optimizely.com/decision with params {"param1":"val1","param2":"val2"}.'
             );
 
-        $optlyObject->sendImpressionEvent('group_experiment_1', 'group_exp_1_var_2', 'user_1', null);
+        $optlyObject->sendImpressionEvent('group_experiment_1', 'group_exp_1_var_2', 'user_1', null, $this->projectConfig);
     }
 
     public function testSendImpressionEventDispatchFailure()
@@ -4359,7 +4359,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::ERROR, 'Unable to dispatch impression event. Error ');
 
-        $optlyObject->sendImpressionEvent('test_experiment', 'control', 'test_user', []);
+        $optlyObject->sendImpressionEvent('test_experiment', 'control', 'test_user', [], $this->projectConfig);
     }
 
     public function testSendImpressionEventWithAttributes()
@@ -4421,7 +4421,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optlyObject->notificationCenter = $this->notificationCenterMock;
 
-        $optlyObject->sendImpressionEvent('test_experiment', 'control', 'test_user', $userAttributes);
+        $optlyObject->sendImpressionEvent('test_experiment', 'control', 'test_user', $userAttributes, $this->projectConfig);
     }
 
     /*
