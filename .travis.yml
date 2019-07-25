@@ -34,7 +34,7 @@ jobs:
     - &integrationtest
       stage: 'Integration tests'
       merge_mode: replace
-      env: SDK=php
+      env: SDK=php SDK_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
       cache: false
       language: minimal
       install: skip
@@ -45,4 +45,4 @@ jobs:
       after_success: travis_terminate 0
     - <<: *integrationtest
       stage: 'Benchmarking tests'
-      env: SDK=php FULLSTACK_TEST_REPO=Benchmarking
+      env: SDK=php FULLSTACK_TEST_REPO=Benchmarking SDK_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
