@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2018, Optimizely
+ * Copyright 2016-2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 namespace Optimizely\Tests;
 
 use Monolog\Logger;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Rollout;
@@ -25,7 +26,6 @@ use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\ProjectConfig;
 
 class BucketerTest extends \PHPUnit_Framework_TestCase
 {
@@ -50,7 +50,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))
             ->getMock();
-        $this->config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
+        $this->config = new DatafileProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
     }
 
     private function getBucketingKey($bucketingId, $experimentId)

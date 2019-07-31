@@ -18,10 +18,10 @@ namespace Optimizely\Utils;
 
 use JsonSchema;
 use Monolog\Logger;
+use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
 use Optimizely\Enums\AudienceEvaluationLogs;
 use Optimizely\Logger\LoggerInterface;
-use Optimizely\ProjectConfig;
 use Optimizely\Utils\ConditionTreeEvaluator;
 use Optimizely\Utils\CustomAttributeConditionEvaluator;
 
@@ -132,7 +132,7 @@ class Validator
     }
 
     /**
-     * @param $config ProjectConfig Configuration for the project.
+     * @param $config ProjectConfigInterface Configuration for the project.
      * @param $experiment Experiment Entity representing the experiment.
      * @param $userAttributes array Attributes of the user.
      * @param $logger LoggerInterface.
@@ -213,7 +213,7 @@ class Validator
      * Checks that if there are more than one experiment IDs
      * in the feature flag, they must belong to the same mutex group
      *
-     * @param ProjectConfig $config      The project config to verify against
+     * @param ProjectConfigInterface $config      The project config to verify against
      * @param FeatureFlag   $featureFlag The feature to validate
      *
      * @return boolean True if feature flag is valid

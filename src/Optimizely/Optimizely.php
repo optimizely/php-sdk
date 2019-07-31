@@ -17,6 +17,7 @@
 namespace Optimizely;
 
 use Exception;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Exceptions\InvalidEventTagException;
@@ -58,7 +59,7 @@ class Optimizely
     const VARIATION_KEY = 'Variation Key';
 
     /**
-     * @var ProjectConfig
+     * @var ProjectConfigInterface
      */
     private $_config;
 
@@ -130,7 +131,7 @@ class Optimizely
         }
 
         try {
-            $this->_config = new ProjectConfig($datafile, $this->_logger, $this->_errorHandler);
+            $this->_config = new DatafileProjectConfig($datafile, $this->_logger, $this->_errorHandler);
         } catch (Exception $exception) {
             $this->_isValid = false;
             $defaultLogger = new DefaultLogger();
@@ -510,7 +511,7 @@ class Optimizely
 
         $featureFlag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
         if ($featureFlag && (!$featureFlag->getId())) {
-            // Error logged in ProjectConfig - getFeatureFlagFromKey
+            // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
             return false;
         }
 
@@ -631,13 +632,13 @@ class Optimizely
 
         $featureFlag = $this->_config->getFeatureFlagFromKey($featureFlagKey);
         if ($featureFlag && (!$featureFlag->getId())) {
-            // Error logged in ProjectConfig - getFeatureFlagFromKey
+            // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
             return null;
         }
 
         $variable = $this->_config->getFeatureVariableFromKey($featureFlagKey, $variableKey);
         if (!$variable) {
-            // Error message logged in ProjectConfig- getFeatureVariableFromKey
+            // Error message logged in ProjectConfigInterface- getFeatureVariableFromKey
             return null;
         }
 
