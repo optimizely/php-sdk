@@ -17,7 +17,7 @@
 
 namespace Optimizely\Config\Tests;
 
-require (dirname(__FILE__).'/../TestData.php');
+require(dirname(__FILE__).'/../TestData.php');
 
 use Monolog\Logger;
 use Optimizely\Config\DatafileProjectConfig;
