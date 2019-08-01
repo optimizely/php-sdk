@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2018, Optimizely
+ * Copyright 2019, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace Optimizely\Utils;
 
-class Errors
+namespace Optimizely\ProjectConfigManager;
+
+/**
+ * Interface for Optimizely's config manager.
+ */
+interface ProjectConfigManagerInterface
 {
-    const INVALID_FORMAT = 'Provided %s is in an invalid format.';
-    const INVALID_DATAFILE = 'Datafile has invalid format. Failing "%s".';
+    /**
+     * Returns ProjectConfig instance.
+     */
+    public function getConfig();
 }

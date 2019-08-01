@@ -32,6 +32,7 @@ use Optimizely\Exceptions\InvalidInputException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
+use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use TypeError;
 use Optimizely\ErrorHandler\DefaultErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
@@ -43,11 +44,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     const OUTPUT_STREAM = 'output';
 
     private $datafile;
-    
+
     private $eventBuilderMock;
     private $loggerMock;
     private $optimizelyObject;
     private $projectConfig;
+    private $staticConfigManager;
+
+
+    /**
+     * Modify Optimizely object and set ProjectConfig in it.
+     */
+    private function setOptimizelyConfigObject($optimizely, $config, $configManager)
+    {
+        $projConfig = new \ReflectionProperty(StaticProjectConfigManager::class, '_config');
+        $projConfig->setAccessible(true);
+        $projConfig->setValue($configManager, $config);
+
+        $projConfigManager = new \ReflectionProperty(Optimizely::class, '_projectConfigManager');
+        $projConfigManager->setAccessible(true);
+        $projConfigManager->setValue($optimizely, $configManager);
+    }
 
     public function setUp()
     {
@@ -90,6 +107,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setConstructorArgs(array($this->loggerMock, new NoOpErrorHandler))
             ->setMethods(array('sendNotifications'))
             ->getMock();
+
+        $this->staticConfigManager = new StaticProjectConfigManager($this->datafile, true, $this->loggerMock, new NoOpErrorHandler);
     }
 
     public function testIsValidForInvalidOptimizelyObject()
@@ -198,36 +217,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             true
         );
         $this->expectOutputRegex('/Provided datafile is in an invalid format./');
-    }
-
-    public function testValidateDatafileInvalidFileJsonValidationNotSkipped()
-    {
-        $validateInputsMethod = new \ReflectionMethod('Optimizely\Optimizely', 'validateDatafile');
-        $validateInputsMethod->setAccessible(true);
-
-        $this->assertFalse(
-            $validateInputsMethod->invoke(
-                new Optimizely('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM)),
-                'Random datafile',
-                false
-            )
-        );
-
-        $this->expectOutputRegex('/Provided "datafile" has invalid schema./');
-    }
-
-    public function testValidateDatafileInvalidFileJsonValidationSkipped()
-    {
-        $validateInputsMethod = new \ReflectionMethod('Optimizely\Optimizely', 'validateDatafile');
-        $validateInputsMethod->setAccessible(true);
-
-        $this->assertTrue(
-            $validateInputsMethod->invoke(
-                new Optimizely('Random datafile', null, null, null, true),
-                'Random datafile',
-                true
-            )
-        );
     }
 
     public function testActivateInvalidOptimizelyObject()
@@ -1159,9 +1148,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Experiment with ID 7716830585 is paused.
         $pausedExpEvent->setExperimentIds(['7716830585']);
 
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($this->optimizelyObject, $this->projectConfig);
+        $this->setOptimizelyConfigObject(
+            $this->optimizelyObject,
+            $this->projectConfig,
+            $this->staticConfigManager
+        );
 
         $this->eventBuilderMock->expects($this->once())
             ->method('createConversionEvent')
@@ -2270,7 +2261,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         $optlyObject = new Optimizely('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM));
 
-        $this->expectOutputRegex("/Datafile has invalid format. Failing 'isFeatureEnabled'./");
+        $this->expectOutputRegex('/Datafile has invalid format. Failing "isFeatureEnabled"./');
         $optlyObject->isFeatureEnabled("boolean_feature", "user_id");
     }
 
@@ -2329,10 +2320,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Create local config copy for this method to add error
         $projectConfig = new DatafileProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
         $optimizelyObj = new Optimizely($this->datafile);
-
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($optimizelyObj, $projectConfig);
+        $this->setOptimizelyConfigObject($optimizelyObj, $projectConfig, $this->staticConfigManager);
 
         $featureFlag = $projectConfig->getFeatureFlagFromKey('mutex_group_feature');
         // Add such an experiment to the list of experiment ids, that does not belong to the same mutex group
@@ -2976,7 +2964,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     {
         $optlyObject = new Optimizely('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM));
 
-        $this->expectOutputRegex("/Datafile has invalid format. Failing 'getEnabledFeatures'./");
+        $this->expectOutputRegex('/Datafile has invalid format. Failing "getEnabledFeatures"./');
 
         $this->assertEmpty($optlyObject->getEnabledFeatures("user_id", []));
     }
@@ -3742,9 +3730,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($this->optimizelyObject, $configMock);
+        $this->setOptimizelyConfigObject($this->optimizelyObject, $configMock, $this->staticConfigManager);
 
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
         $decisionService->setAccessible(true);
@@ -3784,9 +3770,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($this->optimizelyObject, $configMock);
+        $this->setOptimizelyConfigObject($this->optimizelyObject, $configMock, $this->staticConfigManager);
 
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
         $decisionService->setAccessible(true);
@@ -3823,9 +3807,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($this->optimizelyObject, $configMock);
+        $this->setOptimizelyConfigObject($this->optimizelyObject, $configMock, $this->staticConfigManager);
 
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
         $decisionService->setAccessible(true);
@@ -3865,9 +3847,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getVariationForFeature'))
             ->getMock();
 
-        $config = new \ReflectionProperty(Optimizely::class, '_config');
-        $config->setAccessible(true);
-        $config->setValue($this->optimizelyObject, $configMock);
+        $this->setOptimizelyConfigObject($this->optimizelyObject, $configMock, $this->staticConfigManager);
 
         $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
         $decisionService->setAccessible(true);
@@ -4109,7 +4089,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             );
 
         $this->optimizelyObject->notificationCenter = $this->notificationCenterMock;
-        
+
         $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'user_id', $userAttributes, 'double');
     }
 
