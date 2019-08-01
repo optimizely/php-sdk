@@ -17,6 +17,7 @@
 namespace Optimizely;
 
 use Exception;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
@@ -55,6 +56,11 @@ class Optimizely
     const USER_ID = 'User ID';
     const VARIABLE_KEY = 'Variable Key';
     const VARIATION_KEY = 'Variation Key';
+
+    /**
+     * @var DatafileProjectConfig
+     */
+    private $_config;
 
     /**
      * @var DecisionService
@@ -130,13 +136,13 @@ class Optimizely
     }
 
     /**
-     * Returns ProjectConfig instance.
-     * @return ProjectConfig ProjectConfig instance or null
+     * Returns DatafileProjectConfig instance.
+     * @return DatafileProjectConfig DatafileProjectConfig instance or null
      */
     protected function getConfig()
     {
         $config = $this->_projectConfigManager->getConfig();
-        return $config instanceof ProjectConfig ? $config : null;
+        return $config instanceof DatafileProjectConfig ? $config : null;
     }
 
     /**
@@ -175,7 +181,7 @@ class Optimizely
      * @param  string        Variation key
      * @param  string        User ID
      * @param  array         Associative array of user attributes
-     * @param  ProjectConfig ProjectConfig instance
+     * @param  DatafileProjectConfig DatafileProjectConfig instance
      */
     protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes, $config)
     {
@@ -306,7 +312,7 @@ class Optimizely
                 $attributes,
                 $eventTags
             );
-        
+
         $this->_logger->log(Logger::INFO, sprintf('Tracking event "%s" for user "%s".', $eventKey, $userId));
         $this->_logger->log(
             Logger::DEBUG,
@@ -506,7 +512,7 @@ class Optimizely
 
         $featureFlag = $config->getFeatureFlagFromKey($featureFlagKey);
         if ($featureFlag && (!$featureFlag->getId())) {
-            // Error logged in ProjectConfig - getFeatureFlagFromKey
+            // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
             return false;
         }
 
@@ -634,13 +640,13 @@ class Optimizely
 
         $featureFlag = $config->getFeatureFlagFromKey($featureFlagKey);
         if ($featureFlag && (!$featureFlag->getId())) {
-            // Error logged in ProjectConfig - getFeatureFlagFromKey
+            // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
             return null;
         }
 
         $variable = $config->getFeatureVariableFromKey($featureFlagKey, $variableKey);
         if (!$variable) {
-            // Error message logged in ProjectConfig- getFeatureVariableFromKey
+            // Error message logged in ProjectConfigInterface- getFeatureVariableFromKey
             return null;
         }
 

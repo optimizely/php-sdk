@@ -23,10 +23,10 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use Monolog\Logger;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\ProjectConfig;
 use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
 
 class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
@@ -66,7 +66,7 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         );
 
         $config = $configManager->getConfig();
-        $this->assertInstanceOf(ProjectConfig::class, $config);
+        $this->assertInstanceOf(DatafileProjectConfig::class, $config);
     }
 
     public function testConfigManagerRetrievesProjectConfigBySDKKey()
@@ -83,7 +83,7 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         );
 
         $config = $configManager->getConfig();
-        $this->assertInstanceOf(ProjectConfig::class, $config);
+        $this->assertInstanceOf(DatafileProjectConfig::class, $config);
     }
 
     public function testConfigManagerRetrievesProjectConfigByFormat()
@@ -100,7 +100,7 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         );
 
         $config = $configManager->getConfig();
-        $this->assertInstanceOf(ProjectConfig::class, $config);
+        $this->assertInstanceOf(DatafileProjectConfig::class, $config);
     }
 
     /**
@@ -154,7 +154,7 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
             $this->errorHandlerMock
         );
 
-        $config = ProjectConfig::createProjectConfigFromDatafile(
+        $config = DatafileProjectConfig::createProjectConfigFromDatafile(
             DATAFILE,
             false,
             $this->loggerMock,
@@ -172,7 +172,7 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('fetch'))
             ->getMock();
 
-        $config = ProjectConfig::createProjectConfigFromDatafile(
+        $config = DatafileProjectConfig::createProjectConfigFromDatafile(
             DATAFILE,
             false,
             $this->loggerMock,
@@ -189,7 +189,7 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
                                     $this->loggerMock, $this->errorHandlerMock))
             ->setMethods(array('fetchDatafile'))
             ->getMock();
-        
+
         $configManagerMock->expects($this->any())
             ->method('fetchDatafile')
             ->willReturn("Dracarys");
@@ -233,7 +233,7 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
 
         $configManager->fetch();
 
-        $config = ProjectConfig::createProjectConfigFromDatafile(
+        $config = DatafileProjectConfig::createProjectConfigFromDatafile(
             DATAFILE,
             false,
             $this->loggerMock,
@@ -256,14 +256,14 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
             $this->errorHandlerMock
         );
 
-        $config = ProjectConfig::createProjectConfigFromDatafile(
+        $config = DatafileProjectConfig::createProjectConfigFromDatafile(
             DATAFILE,
             false,
             $this->loggerMock,
             $this->errorHandlerMock
         );
 
-         $this->assertInstanceOf(ProjectConfig::class, $configManager->getConfig());
+         $this->assertInstanceOf(DatafileProjectConfig::class, $configManager->getConfig());
         $this->assertNotEquals($config, $configManager->getConfig());
     }
 

@@ -20,9 +20,9 @@ namespace Optimizely\ProjectConfigManager;
 use Exception;
 use GuzzleHttp\Client as HttpClient;
 use Monolog\Logger;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\ProjectConfig;
 use Optimizely\Utils\Validator;
 
 class HTTPProjectConfigManager implements ProjectConfigManagerInterface
@@ -43,7 +43,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
     private $httpClient;
 
     /**
-     * @var ProjectConfig
+     * @var DatafileProjectConfig
      */
     private $_config;
 
@@ -61,12 +61,12 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
      * @var String datafile last modified time.
      */
     private $_lastModifiedSince;
-    
+
     /**
      * @var LoggerInterface Logger instance.
      */
     private $_logger;
-    
+
     /**
      * @var ErrorHandlerInterface ErrorHandler instance.
      */
@@ -86,7 +86,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         $this->_logger = $logger;
         $this->_errorHandler = $errorHandler;
         $this->httpClient = new HttpClient();
-        
+
         if ($this->_logger === null) {
             $this->_logger = new NoOpLogger();
         }
@@ -98,7 +98,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         $this->_url = $this->getUrl($sdkKey, $url, $urlTemplate);
 
         if ($datafile !== null) {
-            $this->_config = ProjectConfig::createProjectConfigFromDatafile(
+            $this->_config = DatafileProjectConfig::createProjectConfigFromDatafile(
                 $datafile,
                 $skipJsonValidation,
                 $this->_logger,
@@ -208,7 +208,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
             return false;
         }
 
-        $config = ProjectConfig::createProjectConfigFromDatafile($datafile, $this->_skipJsonValidation, $this->_logger, $this->_errorHandler);
+        $config = DatafileProjectConfig::createProjectConfigFromDatafile($datafile, $this->_skipJsonValidation, $this->_logger, $this->_errorHandler);
         if ($config === null) {
             return false;
         }
@@ -218,8 +218,8 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
     }
 
     /**
-     * Returns instance of ProjectConfig.
-     * @return null|ProjectConfig ProjectConfig instance.
+     * Returns instance of DatafileProjectConfig.
+     * @return null|DatafileProjectConfig DatafileProjectConfig instance.
      */
     public function getConfig()
     {

@@ -17,6 +17,7 @@
 namespace Optimizely;
 
 use Monolog\Logger;
+use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
 use Optimizely\Logger\LoggerInterface;
@@ -131,14 +132,14 @@ class Bucketer
     /**
      * Determine variation the user should be put in.
      *
-     * @param $config ProjectConfig Configuration for the project.
+     * @param $config ProjectConfigInterface Configuration for the project.
      * @param $experiment Experiment Experiment in which user is to be bucketed.
      * @param $bucketingId string A customer-assigned value used to create the key for the murmur hash.
      * @param $userId string User identifier.
      *
      * @return Variation Variation which will be shown to the user.
      */
-    public function bucket(ProjectConfig $config, Experiment $experiment, $bucketingId, $userId)
+    public function bucket(ProjectConfigInterface $config, Experiment $experiment, $bucketingId, $userId)
     {
         if (is_null($experiment->getKey())) {
             return null;
