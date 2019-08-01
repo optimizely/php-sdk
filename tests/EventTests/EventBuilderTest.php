@@ -20,12 +20,12 @@ namespace Optimizely\Tests;
 use Icecave\Parity\Parity;
 use SebastianBergmann\Diff\Differ;
 use Optimizely\Bucketer;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Event\LogEvent;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\ProjectConfig;
 
 class EventBuilderTest extends \PHPUnit_Framework_TestCase
 {
@@ -39,7 +39,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     {
         $this->testUserId = 'testUserId';
         $logger = new NoOpLogger();
-        $this->config = new ProjectConfig(DATAFILE, $logger, new NoOpErrorHandler());
+        $this->config = new DatafileProjectConfig(DATAFILE, $logger, new NoOpErrorHandler());
         $this->eventBuilder = new EventBuilder($logger);
         $this->timestamp = time()*1000;
         $this->uuid = 'a68cf1ad-0393-4e18-af87-efe8f01a7c9c';
@@ -411,7 +411,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             '$opt_user_agent' => 'Chrome',
         ];
 
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
+        $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, new NoOpLogger, new NoOpErrorHandler))
             ->setMethods(array('getBotFiltering'))
             ->getMock();
@@ -454,7 +454,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             '$opt_user_agent' => 'Chrome',
         ];
 
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
+        $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, new NoOpLogger, new NoOpErrorHandler))
             ->setMethods(array('getBotFiltering'))
             ->getMock();
