@@ -34,10 +34,10 @@ use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\ProjectConfigManager\ProjectConfigManagerInterface;
-use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
+use Optimizely\ProjectConfigManager\ProjectConfigManagerInterface;
+use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\Errors;
 use Optimizely\Utils\Validator;
@@ -185,6 +185,10 @@ class Optimizely
      */
     protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes, $config)
     {
+        // TODO: Config should be passed as param when this is called from activate but
+        // since PHP is single-threaded we can leave this for now.
+        $config = $this->getConfig();
+
         $impressionEvent = $this->_eventBuilder
             ->createImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
         $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
