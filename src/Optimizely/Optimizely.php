@@ -183,12 +183,8 @@ class Optimizely
      * @param  array         Associative array of user attributes
      * @param  DatafileProjectConfig DatafileProjectConfig instance
      */
-    protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes, $config)
+    protected function sendImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes)
     {
-        // TODO: Config should be passed as param when this is called from activate but
-        // since PHP is single-threaded we can leave this for now.
-        $config = $this->getConfig();
-
         $impressionEvent = $this->_eventBuilder
             ->createImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
         $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
@@ -266,7 +262,7 @@ class Optimizely
             return null;
         }
 
-        $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes, $config);
+        $this->sendImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
 
         return $variationKey;
     }
@@ -539,7 +535,7 @@ class Optimizely
                     'variationKey'=> $variationKey
                 );
 
-                $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes, $config);
+                $this->sendImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
             } else {
                 $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
             }

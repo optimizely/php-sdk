@@ -21,22 +21,13 @@ use Exception;
 use GuzzleHttp\Client as HttpClient;
 use Monolog\Logger;
 use Optimizely\Config\DatafileProjectConfig;
+use Optimizely\Enums\ProjectConfigManagerConstants;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Utils\Validator;
 
 class HTTPProjectConfigManager implements ProjectConfigManagerInterface
 {
-    /**
-     * @const int Time in seconds to wait before timing out.
-     */
-    const TIMEOUT = 10;
-
-    /**
-     * @const String Default URL Template to use if only SDK key is provided.
-     */
-    const DEFAULT_URL_TEMPLATE = "https://cdn.optimizely.com/datafiles/%s.json";
-
     /**
      * @var \GuzzleHttp\Client Guzzle HTTP client to send requests.
      */
@@ -137,7 +128,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         if (Validator::validateNonEmptyString($urlTemplate)) {
             $url = sprintf($urlTemplate, $sdkKey);
         } else {
-            $url = sprintf(HTTPProjectConfigManager::DEFAULT_URL_TEMPLATE, $sdkKey);
+            $url = sprintf(ProjectConfigManagerConstants::DEFAULT_URL_TEMPLATE, $sdkKey);
         }
 
         return $url;
@@ -164,16 +155,22 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
 
         // Add If-Modified-Since header.
         if (Validator::validateNonEmptyString($this->_lastModifiedSince)) {
-            $headers = array('If-Modified-Since' => $this->_lastModifiedSince);
+            $headers = array(ProjectConfigManagerConstants::IF_MODIFIED_SINCE => $this->_lastModifiedSince);
         }
 
         $options = [
             'headers' => $headers,
-            'timeout' => HTTPProjectConfigManager::TIMEOUT,
-            'connect_timeout' => HTTPProjectConfigManager::TIMEOUT
+            'timeout' => ProjectConfigManagerConstants::TIMEOUT,
+            'connect_timeout' => ProjectConfigManagerConstants::TIMEOUT
         ];
 
-        $response = $this->httpClient->get($this->_url, $options);
+        try {
+            $response = $this->httpClient->get($this->_url, $options);
+        } catch (Exception $exception) {
+            $this->_logger->log(Logger::ERROR, 'Unexpected response when trying to fetch datafile, status code: ' . $exception->getCode());
+            return null;
+        }
+
         $status = $response->getStatusCode();
 
         // Datafile not updated.
@@ -184,8 +181,8 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
 
         // Datafile retrieved successfully.
         if ($status >= 200 && $status < 300) {
-            if ($response->hasHeader('Last-Modified')) {
-                $this->_lastModifiedSince = $response->getHeader('Last-Modified')[0];
+            if ($response->hasHeader(ProjectConfigManagerConstants::LAST_MODIFIED)) {
+                $this->_lastModifiedSince = $response->getHeader(ProjectConfigManagerConstants::LAST_MODIFIED)[0];
             }
 
             return $response->getBody();

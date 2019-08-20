@@ -293,4 +293,135 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($config, $configAfterFetch);
     }
+
+    public function testGetUrlReturnsURLWhenProvidedURLIsNonEmptyString()
+    {
+       $configManager = new HTTPProjectConfigManagerTester(
+          null,
+          $this->url,
+          null,
+          false,
+          null,
+          false,
+          $this->loggerMock,
+          $this->errorHandlerMock
+       );
+
+       $this->errorHandlerMock->expects($this->never())
+          ->method('handleError');
+
+       $url = $configManager->getUrl(null, $this->url, null);
+
+       $this->assertEquals($url, $this->url);
+    }
+
+    public function testGetUrlReturnsURLWhenSdkKeyAndTemplateAreNonEmptyString()
+    {
+       $url_template = "https://custom/datafiles/%s.json";
+
+       $configManager = new HTTPProjectConfigManagerTester(
+          'sdk_key',
+          null,
+          $url_template,
+          false,
+          DATAFILE,
+          false,
+          $this->loggerMock,
+          $this->errorHandlerMock
+       );
+
+       $this->errorHandlerMock->expects($this->never())
+          ->method('handleError');
+
+       $url = $configManager->getUrl('sdk_key', null, $url_template);
+
+       $this->assertEquals($url, 'https://custom/datafiles/sdk_key.json');
+    }
+
+    public function testGetUrlReturnsURLUsingDefaultTemplateWhenTemplateIsEmptyString()
+    {
+       $configManager = new HTTPProjectConfigManagerTester(
+         'sdk_key',
+         null,
+         null,
+         false,
+         DATAFILE,
+         false,
+         $this->loggerMock,
+         $this->errorHandlerMock
+       );
+
+       $this->errorHandlerMock->expects($this->never())
+          ->method('handleError');
+
+       $url = $configManager->getUrl('sdk_key', null, null);
+
+       $this->assertEquals($url, 'https://cdn.optimizely.com/datafiles/sdk_key.json');
+    }
+
+    public function testFetchDatafileReturnsNullWhenDatafileIsNotUpdated()
+    {
+       $configManager = new HTTPProjectConfigManagerTester(
+           null,
+           $this->url,
+           null,
+           false,
+           null,
+           false,
+           $this->loggerMock,
+           $this->errorHandlerMock
+       );
+
+       $datafile = $configManager->fetchDatafile();
+       $this->assertNotNull($datafile);
+       $this->assertTrue($configManager->handleResponse($datafile));
+
+       # Datafile not updated.
+       $updatedDatafile = $configManager->fetchDatafile();
+       $this->assertNull($updatedDatafile);
+       $this->assertFalse($configManager->handleResponse($updatedDatafile));
+    }
+
+    public function testFetchDatafileReturnsUpdatedDatafile()
+    {
+       $configManager = new HTTPProjectConfigManagerTester(
+           'QBw9gFM8oTn7ogY9ANCC1z',
+           null,
+           null,
+           false,
+           DATAFILE,
+           false,
+           $this->loggerMock,
+           $this->errorHandlerMock
+       );
+
+       $this->loggerMock->expects($this->never())
+          ->method('log');
+
+       $datafile = $configManager->fetchDatafile();
+       $this->assertNotEquals($datafile, DATAFILE);
+       $this->assertTrue($configManager->handleResponse($datafile));
+    }
+
+    public function testFetchDatafileReturnsReturnsNullWhenInvalidASdkKey()
+    {
+       $configManager = new HTTPProjectConfigManagerTester(
+           'Invalid sdk_key',
+           null,
+           null,
+           false,
+           null,
+           false,
+           $this->loggerMock,
+           $this->errorHandlerMock
+       );
+
+       $this->loggerMock->expects($this->once())
+           ->method('log')
+           ->with(Logger::ERROR, sprintf("Unexpected response when trying to fetch datafile, status code: 403"));
+
+       $datafile = $configManager->fetchDatafile();
+       $this->assertNull($datafile);
+       $this->assertFalse($configManager->handleResponse($datafile));
+    }
 }
