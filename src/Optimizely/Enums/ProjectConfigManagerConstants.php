@@ -22,20 +22,20 @@ class ProjectConfigManagerConstants
    /**
     * @const int Time in seconds to wait before timing out.
     */
-   const TIMEOUT = 10;
+    const TIMEOUT = 10;
 
    /**
     * @const String Default URL Template to use if only SDK key is provided.
     */
-   const DEFAULT_URL_TEMPLATE = "https://cdn.optimizely.com/datafiles/%s.json";
+    const DEFAULT_URL_TEMPLATE = "https://cdn.optimizely.com/datafiles/%s.json";
 
    /**
     * @const String to use while fetching the datafile.
     */
-   const IF_MODIFIED_SINCE = "If-Modified-Since";
+    const IF_MODIFIED_SINCE = "If-Modified-Since";
 
    /**
     * @const String to use while handling the response.
     */
-   const LAST_MODIFIED = "Last-Modified";
+     const LAST_MODIFIED = "Last-Modified";
 }
