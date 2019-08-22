@@ -115,28 +115,37 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testActivateWorksWithHTTPConfigManager()
     {
         $configManager = new HTTPProjectConfigManager(
+            'sdk key',
             null,
-            "https://cdn.optimizely.com/json/10192104166.json",
             null,
-            true,
+            false,
             $this->datafile,
             false,
             $this->loggerMock,
             new NoOpErrorHandler
         );
 
-        $optimizely = new Optimizely(
-            null,
-            null,
-            $this->loggerMock,
-            null,
-            true,
-            null,
-            $configManager
-        );
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array(null, null, $this->loggerMock, null, true,
+                                       null, $configManager))
+            ->setMethods(array('getConfig', 'validateInputs'))
+            ->getMock();
 
-        // Call activate
-        $this->assertEquals('two_step_checkout', $optimizely->activate('checkout_flow_experiment', 'test_user'));
+        $expectedConfig = $configManager->getConfig();
+        $this->assertInstanceOf(DatafileProjectConfig::class, $expectedConfig);
+
+        // Refrain from calling getVariation.
+        // getConfig would be called twice otherwise.
+        $optimizelyMock->expects($this->once())
+            ->method('validateInputs')
+            ->willReturn(false);
+
+        // assert that getConfig gets called.
+        $optimizelyMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($expectedConfig);
+
+        $optimizelyMock->activate('checkout_flow_experiment', 'test_user');
     }
 
     public function testIsValidForInvalidOptimizelyObject()

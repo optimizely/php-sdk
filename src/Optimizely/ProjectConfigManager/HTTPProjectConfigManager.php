@@ -124,12 +124,11 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
             throw $exception;
         }
 
-        // Use default URL template if no template is provided.
-        if (Validator::validateNonEmptyString($urlTemplate)) {
-            $url = sprintf($urlTemplate, $sdkKey);
-        } else {
-            $url = sprintf(ProjectConfigManagerConstants::DEFAULT_URL_TEMPLATE, $sdkKey);
+        if (!Validator::validateNonEmptyString($urlTemplate)) {
+            $urlTemplate = ProjectConfigManagerConstants::DEFAULT_URL_TEMPLATE;
         }
+
+        $url = sprintf($urlTemplate, $sdkKey);
 
         return $url;
     }
@@ -141,11 +140,17 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
      */
     public function fetch()
     {
-        return $this->handleResponse($this->fetchDatafile());
+        $datafile = $this->fetchDatafile();
+
+        if ($datafile === null) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * Helper function to fetch datafile if modified.
+     * Helper function to fetch datafile and handle response if datafile is modified.
      *
      * @return null|datafile.
      */
@@ -185,7 +190,13 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
                 $this->_lastModifiedSince = $response->getHeader(ProjectConfigManagerConstants::LAST_MODIFIED)[0];
             }
 
-            return $response->getBody();
+            $datafile = $response->getBody();
+
+            if ($this->handleResponse($datafile) === true) {
+                return $datafile;
+            }
+
+            return null;
         }
 
         // Failed to retrieve datafile from Url.
@@ -207,6 +218,15 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
 
         $config = DatafileProjectConfig::createProjectConfigFromDatafile($datafile, $this->_skipJsonValidation, $this->_logger, $this->_errorHandler);
         if ($config === null) {
+            return false;
+        }
+
+        $previousRevision = null;
+        if ($this->_config !== null) {
+            $previousRevision = $this->_config->getRevision();
+        }
+
+        if ($previousRevision === $config->getRevision()) {
             return false;
         }
 

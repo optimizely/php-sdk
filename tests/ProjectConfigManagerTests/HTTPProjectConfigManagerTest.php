@@ -374,12 +374,10 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
 
         $datafile = $configManager->fetchDatafile();
         $this->assertNotNull($datafile);
-        $this->assertTrue($configManager->handleResponse($datafile));
 
         # Datafile not updated.
         $updatedDatafile = $configManager->fetchDatafile();
         $this->assertNull($updatedDatafile);
-        $this->assertFalse($configManager->handleResponse($updatedDatafile));
     }
 
     public function testFetchDatafileReturnsUpdatedDatafile()
@@ -399,11 +397,11 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
            ->method('log');
 
         $datafile = $configManager->fetchDatafile();
+        $this->assertNotNull($datafile);
         $this->assertNotEquals($datafile, DATAFILE);
-        $this->assertTrue($configManager->handleResponse($datafile));
     }
 
-    public function testFetchDatafileReturnsReturnsNullWhenInvalidASdkKey()
+    public function testFetchDatafileReturnsNullWhenInvalidASdkKey()
     {
         $configManager = new HTTPProjectConfigManagerTester(
             'Invalid sdk_key',
@@ -423,5 +421,27 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         $datafile = $configManager->fetchDatafile();
         $this->assertNull($datafile);
         $this->assertFalse($configManager->handleResponse($datafile));
+    }
+
+    public function testHandleResponseReturnsFalseForSameDatafilesRevisions()
+    {
+        $configManager = new HTTPProjectConfigManagerTester(
+            null,
+            $this->url,
+            null,
+            false,
+            DATAFILE,
+            false,
+            $this->loggerMock,
+            $this->errorHandlerMock
+        );
+
+        $config = $configManager->getConfig();
+        $datafile = json_decode(DATAFILE, true);
+
+        // handleResponse returns False when new Datafile's revision is equal
+        // to previous revision.
+        $this->assertSame($config->getRevision(), $datafile['revision']);
+        $this->assertFalse($configManager->handleResponse(DATAFILE));
     }
 }
