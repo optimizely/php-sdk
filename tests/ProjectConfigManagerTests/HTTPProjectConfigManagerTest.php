@@ -45,8 +45,8 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
 
         // Mock Error Handler
         $this->errorHandlerMock = $this->getMockBuilder(NoOpErrorHandler::class)
-        ->setMethods(array('handleError'))
-        ->getMock();
+            ->setMethods(array('handleError'))
+            ->getMock();
 
         $this->url = "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json";
         $this->template = "https://cdn.optimizely.com/datafiles/%s.json";
