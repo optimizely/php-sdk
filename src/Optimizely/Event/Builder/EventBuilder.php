@@ -19,11 +19,11 @@ namespace Optimizely\Event\Builder;
 
 require 'Params.php';
 
+use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Attribute;
 use Optimizely\Entity\Experiment;
 use Optimizely\Enums\ControlAttributes;
 use Optimizely\Event\LogEvent;
-use Optimizely\ProjectConfig;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\GeneratorUtils;
 use Optimizely\Utils\Validator;
@@ -75,7 +75,7 @@ class EventBuilder
     /**
      * Helper function to get parameters common to impression and conversion events.
      *
-     * @param $config ProjectConfig Configuration for the project.
+     * @param $config ProjectConfigInterface Configuration for the project.
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.
      *
@@ -213,7 +213,7 @@ class EventBuilder
     /**
      * Create impression event to be sent to the logging endpoint.
      *
-     * @param $config ProjectConfig Configuration for the project.
+     * @param $config ProjectConfigInterface Configuration for the project.
      * @param $experimentKey Experiment Experiment being activated.
      * @param $variationKey string Variation user
      * @param $userId string ID of user.
@@ -237,7 +237,7 @@ class EventBuilder
     /**
      * Create conversion event to be sent to the logging endpoint.
      *
-     * @param $config ProjectConfig Configuration for the project.
+     * @param $config ProjectConfigInterface Configuration for the project.
      * @param $eventKey string Key representing the event.
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.

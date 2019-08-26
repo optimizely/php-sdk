@@ -25,6 +25,7 @@ use Optimizely\DecisionService\DecisionService;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Event\LogEvent;
 use Optimizely\Optimizely;
+use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
 
 define(
     'DATAFILE',
@@ -1304,14 +1305,19 @@ class TestBucketer extends Bucketer
  */
 class OptimizelyTester extends Optimizely
 {
-    public function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
+    public function sendImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes)
     {
-        parent::sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+        parent::sendImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
     }
 
     public function validateInputs(array $values, $logLevel = Logger::ERROR)
     {
         return parent::validateInputs($values, $logLevel);
+    }
+
+    public function getConfig()
+    {
+        return parent::getConfig();
     }
 }
 
@@ -1376,5 +1382,27 @@ class DecisionTester extends DecisionService
     public function getBucketingId($userId, $userAttributes)
     {
         return parent::getBucketingId($userId, $userAttributes);
+    }
+}
+
+/**
+ * Class HTTPProjectConfigManagerTester
+ * Extending HTTPProjectConfigManager for the sake of tests.
+ */
+class HTTPProjectConfigManagerTester extends HTTPProjectConfigManager
+{
+    public function getUrl($sdkKey, $url, $urlTemplate)
+    {
+        return parent::getUrl($sdkKey, $url, $urlTemplate);
+    }
+
+    public function fetchDatafile()
+    {
+        return parent::fetchDatafile();
+    }
+
+    public function handleResponse($datafile)
+    {
+        return parent::handleResponse($datafile);
     }
 }

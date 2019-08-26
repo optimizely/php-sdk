@@ -18,10 +18,10 @@
 namespace Optimizely\Tests;
 
 use Monolog\Logger;
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Entity\Audience;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\ProjectConfig;
 use Optimizely\Utils\Validator;
 
 class ValidatorTest extends \PHPUnit_Framework_TestCase
@@ -190,7 +190,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     // test that Audience evaluation proceeds if provided attributes are empty or null.
     public function testIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
     {
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
+        $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, $this->loggerMock, new NoOpErrorHandler()))
             ->setMethods(array('getAudience'))
             ->getMock();
@@ -233,7 +233,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentAudienceMatch()
     {
-        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $config = new DatafileProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertTrue(
             Validator::isUserInExperiment(
                 $config,
@@ -246,7 +246,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentAudienceNoMatch()
     {
-        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $config = new DatafileProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertFalse(
             Validator::isUserInExperiment(
                 $config,
@@ -260,7 +260,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     // test that isUserInExperiment returns true when no audience is attached to experiment.
     public function testIsUserInExperimentNoAudienceUsedInExperiment()
     {
-        $config = new ProjectConfig(DATAFILE, null, null);
+        $config = new DatafileProjectConfig(DATAFILE, null, null);
         $experiment = $config->getExperimentFromKey('test_experiment');
 
         // Both audience conditions and audience Ids are empty.
@@ -304,7 +304,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     // and user attributes do not match.
     public function testIsUserInExperimentSomeAudienceUsedInExperiment()
     {
-        $config = new ProjectConfig(DATAFILE, null, null);
+        $config = new DatafileProjectConfig(DATAFILE, null, null);
         $experiment = $config->getExperimentFromKey('test_experiment');
 
         // Both audience Ids and audience conditions exist. Audience Ids is ignored.
@@ -338,7 +338,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     // test that isUserInExperiment evaluates audience when audienceConditions is an audience leaf node.
     public function testIsUserInExperimentWithAudienceConditionsSetToAudienceIdString()
     {
-        $config = new ProjectConfig(DATAFILE, null, null);
+        $config = new DatafileProjectConfig(DATAFILE, null, null);
         $experiment = $config->getExperimentFromKey('test_experiment');
 
         // Both audience Ids and audience conditions exist. Audience Ids is ignored.
@@ -357,7 +357,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsUserInExperimentWithUnknownAudienceId()
     {
-        $config = new ProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
+        $config = new DatafileProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
         $experiment = $config->getExperimentFromKey('test_experiment');
 
         // Both audience Ids and audience conditions exist. Audience Ids is ignored.
@@ -378,8 +378,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     // test that isUserInExperiment evaluates simple audience.
     public function testIsUserInExperimentWithSimpleAudience()
     {
-        $config = new ProjectConfig(DATAFILE, null, null);
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
+        $config = new DatafileProjectConfig(DATAFILE, null, null);
+        $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, $this->loggerMock, new NoOpErrorHandler()))
             ->setMethods(array('getAudience'))
             ->getMock();
@@ -411,8 +411,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     // test that isUserInExperiment evaluates complex audience.
     public function testIsUserInExperimentWithComplexAudience()
     {
-        $config = new ProjectConfig(DATAFILE_WITH_TYPED_AUDIENCES, null, null);
-        $configMock = $this->getMockBuilder(ProjectConfig::class)
+        $config = new DatafileProjectConfig(DATAFILE_WITH_TYPED_AUDIENCES, null, null);
+        $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE_WITH_TYPED_AUDIENCES, $this->loggerMock, new NoOpErrorHandler()))
             ->setMethods(array('getAudience'))
             ->getMock();
@@ -467,7 +467,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsFeatureFlagValid()
     {
-        $config = new ProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
+        $config = new DatafileProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $featureFlagSource = $config->getFeatureFlagFromKey('mutex_group_feature');
 
         // should return true when no experiment ids exist

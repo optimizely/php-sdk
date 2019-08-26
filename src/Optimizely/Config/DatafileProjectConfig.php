@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, 2018-2019 Optimizely
+ * Copyright 2019, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-namespace Optimizely;
+namespace Optimizely\Config;
 
+use Exception;
 use Monolog\Logger;
 use Optimizely\Entity\Attribute;
 use Optimizely\Entity\Audience;
@@ -37,20 +38,23 @@ use Optimizely\Exceptions\InvalidExperimentException;
 use Optimizely\Exceptions\InvalidFeatureFlagException;
 use Optimizely\Exceptions\InvalidFeatureVariableException;
 use Optimizely\Exceptions\InvalidGroupException;
+use Optimizely\Exceptions\InvalidInputException;
 use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\LoggerInterface;
+use Optimizely\Logger\DefaultLogger;
+use Optimizely\Optimizely;
 use Optimizely\Utils\ConditionDecoder;
 use Optimizely\Utils\ConfigParser;
 use Optimizely\Utils\Errors;
 use Optimizely\Utils\Validator;
 
 /**
- * Class ProjectConfig
+ * Class DatafileProjectConfig
  *
  * @package Optimizely
  */
-class ProjectConfig
+class DatafileProjectConfig implements ProjectConfigInterface
 {
     const RESERVED_ATTRIBUTE_PREFIX = '$opt_';
     const V2 = '2';
@@ -182,7 +186,7 @@ class ProjectConfig
     private $_experimentFeatureMap;
 
     /**
-     * ProjectConfig constructor to load and set project configuration data.
+     * DatafileProjectConfig constructor to load and set project configuration data.
      *
      * @param $datafile string JSON string representing the project.
      * @param $logger LoggerInterface
@@ -302,6 +306,41 @@ class ProjectConfig
                 }
             }
         }
+    }
+
+    /**
+     * Create ProjectConfig based on datafile string.
+     *
+     * @param string                $datafile           JSON string representing the Optimizely project.
+     * @param bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
+     * @param LoggerInterface       $logger             Logger instance
+     * @param ErrorHandlerInterface $errorHandler       ErrorHandler instance.
+     * @return ProjectConfig ProjectConfig instance or null;
+     */
+    public static function createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler)
+    {
+        if (!$skipJsonValidation) {
+            if (!Validator::validateJsonSchema($datafile)) {
+                $defaultLogger = new DefaultLogger();
+                $defaultLogger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
+                $logger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
+                return null;
+            }
+        }
+
+        try {
+            $config = new DatafileProjectConfig($datafile, $logger, $errorHandler);
+        } catch (Exception $exception) {
+            $defaultLogger = new DefaultLogger();
+            $errorMsg = $exception->getCode() == InvalidDatafileVersionException::class ? $exception->getMessage() : sprintf(Errors::INVALID_FORMAT, 'datafile');
+            $errorToHandle = $exception->getCode() == InvalidDatafileVersionException::class ? new InvalidDatafileVersionException($errorMsg) : new InvalidInputException($errorMsg);
+            $defaultLogger->log(Logger::ERROR, $errorMsg);
+            $logger->log(Logger::ERROR, $errorMsg);
+            $errorHandler->handleError($errorToHandle);
+            return null;
+        }
+
+        return $config;
     }
 
     /**
@@ -500,7 +539,7 @@ class ProjectConfig
 
         $this->_logger->log(Logger::ERROR, sprintf('Attribute key "%s" is not in datafile.', $attributeKey));
         $this->_errorHandler->handleError(new InvalidAttributeException('Provided attribute is not in datafile.'));
-        
+
         return null;
     }
 
@@ -593,12 +632,6 @@ class ProjectConfig
         return null;
     }
 
-    public function isVariationIdValid($experimentKey, $variationId)
-    {
-        return isset($this->_variationIdMap[$experimentKey]) &&
-            isset($this->_variationIdMap[$experimentKey][$variationId]);
-    }
-    
     /**
      * Determines if given experiment is a feature test.
      *
