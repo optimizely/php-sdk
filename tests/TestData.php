@@ -1314,6 +1314,11 @@ class OptimizelyTester extends Optimizely
     {
         return parent::validateInputs($values, $logLevel);
     }
+
+    public function getConfig()
+    {
+        return parent::getConfig();
+    }
 }
 
 class FireNotificationTester

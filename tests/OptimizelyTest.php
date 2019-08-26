@@ -112,42 +112,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->staticConfigManager = new StaticProjectConfigManager($this->datafile, true, $this->loggerMock, new NoOpErrorHandler);
     }
 
-    public function testActivateWorksWithHTTPConfigManager()
-    {
-        $configManager = new HTTPProjectConfigManager(
-            'sdk key',
-            null,
-            null,
-            false,
-            $this->datafile,
-            false,
-            $this->loggerMock,
-            new NoOpErrorHandler
-        );
-
-        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
-            ->setConstructorArgs(array(null, null, $this->loggerMock, null, true,
-                                       null, $configManager))
-            ->setMethods(array('getConfig', 'validateInputs'))
-            ->getMock();
-
-        $expectedConfig = $configManager->getConfig();
-        $this->assertInstanceOf(DatafileProjectConfig::class, $expectedConfig);
-
-        // Refrain from calling getVariation.
-        // getConfig would be called twice otherwise.
-        $optimizelyMock->expects($this->once())
-            ->method('validateInputs')
-            ->willReturn(false);
-
-        // assert that getConfig gets called.
-        $optimizelyMock->expects($this->once())
-            ->method('getConfig')
-            ->willReturn($expectedConfig);
-
-        $optimizelyMock->activate('checkout_flow_experiment', 'test_user');
-    }
-
     public function testIsValidForInvalidOptimizelyObject()
     {
         $optlyObject = new Optimizely('Random datafile');
@@ -4494,5 +4458,28 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($optlyObject->validateInputs(['key' => 2]));
         $this->assertFalse($optlyObject->validateInputs(['key' => 2.0]));
         $this->assertFalse($optlyObject->validateInputs(['key' => array()]));
+    }
+
+    public function testGetConfigReturnsDatafileProjectConfigInstance()
+    {
+         $optlyObject = new OptimizelyTester($this->datafile, null, $this->loggerMock);
+
+         $projectConfigManagerMock = $this->getMockBuilder(HTTPProjectConfigManager::class)
+             ->setConstructorArgs(array('Random Sdk Key', null, null, false, $this->datafile,
+                                      false, $this->loggerMock, new NoOpErrorHandler))
+             ->setMethods(array('getConfig'))
+             ->getMock();
+
+         $projectConfigManager = new \ReflectionProperty(Optimizely::class, '_projectConfigManager');
+         $projectConfigManager->setAccessible(true);
+         $projectConfigManager->setValue($optlyObject, $projectConfigManagerMock);
+
+         $expectedProjectConfig = new DatafileProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
+
+         $projectConfigManagerMock->expects($this->once())
+             ->method('getConfig')
+             ->willReturn($expectedProjectConfig);
+
+        $this->assertEquals($expectedProjectConfig, $optlyObject->getConfig());
     }
 }

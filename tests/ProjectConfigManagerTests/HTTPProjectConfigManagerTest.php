@@ -54,53 +54,55 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testConfigManagerRetrievesProjectConfigByURL()
     {
-        $configManager = new HTTPProjectConfigManager(
-            null,
-            $this->url,
-            null,
-            true,
-            null,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
+            ->setConstructorArgs(array(null, $this->url, null, true, null, false,
+                                    $this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('fetchDatafile'))
+            ->getMock();
 
-        $config = $configManager->getConfig();
+        $configManagerMock->expects($this->any())
+            ->method('fetchDatafile')
+            ->willReturn(DATAFILE);
+
+        $configManagerMock->handleResponse(DATAFILE);
+        $config = $configManagerMock->getConfig();
+
         $this->assertInstanceOf(DatafileProjectConfig::class, $config);
     }
 
     public function testConfigManagerRetrievesProjectConfigBySDKKey()
     {
-        $configManager = new HTTPProjectConfigManager(
-            'QBw9gFM8oTn7ogY9ANCC1z',
-            null,
-            null,
-            true,
-            null,
-            false,
-            null,
-            null
-        );
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
+            ->setConstructorArgs(array('QBw9gFM8oTn7ogY9ANCC1z', null, null, true, null, false, null, null))
+            ->setMethods(array('fetchDatafile'))
+            ->getMock();
 
-        $config = $configManager->getConfig();
+        $configManagerMock->expects($this->any())
+            ->method('fetchDatafile')
+            ->willReturn(DATAFILE);
+
+        $configManagerMock->handleResponse(DATAFILE);
+        $config = $configManagerMock->getConfig();
+
         $this->assertInstanceOf(DatafileProjectConfig::class, $config);
     }
 
     public function testConfigManagerRetrievesProjectConfigByFormat()
     {
-        $configManager = new HTTPProjectConfigManager(
-            'QBw9gFM8oTn7ogY9ANCC1z',
-            null,
-            $this->template,
-            true,
-            null,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
+             ->setConstructorArgs(array('QBw9gFM8oTn7ogY9ANCC1z', null, $this->template, true, null, false,
+                                     $this->loggerMock, $this->errorHandlerMock))
+             ->setMethods(array('fetchDatafile'))
+             ->getMock();
 
-        $config = $configManager->getConfig();
-        $this->assertInstanceOf(DatafileProjectConfig::class, $config);
+         $configManagerMock->expects($this->any())
+             ->method('fetchDatafile')
+             ->willReturn(DATAFILE);
+
+         $configManagerMock->handleResponse(DATAFILE);
+         $config = $configManagerMock->getConfig();
+
+         $this->assertInstanceOf(DatafileProjectConfig::class, $config);
     }
 
     /**
@@ -113,46 +115,31 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
             ->method('handleError')
             ->with(new Exception("One of the SDK key or URL must be provided."));
 
-        $configManager = new HTTPProjectConfigManager(
-            null,
-            null,
-            null,
-            true,
-            DATAFILE,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManager::class)
+             ->setConstructorArgs(array(null, null, null, true, DATAFILE, false,
+                                     $this->loggerMock, $this->errorHandlerMock))
+             ->setMethods(array('fetch'))
+             ->getMock();
     }
 
     public function testConfigIsNullWhenNoDatafileProvidedAndfetchOnInitIsFalse()
     {
-        $configManager = new HTTPProjectConfigManager(
-            null,
-            $this->url,
-            null,
-            false,
-            null,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManager::class)
+          ->setConstructorArgs(array(null, $this->url, null, false, null, false,
+                                  $this->loggerMock, $this->errorHandlerMock))
+          ->setMethods(array('fetch'))
+          ->getMock();
 
-        $this->assertNull($configManager->getConfig());
+        $this->assertNull($configManagerMock->getConfig());
     }
 
     public function testConfigNotNullWhenDatafileProvidedAndfetchOnInitFalse()
     {
-        $configManager = new HTTPProjectConfigManager(
-            null,
-            $this->url,
-            null,
-            false,
-            DATAFILE,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManager::class)
+           ->setConstructorArgs(array(null, $this->url, null, false, DATAFILE, true,
+                                   $this->loggerMock, $this->errorHandlerMock))
+           ->setMethods(array('fetch'))
+           ->getMock();
 
         $config = DatafileProjectConfig::createProjectConfigFromDatafile(
             DATAFILE,
@@ -161,7 +148,7 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
             $this->errorHandlerMock
         );
 
-        $this->assertEquals($config, $configManager->getConfig());
+        $this->assertEquals($config, $configManagerMock->getConfig());
     }
 
     public function testGetConfigReturnsProvidedDataFileWhenFetchReturnsNullWithFetchOnInitTrue()
@@ -199,22 +186,11 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetConfigReturnsProvidedDatafileWhenHttpClientReturnsInvalidFile()
     {
-        $configManager = new HTTPProjectConfigManager(
-            null,
-            $this->url,
-            null,
-            false,
-            DATAFILE,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
-
-        $expectedOptions = [
-            'headers' => null,
-            'timeout' => 10,
-            'connect_timeout' => 10
-        ];
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManager::class)
+            ->setConstructorArgs(array(null, $this->url, null, false, DATAFILE, false,
+                                    $this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('handleResponse'))
+            ->getMock();
 
         $mock = new MockHandler([
             new Response(307, [], 'Invalid Datafile')
@@ -225,13 +201,13 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
 
         $httpClient = new \ReflectionProperty(HTTPProjectConfigManager::class, 'httpClient');
         $httpClient->setAccessible(true);
-        $httpClient->setValue($configManager, $client);
+        $httpClient->setValue($configManagerMock, $client);
 
         $this->loggerMock->expects($this->once())
             ->method('log')
             ->with(Logger::ERROR, sprintf("Unexpected response when trying to fetch datafile, status code: 307"));
 
-        $configManager->fetch();
+        $configManagerMock->fetch();
 
         $config = DatafileProjectConfig::createProjectConfigFromDatafile(
             DATAFILE,
@@ -240,77 +216,81 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
             $this->errorHandlerMock
         );
 
-        $this->assertEquals($config, $configManager->getConfig());
-    }
-
-    public function testGetConfigReturnsUpdatedDatafileWhenHttpClientReturnsValidDatafile()
-    {
-        $configManager = new HTTPProjectConfigManager(
-            null,
-            $this->url,
-            null,
-            true,
-            DATAFILE,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
-
-        $config = DatafileProjectConfig::createProjectConfigFromDatafile(
-            DATAFILE,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
-
-         $this->assertInstanceOf(DatafileProjectConfig::class, $configManager->getConfig());
-        $this->assertNotEquals($config, $configManager->getConfig());
+        $this->assertEquals($config, $configManagerMock->getConfig());
     }
 
     public function testConfigNotUpdatedWhenDatafileIsNotModified()
     {
-        $configManager = new HTTPProjectConfigManager(
-            null,
-            $this->url,
-            null,
-            true,
-            null,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManager::class)
+            ->setConstructorArgs(array(null, $this->url, null, false, null, false,
+                                    $this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('handleResponse'))
+            ->getMock();
+
+        $mock = new MockHandler([
+            new Response(304, [], DATAFILE)
+        ]);
+
+        $handler = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handler]);
+
+        $httpClient = new \ReflectionProperty(HTTPProjectConfigManager::class, 'httpClient');
+        $httpClient->setAccessible(true);
+        $httpClient->setValue($configManagerMock, $client);
 
         $lastModified = new \ReflectionProperty(HTTPProjectConfigManager::class, '_lastModifiedSince');
         $lastModified->setAccessible(true);
 
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with(Logger::DEBUG, sprintf("Not updating ProjectConfig as datafile has not updated since %s", $lastModified->getValue($configManager)));
+            ->with(Logger::DEBUG, sprintf("Not updating ProjectConfig as datafile has not updated since %s", $lastModified->getValue($configManagerMock)));
 
-        $config = $configManager->getConfig();
-        $configManager->fetch();
-        $configAfterFetch = $configManager->getConfig();
+        $config = $configManagerMock->getConfig();
+
+        $configManagerMock->fetch();
+
+        $configAfterFetch = $configManagerMock->getConfig();
 
         $this->assertEquals($config, $configAfterFetch);
     }
 
-    public function testGetUrlReturnsURLWhenProvidedURLIsNonEmptyString()
+    public function testGetConfigReturnsUpdatedDatafileWhenHttpClientReturnsValidDatafile()
     {
-        $configManager = new HTTPProjectConfigManagerTester(
-            null,
-            $this->url,
-            null,
-            false,
-            null,
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
+            ->setConstructorArgs(array(null, $this->url, null, true, DATAFILE_WITH_TYPED_AUDIENCES, false,
+                                     $this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('fetchDatafile'))
+            ->getMock();
+
+        $configManagerMock->expects($this->any())
+            ->method('fetchDatafile')
+            ->willReturn(DATAFILE);
+
+        $configManagerMock->handleResponse(DATAFILE);
+
+        $config = DatafileProjectConfig::createProjectConfigFromDatafile(
+            DATAFILE_WITH_TYPED_AUDIENCES,
             false,
             $this->loggerMock,
             $this->errorHandlerMock
         );
 
+        $this->assertInstanceOf(DatafileProjectConfig::class, $configManagerMock->getConfig());
+        $this->assertNotEquals($config, $configManagerMock->getConfig());
+    }
+
+    public function testGetUrlReturnsURLWhenProvidedURLIsNonEmptyString()
+    {
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
+            ->setConstructorArgs(array(null, $this->url, null, true, DATAFILE_WITH_TYPED_AUDIENCES, false,
+                                     $this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('fetch'))
+            ->getMock();
+
         $this->errorHandlerMock->expects($this->never())
            ->method('handleError');
 
-        $url = $configManager->getUrl(null, $this->url, null);
+        $url = $configManagerMock->getUrl(null, $this->url, null);
 
         $this->assertEquals($url, $this->url);
     }
@@ -319,129 +299,50 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
     {
         $url_template = "https://custom/datafiles/%s.json";
 
-        $configManager = new HTTPProjectConfigManagerTester(
-            'sdk_key',
-            null,
-            $url_template,
-            false,
-            DATAFILE,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
+            ->setConstructorArgs(array('sdk_key', null, $url_template, false, DATAFILE, false,
+                                    $this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('fetch'))
+            ->getMock();
 
         $this->errorHandlerMock->expects($this->never())
            ->method('handleError');
 
-        $url = $configManager->getUrl('sdk_key', null, $url_template);
+        $url = $configManagerMock->getUrl('sdk_key', null, $url_template);
 
         $this->assertEquals($url, 'https://custom/datafiles/sdk_key.json');
     }
 
     public function testGetUrlReturnsURLUsingDefaultTemplateWhenTemplateIsEmptyString()
     {
-        $configManager = new HTTPProjectConfigManagerTester(
-            'sdk_key',
-            null,
-            null,
-            false,
-            DATAFILE,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
+            ->setConstructorArgs(array('sdk_key', null, null, false, DATAFILE, false,
+                                    $this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('fetch'))
+            ->getMock();
 
         $this->errorHandlerMock->expects($this->never())
            ->method('handleError');
 
-        $url = $configManager->getUrl('sdk_key', null, null);
+        $url = $configManagerMock->getUrl('sdk_key', null, null);
 
         $this->assertEquals($url, 'https://cdn.optimizely.com/datafiles/sdk_key.json');
     }
 
-    public function testFetchDatafileReturnsNullWhenDatafileIsNotUpdated()
-    {
-        $configManager = new HTTPProjectConfigManagerTester(
-            null,
-            $this->url,
-            null,
-            false,
-            null,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
-
-        $datafile = $configManager->fetchDatafile();
-        $this->assertNotNull($datafile);
-
-        # Datafile not updated.
-        $updatedDatafile = $configManager->fetchDatafile();
-        $this->assertNull($updatedDatafile);
-    }
-
-    public function testFetchDatafileReturnsUpdatedDatafile()
-    {
-        $configManager = new HTTPProjectConfigManagerTester(
-            'QBw9gFM8oTn7ogY9ANCC1z',
-            null,
-            null,
-            false,
-            DATAFILE,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
-
-        $this->loggerMock->expects($this->never())
-           ->method('log');
-
-        $datafile = $configManager->fetchDatafile();
-        $this->assertNotNull($datafile);
-        $this->assertNotEquals($datafile, DATAFILE);
-    }
-
-    public function testFetchDatafileReturnsNullWhenInvalidASdkKey()
-    {
-        $configManager = new HTTPProjectConfigManagerTester(
-            'Invalid sdk_key',
-            null,
-            null,
-            false,
-            null,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
-
-        $this->loggerMock->expects($this->once())
-            ->method('log')
-            ->with(Logger::ERROR, sprintf("Unexpected response when trying to fetch datafile, status code: 403"));
-
-        $datafile = $configManager->fetchDatafile();
-        $this->assertNull($datafile);
-        $this->assertFalse($configManager->handleResponse($datafile));
-    }
-
     public function testHandleResponseReturnsFalseForSameDatafilesRevisions()
     {
-        $configManager = new HTTPProjectConfigManagerTester(
-            null,
-            $this->url,
-            null,
-            false,
-            DATAFILE,
-            false,
-            $this->loggerMock,
-            $this->errorHandlerMock
-        );
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
+            ->setConstructorArgs(array(null, $this->url, null, false, DATAFILE, false,
+                                    $this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('fetch'))
+            ->getMock();
 
-        $config = $configManager->getConfig();
+        $config = $configManagerMock->getConfig();
         $datafile = json_decode(DATAFILE, true);
 
         // handleResponse returns False when new Datafile's revision is equal
         // to previous revision.
         $this->assertSame($config->getRevision(), $datafile['revision']);
-        $this->assertFalse($configManager->handleResponse(DATAFILE));
+        $this->assertFalse($configManagerMock->handleResponse(DATAFILE));
     }
 }
