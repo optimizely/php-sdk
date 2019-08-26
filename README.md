@@ -24,6 +24,44 @@ php composer.phar require optimizely/optimizely-sdk
 To access the Feature Management configuration in the Optimizely dashboard, please contact your Optimizely account executive.
 
 ### Using the SDK
+
+#### Initialization
+Create the Optimizely client, for example:
+
+```
+$optimizely = new Optimizely(<<DATAFILE>>);
+```
+
+You can also provide an implementation of the `ProjectConfigManagerInterface` in the constructor:
+
+```
+$configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
+$optimizely = new Optimizely(<<DATAFILE>>, null, null, null, false, $configManager);
+```
+
+#### ProjectConfigManagerInterface
+[`ProjectConfigManagerInterface`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/ProjectConfigManagerInterface.php) exposes `getConfig` method for retrieving `ProjectConfig` instance.
+
+#### HTTPProjectConfigManager
+
+[`HTTPProjectConfigManager`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/HTTPProjectConfigManager.php)
+is an implementation of `ProjectConfigManagerInterface` interface.
+
+The `fetch` method makes a blocking HTTP GET request to the configured URL to download the
+project datafile and initialize an instance of the ProjectConfig.
+
+Calling `fetch` will update the internal ProjectConfig instance that will be returned by `getConfig`.
+
+##### Use HTTPProjectConfigManager
+
+```
+$configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
+```
+
+##### SDK key
+Optimizely project SDK key; required unless source URL is overridden.
+
+#### Documentation
 See the Optimizely Full Stack [developer documentation](https://developers.optimizely.com/x/solutions/sdks/reference/?language=php) to learn how to set up your first Full Stack project and use the SDK.
 
 ## Development
