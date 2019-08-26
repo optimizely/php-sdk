@@ -17,9 +17,9 @@
 
 namespace Optimizely\ProjectConfigManager;
 
+use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\Logger\LoggerInterface;
-use Optimizely\Config\DatafileProjectConfig;
 
 /**
  * Project config manager that returns ProjectConfig based on provided datafile.
@@ -27,7 +27,7 @@ use Optimizely\Config\DatafileProjectConfig;
 class StaticProjectConfigManager implements ProjectConfigManagerInterface
 {
     /**
-     * @var ProjectConfigInterface
+     * @var DatafileProjectConfig JSON datafile string.
      */
     private $_config;
 
@@ -58,7 +58,7 @@ class StaticProjectConfigManager implements ProjectConfigManagerInterface
 
     /**
      * Returns instance of ProjectConfig.
-     * @return null| DatafileProjectConfig interface.
+     * @return null|DatafileProjectConfig DatafileProjectConfig instance.
      */
     public function getConfig()
     {

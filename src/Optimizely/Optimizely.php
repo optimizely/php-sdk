@@ -34,9 +34,10 @@ use Optimizely\Event\Dispatcher\DefaultEventDispatcher;
 use Optimizely\Event\Dispatcher\EventDispatcherInterface;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
+use Optimizely\ProjectConfigManager\ProjectConfigManagerInterface;
+use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\Errors;
 use Optimizely\Utils\Validator;
@@ -55,6 +56,11 @@ class Optimizely
     const USER_ID = 'User ID';
     const VARIABLE_KEY = 'Variable Key';
     const VARIATION_KEY = 'Variation Key';
+
+    /**
+     * @var DatafileProjectConfig
+     */
+    private $_config;
 
     /**
      * @var DecisionService
@@ -87,7 +93,7 @@ class Optimizely
     private $_logger;
 
     /**
-     * @var ProjectConfigManager
+     * @var ProjectConfigManagerInterface
      */
     private $_projectConfigManager;
 
@@ -112,16 +118,21 @@ class Optimizely
         LoggerInterface $logger = null,
         ErrorHandlerInterface $errorHandler = null,
         $skipJsonValidation = false,
-        UserProfileServiceInterface $userProfileService = null
+        UserProfileServiceInterface $userProfileService = null,
+        ProjectConfigManagerInterface $configManager = null
     ) {
         $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
         $this->_eventBuilder = new EventBuilder($this->_logger);
-        $this->_projectConfigManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
         $this->_decisionService = new DecisionService($this->_logger, $userProfileService);
         $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
+        $this->_projectConfigManager = $configManager;
+
+        if ($this->_projectConfigManager === null) {
+            $this->_projectConfigManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
+        }
     }
 
     /**
@@ -166,17 +177,14 @@ class Optimizely
     }
 
     /**
-     * @param  string Experiment key
-     * @param  string Variation key
-     * @param  string User ID
-     * @param  array Associative array of user attributes
+     * @param  string        Experiment key
+     * @param  string        Variation key
+     * @param  string        User ID
+     * @param  array         Associative array of user attributes
+     * @param  DatafileProjectConfig DatafileProjectConfig instance
      */
-    protected function sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes)
+    protected function sendImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes)
     {
-        // TODO: Config should be passed as param when this is called from activate but
-        // since PHP is single-threaded we can leave this for now.
-        $config = $this->getConfig();
-
         $impressionEvent = $this->_eventBuilder
             ->createImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
         $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
@@ -254,7 +262,7 @@ class Optimizely
             return null;
         }
 
-        $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+        $this->sendImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
 
         return $variationKey;
     }
@@ -527,7 +535,7 @@ class Optimizely
                     'variationKey'=> $variationKey
                 );
 
-                $this->sendImpressionEvent($experimentKey, $variationKey, $userId, $attributes);
+                $this->sendImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
             } else {
                 $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
             }
