@@ -32,7 +32,7 @@ Create the Optimizely client, for example:
 $optimizely = new Optimizely(<<DATAFILE>>);
 ```
 
-You can also provide `ProjectConfigManagerInterface` in the constructor:
+You can also provide an implementation of the `ProjectConfigManagerInterface` in the constructor:
 
 ```
 $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
@@ -40,7 +40,7 @@ $optimizely = new Optimizely(<<DATAFILE>>, null, null, null, false, $configManag
 ```
 
 #### ProjectConfigManagerInterface
-[`ProjectConfigManagerInterface`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/ProjectConfigManagerInterface.php) exposes method for retrieving `ProjectConfig` instance.
+[`ProjectConfigManagerInterface`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/ProjectConfigManagerInterface.php) exposes `getConfig` method for retrieving `ProjectConfig` instance.
 
 #### HTTPProjectConfigManager
 
