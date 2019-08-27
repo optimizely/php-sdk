@@ -24,6 +24,8 @@ use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Enums\ProjectConfigManagerConstants;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\Notification\NotificationCenter;
+use Optimizely\Notification\NotificationType;
 use Optimizely\Utils\Validator;
 
 class HTTPProjectConfigManager implements ProjectConfigManagerInterface
@@ -63,6 +65,11 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
      */
     private $_errorHandler;
 
+    /**
+     * @var NotificationCenter NotificationCenter instance.
+     */
+    private $_notificationCenter;
+
     public function __construct(
         $sdkKey = null,
         $url = null,
@@ -71,11 +78,16 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         $datafile = null,
         $skipJsonValidation = false,
         $logger = null,
-        $errorHandler = null
+        $errorHandler = null,
+        $notificationCenter = null
     ) {
         $this->_skipJsonValidation = $skipJsonValidation;
-        $this->_logger = $logger;
-        $this->_errorHandler = $errorHandler;
+        $this->_logger = $logger ?: new NoOpLogger();
+        $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
+        $this->_notificationCenter = $notificationCenter;
+        if (!($this->_notificationCenter instanceof NotificationCenter)) {
+            $this->_notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
+        }
         $this->httpClient = new HttpClient();
 
         if ($this->_logger === null) {
@@ -231,6 +243,10 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         $this->_config = $config;
+
+        $this->_notificationCenter->sendNotifications(NotificationType::OPTIMIZELY_CONFIG_UPDATE);
+        $this->_logger->log(Logger::DEBUG, sprintf('Received new datafile and updated config. Old revision number: "%s". New revision number: "%s".', $previousRevision, $this->_config->getRevision()));
+
         return true;
     }
 

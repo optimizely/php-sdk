@@ -27,6 +27,8 @@ use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\Notification\NotificationCenter;
+use Optimizely\Notification\NotificationType;
 use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
 
 class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
@@ -46,6 +48,12 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         // Mock Error Handler
         $this->errorHandlerMock = $this->getMockBuilder(NoOpErrorHandler::class)
             ->setMethods(array('handleError'))
+            ->getMock();
+
+        // Mock Notification Center
+        $this->notificationCenterMock = $this->getMockBuilder(NotificationCenter::class)
+            ->setConstructorArgs(array($this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('sendNotifications'))
             ->getMock();
 
         $this->url = "https://cdn.optimizely.com/datafiles/QBw9gFM8oTn7ogY9ANCC1z.json";
@@ -254,17 +262,25 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($config, $configAfterFetch);
     }
 
-    public function testGetConfigReturnsUpdatedDatafileWhenHttpClientReturnsValidDatafile()
+    public function testHandleResponseCallsConfigUpdateListenerWhenProjectConfigIsUpdated()
     {
         $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
             ->setConstructorArgs(array(null, $this->url, null, true, DATAFILE_WITH_TYPED_AUDIENCES, false,
-                                     $this->loggerMock, $this->errorHandlerMock))
+                                     $this->loggerMock, $this->errorHandlerMock, $this->notificationCenterMock))
             ->setMethods(array('fetchDatafile'))
             ->getMock();
 
         $configManagerMock->expects($this->any())
             ->method('fetchDatafile')
             ->willReturn(DATAFILE);
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with(Logger::DEBUG, 'Received new datafile and updated config. Old revision number: "3". New revision number: "15".');
+
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(NotificationType::OPTIMIZELY_CONFIG_UPDATE);
 
         $configManagerMock->handleResponse(DATAFILE);
 
@@ -333,12 +349,18 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
     {
         $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
             ->setConstructorArgs(array(null, $this->url, null, false, DATAFILE, false,
-                                    $this->loggerMock, $this->errorHandlerMock))
+                                    $this->loggerMock, $this->errorHandlerMock, $this->notificationCenterMock))
             ->setMethods(array('fetch'))
             ->getMock();
 
         $config = $configManagerMock->getConfig();
         $datafile = json_decode(DATAFILE, true);
+
+        $this->loggerMock->expects($this->never())
+            ->method('log');
+
+        $this->notificationCenterMock->expects($this->never())
+            ->method('sendNotifications');
 
         // handleResponse returns False when new Datafile's revision is equal
         // to previous revision.
