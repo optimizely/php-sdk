@@ -89,15 +89,6 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
             $this->_notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
         }
         $this->httpClient = new HttpClient();
-
-        if ($this->_logger === null) {
-            $this->_logger = new NoOpLogger();
-        }
-
-        if ($this->_errorHandler === null) {
-            $this->_errorHandler = new NoOpErrorHandler();
-        }
-
         $this->_url = $this->getUrl($sdkKey, $url, $urlTemplate);
 
         if ($datafile !== null) {
