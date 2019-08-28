@@ -9,7 +9,10 @@ August 28th, 2019
   $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
   $optimizely = new Optimizely(<<DATAFILE>>, null, null, null, false, null, $configManager);  
   ```
-  * The `fetch` method allows you to refresh the config. 
+  * The `fetch` method allows you to refresh the config. In order to update the config, you can do something like:
+  ```
+  $configManager->fetch()
+  ```
 
 ## 3.1.0
 May 3rd, 2019
