@@ -11,7 +11,7 @@ August 28th, 2019
   ```
   * The `fetch` method allows you to refresh the config. In order to update the config, you can do something like:
   ```
-  $configManager->fetch()
+  $configManager->fetch();
   ```
 
 ## 3.1.0
