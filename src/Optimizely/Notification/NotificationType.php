@@ -33,6 +33,11 @@ class NotificationType
     const DECISION = "DECISION:type, user_id, attributes, decision_info";
 
     /*
+     * Notification triggered when Project Config is updated.
+     */
+    const OPTIMIZELY_CONFIG_UPDATE = "OPTIMIZELY_CONFIG_UPDATE";
+
+    /*
      * Notification triggered when a conversion event is sent to Optimizely.
      */
     const TRACK = "TRACK:event_key, user_id, attributes, event_tags, event";
