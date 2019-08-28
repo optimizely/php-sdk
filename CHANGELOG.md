@@ -1,3 +1,16 @@
+## 3.2.0
+August 28th, 2019
+
+### New Features:
+* Added support for datafile management via [HTTPProjectConfigManager](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/HTTPProjectConfigManager.php):
+  * The [HTTPProjectConfigManager](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/HTTPProjectConfigManager.php) is an implementation of the [ProjectConfigManagerInterface](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/ProjectConfigManagerInterface.php).
+  * Users will have to initialize and pass in the config manager to be able to use it:
+  ```
+  $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
+  $optimizely = new Optimizely(<<DATAFILE>>, null, null, null, false, null, $configManager);  
+  ```
+  * The `fetch` method allows you to refresh the config. 
+
 ## 3.1.0
 May 3rd, 2019
 

@@ -36,7 +36,7 @@ You can also provide an implementation of the `ProjectConfigManagerInterface` in
 
 ```
 $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
-$optimizely = new Optimizely(<<DATAFILE>>, null, null, null, false, $configManager);
+$optimizely = new Optimizely(<<DATAFILE>>, null, null, null, false, null, $configManager);
 ```
 
 #### ProjectConfigManagerInterface
