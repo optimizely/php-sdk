@@ -61,7 +61,7 @@ $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
 ##### SDK key
 Optimizely project SDK key; required unless source URL is overridden.
 
-A notification signal will be triggered whenever a _new_ datafile is fetched and Project Config is updated. To subscribe to these notifications, use the `$notificationCenter->addNotificationListener(NotificationType::OPTIMIZELY_CONFIG_UPDATE, $updateCallback)`.
+A notification will be triggered whenever a _new_ datafile is fetched and ProjectConfig is updated. To subscribe to these notifications, use the `$notificationCenter->addNotificationListener(NotificationType::OPTIMIZELY_CONFIG_UPDATE, $updateCallback)`.
 
 #### Documentation
 See the Optimizely Full Stack [developer documentation](https://developers.optimizely.com/x/solutions/sdks/reference/?language=php) to learn how to set up your first Full Stack project and use the SDK.
