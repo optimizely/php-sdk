@@ -22,7 +22,9 @@ use GuzzleHttp\Client as HttpClient;
 use Monolog\Logger;
 use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Enums\ProjectConfigManagerConstants;
+use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
+use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
@@ -77,17 +79,14 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         $fetchOnInit = true,
         $datafile = null,
         $skipJsonValidation = false,
-        $logger = null,
-        $errorHandler = null,
-        $notificationCenter = null
+        LoggerInterface $logger = null,
+        ErrorHandlerInterface $errorHandler = null,
+        NotificationCenter $notificationCenter = null
     ) {
         $this->_skipJsonValidation = $skipJsonValidation;
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
-        $this->_notificationCenter = $notificationCenter;
-        if (!($this->_notificationCenter instanceof NotificationCenter)) {
-            $this->_notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
-        }
+        $this->_notificationCenter = $notificationCenter ?: new NotificationCenter($this->_logger, $this->_errorHandler);
         $this->httpClient = new HttpClient();
         $this->_url = $this->getUrl($sdkKey, $url, $urlTemplate);
 

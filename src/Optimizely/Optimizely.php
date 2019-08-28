@@ -111,6 +111,8 @@ class Optimizely
      * @param $errorHandler ErrorHandlerInterface
      * @param $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
      * @param $userProfileService UserProfileServiceInterface
+     * @param $configManager ProjectConfigManagerInterface provides ProjectConfig through getConfig method.
+     * @param $notificationCenter NotificationCenter
      */
     public function __construct(
         $datafile,
@@ -119,7 +121,8 @@ class Optimizely
         ErrorHandlerInterface $errorHandler = null,
         $skipJsonValidation = false,
         UserProfileServiceInterface $userProfileService = null,
-        ProjectConfigManagerInterface $configManager = null
+        ProjectConfigManagerInterface $configManager = null,
+        NotificationCenter $notificationCenter = null
     ) {
         $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
@@ -127,12 +130,8 @@ class Optimizely
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
         $this->_eventBuilder = new EventBuilder($this->_logger);
         $this->_decisionService = new DecisionService($this->_logger, $userProfileService);
-        $this->notificationCenter = new NotificationCenter($this->_logger, $this->_errorHandler);
-        $this->_projectConfigManager = $configManager;
-
-        if ($this->_projectConfigManager === null) {
-            $this->_projectConfigManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
-        }
+        $this->notificationCenter = $notificationCenter ?: new NotificationCenter($this->_logger, $this->_errorHandler);
+        $this->_projectConfigManager = $configManager ?: new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
     }
 
     /**
@@ -148,7 +147,7 @@ class Optimizely
     /**
      * Helper function to validate user inputs into the API methods.
      *
-     * @param $userId string ID for user.
+     * @param $attributes array Associative array of user attributes
      * @param $eventTags array Hash representing metadata associated with an event.
      *
      * @return boolean Representing whether all user inputs are valid.
