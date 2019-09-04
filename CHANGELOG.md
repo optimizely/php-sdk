@@ -13,6 +13,7 @@ August 28th, 2019
   ```
   $configManager->fetch();
   ```
+  * Configuration updates can be subscribed to by adding the `OPTIMIZELY_CONFIG_UPDATE` notification listener.
 
 ## 3.1.0
 May 3rd, 2019
