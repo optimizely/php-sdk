@@ -19,5 +19,6 @@
     <exclude name="PSR2.Classes.PropertyDeclaration.Underscore"/>
     <exclude name="PSR1.Classes.ClassDeclaration.MultipleClasses"/>
     <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
+    <exclude name="Generic.Files.LineEndings.InvalidEOLChar"/>
   </rule >
 </ruleset>
