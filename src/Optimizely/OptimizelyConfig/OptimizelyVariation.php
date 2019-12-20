@@ -17,7 +17,8 @@
 namespace Optimizely\OptimizelyConfig;
 
 class OptimizelyVariation implements \JsonSerializable
-{   
+{
+
     private $id;
 
     private $key;
@@ -56,6 +57,11 @@ class OptimizelyVariation implements \JsonSerializable
 
     public function jsonSerialize()
     {
-        return get_object_vars($this);
+        $props = get_object_vars($this);
+        if ($this->featureEnabled === null) {
+            unset($props['featureEnabled']);
+        }
+
+        return $props;
     }
 }

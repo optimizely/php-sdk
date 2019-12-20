@@ -394,7 +394,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
     }
 
     /**
-     * @return array List of all experiments (including group experiments) 
+     * @return array List of all experiments (including group experiments)
      *               parsed from the datafile
      */
     public function getAllExperiments()

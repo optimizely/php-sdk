@@ -17,7 +17,8 @@
 namespace Optimizely\OptimizelyConfig;
 
 class OptimizelyExperiment implements \JsonSerializable
-{   
+{
+
     private $id;
 
     private $key;

@@ -293,7 +293,6 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-
             ['input_value' => 10.0],
             $this->loggerMock
         );
@@ -445,7 +444,6 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-
             ['lasers_count' => true],
             $this->loggerMock
         );
@@ -471,7 +469,6 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-
             ['lasers_count' => true],
             $this->loggerMock
         );

@@ -57,7 +57,7 @@ interface ProjectConfigInterface
     public function getFeatureFlags();
 
     /**
-     * @return array List of all experiments (including group experiments) 
+     * @return array List of all experiments (including group experiments)
      *               parsed from the datafile
      */
     public function getAllExperiments();

@@ -401,7 +401,7 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($variableUsageMap, $variation->getVariables());
 
         // assert featureEnabled by default is set to false when property not provided in data file
-        $this->assertFalse($variation->getFeatureEnabled());
+        $this->assertNull($variation->getFeatureEnabled());
     }
 
     public function testGetAccountId()

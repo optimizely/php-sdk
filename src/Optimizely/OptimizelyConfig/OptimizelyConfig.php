@@ -17,7 +17,8 @@
 namespace Optimizely\OptimizelyConfig;
 
 class OptimizelyConfig implements \JsonSerializable
-{   
+{
+
     private $revision;
 
     private $experimentsMap;

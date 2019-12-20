@@ -50,7 +50,9 @@ class OptimizelyConfigService
         $featuresMap = $this->getFeaturesMap($experimentsMaps[1]);
 
         return new OptimizelyConfig(
-            $this->revision, $experimentsMaps[0], $featuresMap
+            $this->revision,
+            $experimentsMaps[0],
+            $featuresMap
         );
     }
     
@@ -62,7 +64,7 @@ class OptimizelyConfigService
 
         foreach ($this->featureFlags as $key => $feature) {
             # Populate experimentIdFeatureMap
-            foreach($feature->getExperimentIds() as $expId) {
+            foreach ($feature->getExperimentIds() as $expId) {
                 $this->experimentIdFeatureMap[$expId] = $feature;
             }
 
@@ -70,14 +72,16 @@ class OptimizelyConfigService
             $variablesKeyMap = [];
             $variablesIdMap = [];
 
-            foreach($feature->getVariables() as $variable) {
+            foreach ($feature->getVariables() as $variable) {
                 $optVariable = new OptimizelyVariable(
-                    $variable->getId(), $variable->getKey(), $variable->getType(), $variable->getDefaultValue()
+                    $variable->getId(),
+                    $variable->getKey(),
+                    $variable->getType(),
+                    $variable->getDefaultValue()
                 );
 
                 $variablesKeyMap[$variable->getKey()] = $optVariable;
                 $variablesIdMap[$variable->getId()] = $optVariable;
-
             }
 
             $this->featKeyOptlyVariableKeyVariableMap[$feature->getKey()] = $variablesKeyMap;
@@ -88,7 +92,7 @@ class OptimizelyConfigService
     protected function getVariablesMap(Variation $variation, Experiment $experiment)
     {
         $experimentId = $experiment->getId();
-        if(!array_key_exists($experimentId, $this->experimentIdFeatureMap)) {
+        if (!array_key_exists($experimentId, $this->experimentIdFeatureMap)) {
             return [];
         }
 
@@ -97,16 +101,24 @@ class OptimizelyConfigService
         // Set default variables for variation.
         $variablesMap = $this->featKeyOptlyVariableKeyVariableMap[$featureFlag->getKey()];
         
+  
+        if (!$variation->getFeatureEnabled()) {
+            return $variablesMap;
+        }
+
         // Set variation specific value if any.
-        foreach($variation->getVariables() as $variableUsage) {
-            $optVariable = 
+        foreach ($variation->getVariables() as $variableUsage) {
+            $optVariable =
                 $this->featKeyOptlyVariableIdVariableMap[$featureFlag->getKey()][$variableUsage->getId()];
             
            
             $value = $variableUsage->getValue();
 
             $modifiedOptVariable = new OptimizelyVariable(
-                $optVariable->getId(), $optVariable->getKey(), $optVariable->getType(), $value 
+                $optVariable->getId(),
+                $optVariable->getKey(),
+                $optVariable->getType(),
+                $value
             );
 
             $variablesMap[$optVariable->getKey()] = $modifiedOptVariable;
@@ -119,12 +131,15 @@ class OptimizelyConfigService
     {
         $variationsMap = [];
 
-        foreach($experiment->getVariations() as $variation) {
+        foreach ($experiment->getVariations() as $variation) {
             $variablesMap = $this->getVariablesMap($variation, $experiment);
             $featureEnabled = $variation->getFeatureEnabled();
 
             $optVariation = new OptimizelyVariation(
-                $variation->getId(), $variation->getKey(), $featureEnabled, $variablesMap
+                $variation->getId(),
+                $variation->getKey(),
+                $featureEnabled,
+                $variablesMap
             );
 
             $variationsMap[$variation->getKey()] = $optVariation;
@@ -138,7 +153,7 @@ class OptimizelyConfigService
         $experimentsKeyMap = [];
         $experimentsIdMap = [];
 
-        foreach($this->experiments as $exp) {
+        foreach ($this->experiments as $exp) {
             $optExp = new OptimizelyExperiment(
                 $exp->getId(),
                 $exp->getKey(),
@@ -156,10 +171,10 @@ class OptimizelyConfigService
     {
         $featuresMap = [];
 
-        foreach($this->featureFlags as $feature) {
+        foreach ($this->featureFlags as $feature) {
             $experimentsMap = [];
 
-            foreach($feature->getExperimentIds() as $expId) {
+            foreach ($feature->getExperimentIds() as $expId) {
                 $optExp = $experimentsIdMap[$expId];
                 $experimentsMap[$optExp->getKey()] = $optExp;
             }
@@ -167,7 +182,10 @@ class OptimizelyConfigService
             $variablesMap = $this->featKeyOptlyVariableKeyVariableMap[$feature->getKey()];
 
             $optFeature = new OptimizelyFeature(
-                $feature->getId(), $feature->getKey(), $experimentsMap, $variablesMap
+                $feature->getId(),
+                $feature->getKey(),
+                $experimentsMap,
+                $variablesMap
             );
 
             $featuresMap[$feature->getKey()] = $optFeature;
