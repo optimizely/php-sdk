@@ -555,7 +555,12 @@ define(
       "rolloutId": "",
       "experimentIds": ["111133"],
       "variables": [
-
+        {
+          "id": "155551",
+          "key": "double_variable",
+          "type": "double",
+          "defaultValue": "14.99"
+        }
       ]
     },
     {

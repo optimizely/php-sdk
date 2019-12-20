@@ -16,7 +16,7 @@
  */
 namespace Optimizely\OptimizelyConfig;
 
-class OptimizelyExperiment
+class OptimizelyExperiment implements \JsonSerializable
 {   
     private $id;
 
@@ -44,5 +44,10 @@ class OptimizelyExperiment
     public function getVariationsMap()
     {
         return $this->variationsMap;
+    }
+
+    public function jsonSerialize()
+    {
+        return get_object_vars($this);
     }
 }

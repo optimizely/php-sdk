@@ -57,6 +57,12 @@ interface ProjectConfigInterface
     public function getFeatureFlags();
 
     /**
+     * @return array List of all experiments (including group experiments) 
+     *               parsed from the datafile
+     */
+    public function getAllExperiments();
+
+    /**
      * @param $groupId string ID of the group.
      *
      * @return Group Entity corresponding to the ID.

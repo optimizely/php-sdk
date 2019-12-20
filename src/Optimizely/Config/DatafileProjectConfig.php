@@ -394,6 +394,15 @@ class DatafileProjectConfig implements ProjectConfigInterface
     }
 
     /**
+     * @return array List of all experiments (including group experiments) 
+     *               parsed from the datafile
+     */
+    public function getAllExperiments()
+    {
+        return array_values($this->_experimentKeyMap);
+    }
+
+    /**
      * @param $groupId string ID of the group.
      *
      * @return Group Entity corresponding to the ID.

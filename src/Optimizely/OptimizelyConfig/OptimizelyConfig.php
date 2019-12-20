@@ -16,7 +16,7 @@
  */
 namespace Optimizely\OptimizelyConfig;
 
-class OptimizelyConfig
+class OptimizelyConfig implements \JsonSerializable
 {   
     private $revision;
 
@@ -44,5 +44,10 @@ class OptimizelyConfig
     public function getFeaturesMap()
     {
         return $this->featuresMap;
+    }
+
+    public function jsonSerialize()
+    {
+        return get_object_vars($this);
     }
 }
