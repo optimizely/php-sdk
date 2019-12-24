@@ -55,21 +55,21 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testOptimizelyConfigService()
     {
-        // $this->projectConfig = new DatafileProjectConfig(
-        //     $this->datafile,
-        //     $this->loggerMock,
-        //     new NoOpErrorHandler()
-        // );
+        $this->projectConfig = new DatafileProjectConfig(
+            $this->datafile,
+            $this->loggerMock,
+            new NoOpErrorHandler()
+        );
 
-        // $optService = new OptimizelyConfigService($this->projectConfig);
-        // $optConfig = $optService->getConfig();
+        $optService = new OptimizelyConfigService($this->projectConfig);
+        $optConfig = $optService->getConfig();
 
-        // $result = $optConfig;
+        $result = $optConfig;
         
 
-        // $result = json_encode($result, JSON_FORCE_OBJECT);
-        // $result = json_decode($result);
+        $result = json_encode($result, JSON_FORCE_OBJECT);
+        $result = json_decode($result);
 
-        // print(json_encode($result));
+        print(json_encode($result));
     }
 }
