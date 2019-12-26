@@ -36,7 +36,6 @@ use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
-use Optimizely\OptimizelyConfig\OptimizelyConfigService;
 use Optimizely\ProjectConfigManager\ProjectConfigManagerInterface;
 use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use Optimizely\UserProfile\UserProfileServiceInterface;
@@ -265,19 +264,6 @@ class Optimizely
         $this->sendImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
 
         return $variationKey;
-    }
-
-    public function getOptimizelyConfig()
-    {
-        $config = $this->getConfig();
-        if ($config === null) {
-            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
-            return null;
-        }
-
-        $optConfigService = new OptimizelyConfigService($config);
-        
-        return $optConfigService->getConfig();
     }
 
     /**

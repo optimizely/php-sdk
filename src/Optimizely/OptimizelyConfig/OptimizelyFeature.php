@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely Inc and Contributors
+ * Copyright 2020, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,28 @@ namespace Optimizely\OptimizelyConfig;
 
 class OptimizelyFeature implements \JsonSerializable
 {
-
+    /**
+     * @var string ID representing the feature.
+     */
     private $id;
 
+    /**
+     * @var string Key representing the feature.
+     */
     private $key;
 
+    /**
+     * Map of Experiment Keys to OptimizelyExperiments.
+     *
+     * @var <String, OptimizelyExperiment> associative array
+     */
     private $experimentsMap;
 
+    /**
+     * Map of Variable Keys to OptimizelyVariables.
+     *
+     * @var <String, OptimizelyVariable> associative array
+     */
     private $variablesMap;
 
     public function __construct($id, $key, array $experimentsMap, array $variablesMap)
@@ -35,26 +50,41 @@ class OptimizelyFeature implements \JsonSerializable
         $this->variablesMap = $variablesMap;
     }
 
+    /**
+     * @return string Feature ID.
+     */
     public function getId()
     {
         return $this->id;
     }
 
+    /**
+     * @return string Feature Key.
+     */
     public function getKey()
     {
         return $this->key;
     }
 
+    /**
+     * @return array Map of Experiment Keys to OptimizelyExperiments.
+     */
     public function getExperimentsMap()
     {
         return $this->experimentsMap;
     }
     
+    /**
+     * @return array Map of Variable Keys to OptimizelyVariables.
+     */
     public function getVariablesMap()
     {
         return $this->variablesMap;
     }
 
+    /**
+     * @return string JSON representation of the object.
+     */
     public function jsonSerialize()
     {
         return get_object_vars($this);

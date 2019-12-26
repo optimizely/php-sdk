@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely Inc and Contributors
+ * Copyright 2020, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,25 @@ namespace Optimizely\OptimizelyConfig;
 
 class OptimizelyVariable implements \JsonSerializable
 {
-
+    /**
+     * @var string ID representing variable.
+     */
     private $id;
 
+    /**
+     * @var string Key representing variable.
+     */
     private $key;
 
+     /**
+     * @var String Variable denoting type of the variable. One of
+     *             boolean, integer, double or string.
+     */
     private $type;
 
+    /**
+     * @var mixed Value of the variable.
+     */
     private $value;
 
     public function __construct($id, $key, $type, $value)
@@ -35,26 +47,41 @@ class OptimizelyVariable implements \JsonSerializable
         $this->value = $value;
     }
 
+    /**
+     * @return string Variable ID.
+     */
     public function getId()
     {
         return $this->id;
     }
 
+    /**
+     * @return string Variable key.
+     */
     public function getKey()
     {
         return $this->key;
     }
 
+    /**
+     * @return string Variable type.
+     */
     public function getType()
     {
         return $this->type;
     }
     
+    /**
+     * @return mixed Variable value.
+     */
     public function getValue()
     {
         return $this->value;
     }
 
+    /**
+     * @return string JSON representation of the object.
+     */
     public function jsonSerialize()
     {
         return get_object_vars($this);
