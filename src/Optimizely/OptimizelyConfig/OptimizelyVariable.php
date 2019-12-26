@@ -35,7 +35,7 @@ class OptimizelyVariable implements \JsonSerializable
     private $type;
 
     /**
-     * @var mixed Value of the variable.
+     * @var string Value of the variable.
      */
     private $value;
 
@@ -72,7 +72,7 @@ class OptimizelyVariable implements \JsonSerializable
     }
     
     /**
-     * @return mixed Variable value.
+     * @return string Variable value.
      */
     public function getValue()
     {
