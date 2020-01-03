@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2019, Optimizely
+ * Copyright 2016-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ use Optimizely\Exceptions\InvalidInputException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
+use Optimizely\OptimizelyConfig\OptimizelyConfig;
 use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
 use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use TypeError;
@@ -4481,5 +4482,19 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
              ->willReturn($expectedProjectConfig);
 
         $this->assertEquals($expectedProjectConfig, $optlyObject->getConfig());
+    }
+
+    public function testGetOptimizelyConfigInvalidOptimizelyObject()
+    {
+        $opt_obj = new Optimizely('Random datafile', null, new DefaultLogger(Logger::INFO, self::OUTPUT_STREAM));
+
+        $opt_obj->getOptimizelyConfig();
+        $this->expectOutputRegex('/Datafile has invalid format. Failing "getOptimizelyConfig"./');
+    }
+
+    public function testGetOptimizelyConfigReturnsValidOptimizelyConfigObj()
+    {
+        $optConfig = $this->optimizelyTypedAudienceObject->getOptimizelyConfig();
+        $this->assertInstanceof(OptimizelyConfig::class, $optConfig);
     }
 }

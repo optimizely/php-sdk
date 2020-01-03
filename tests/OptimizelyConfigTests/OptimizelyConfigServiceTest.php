@@ -135,7 +135,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $abExpVarA = $abExp->getVariations()[0];
 
         $getVariablesMap = self::getMethod("getVariablesMap");
-        $response = $getVariablesMap->invokeArgs($this->optConfigService, array($abExpVarA, $abExp));
+        $response = $getVariablesMap->invokeArgs($this->optConfigService, array($abExp, $abExpVarA));
 
         $this->assertEmpty($response);
     }
@@ -146,7 +146,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $featureDisabledVar = $featExp->getVariations()[0];
 
         $getVariablesMap = self::getMethod("getVariablesMap");
-        $response = $getVariablesMap->invokeArgs($this->optConfigService, array($featureDisabledVar, $featExp));
+        $response = $getVariablesMap->invokeArgs($this->optConfigService, array($featExp, $featureDisabledVar));
 
         $this->assertEquals($this->expectedVariableKeyMap, $response);
     }
@@ -157,7 +157,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $featureDisabledVar = $featExp->getVariations()[1];
 
         $getVariablesMap = self::getMethod("getVariablesMap");
-        $response = $getVariablesMap->invokeArgs($this->optConfigService, array($featureDisabledVar, $featExp));
+        $response = $getVariablesMap->invokeArgs($this->optConfigService, array($featExp, $featureDisabledVar));
 
         $this->assertEquals($this->expectedDefaultVariableKeyMap, $response);
     }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2019, Optimizely
+ * Copyright 2016-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
+use Optimizely\OptimizelyConfig\OptimizelyConfigService;
 use Optimizely\ProjectConfigManager\ProjectConfigManagerInterface;
 use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use Optimizely\UserProfile\UserProfileServiceInterface;
@@ -264,6 +265,24 @@ class Optimizely
         $this->sendImpressionEvent($config, $experimentKey, $variationKey, $userId, $attributes);
 
         return $variationKey;
+    }
+
+    /**
+     * Gets OptimizelyConfig object for the current ProjectConfig.
+     *
+     * @return OptimizelyConfig Representing current ProjectConfig.
+     */
+    public function getOptimizelyConfig()
+    {
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
+            return null;
+        }
+
+        $optConfigService = new OptimizelyConfigService($config);
+        
+        return $optConfigService->getConfig();
     }
 
     /**

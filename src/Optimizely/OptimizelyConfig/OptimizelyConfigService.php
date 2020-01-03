@@ -125,12 +125,12 @@ class OptimizelyConfigService
     /**
      * Generates Variables map for the given Experiment and Variation.
      *
-     * @param Variation
      * @param Experiment
+     * @param Variation
      *
      * @return <String, OptimizelyVariable> Map of Variable key to OptimizelyVariable.
      */
-    protected function getVariablesMap(Variation $variation, Experiment $experiment)
+    protected function getVariablesMap(Experiment $experiment, Variation $variation)
     {
         $experimentId = $experiment->getId();
         if (!array_key_exists($experimentId, $this->experimentIdFeatureMap)) {
@@ -184,7 +184,7 @@ class OptimizelyConfigService
         $variationsMap = [];
 
         foreach ($experiment->getVariations() as $variation) {
-            $variablesMap = $this->getVariablesMap($variation, $experiment);
+            $variablesMap = $this->getVariablesMap($experiment, $variation);
  
             $variationKey = $variation->getKey();
             $optVariation = new OptimizelyVariation(
