@@ -117,8 +117,8 @@ class OptimizelyConfigService
             }
 
             $featureKey = $feature->getKey();
-            $this->featKeyOptlyVariableKeyVariableMap[ $featureKey] = $variablesKeyMap;
-            $this->featKeyOptlyVariableIdVariableMap[ $featureKey] = $variablesIdMap;
+            $this->featKeyOptlyVariableKeyVariableMap[$featureKey] = $variablesKeyMap;
+            $this->featKeyOptlyVariableIdVariableMap[$featureKey] = $variablesIdMap;
         }
     }
 
