@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2019, Optimizely
+ * Copyright 2016-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class Variation
     private $_variableIdToVariableUsageInstanceMap;
 
 
-    public function __construct($id = null, $key = null, $featureEnabled = false, $variableUsageInstances = [])
+    public function __construct($id = null, $key = null, $featureEnabled = null, $variableUsageInstances = [])
     {
         $this->_id = $id;
         $this->_key = $key;

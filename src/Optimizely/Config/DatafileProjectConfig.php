@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -391,6 +391,15 @@ class DatafileProjectConfig implements ProjectConfigInterface
     public function getFeatureFlags()
     {
         return $this->_featureFlags;
+    }
+
+    /**
+     * @return array List of all experiments (including group experiments)
+     *               parsed from the datafile
+     */
+    public function getAllExperiments()
+    {
+        return array_values($this->_experimentKeyMap);
     }
 
     /**

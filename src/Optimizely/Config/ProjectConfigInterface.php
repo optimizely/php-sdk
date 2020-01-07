@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, 2018-2019 Optimizely
+ * Copyright 2016, 2018-2020 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,11 @@ interface ProjectConfigInterface
      * @return array List of feature flags parsed from the datafile
      */
     public function getFeatureFlags();
+
+    /**
+     * @return array List of all experiments (including group experiments)
+     */
+    public function getAllExperiments();
 
     /**
      * @param $groupId string ID of the group.
