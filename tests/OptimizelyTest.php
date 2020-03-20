@@ -227,7 +227,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testInitWithSdkKey()
     {
         $sdkKey = "some-sdk-key";
-        $optimizelyClient = new Optimizely(null, null, null, null, null, null, $sdkKey);
+        $optimizelyClient = new Optimizely(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            $sdkKey
+        );
 
         // client hasn't been mocked yet. Hence, activate should return null.
         $actualVariation = $optimizelyClient->activate('test_experiment_integer_feature', 'test_user');
@@ -266,7 +276,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
     public function testInitWithBothSdkKeyAndDatafile()
     {
         $sdkKey = "some-sdk-key";
-        $optimizelyClient = new Optimizely(DATAFILE, null, null, null, null, null, $sdkKey);
+        $optimizelyClient = new Optimizely(
+            DATAFILE,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            $sdkKey
+        );
 
         // client hasn't been mocked yet. Hence, config manager should return config of hardcoded
         // datafile.
