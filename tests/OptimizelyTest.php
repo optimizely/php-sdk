@@ -17,6 +17,11 @@
 namespace Optimizely\Tests;
 
 use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response;
 use Monolog\Logger;
 use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\DecisionService\DecisionService;
@@ -63,9 +68,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $projConfig->setAccessible(true);
         $projConfig->setValue($configManager, $config);
 
-        $projConfigManager = new \ReflectionProperty(Optimizely::class, '_projectConfigManager');
-        $projConfigManager->setAccessible(true);
-        $projConfigManager->setValue($optimizely, $configManager);
+        $optimizely->configManager = $configManager;
     }
 
     public function setUp()
@@ -219,6 +222,92 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             true
         );
         $this->expectOutputRegex('/Provided datafile is in an invalid format./');
+    }
+
+    public function testInitWithSdkKey()
+    {
+        $sdkKey = "some-sdk-key";
+        $optimizelyClient = new Optimizely(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            $sdkKey
+        );
+
+        // client hasn't been mocked yet. Hence, activate should return null.
+        $actualVariation = $optimizelyClient->activate('test_experiment_integer_feature', 'test_user');
+        $this->assertNull($actualVariation);
+
+        // Mock http client to return a valid datafile
+        $mock = new MockHandler([
+            new Response(200, [], $this->datafile)
+        ]);
+
+        $container = [];
+        $history = Middleware::history($container);
+        $handler = HandlerStack::create($mock);
+        $handler->push($history);
+
+        $client = new Client(['handler' => $handler]);
+        $httpClient = new \ReflectionProperty(HTTPProjectConfigManager::class, 'httpClient');
+        $httpClient->setAccessible(true);
+        $httpClient->setValue($optimizelyClient->configManager, $client);
+
+        // Fetch datafile
+        $optimizelyClient->configManager->fetch();
+
+        // activate should return expected variation.
+        $actualVariation = $optimizelyClient->activate('test_experiment_integer_feature', 'test_user');
+        $this->assertEquals('variation', $actualVariation);
+
+        // assert that https call is made to mock as expected.
+        $transaction = $container[0];
+        $this->assertEquals(
+            'https://cdn.optimizely.com/datafiles/some-sdk-key.json',
+            $transaction['request']->getUri()
+        );
+    }
+
+    public function testInitWithBothSdkKeyAndDatafile()
+    {
+        $sdkKey = "some-sdk-key";
+        $optimizelyClient = new Optimizely(
+            DATAFILE,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            $sdkKey
+        );
+
+        // client hasn't been mocked yet. Hence, config manager should return config of hardcoded
+        // datafile.
+        $this->assertEquals('15', $optimizelyClient->configManager->getConfig()->getRevision());
+        
+
+        // Mock http client to return a valid datafile
+        $mock = new MockHandler([
+            new Response(200, [], $this->typedAudiencesDataFile)
+        ]);
+
+        $handler = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handler]);
+        $httpClient = new \ReflectionProperty(HTTPProjectConfigManager::class, 'httpClient');
+        $httpClient->setAccessible(true);
+        $httpClient->setValue($optimizelyClient->configManager, $client);
+
+        // Fetch datafile
+        $optimizelyClient->configManager->fetch();
+
+        $this->assertEquals('3', $optimizelyClient->configManager->getConfig()->getRevision());
     }
 
     public function testActivateInvalidOptimizelyObject()
@@ -4471,9 +4560,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
              ->setMethods(array('getConfig'))
              ->getMock();
 
-         $projectConfigManager = new \ReflectionProperty(Optimizely::class, '_projectConfigManager');
-         $projectConfigManager->setAccessible(true);
-         $projectConfigManager->setValue($optlyObject, $projectConfigManagerMock);
+         $optlyObject->configManager = $projectConfigManagerMock;
 
          $expectedProjectConfig = new DatafileProjectConfig($this->datafile, $this->loggerMock, new NoOpErrorHandler());
 
