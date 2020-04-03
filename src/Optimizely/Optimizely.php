@@ -37,6 +37,7 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\OptimizelyConfig\OptimizelyConfigService;
+use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
 use Optimizely\ProjectConfigManager\ProjectConfigManagerInterface;
 use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
 use Optimizely\UserProfile\UserProfileServiceInterface;
@@ -96,7 +97,7 @@ class Optimizely
     /**
      * @var ProjectConfigManagerInterface
      */
-    private $_projectConfigManager;
+    public $configManager;
 
     /**
      * @var NotificationCenter
@@ -114,6 +115,7 @@ class Optimizely
      * @param $userProfileService UserProfileServiceInterface
      * @param $configManager ProjectConfigManagerInterface provides ProjectConfig through getConfig method.
      * @param $notificationCenter NotificationCenter
+     * @param $sdkKey string uniquely identifying the datafile corresponding to project and environment combination. Must provide at least one of datafile or sdkKey.
      */
     public function __construct(
         $datafile,
@@ -123,7 +125,8 @@ class Optimizely
         $skipJsonValidation = false,
         UserProfileServiceInterface $userProfileService = null,
         ProjectConfigManagerInterface $configManager = null,
-        NotificationCenter $notificationCenter = null
+        NotificationCenter $notificationCenter = null,
+        $sdkKey = null
     ) {
         $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
@@ -132,7 +135,15 @@ class Optimizely
         $this->_eventBuilder = new EventBuilder($this->_logger);
         $this->_decisionService = new DecisionService($this->_logger, $userProfileService);
         $this->notificationCenter = $notificationCenter ?: new NotificationCenter($this->_logger, $this->_errorHandler);
-        $this->_projectConfigManager = $configManager ?: new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
+        $this->configManager = $configManager;
+
+        if ($this->configManager === null) {
+            if ($sdkKey) {
+                $this->configManager = new HTTPProjectConfigManager($sdkKey, null, null, true, $datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler, $this->notificationCenter);
+            } else {
+                $this->configManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
+            }
+        }
     }
 
     /**
@@ -141,7 +152,7 @@ class Optimizely
      */
     protected function getConfig()
     {
-        $config = $this->_projectConfigManager->getConfig();
+        $config = $this->configManager->getConfig();
         return $config instanceof DatafileProjectConfig ? $config : null;
     }
 
