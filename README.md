@@ -32,12 +32,12 @@ Create the Optimizely client, for example:
 $optimizely = new Optimizely(<<DATAFILE>>);
 ```
 
-Or you may also use OptimizelyFactory method to create an optimizely client using your SDK key and an optional fallback datafile. Using this method internally creates an HTTProjectConfigManager. See HTTProjectConfigManager for further detail.
+Or you may also use OptimizelyFactory method to create an optimizely client using your SDK key and an optional fallback datafile. Using this method internally creates an HTTPProjectConfigManager. See HTTPProjectConfigManager for further detail.
 
 ```
 $optimizelyClient = OptimizelyFactory::createDefaultInstance("your-sdk-key", <<DATAFILE>>);
 ```
-// access your HTTP project config manager
+// access your HTTPProjectConfigManager
 ```
 $configManager = $optimizelyClient->configManager;
 ```
