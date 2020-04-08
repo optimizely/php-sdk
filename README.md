@@ -28,13 +28,24 @@ To access the Feature Management configuration in the Optimizely dashboard, plea
 #### Initialization
 Create the Optimizely client, for example:
 
-```
+```php
 $optimizely = new Optimizely(<<DATAFILE>>);
 ```
 
-You can also provide an implementation of the `ProjectConfigManagerInterface` in the constructor:
+Or you may also use OptimizelyFactory method to create an optimizely client using your SDK key and an optional fallback datafile. Using this method internally creates an HTTPProjectConfigManager. See [HTTPProjectConfigManager](#http_config_manager) for further detail.
 
+```php
+$optimizelyClient = OptimizelyFactory::createDefaultInstance("your-sdk-key", <<DATAFILE>>);
 ```
+To access your HTTPProjectConfigManager:
+
+```php
+$configManager = $optimizelyClient->configManager;
+```
+
+Or you can also provide an implementation of the [`ProjectConfigManagerInterface`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/ProjectConfigManagerInterface.php) in the constructor:
+
+```php
 $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
 $optimizely = new Optimizely(<<DATAFILE>>, null, null, null, false, null, $configManager);
 ```
@@ -42,7 +53,7 @@ $optimizely = new Optimizely(<<DATAFILE>>, null, null, null, false, null, $confi
 #### ProjectConfigManagerInterface
 [`ProjectConfigManagerInterface`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/ProjectConfigManagerInterface.php) exposes `getConfig` method for retrieving `ProjectConfig` instance.
 
-#### HTTPProjectConfigManager
+#### <a name="http_config_manager"></a> HTTPProjectConfigManager
 
 [`HTTPProjectConfigManager`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/HTTPProjectConfigManager.php)
 is an implementation of `ProjectConfigManagerInterface` interface.
@@ -54,7 +65,7 @@ Calling `fetch` will update the internal ProjectConfig instance that will be ret
 
 ##### Use HTTPProjectConfigManager
 
-```
+```php
 $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
 ```
 
