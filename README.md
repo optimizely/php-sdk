@@ -16,7 +16,7 @@ Optimizely Rollouts is free feature flags for development teams. Easily roll out
 
 The Optimizely PHP SDK can be installed through [Composer](https://getcomposer.org/). Please use the following command:
 
-```sh
+```
 php composer.phar require optimizely/optimizely-sdk
 ```
 
@@ -37,7 +37,7 @@ Or you may also use OptimizelyFactory method to create an optimizely client usin
 ```php
 $optimizelyClient = OptimizelyFactory::createDefaultInstance("your-sdk-key", <<DATAFILE>>);
 ```
-To access your HTTPProjectConfigManager
+To access your HTTPProjectConfigManager:
 
 ```php
 $configManager = $optimizelyClient->configManager;
@@ -84,7 +84,7 @@ See the Optimizely Full Stack [developer documentation](https://developers.optim
 ##### Running all tests
 You can run all unit tests with:
 
-```sh
+```
 ./vendor/bin/phpunit
 ```
 
