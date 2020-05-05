@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, 2019, Optimizely
+ * Copyright 2017, 2019-2020 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ class FeatureVariable
     const STRING_TYPE = 'string';
     const INTEGER_TYPE = 'integer';
     const DOUBLE_TYPE = 'double';
+    const JSON_TYPE = 'json';
 
     /**
      * variable to hold the feature variable ID
@@ -150,6 +151,8 @@ class FeatureVariable
                 return "getFeatureVariableDouble";
             case FeatureVariable::STRING_TYPE:
                 return "getFeatureVariableString";
+            case FeatureVariable::JSON_TYPE:
+                return "getFeatureVariableJson";
             default:
                 return null;
         }

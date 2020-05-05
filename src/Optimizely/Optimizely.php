@@ -292,7 +292,7 @@ class Optimizely
         }
 
         $optConfigService = new OptimizelyConfigService($config);
-        
+
         return $optConfigService->getConfig();
     }
 
@@ -841,6 +841,27 @@ class Optimizely
             $userId,
             $attributes,
             FeatureVariable::STRING_TYPE
+        );
+    }
+
+    /**
+    * Get the JSON value of the specified variable in the feature flag.
+    *
+    * @param string Feature flag key
+    * @param string Variable key
+    * @param string User ID
+    * @param array  Associative array of user attributes
+    *
+    * @return string variable value / null
+    */
+    public function getFeatureVariableJson($featureFlagKey, $variableKey, $userId, $attributes = null)
+    {
+        return $this->getFeatureVariableValueForType(
+            $featureFlagKey,
+            $variableKey,
+            $userId,
+            $attributes,
+            FeatureVariable::JSON_TYPE
         );
     }
 
