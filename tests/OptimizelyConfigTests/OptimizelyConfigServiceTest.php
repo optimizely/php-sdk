@@ -47,24 +47,28 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $intDefaultVariable = new OptimizelyVariable('17258820367', 'integer_var', 'integer', 1);
         $doubleDefaultVariable = new OptimizelyVariable('17260550714', 'double_var', 'double', 0.5);
         $strDefaultVariable = new OptimizelyVariable('17290540010', 'string_var', 'string', 'i am default value');
+        $jsonDefaultVariable = new OptimizelyVariable('17260550458', 'json_var', 'json', json_decode('{"text": "default value"}', true));
 
         $this->expectedDefaultVariableKeyMap = [];
         $this->expectedDefaultVariableKeyMap['boolean_var'] = $boolDefaultVariable;
         $this->expectedDefaultVariableKeyMap['integer_var'] = $intDefaultVariable;
         $this->expectedDefaultVariableKeyMap['double_var'] = $doubleDefaultVariable;
         $this->expectedDefaultVariableKeyMap['string_var'] = $strDefaultVariable;
+        $this->expectedDefaultVariableKeyMap['json_var'] = $jsonDefaultVariable;
 
         // Create variable variables map for feat_experiment variation_a
         $boolFeatVariable = new OptimizelyVariable('17252790456', 'boolean_var', 'boolean', 'true');
         $intFeatVariable = new OptimizelyVariable('17258820367', 'integer_var', 'integer', 5);
         $doubleFeatVariable = new OptimizelyVariable('17260550714', 'double_var', 'double', 5.5);
         $strFeatVariable = new OptimizelyVariable('17290540010', 'string_var', 'string', 'i am variable value');
+        $jsonFeatVariable = new OptimizelyVariable('17260550458', 'json_var', 'json', json_decode('{"text": "variable value"}', true));
 
         $this->expectedVariableKeyMap = [];
         $this->expectedVariableKeyMap['boolean_var'] = $boolFeatVariable;
         $this->expectedVariableKeyMap['integer_var'] = $intFeatVariable;
         $this->expectedVariableKeyMap['double_var'] = $doubleFeatVariable;
         $this->expectedVariableKeyMap['string_var'] = $strFeatVariable;
+        $this->expectedVariableKeyMap['json_var'] = $jsonFeatVariable;
 
         // Create variations map for feat_experiment
         $this->featExpVariationMap = [];
@@ -270,6 +274,12 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                       "key": "string_var",
                       "type": "string",
                       "value": "i am variable value"
+                    },
+                    "json_var": {
+                      "id": "17260550458",
+                      "key": "json_var",
+                      "type": "json",
+                      "value": {"text": "variable value"}
                     }
                   }
                 },
@@ -301,6 +311,12 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                       "key": "string_var",
                       "type": "string",
                       "value": "i am default value"
+                    },
+                    "json_var": {
+                      "id": "17260550458",
+                      "key": "json_var",
+                      "type": "json",
+                      "value": {"text": "default value"}
                     }
                   }
                 }
@@ -364,6 +380,12 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                           "key": "string_var",
                           "type": "string",
                           "value": "i am variable value"
+                        },
+                        "json_var": {
+                          "id": "17260550458",
+                          "key": "json_var",
+                          "type": "json",
+                          "value": {"text": "variable value"}
                         }
                       }
                     },
@@ -395,6 +417,12 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                           "key": "string_var",
                           "type": "string",
                           "value": "i am default value"
+                        },
+                        "json_var": {
+                          "id": "17260550458",
+                          "key": "json_var",
+                          "type": "json",
+                          "value": {"text": "default value"}
                         }
                       }
                     }
@@ -425,6 +453,12 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                   "key": "string_var",
                   "type": "string",
                   "value": "i am default value"
+                },
+                "json_var": {
+                  "id": "17260550458",
+                  "key": "json_var",
+                  "type": "json",
+                  "value": {"text": "default value"}
                 }
               }
             }

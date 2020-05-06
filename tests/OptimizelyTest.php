@@ -3084,7 +3084,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         // Mock isFeatureEnabled to return false for all calls
-        $optimizelyMock->expects($this->exactly(8))
+        $optimizelyMock->expects($this->exactly(9))
             ->method('isFeatureEnabled')
             ->will($this->returnValue(false));
 
@@ -3110,7 +3110,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         ];
 
         // Mock isFeatureEnabled to return specific values
-        $optimizelyMock->expects($this->exactly(8))
+        $optimizelyMock->expects($this->exactly(9))
             ->method('isFeatureEnabled')
             ->will($this->returnValueMap($map));
 
@@ -3133,7 +3133,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         ];
 
         // Mock isFeatureEnabled to return specific values
-        $optimizelyMock->expects($this->exactly(8))
+        $optimizelyMock->expects($this->exactly(9))
             ->method('isFeatureEnabled')
             ->will($this->returnValueMap($map));
 
@@ -3168,7 +3168,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         ];
 
         // Assert that isFeatureEnabled is called with the same attributes and mock to return value map
-        $optimizelyMock->expects($this->exactly(8))
+        $optimizelyMock->expects($this->exactly(9))
             ->method('isFeatureEnabled')
             ->with()
             ->will($this->returnValueMap($map));
@@ -3231,22 +3231,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
         $decision6 = new FeatureDecision(
+            $experiment,
+            $enabledFeatureVariation,
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
+        );
+        $decision7 = new FeatureDecision(
             $disabledFeatureExperiment,
             $disabledFeatureVariation,
             FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
-        $decision7 = new FeatureDecision(
+        $decision8 = new FeatureDecision(
             $experiment,
             $enabledFeatureVariation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
-        $decision8 = new FeatureDecision(
+        $decision9 = new FeatureDecision(
             $disabledFeatureExperiment,
             $disabledFeatureVariation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 
-        $decisionServiceMock->expects($this->exactly(8))
+        $decisionServiceMock->expects($this->exactly(9))
             ->method('getVariationForFeature')
             ->will($this->onConsecutiveCalls(
                 $decision1,
@@ -3256,7 +3261,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 $decision5,
                 $decision6,
                 $decision7,
-                $decision8
+                $decision8,
+                $decision9
             ));
 
         $optimizelyMock->notificationCenter = $this->notificationCenterMock;
@@ -3364,6 +3370,26 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                     'user_id',
                     [],
                     (object) array(
+                        'featureKey'=>'json_single_variable_feature',
+                        'featureEnabled'=> true,
+                        'source'=> 'feature-test',
+                        'sourceInfo' => (object) array(
+                            'experimentKey'=> 'rollout_1_exp_1',
+                            'variationKey'=> '177771'
+                        )
+                    )
+                )
+            );
+
+        $this->notificationCenterMock->expects($this->at(6))
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                array(
+                    DecisionNotificationTypes::FEATURE,
+                    'user_id',
+                    [],
+                    (object) array(
                         'featureKey'=>'multi_variate_feature',
                         'featureEnabled'=> false,
                         'source'=> 'feature-test',
@@ -3375,7 +3401,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
-        $this->notificationCenterMock->expects($this->at(6))
+        $this->notificationCenterMock->expects($this->at(7))
             ->method('sendNotifications')
             ->with(
                 NotificationType::DECISION,
@@ -3392,7 +3418,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
-        $this->notificationCenterMock->expects($this->at(7))
+        $this->notificationCenterMock->expects($this->at(8))
             ->method('sendNotifications')
             ->with(
                 NotificationType::DECISION,
@@ -3414,6 +3440,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'boolean_feature',
                 'integer_single_variable_feature',
                 'string_single_variable_feature',
+                'json_single_variable_feature',
                 'mutex_group_feature'
             ],
             $optimizelyMock->getEnabledFeatures("user_id")
@@ -3979,6 +4006,25 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             $optimizelyMock->getFeatureVariableString('string_single_variable_feature', 'string_variable', 'user_id', []),
             '59abc0p'
+        );
+    }
+
+    public function testGetFeatureVariableJson()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('getFeatureVariableValueForType'))
+            ->getMock();
+
+        $map = [['json_single_variable_feature', 'json_variable', 'user_id', [], 'json', json_decode('{"text": "variable value"}', true)]];
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('getFeatureVariableValueForType')
+            ->with('json_single_variable_feature', 'json_variable', 'user_id', [], 'json')
+            ->will($this->returnValueMap($map));
+
+        $this->assertSame(
+            $optimizelyMock->getFeatureVariableJson('json_single_variable_feature', 'json_variable', 'user_id', []),
+            json_decode('{"text": "variable value"}', true)
         );
     }
 

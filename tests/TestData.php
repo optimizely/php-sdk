@@ -623,6 +623,22 @@ define(
       ]
     },
     {
+      "id": "155597",
+      "key": "json_single_variable_feature",
+      "rolloutId": "166661",
+      "experimentIds": [
+      ],
+      "variables": [
+        {
+          "id": "154867",
+          "key": "json_variable",
+          "type": "string",
+          "subType": "json",
+          "defaultValue": {"text": "default value"}
+        }
+      ]
+    },
+    {
       "id": "155559",
       "key": "multi_variate_feature",
       "rolloutId": "",
@@ -1307,6 +1323,10 @@ define(
                     {
                       "id": "17260550714",
                       "value": "0.5"
+                    },
+                    {
+                      "id": "17260550458",
+                      "value": {"text": "default value"}
                     }
                   ],
                   "id": "17285550838",
@@ -1369,6 +1389,13 @@ define(
               "type": "string",
               "id": "17290540010",
               "key": "string_var"
+            },
+            {
+              "id": "17260550458",
+              "key": "json_var",
+              "type": "string",
+              "subType": "json",
+              "defaultValue": {"text": "default value"}
             }
           ],
           "id": "17266500726",
@@ -1467,6 +1494,10 @@ define(
                     {
                       "id": "17260550714",
                       "value": "5.5"
+                    },
+                    {
+                      "id": "17260550458",
+                      "value": {"text": "variable value"}
                     }
                   ],
                   "id": "17289540366",

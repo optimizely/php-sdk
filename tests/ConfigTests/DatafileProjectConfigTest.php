@@ -312,6 +312,7 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             'integer_single_variable_feature' => $this->config->getFeatureFlagFromKey('integer_single_variable_feature'),
             'boolean_single_variable_feature' => $this->config->getFeatureFlagFromKey('boolean_single_variable_feature'),
             'string_single_variable_feature' => $this->config->getFeatureFlagFromKey('string_single_variable_feature'),
+            'json_single_variable_feature' => $this->config->getFeatureFlagFromKey('json_single_variable_feature'),
             'multi_variate_feature' => $this->config->getFeatureFlagFromKey('multi_variate_feature'),
             'mutex_group_feature' => $this->config->getFeatureFlagFromKey('mutex_group_feature'),
             'empty_feature' => $this->config->getFeatureFlagFromKey('empty_feature')
