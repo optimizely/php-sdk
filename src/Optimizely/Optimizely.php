@@ -641,7 +641,7 @@ class Optimizely
      * @param array  Associative array of user attributes
      * @param string Variable type
      *
-     * @return string Feature variable value / null
+     * @return string|array Feature variable value / null
      */
     public function getFeatureVariableValueForType(
         $featureFlagKey,
@@ -689,7 +689,8 @@ class Optimizely
 
         $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
-        $variableValue = $variable->getDefaultValue();
+        $variableType = $variable->getType();
+        $variableValue = $variableType === FeatureVariable::JSON_TYPE ? json_encode($variable->getDefaultValue()) : $variable->getDefaultValue();
 
         if ($decision->getVariation() === null) {
             $this->_logger->log(
@@ -712,7 +713,9 @@ class Optimizely
             if ($featureEnabled) {
                 $variableUsage = $variation->getVariableUsageById($variable->getId());
                 if ($variableUsage) {
-                    $variableValue = $variableUsage->getValue();
+                    $variableValue = $variableType === FeatureVariable::JSON_TYPE
+                        ? json_encode($variableUsage->getValue())
+                        : $variableUsage->getValue();
                     $this->_logger->log(
                         Logger::INFO,
                         "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
@@ -852,7 +855,7 @@ class Optimizely
     * @param string User ID
     * @param array  Associative array of user attributes
     *
-    * @return string variable value / null
+    * @return array Associative array of json variable including key and value
     */
     public function getFeatureVariableJson($featureFlagKey, $variableKey, $userId, $attributes = null)
     {

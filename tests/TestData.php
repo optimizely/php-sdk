@@ -363,6 +363,41 @@ define(
           }
         ]
       }]
+    },
+    {
+      "key": "test_experiment_json_feature",
+      "status": "Running",
+      "layerId": "5",
+      "audienceIds": [
+
+      ],
+      "id": "122245",
+      "forcedVariations": {
+
+      },
+      "trafficAllocation": [
+        {
+          "entityId": "122246",
+          "endOfRange": 5000
+        },
+        {
+          "entityId": "122240",
+          "endOfRange": 10000
+        }
+      ],
+      "variations": [
+        {
+          "id": "122246",
+          "key": "json_variation",
+          "variables": [
+            {
+              "id": "122247",
+              "value": {"text": "variable value"}
+            }
+          ],
+          "featureEnabled": true
+        }
+      ]
     }
   ],
   "version": "4",
@@ -625,12 +660,13 @@ define(
     {
       "id": "155597",
       "key": "json_single_variable_feature",
-      "rolloutId": "166661",
+      "rolloutId": "",
       "experimentIds": [
+        122245
       ],
       "variables": [
         {
-          "id": "154867",
+          "id": "122247",
           "key": "json_variable",
           "type": "string",
           "subType": "json",

@@ -50,7 +50,7 @@ class VariableTypeUtils
                 break;
 
             case FeatureVariable::JSON_TYPE:
-                $return_value = json_encode($value);
+                $return_value = json_decode($value, true);
                 break;
         }
 

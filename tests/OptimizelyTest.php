@@ -4021,11 +4021,62 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('getFeatureVariableValueForType')
             ->with('json_single_variable_feature', 'json_variable', 'user_id', [], 'json')
             ->will($this->returnValueMap($map));
-
         $this->assertSame(
             $optimizelyMock->getFeatureVariableJson('json_single_variable_feature', 'json_variable', 'user_id', []),
             json_decode('{"text": "variable value"}', true)
         );
+    }
+
+    public function testGetFeatureVariableJsonCallsDecisionListenerGivenUserInExperimentAndFeatureFlagIsEnabled()
+    {
+        // should return specific value
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($this->optimizelyObject, $decisionServiceMock);
+        $experiment = $this->projectConfig->getExperimentFromKey('test_experiment_json_feature');
+        $expectedVariation = $this->projectConfig->getVariationFromKey('test_experiment_json_feature', 'json_variation');
+        $expectedDecision = new FeatureDecision(
+            $experiment,
+            $expectedVariation,
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
+        );
+
+        $decisionServiceMock->expects($this->once())
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expectedDecision));
+
+        $this->assertTrue($expectedVariation->getFeatureEnabled());
+        $arrayParam = array(
+            DecisionNotificationTypes::FEATURE_VARIABLE,
+            'user_id',
+            [],
+            (object) array(
+                'featureKey'=>'json_single_variable_feature',
+                'featureEnabled'=> true,
+                'variableKey'=> 'json_variable',
+                'variableType'=> 'json',
+                'variableValue'=> json_decode('{"text": "variable value"}', true),
+                'source'=> 'feature-test',
+                'sourceInfo' => (object) array(
+                    'experimentKey'=> 'test_experiment_json_feature',
+                    'variationKey'=> 'json_variation'
+                )
+            )
+        );
+        $this->notificationCenterMock->expects($this->once())
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+
+        $this->optimizelyObject->notificationCenter = $this->notificationCenterMock;
+
+        $this->optimizelyObject->getFeatureVariableJson('json_single_variable_feature', 'json_variable', 'user_id', []);
     }
 
     public function testGetFeatureVariableMethodsReturnNullWhenGetVariableValueForTypeReturnsNull()
