@@ -47,7 +47,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $intDefaultVariable = new OptimizelyVariable('17258820367', 'integer_var', 'integer', 1);
         $doubleDefaultVariable = new OptimizelyVariable('17260550714', 'double_var', 'double', 0.5);
         $strDefaultVariable = new OptimizelyVariable('17290540010', 'string_var', 'string', 'i am default value');
-        $jsonDefaultVariable = new OptimizelyVariable('17260550458', 'json_var', 'json', json_decode('{"text": "default value"}', true));
+        $jsonDefaultVariable = new OptimizelyVariable('17260550458', 'json_var', 'json', "{\"text\": \"default value\"}");
 
         $this->expectedDefaultVariableKeyMap = [];
         $this->expectedDefaultVariableKeyMap['boolean_var'] = $boolDefaultVariable;
@@ -61,7 +61,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $intFeatVariable = new OptimizelyVariable('17258820367', 'integer_var', 'integer', 5);
         $doubleFeatVariable = new OptimizelyVariable('17260550714', 'double_var', 'double', 5.5);
         $strFeatVariable = new OptimizelyVariable('17290540010', 'string_var', 'string', 'i am variable value');
-        $jsonFeatVariable = new OptimizelyVariable('17260550458', 'json_var', 'json', json_decode('{"text": "variable value"}', true));
+        $jsonFeatVariable = new OptimizelyVariable('17260550458', 'json_var', 'json', "{\"text\": \"variable value\"}");
 
         $this->expectedVariableKeyMap = [];
         $this->expectedVariableKeyMap['boolean_var'] = $boolFeatVariable;
@@ -279,7 +279,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                       "id": "17260550458",
                       "key": "json_var",
                       "type": "json",
-                      "value": {"text": "variable value"}
+                      "value": "{\"text\": \"variable value\"}"
                     }
                   }
                 },
@@ -316,7 +316,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                       "id": "17260550458",
                       "key": "json_var",
                       "type": "json",
-                      "value": {"text": "default value"}
+                      "value": "{\"text\": \"default value\"}"
                     }
                   }
                 }
@@ -385,7 +385,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                           "id": "17260550458",
                           "key": "json_var",
                           "type": "json",
-                          "value": {"text": "variable value"}
+                          "value": "{\"text\": \"variable value\"}"
                         }
                       }
                     },
@@ -422,7 +422,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                           "id": "17260550458",
                           "key": "json_var",
                           "type": "json",
-                          "value": {"text": "default value"}
+                          "value": "{\"text\": \"default value\"}"
                         }
                       }
                     }
@@ -458,7 +458,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                   "id": "17260550458",
                   "key": "json_var",
                   "type": "json",
-                  "value": {"text": "default value"}
+                  "value": "{\"text\": \"default value\"}"
                 }
               }
             }

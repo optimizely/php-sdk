@@ -4016,14 +4016,14 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('getFeatureVariableValueForType'))
             ->getMock();
 
-        $map = [['json_single_variable_feature', 'json_variable', 'user_id', [], 'json', json_decode('{"text": "variable value"}', true)]];
+        $map = [['json_single_variable_feature', 'json_variable', 'user_id', [], 'json', "{\"text\": \"variable value\"}"]];
         $optimizelyMock->expects($this->exactly(1))
             ->method('getFeatureVariableValueForType')
             ->with('json_single_variable_feature', 'json_variable', 'user_id', [], 'json')
             ->will($this->returnValueMap($map));
         $this->assertSame(
             $optimizelyMock->getFeatureVariableJson('json_single_variable_feature', 'json_variable', 'user_id', []),
-            json_decode('{"text": "variable value"}', true)
+            "{\"text\": \"variable value\"}"
         );
     }
 

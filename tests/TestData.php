@@ -392,7 +392,7 @@ define(
           "variables": [
             {
               "id": "122247",
-              "value": {"text": "variable value"}
+              "value": "{\"text\": \"variable value\"}"
             }
           ],
           "featureEnabled": true
@@ -670,7 +670,7 @@ define(
           "key": "json_variable",
           "type": "string",
           "subType": "json",
-          "defaultValue": {"text": "default value"}
+          "defaultValue": "{\"text\": \"default value\"}"
         }
       ]
     },
@@ -1362,7 +1362,7 @@ define(
                     },
                     {
                       "id": "17260550458",
-                      "value": {"text": "default value"}
+                      "value": "{\"text\": \"default value\"}"
                     }
                   ],
                   "id": "17285550838",
@@ -1431,7 +1431,7 @@ define(
               "key": "json_var",
               "type": "string",
               "subType": "json",
-              "defaultValue": {"text": "default value"}
+              "defaultValue": "{\"text\": \"default value\"}"
             }
           ],
           "id": "17266500726",
@@ -1533,7 +1533,7 @@ define(
                     },
                     {
                       "id": "17260550458",
-                      "value": {"text": "variable value"}
+                      "value": "{\"text\": \"variable value\"}"
                     }
                   ],
                   "id": "17289540366",

@@ -641,7 +641,10 @@ class Optimizely
      * @param array  Associative array of user attributes
      * @param string Variable type
      *
-     * @return string|array Feature variable value / null
+     * @return string|boolean|number|array|null Value of the variable cast to the appropriate
+     *                                          type, or null if the feature key is invalid, the
+     *                                          variable key is invalid, or there is a mismatch
+     *                                          with the type of the variable
      */
     public function getFeatureVariableValueForType(
         $featureFlagKey,
@@ -690,7 +693,7 @@ class Optimizely
         $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
         $variableType = $variable->getType();
-        $variableValue = $variableType === FeatureVariable::JSON_TYPE ? json_encode($variable->getDefaultValue()) : $variable->getDefaultValue();
+        $variableValue = $variable->getDefaultValue();
 
         if ($decision->getVariation() === null) {
             $this->_logger->log(
@@ -713,9 +716,7 @@ class Optimizely
             if ($featureEnabled) {
                 $variableUsage = $variation->getVariableUsageById($variable->getId());
                 if ($variableUsage) {
-                    $variableValue = $variableType === FeatureVariable::JSON_TYPE
-                        ? json_encode($variableUsage->getValue())
-                        : $variableUsage->getValue();
+                    $variableValue = $variableUsage->getValue();
                     $this->_logger->log(
                         Logger::INFO,
                         "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
