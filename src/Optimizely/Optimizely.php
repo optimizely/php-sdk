@@ -682,7 +682,10 @@ class Optimizely
         $experiment = $decision->getExperiment();
         $featureEnabled = $variation !== null ? $variation->getFeatureEnabled() : false;
         $variableValue = $this->getFeatureVariableValueFromVariation($featureFlagKey, $variableKey, $variableType, $featureEnabled, $variation, $userId);
-
+        // returning as variable not found or type is invalid
+        if ($variableValue === null) {
+            return null;
+        }
         if ($variation && $decision->getSource() == FeatureDecision::DECISION_SOURCE_FEATURE_TEST) {
             $sourceInfo = (object) array(
                 'experimentKey'=> $experiment->getKey(),
