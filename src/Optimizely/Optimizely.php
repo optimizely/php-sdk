@@ -692,7 +692,6 @@ class Optimizely
 
         $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
-        $variableType = $variable->getType();
         $variableValue = $variable->getDefaultValue();
 
         if ($decision->getVariation() === null) {
