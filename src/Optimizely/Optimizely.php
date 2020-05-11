@@ -911,7 +911,7 @@ class Optimizely
      *                                          variable key is invalid, or there is a mismatch
      *                                          with the type of the variable
      */
-    public function getFeatureVariableValueFromVariation($featureFlagKey, $variableKey, $variableType, $featureEnabled, $variation, $userId)
+    private function getFeatureVariableValueFromVariation($featureFlagKey, $variableKey, $variableType, $featureEnabled, $variation, $userId)
     {
         $config = $this->getConfig();
         $variable = $config->getFeatureVariableFromKey($featureFlagKey, $variableKey);
