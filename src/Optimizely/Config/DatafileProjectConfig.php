@@ -225,7 +225,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
         foreach ($featureFlags as $featureFlagKey => $featureFlag) {
             foreach ($featureFlag['variables'] as $variableKey => $variable) {
                 if (isset($variable['subType']) && $variable['type'] === FeatureVariable::STRING_TYPE && $variable['subType'] === FeatureVariable::JSON_TYPE) {
-                    $variable['type'] = 'json';
+                    $variable['type'] = FeatureVariable::JSON_TYPE;
                     unset($variable['subType']);
                     $featureFlags[$featureFlagKey]['variables'][$variableKey] = $variable;
                 }

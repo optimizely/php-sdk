@@ -833,7 +833,7 @@ class Optimizely
     {
         $config = $this->getConfig();
         if ($config === null) {
-            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, "getAllFeatureVariables"));
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, FeatureVariable::getFeatureVariableMethodName(FeatureVariable::JSON_TYPE)));
             return null;
         }
 

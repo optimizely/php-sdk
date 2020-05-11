@@ -47,6 +47,7 @@ class FeatureVariable
      * b. string
      * c. integer
      * d. double
+     * e. json
      *
      * @var String
      */
