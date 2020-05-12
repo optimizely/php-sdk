@@ -3370,7 +3370,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                     'user_id',
                     [],
                     (object) array(
-                        'featureKey'=>'json_single_variable_feature',
+                        'featureKey'=>'multiple_variables_feature',
                         'featureEnabled'=> true,
                         'source'=> 'feature-test',
                         'sourceInfo' => (object) array(
@@ -3440,7 +3440,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'boolean_feature',
                 'integer_single_variable_feature',
                 'string_single_variable_feature',
-                'json_single_variable_feature',
+                'multiple_variables_feature',
                 'mutex_group_feature'
             ],
             $optimizelyMock->getEnabledFeatures("user_id")
@@ -4055,7 +4055,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'user_id',
             [],
             (object) array(
-                'featureKey'=>'json_single_variable_feature',
+                'featureKey'=>'multiple_variables_feature',
                 'featureEnabled'=> true,
                 'variableKey'=> 'json_variable',
                 'variableType'=> 'json',
@@ -4076,7 +4076,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->optimizelyObject->notificationCenter = $this->notificationCenterMock;
 
-        $this->optimizelyObject->getFeatureVariableJson('json_single_variable_feature', 'json_variable', 'user_id', []);
+        $this->optimizelyObject->getFeatureVariableJson('multiple_variables_feature', 'json_variable', 'user_id', []);
     }
 
     public function testGetAllFeatureVariablesReturnsValuesGivenUserInExperimentAndFeatureFlagIsEnabled()
@@ -4116,7 +4116,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             'user_id',
             [],
             (object) array(
-                'featureKey'=>'json_single_variable_feature',
+                'featureKey'=>'multiple_variables_feature',
                 'featureEnabled'=> true,
                 'variableValues'=> json_decode($expectedVariables, true),
                 'source'=> 'feature-test',
@@ -4136,7 +4136,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->optimizelyObject->notificationCenter = $this->notificationCenterMock;
         $this->assertSame(
             json_decode($expectedVariables, true),
-            $this->optimizelyObject->getAllFeatureVariables('json_single_variable_feature', 'user_id', [])
+            $this->optimizelyObject->getAllFeatureVariables('multiple_variables_feature', 'user_id', [])
         );
     }
 

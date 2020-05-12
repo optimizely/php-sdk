@@ -675,7 +675,7 @@ define(
     },
     {
       "id": "155597",
-      "key": "json_single_variable_feature",
+      "key": "multiple_variables_feature",
       "rolloutId": "",
       "experimentIds": [
         122245
