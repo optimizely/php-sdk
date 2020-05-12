@@ -393,6 +393,22 @@ define(
             {
               "id": "122247",
               "value": "{\"text\": \"variable value\"}"
+            },
+            {
+                "id": "122248",
+                "value": "13.37"
+            },
+            {
+                "id": "122249",
+                "value": "13"
+            },
+            {
+                "id": "122250",
+                "value": "string variable"
+            },
+            {
+                "id": "122251",
+                "value": "true"
             }
           ],
           "featureEnabled": true
@@ -671,6 +687,30 @@ define(
           "type": "string",
           "subType": "json",
           "defaultValue": "{\"text\": \"default value\"}"
+        },
+        {
+          "id": "122248",
+          "key": "double_variable",
+          "type": "double",
+          "defaultValue": "10.37"
+        },
+        {
+          "id": "122249",
+          "key": "integer_variable",
+          "type": "integer",
+          "defaultValue": "10"
+        },
+        {
+          "id": "122250",
+          "key": "string_variable",
+          "type": "string",
+          "defaultValue": "default string variable"
+        },
+        {
+          "id": "122251",
+          "key": "boolean_variable",
+          "type": "boolean",
+          "defaultValue": "false"
         }
       ]
     },
