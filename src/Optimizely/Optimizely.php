@@ -18,6 +18,7 @@ namespace Optimizely;
 
 use Exception;
 use Optimizely\Config\DatafileProjectConfig;
+use Optimizely\Entity\Variation;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
@@ -292,7 +293,7 @@ class Optimizely
         }
 
         $optConfigService = new OptimizelyConfigService($config);
-        
+
         return $optConfigService->getConfig();
     }
 
@@ -633,7 +634,7 @@ class Optimizely
     }
 
     /**
-     * Get the string value of the specified variable in the feature flag.
+     * Get value of the specified variable in the feature flag.
      *
      * @param string Feature flag key
      * @param string Variable key
@@ -641,7 +642,10 @@ class Optimizely
      * @param array  Associative array of user attributes
      * @param string Variable type
      *
-     * @return string Feature variable value / null
+     * @return string|boolean|number|array|null Value of the variable cast to the appropriate
+     *                                          type, or null if the feature key is invalid, the
+     *                                          variable key is invalid, or there is a mismatch
+     *                                          with the type of the variable
      */
     public function getFeatureVariableValueForType(
         $featureFlagKey,
@@ -673,69 +677,20 @@ class Optimizely
             return null;
         }
 
-        $variable = $config->getFeatureVariableFromKey($featureFlagKey, $variableKey);
-        if (!$variable) {
-            // Error message logged in ProjectConfigInterface- getFeatureVariableFromKey
-            return null;
-        }
-
-        if ($variableType != $variable->getType()) {
-            $this->_logger->log(
-                Logger::ERROR,
-                "Variable is of type '{$variable->getType()}', but you requested it as type '{$variableType}'."
-            );
-            return null;
-        }
-
-        $featureEnabled = false;
         $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
-        $variableValue = $variable->getDefaultValue();
-
-        if ($decision->getVariation() === null) {
-            $this->_logger->log(
-                Logger::INFO,
-                "User '{$userId}'is not in any variation, ".
-                "returning default value '{$variableValue}'."
-            );
-        } else {
-            $experiment = $decision->getExperiment();
-            $variation = $decision->getVariation();
-            $featureEnabled = $variation->getFeatureEnabled();
-
-            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_FEATURE_TEST) {
-                $sourceInfo = (object) array(
-                    'experimentKey'=> $experiment->getKey(),
-                    'variationKey'=> $variation->getKey()
-                );
-            }
-
-            if ($featureEnabled) {
-                $variableUsage = $variation->getVariableUsageById($variable->getId());
-                if ($variableUsage) {
-                    $variableValue = $variableUsage->getValue();
-                    $this->_logger->log(
-                        Logger::INFO,
-                        "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
-                        "of feature flag '{$featureFlagKey}'"
-                    );
-                } else {
-                    $this->_logger->log(
-                        Logger::INFO,
-                        "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}', ".
-                        "returning default value '{$variableValue}'."
-                    );
-                }
-            } else {
-                $this->_logger->log(
-                    Logger::INFO,
-                    "Feature '{$featureFlagKey}' for variation '{$variation->getKey()}' is not enabled, ".
-                    "returning default value '{$variableValue}'."
-                );
-            }
+        $variation = $decision->getVariation();
+        $experiment = $decision->getExperiment();
+        $featureEnabled = $variation !== null ? $variation->getFeatureEnabled() : false;
+        $variableValue = $this->getFeatureVariableValueFromVariation($featureFlagKey, $variableKey, $variableType, $featureEnabled, $variation, $userId);
+        // returning as variable not found or type is invalid
+        if ($variableValue === null) {
+            return null;
         }
-
-        if (!is_null($variableValue)) {
-            $variableValue = VariableTypeUtils::castStringToType($variableValue, $variableType, $this->_logger);
+        if ($variation && $decision->getSource() == FeatureDecision::DECISION_SOURCE_FEATURE_TEST) {
+            $sourceInfo = (object) array(
+                'experimentKey'=> $experiment->getKey(),
+                'variationKey'=> $variation->getKey()
+            );
         }
 
         $attributes = $attributes ?: [];
@@ -842,6 +797,173 @@ class Optimizely
             $attributes,
             FeatureVariable::STRING_TYPE
         );
+    }
+
+    /**
+    * Get the JSON value of the specified variable in the feature flag.
+    *
+    * @param string Feature flag key
+    * @param string Variable key
+    * @param string User ID
+    * @param array  Associative array of user attributes
+    *
+    * @return array Associative array of json variable including key and value
+    */
+    public function getFeatureVariableJson($featureFlagKey, $variableKey, $userId, $attributes = null)
+    {
+        return $this->getFeatureVariableValueForType(
+            $featureFlagKey,
+            $variableKey,
+            $userId,
+            $attributes,
+            FeatureVariable::JSON_TYPE
+        );
+    }
+
+    /**
+     * Returns values for all the variables attached to the given feature
+     *
+     * @param string Feature flag key
+     * @param string User ID
+     * @param array  Associative array of user attributes
+     *
+     * @return array|null array of all the variables, or null if the feature key is invalid
+     */
+    public function getAllFeatureVariables($featureFlagKey, $userId, $attributes = null)
+    {
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
+            return null;
+        }
+
+        if (!$this->validateInputs(
+            [
+                self::FEATURE_FLAG_KEY => $featureFlagKey,
+                self::USER_ID => $userId
+            ]
+        )
+        ) {
+            return null;
+        }
+
+        $featureFlag = $config->getFeatureFlagFromKey($featureFlagKey);
+        if ($featureFlag && (!$featureFlag->getId())) {
+            return null;
+        }
+
+        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
+        $variation = $decision->getVariation();
+        $experiment = $decision->getExperiment();
+        $featureEnabled = $variation !== null ? $variation->getFeatureEnabled() : false;
+
+        $allVariables = [];
+        foreach ($featureFlag->getVariables() as $variable) {
+            $allVariables[$variable->getKey()] = $this->getFeatureVariableValueFromVariation(
+                $featureFlagKey,
+                $variable->getKey(),
+                null,
+                $featureEnabled,
+                $variation,
+                $userId
+            );
+        }
+
+        $sourceInfo = (object) array();
+        if ($variation && $decision->getSource() == FeatureDecision::DECISION_SOURCE_FEATURE_TEST) {
+            $sourceInfo = (object) array(
+                'experimentKey'=> $experiment->getKey(),
+                'variationKey'=> $variation->getKey()
+            );
+        }
+
+        $attributes = $attributes ?: [];
+        
+        $this->notificationCenter->sendNotifications(
+            NotificationType::DECISION,
+            array(
+                DecisionNotificationTypes::ALL_FEATURE_VARIABLES,
+                $userId,
+                $attributes,
+                (object)array(
+                    'featureKey' => $featureFlagKey,
+                    'featureEnabled' => $featureEnabled,
+                    'variableValues' => $allVariables,
+                    'source' => $decision->getSource(),
+                    'sourceInfo' => $sourceInfo
+                )
+            )
+        );
+
+        return $allVariables;
+    }
+
+    /**
+     * Get the value of the specified variable on the basis of its status and usage
+     *
+     * @param string    Feature flag key
+     * @param string    Variable key
+     * @param boolean   Feature Status
+     * @param Variation for feature
+     * @param string    User Id
+     *
+     * @return string|boolean|number|array|null Value of the variable cast to the appropriate
+     *                                          type, or null if the feature key is invalid, the
+     *                                          variable key is invalid, or there is a mismatch
+     *                                          with the type of the variable
+     */
+    private function getFeatureVariableValueFromVariation($featureFlagKey, $variableKey, $variableType, $featureEnabled, $variation, $userId)
+    {
+        $config = $this->getConfig();
+        $variable = $config->getFeatureVariableFromKey($featureFlagKey, $variableKey);
+        if (!$variable) {
+            // Error message logged in ProjectConfigInterface- getFeatureVariableFromKey
+            return null;
+        }
+        if ($variableType && $variableType != $variable->getType()) {
+            $this->_logger->log(
+                Logger::ERROR,
+                "Variable is of type '{$variable->getType()}', but you requested it as type '{$variableType}'."
+            );
+            return null;
+        }
+        $variableValue = $variable->getDefaultValue();
+        if ($variation === null) {
+            $this->_logger->log(
+                Logger::INFO,
+                "User '{$userId}'is not in any variation, ".
+                "returning default value '{$variableValue}'."
+            );
+        } else {
+            if ($featureEnabled) {
+                $variableUsage = $variation->getVariableUsageById($variable->getId());
+                if ($variableUsage) {
+                    $variableValue = $variableUsage->getValue();
+                    $this->_logger->log(
+                        Logger::INFO,
+                        "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
+                        "of feature flag '{$featureFlagKey}'"
+                    );
+                } else {
+                    $this->_logger->log(
+                        Logger::INFO,
+                        "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}', ".
+                        "returning default value '{$variableValue}'."
+                    );
+                }
+            } else {
+                $this->_logger->log(
+                    Logger::INFO,
+                    "Feature '{$featureFlagKey}' for variation '{$variation->getKey()}' is not enabled, ".
+                    "returning default value '{$variableValue}'."
+                );
+            }
+        }
+
+        if (!is_null($variableValue)) {
+            $variableValue = VariableTypeUtils::castStringToType($variableValue, $variable->getType(), $this->_logger);
+        }
+        return $variableValue;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,4 +23,5 @@ class DecisionNotificationTypes
     const FEATURE = "feature";
     const FEATURE_TEST = "feature-test";
     const FEATURE_VARIABLE = "feature-variable";
+    const ALL_FEATURE_VARIABLES = "all-feature-variables";
 }
