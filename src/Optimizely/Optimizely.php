@@ -869,6 +869,7 @@ class Optimizely
             );
         }
 
+        $sourceInfo = (object) array();
         if ($variation && $decision->getSource() == FeatureDecision::DECISION_SOURCE_FEATURE_TEST) {
             $sourceInfo = (object) array(
                 'experimentKey'=> $experiment->getKey(),
@@ -877,6 +878,7 @@ class Optimizely
         }
 
         $attributes = $attributes ?: [];
+        
         $this->notificationCenter->sendNotifications(
             NotificationType::DECISION,
             array(
@@ -888,7 +890,7 @@ class Optimizely
                     'featureEnabled' => $featureEnabled,
                     'variableValues' => $allVariables,
                     'source' => $decision->getSource(),
-                    'sourceInfo' => isset($sourceInfo) ? $sourceInfo : (object)array()
+                    'sourceInfo' => $sourceInfo
                 )
             )
         );
