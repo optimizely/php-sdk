@@ -4109,8 +4109,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
           "integer_variable": 13,
           "string_variable": "string variable",
           "boolean_variable": true,
-          "json_invalid_variable": {
-            "text": "json_invalid_variable default value"
+          "json_type_variable": {
+            "text": "json_type_variable default value"
           }
         }';
         $this->assertTrue($expectedVariation->getFeatureEnabled());

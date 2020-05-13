@@ -714,9 +714,9 @@ define(
         },
         {
           "id": "122252",
-          "key": "json_invalid_variable",
+          "key": "json_type_variable",
           "type": "json",
-          "defaultValue": "{\"text\": \"json_invalid_variable default value\"}"
+          "defaultValue": "{\"text\": \"json_type_variable default value\"}"
         }
       ]
     },
