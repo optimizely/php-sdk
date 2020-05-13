@@ -22,10 +22,10 @@ class FeatureVariable
 
     // Feature variable primitive types
     const BOOLEAN_TYPE = 'boolean';
-    const STRING_TYPE = 'string';
-    const INTEGER_TYPE = 'integer';
     const DOUBLE_TYPE = 'double';
+    const INTEGER_TYPE = 'integer';
     const JSON_TYPE = 'json';
+    const STRING_TYPE = 'string';
 
     /**
      * variable to hold the feature variable ID
@@ -146,14 +146,14 @@ class FeatureVariable
         switch ($type) {
             case FeatureVariable::BOOLEAN_TYPE:
                 return "getFeatureVariableBoolean";
-            case FeatureVariable::INTEGER_TYPE:
-                return "getFeatureVariableInteger";
             case FeatureVariable::DOUBLE_TYPE:
                 return "getFeatureVariableDouble";
-            case FeatureVariable::STRING_TYPE:
-                return "getFeatureVariableString";
+            case FeatureVariable::INTEGER_TYPE:
+                return "getFeatureVariableInteger";
             case FeatureVariable::JSON_TYPE:
                 return "getFeatureVariableJson";
+            case FeatureVariable::STRING_TYPE:
+                return "getFeatureVariableString";
             default:
                 return null;
         }

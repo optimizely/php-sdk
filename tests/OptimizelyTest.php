@@ -4108,7 +4108,10 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
           "double_variable": 13.37,
           "integer_variable": 13,
           "string_variable": "string variable",
-          "boolean_variable": true
+          "boolean_variable": true,
+          "json_invalid_variable": {
+            "text": "json_invalid_variable default value"
+          }
         }';
         $this->assertTrue($expectedVariation->getFeatureEnabled());
         $arrayParam = array(
@@ -4310,11 +4313,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->optimizelyObject->getAllFeatureVariables('double_single_variable_feature', 'user_id', []);
     }
-
-    /**
-     *
-     * End
-     */
 
     public function testGetFeatureVariableMethodsReturnNullWhenGetVariableValueForTypeReturnsNull()
     {

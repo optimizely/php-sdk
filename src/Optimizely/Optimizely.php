@@ -849,7 +849,6 @@ class Optimizely
 
         $featureFlag = $config->getFeatureFlagFromKey($featureFlagKey);
         if ($featureFlag && (!$featureFlag->getId())) {
-            // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
             return null;
         }
 

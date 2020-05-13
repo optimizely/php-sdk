@@ -711,6 +711,12 @@ define(
           "key": "boolean_variable",
           "type": "boolean",
           "defaultValue": "false"
+        },
+        {
+          "id": "122252",
+          "key": "json_invalid_variable",
+          "type": "json",
+          "defaultValue": "{\"text\": \"json_invalid_variable default value\"}"
         }
       ]
     },
