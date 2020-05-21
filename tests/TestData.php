@@ -363,6 +363,57 @@ define(
           }
         ]
       }]
+    },
+    {
+      "key": "test_experiment_json_feature",
+      "status": "Running",
+      "layerId": "5",
+      "audienceIds": [
+
+      ],
+      "id": "122245",
+      "forcedVariations": {
+
+      },
+      "trafficAllocation": [
+        {
+          "entityId": "122246",
+          "endOfRange": 5000
+        },
+        {
+          "entityId": "122240",
+          "endOfRange": 10000
+        }
+      ],
+      "variations": [
+        {
+          "id": "122246",
+          "key": "json_variation",
+          "variables": [
+            {
+              "id": "122247",
+              "value": "{\"text\": \"variable value\"}"
+            },
+            {
+                "id": "122248",
+                "value": "13.37"
+            },
+            {
+                "id": "122249",
+                "value": "13"
+            },
+            {
+                "id": "122250",
+                "value": "string variable"
+            },
+            {
+                "id": "122251",
+                "value": "true"
+            }
+          ],
+          "featureEnabled": true
+        }
+      ]
     }
   ],
   "version": "4",
@@ -619,6 +670,53 @@ define(
           "key": "string_variable",
           "type": "string",
           "defaultValue": "wingardium leviosa"
+        }
+      ]
+    },
+    {
+      "id": "155597",
+      "key": "multiple_variables_feature",
+      "rolloutId": "",
+      "experimentIds": [
+        122245
+      ],
+      "variables": [
+        {
+          "id": "122247",
+          "key": "json_variable",
+          "type": "string",
+          "subType": "json",
+          "defaultValue": "{\"text\": \"default value\"}"
+        },
+        {
+          "id": "122248",
+          "key": "double_variable",
+          "type": "double",
+          "defaultValue": "10.37"
+        },
+        {
+          "id": "122249",
+          "key": "integer_variable",
+          "type": "integer",
+          "defaultValue": "10"
+        },
+        {
+          "id": "122250",
+          "key": "string_variable",
+          "type": "string",
+          "defaultValue": "default string variable"
+        },
+        {
+          "id": "122251",
+          "key": "boolean_variable",
+          "type": "boolean",
+          "defaultValue": "false"
+        },
+        {
+          "id": "122252",
+          "key": "json_type_variable",
+          "type": "json",
+          "defaultValue": "{\"text\": \"json_type_variable default value\"}"
         }
       ]
     },
@@ -1307,6 +1405,10 @@ define(
                     {
                       "id": "17260550714",
                       "value": "0.5"
+                    },
+                    {
+                      "id": "17260550458",
+                      "value": "{\"text\": \"default value\"}"
                     }
                   ],
                   "id": "17285550838",
@@ -1369,6 +1471,13 @@ define(
               "type": "string",
               "id": "17290540010",
               "key": "string_var"
+            },
+            {
+              "id": "17260550458",
+              "key": "json_var",
+              "type": "string",
+              "subType": "json",
+              "defaultValue": "{\"text\": \"default value\"}"
             }
           ],
           "id": "17266500726",
@@ -1467,6 +1576,10 @@ define(
                     {
                       "id": "17260550714",
                       "value": "5.5"
+                    },
+                    {
+                      "id": "17260550458",
+                      "value": "{\"text\": \"variable value\"}"
                     }
                   ],
                   "id": "17289540366",

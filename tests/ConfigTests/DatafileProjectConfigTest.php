@@ -115,7 +115,8 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_with_feature_rollout' => $this->config->getExperimentFromKey('test_experiment_with_feature_rollout'),
             'test_experiment_double_feature' =>  $this->config->getExperimentFromKey('test_experiment_double_feature'),
             'test_experiment_integer_feature' =>  $this->config->getExperimentFromKey('test_experiment_integer_feature'),
-            'test_experiment_2' =>  $this->config->getExperimentFromKey('test_experiment_2')
+            'test_experiment_2' =>  $this->config->getExperimentFromKey('test_experiment_2'),
+            'test_experiment_json_feature' =>  $this->config->getExperimentFromKey('test_experiment_json_feature')
             ],
             $experimentKeyMap->getValue($this->config)
         );
@@ -133,7 +134,8 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             '122235' => $this->config->getExperimentFromId('122235'),
             '122238' => $this->config->getExperimentFromId('122238'),
             '122241' => $this->config->getExperimentFromId('122241'),
-            '111133' => $this->config->getExperimentFromId('111133')
+            '111133' => $this->config->getExperimentFromId('111133'),
+            '122245' => $this->config->getExperimentFromId('122245')
             ],
             $experimentIdMap->getValue($this->config)
         );
@@ -234,6 +236,9 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_2' => [
                 'test_variation_1' => $this->config->getVariationFromKey('test_experiment_2', 'test_variation_1'),
                 'test_variation_2' => $this->config->getVariationFromKey('test_experiment_2', 'test_variation_2')
+            ],
+            'test_experiment_json_feature' => [
+                'json_variation' => $this->config->getVariationFromKey('test_experiment_json_feature', 'json_variation')
             ]
             ],
             $variationKeyMap->getValue($this->config)
@@ -296,6 +301,9 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_2' => [
                 '151239' => $this->config->getVariationFromId('test_experiment_2', '151239'),
                 '151240' => $this->config->getVariationFromId('test_experiment_2', '151240')
+            ],
+            'test_experiment_json_feature' => [
+                '122246' => $this->config->getVariationFromId('test_experiment_json_feature', '122246')
             ]
             ],
             $variationIdMap->getValue($this->config)
@@ -312,6 +320,7 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             'integer_single_variable_feature' => $this->config->getFeatureFlagFromKey('integer_single_variable_feature'),
             'boolean_single_variable_feature' => $this->config->getFeatureFlagFromKey('boolean_single_variable_feature'),
             'string_single_variable_feature' => $this->config->getFeatureFlagFromKey('string_single_variable_feature'),
+            'multiple_variables_feature' => $this->config->getFeatureFlagFromKey('multiple_variables_feature'),
             'multi_variate_feature' => $this->config->getFeatureFlagFromKey('multi_variate_feature'),
             'mutex_group_feature' => $this->config->getFeatureFlagFromKey('mutex_group_feature'),
             'empty_feature' => $this->config->getFeatureFlagFromKey('empty_feature')
@@ -353,7 +362,8 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
                 '122235' => ['155557'],
                 '122230' => ['155559'],
                 '7723330021' => ['155562'],
-                '7718750065' => ['155562']
+                '7718750065' => ['155562'],
+                '122245' => ['155597']
             ],
             $experimentFeatureMap->getValue($this->config)
         );

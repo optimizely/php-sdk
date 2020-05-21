@@ -220,6 +220,18 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
         $featureFlags = isset($config['featureFlags']) ? $config['featureFlags']: [];
 
+        // JSON type is represented in datafile as a subtype of string for the sake of backwards compatibility.
+        // Converting it to a first-class json type while creating Project Config
+        foreach ($featureFlags as $featureFlagKey => $featureFlag) {
+            foreach ($featureFlag['variables'] as $variableKey => $variable) {
+                if (isset($variable['subType']) && $variable['type'] === FeatureVariable::STRING_TYPE && $variable['subType'] === FeatureVariable::JSON_TYPE) {
+                    $variable['type'] = FeatureVariable::JSON_TYPE;
+                    unset($variable['subType']);
+                    $featureFlags[$featureFlagKey]['variables'][$variableKey] = $variable;
+                }
+            }
+        }
+
         $this->_groupIdMap = ConfigParser::generateMap($groups, 'id', Group::class);
         $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);
         $this->_eventKeyMap = ConfigParser::generateMap($events, 'key', Event::class);

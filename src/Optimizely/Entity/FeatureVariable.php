@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, 2019, Optimizely
+ * Copyright 2017, 2019-2020 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,10 @@ class FeatureVariable
 
     // Feature variable primitive types
     const BOOLEAN_TYPE = 'boolean';
-    const STRING_TYPE = 'string';
-    const INTEGER_TYPE = 'integer';
     const DOUBLE_TYPE = 'double';
+    const INTEGER_TYPE = 'integer';
+    const JSON_TYPE = 'json';
+    const STRING_TYPE = 'string';
 
     /**
      * variable to hold the feature variable ID
@@ -46,6 +47,7 @@ class FeatureVariable
      * b. string
      * c. integer
      * d. double
+     * e. json
      *
      * @var String
      */
@@ -144,10 +146,12 @@ class FeatureVariable
         switch ($type) {
             case FeatureVariable::BOOLEAN_TYPE:
                 return "getFeatureVariableBoolean";
-            case FeatureVariable::INTEGER_TYPE:
-                return "getFeatureVariableInteger";
             case FeatureVariable::DOUBLE_TYPE:
                 return "getFeatureVariableDouble";
+            case FeatureVariable::INTEGER_TYPE:
+                return "getFeatureVariableInteger";
+            case FeatureVariable::JSON_TYPE:
+                return "getFeatureVariableJson";
             case FeatureVariable::STRING_TYPE:
                 return "getFeatureVariableString";
             default:
