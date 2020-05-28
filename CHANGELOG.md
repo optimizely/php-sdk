@@ -1,3 +1,9 @@
+## 3.3.1
+May 28th, 2020
+
+### Bug Fixes:
+- This release adds an SDK key param to Optimizely constructor. The user can now create an Optimizely instance only using an SDK key. Previously the user was required to create a HTTPProjectConfigManager, and pass it as a config manager in the constructor. ([#189](https://github.com/optimizely/php-sdk/pull/189), [#193](https://github.com/optimizely/php-sdk/pull/193)) 
+
 ## 3.3.0
 January 27th, 2020
 
