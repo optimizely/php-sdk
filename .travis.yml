@@ -19,7 +19,6 @@ after_script: "vendor/bin/php-coveralls -v"
 stages:
   - 'Linting'
   - 'Integration tests'
-  - 'Benchmarking tests'
   - 'Test'
 
 jobs:
@@ -31,8 +30,7 @@ jobs:
       script: 'composer lint'
       after_script: skip
       after_success: travis_terminate 0
-    - &integrationtest
-      stage: 'Integration tests'
+    - stage: 'Integration tests'
       merge_mode: replace
       env: SDK=php SDK_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
       cache: false
@@ -43,6 +41,3 @@ jobs:
       script:
         - $HOME/travisci-tools/trigger-script-with-status-update.sh
       after_success: travis_terminate 0
-    - <<: *integrationtest
-      stage: 'Benchmarking tests'
-      env: SDK=php FULLSTACK_TEST_REPO=Benchmarking SDK_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
