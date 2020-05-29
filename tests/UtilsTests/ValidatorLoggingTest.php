@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             [Logger::DEBUG, "Starting to evaluate audience \"11155\" with conditions: [\"and\",[\"or\",[\"or\",{\"name\":\"browser_type\",\"type\":\"custom_attribute\",\"value\":\"chrome\"}]]]."],
             $this->collectedLogs
         );
-        $this->assertContains([Logger::INFO, "Audience \"11155\" evaluated to UNKNOWN."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "Audience \"11155\" evaluated to UNKNOWN."], $this->collectedLogs);
         $this->assertContains([Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to FALSE."], $this->collectedLogs);
     }
 
@@ -105,7 +105,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             $this->collectedLogs
         );
         $this->assertContains(
-            [Logger::INFO, "Audience \"3468206642\" evaluated to FALSE."],
+            [Logger::DEBUG, "Audience \"3468206642\" evaluated to FALSE."],
             $this->collectedLogs
         );
         $this->assertContains(
@@ -113,7 +113,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             $this->collectedLogs
         );
         $this->assertContains(
-            [Logger::INFO, "Audience \"3988293898\" evaluated to TRUE."],
+            [Logger::DEBUG, "Audience \"3988293898\" evaluated to TRUE."],
             $this->collectedLogs
         );
         $this->assertContains([Logger::INFO, "Audiences for experiment \"audience_combinations_experiment\" collectively evaluated to TRUE."], $this->collectedLogs);

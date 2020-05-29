@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2019, Optimizely
+ * Copyright 2016-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,7 +187,7 @@ class Validator
             $result = $conditionTreeEvaluator->evaluate($audience->getConditionsList(), $evaluateCustomAttr);
             $resultStr = $result === null ? 'UNKNOWN' : strtoupper(var_export($result, true));
 
-            $logger->log(Logger::INFO, sprintf(
+            $logger->log(Logger::DEBUG, sprintf(
                 AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT,
                 $audienceId,
                 $resultStr
