@@ -104,8 +104,7 @@ class Optimizely
      */
     public $notificationCenter;
 
-    // 
-    
+
     /**
      * Optimizely constructor for managing Full Stack PHP projects.
      *
