@@ -72,6 +72,8 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
      */
     private $_notificationCenter;
 
+    private $datafileAccessToken;
+
     public function __construct(
         $sdkKey = null,
         $url = null,
@@ -81,12 +83,15 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         $skipJsonValidation = false,
         LoggerInterface $logger = null,
         ErrorHandlerInterface $errorHandler = null,
-        NotificationCenter $notificationCenter = null
+        NotificationCenter $notificationCenter = null,
+        $datafileAccessToken = null
     ) {
         $this->_skipJsonValidation = $skipJsonValidation;
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
         $this->_notificationCenter = $notificationCenter ?: new NotificationCenter($this->_logger, $this->_errorHandler);
+        $this->datafileAccessToken = $datafileAccessToken;
+
         $this->httpClient = new HttpClient();
         $this->_url = $this->getUrl($sdkKey, $url, $urlTemplate);
 
@@ -127,7 +132,11 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         if (!Validator::validateNonEmptyString($urlTemplate)) {
-            $urlTemplate = ProjectConfigManagerConstants::DEFAULT_URL_TEMPLATE;
+            if ($this->datafileAccessToken === null) {
+                $urlTemplate = ProjectConfigManagerConstants::DEFAULT_URL_TEMPLATE;
+            } else {
+                $urlTemplate = ProjectConfigManagerConstants::AUTHENTICATED_DATAFILE_URL_TEMPLATE;
+            }
         }
 
         $url = sprintf($urlTemplate, $sdkKey);
@@ -158,12 +167,18 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
      */
     protected function fetchDatafile()
     {
-        $headers = null;
+        $headers = [];
 
         // Add If-Modified-Since header.
         if (Validator::validateNonEmptyString($this->_lastModifiedSince)) {
-            $headers = array(ProjectConfigManagerConstants::IF_MODIFIED_SINCE => $this->_lastModifiedSince);
+            $headers[ProjectConfigManagerConstants::IF_MODIFIED_SINCE] = $this->_lastModifiedSince;
         }
+
+        // Add Authorization header if access token available.
+        if (Validator::validateNonEmptyString($this->datafileAccessToken)) {
+            $headers['Authorization'] = "Bearer {$this->datafileAccessToken}";
+        }
+
 
         $options = [
             'headers' => $headers,

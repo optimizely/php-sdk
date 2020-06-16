@@ -21,6 +21,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Monolog\Logger;
 use Optimizely\Config\DatafileProjectConfig;
@@ -329,6 +330,24 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($url, 'https://custom/datafiles/sdk_key.json');
     }
 
+    public function testGetUrlReturnsURLWhenSdkKeyAndTemplateAndAccessTokenAreNonEmptyString()
+    {
+        $url_template = "https://custom/datafiles/%s.json";
+
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
+            ->setConstructorArgs(array('sdk_key', null, $url_template, false, DATAFILE, false,
+                                    $this->loggerMock, $this->errorHandlerMock, null, 'some_token'))
+            ->setMethods(array('fetch'))
+            ->getMock();
+
+        $this->errorHandlerMock->expects($this->never())
+           ->method('handleError');
+
+        $url = $configManagerMock->getUrl('sdk_key', null, $url_template);
+
+        $this->assertEquals($url, 'https://custom/datafiles/sdk_key.json');
+    }
+
     public function testGetUrlReturnsURLUsingDefaultTemplateWhenTemplateIsEmptyString()
     {
         $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
@@ -343,6 +362,22 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         $url = $configManagerMock->getUrl('sdk_key', null, null);
 
         $this->assertEquals($url, 'https://cdn.optimizely.com/datafiles/sdk_key.json');
+    }
+
+    public function testGetUrlReturnsAuthDatafileURLWhenTemplateIsEmptyAndTokenIsProvided()
+    {
+        $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManagerTester::class)
+            ->setConstructorArgs(array('sdk_key', null, null, false, DATAFILE, false,
+                                    $this->loggerMock, $this->errorHandlerMock, null, 'some_token'))
+            ->setMethods(array('fetch'))
+            ->getMock();
+
+        $this->errorHandlerMock->expects($this->never())
+           ->method('handleError');
+
+        $url = $configManagerMock->getUrl('sdk_key', null, null);
+
+        $this->assertEquals($url, 'https://config.optimizely.com/datafiles/auth/sdk_key.json');
     }
 
     public function testHandleResponseReturnsFalseForSameDatafilesRevisions()
@@ -366,5 +401,52 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         // to previous revision.
         $this->assertSame($config->getRevision(), $datafile['revision']);
         $this->assertFalse($configManagerMock->handleResponse(DATAFILE));
+    }
+
+    public function testAuthTokenInRequestHeaderWhenTokenIsProvided()
+    {
+        $configManager = new HTTPProjectConfigManager(
+            'sdk_key',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'access_token'
+        );
+
+        // Mock http client to return a valid datafile
+        $mock = new MockHandler([
+            new Response(200, [], null)
+        ]);
+
+        $container = [];
+        $history = Middleware::history($container);
+        $handler = HandlerStack::create($mock);
+        $handler->push($history);
+
+        $client = new Client(['handler' => $handler]);
+        $httpClient = new \ReflectionProperty(HTTPProjectConfigManager::class, 'httpClient');
+        $httpClient->setAccessible(true);
+        $httpClient->setValue($configManager, $client);
+
+        // Fetch datafile
+        $configManager->fetch();
+
+        // assert that https call is made to mock as expected.
+        $transaction = $container[0];
+        $this->assertEquals(
+            'https://config.optimizely.com/datafiles/auth/sdk_key.json',
+            $transaction['request']->getUri()
+        );
+
+        // assert that headers include authorization access token
+        $this->assertEquals(
+            'Bearer access_token',
+            $transaction['request']->getHeaders()['Authorization'][0]
+        );
     }
 }
