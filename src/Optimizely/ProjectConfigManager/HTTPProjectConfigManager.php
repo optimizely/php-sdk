@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely Inc and Contributors
+ * Copyright 2019-2020, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,9 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
      */
     private $_notificationCenter;
 
+    /**
+    * @var String datafile access token.
+    */
     private $datafileAccessToken;
 
     public function __construct(
@@ -178,7 +181,6 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         if (Validator::validateNonEmptyString($this->datafileAccessToken)) {
             $headers['Authorization'] = "Bearer {$this->datafileAccessToken}";
         }
-
 
         $options = [
             'headers' => $headers,
