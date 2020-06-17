@@ -135,10 +135,10 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         if (!Validator::validateNonEmptyString($urlTemplate)) {
-            if ($this->datafileAccessToken === null) {
-                $urlTemplate = ProjectConfigManagerConstants::DEFAULT_URL_TEMPLATE;
-            } else {
+            if (Validator::validateNonEmptyString($this->datafileAccessToken)) {
                 $urlTemplate = ProjectConfigManagerConstants::AUTHENTICATED_DATAFILE_URL_TEMPLATE;
+            } else {
+                $urlTemplate = ProjectConfigManagerConstants::DEFAULT_URL_TEMPLATE;
             }
         }
 

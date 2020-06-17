@@ -20,6 +20,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Optimizely\OptimizelyFactory;
 use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
@@ -56,5 +57,47 @@ class OptimizelyFactoryTest extends \PHPUnit_Framework_TestCase
         $optimizelyClient->configManager->fetch();
 
         $this->assertEquals('3', $optimizelyClient->configManager->getConfig()->getRevision());
+    }
+
+    public function testDefaultInstanceWithAccessToken()
+    {
+        $optimizelyClient = OptimizelyFactory::createDefaultInstance(
+            "some-sdk-key",
+            null,
+            "some_token"
+        );
+
+        // Mock http client to return a valid datafile
+        $mock = new MockHandler([
+            new Response(200, [], $this->typedAudiencesDataFile)
+        ]);
+
+        $container = [];
+        $history = Middleware::history($container);
+        $handler = HandlerStack::create($mock);
+        $handler->push($history);
+
+        $client = new Client(['handler' => $handler]);
+        $httpClient = new \ReflectionProperty(HTTPProjectConfigManager::class, 'httpClient');
+        $httpClient->setAccessible(true);
+        $httpClient->setValue($optimizelyClient->configManager, $client);
+
+        /// Fetch datafile
+        $optimizelyClient->configManager->fetch();
+
+        $this->assertEquals('3', $optimizelyClient->configManager->getConfig()->getRevision());
+
+        // assert that https call is made to mock as expected.
+        $transaction = $container[0];
+        $this->assertEquals(
+            'https://config.optimizely.com/datafiles/auth/some-sdk-key.json',
+            $transaction['request']->getUri()
+        );
+
+        // assert that headers include authorization access token
+        $this->assertEquals(
+            'Bearer some_token',
+            $transaction['request']->getHeaders()['Authorization'][0]
+        );
     }
 }
