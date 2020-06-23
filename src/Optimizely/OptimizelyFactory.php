@@ -28,7 +28,7 @@ class OptimizelyFactory
 {
     public static function createDefaultInstance(
         $sdkKey,
-        $fallbackDatafile = null,
+        $datafile = null,
         $datafileAccessToken = null
     ) {
         $configManager = new HTTPProjectConfigManager(
@@ -36,7 +36,7 @@ class OptimizelyFactory
             null,
             null,
             true,
-            $fallbackDatafile,
+            $datafile,
             false,
             null,
             null,

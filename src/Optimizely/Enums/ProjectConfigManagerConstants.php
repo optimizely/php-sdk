@@ -27,7 +27,7 @@ class ProjectConfigManagerConstants
    /**
     * @const String Default URL Template to use if only SDK key is provided.
     */
-    const DEFAULT_URL_TEMPLATE = "https://cdn.optimizely.com/datafiles/%s.json";
+    const DEFAULT_DATAFILE_URL_TEMPLATE = "https://cdn.optimizely.com/datafiles/%s.json";
 
     /**
     * @const  String Default URL Template to use if Access token is provided along with the SDK key.
