@@ -136,6 +136,8 @@ class Validator
      * @param $experiment Experiment Entity representing the experiment.
      * @param $userAttributes array Attributes of the user.
      * @param $logger LoggerInterface.
+     * @param $isRollout Boolean true if experiment to evaluate is a rollout rule.
+     * @param $rolloutRule String Rollout rule identifier to log.
      *
      * @return boolean Representing whether user meets audience conditions to be in experiment or not.
      */
