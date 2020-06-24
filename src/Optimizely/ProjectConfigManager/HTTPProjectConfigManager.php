@@ -94,7 +94,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
         $this->_notificationCenter = $notificationCenter ?: new NotificationCenter($this->_logger, $this->_errorHandler);
         $this->datafileAccessToken = $datafileAccessToken;
-        $this->IsdatafileAccessTokenValid = Validator::validateNonEmptyString($this->datafileAccessToken);
+        $this->isDatafileAccessTokenValid = Validator::validateNonEmptyString($this->datafileAccessToken);
 
         $this->httpClient = new HttpClient();
         $this->_url = $this->getUrl($sdkKey, $url, $urlTemplate);
@@ -136,7 +136,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         if (!Validator::validateNonEmptyString($urlTemplate)) {
-            if ($this->IsdatafileAccessTokenValid) {
+            if ($this->isDatafileAccessTokenValid) {
                 $urlTemplate = ProjectConfigManagerConstants::AUTHENTICATED_DATAFILE_URL_TEMPLATE;
             } else {
                 $urlTemplate = ProjectConfigManagerConstants::DEFAULT_DATAFILE_URL_TEMPLATE;
@@ -179,7 +179,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         // Add Authorization header if access token available.
-        if ($this->IsdatafileAccessTokenValid) {
+        if ($this->isDatafileAccessTokenValid) {
             $headers['Authorization'] = "Bearer {$this->datafileAccessToken}";
         }
 
