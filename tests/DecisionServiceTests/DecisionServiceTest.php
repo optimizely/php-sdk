@@ -1125,8 +1125,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         );
 
         // Verify Logs
-        $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment0->getKey()}'."], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment1->getKey()}'."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 1."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 2."], $this->collectedLogs);
     }
 
     public function testGetVariationForFeatureRolloutWhenUserDoesNotQualifyForAnyTargetingRuleOrEveryoneElseRule()
@@ -1161,10 +1161,58 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes));
 
         // Verify Logs
-        $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment0->getKey()}'."], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment1->getKey()}'."], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, "User 'user_1' did not meet the audience conditions to be in rollout rule '{$experiment2->getKey()}'."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 1."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 2."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 'Everyone Else'."], $this->collectedLogs);
     }
+
+
+    public function testGetVariationForFeatureRolloutLogging()
+    {
+        $featureFlag = $this->config->getFeatureFlagFromKey('boolean_single_variable_feature');
+        $rollout_id = $featureFlag->getRolloutId();
+        $rollout = $this->config->getRolloutFromId($rollout_id);
+        $experiment0 = $rollout->getExperiments()[0];
+        $experiment1 = $rollout->getExperiments()[1];
+        // Everyone Else Rule
+        $experiment2 = $rollout->getExperiments()[2];
+        $expected_variation = $experiment2->getVariations()[0];
+        $expected_decision = new FeatureDecision(
+            $experiment2,
+            $expected_variation,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
+        // Provide null attributes so that user does not qualify for audience
+        $user_attributes = [];
+        $this->decisionService = new DecisionService($this->loggerMock);
+        $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
+        $bucketer->setAccessible(true);
+        $bucketer->setValue($this->decisionService, $this->bucketerMock);
+
+        // Expect bucket to be called exactly once for the everyone else/last rule.
+        $this->bucketerMock->expects($this->exactly(1))
+            ->method('bucket')
+            ->willReturn($expected_variation);
+
+        $this->loggerMock->expects($this->any())
+                        ->method('log')
+                        ->will($this->returnCallback($this->collectLogsForAssertion));
+
+        $this->assertEquals(
+            $expected_decision,
+            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
+        );
+
+        // Verify Logs
+        $this->assertContains([Logger::DEBUG, 'Evaluating audiences for rule 1: ["11155"].'], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, 'Audiences for rule 1 collectively evaluated to FALSE.'], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, 'Evaluating audiences for rule 2: ["11155"].'], $this->collectedLogs);
+        $this->assertContains([Logger::INFO,'Audiences for rule 2 collectively evaluated to FALSE.'], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, 'Evaluating audiences for rule Everyone Else: [].'], $this->collectedLogs);
+        $this->assertContains([Logger::INFO, 'Audiences for rule Everyone Else collectively evaluated to TRUE.'], $this->collectedLogs);
+    }
+
 
     // test set/get forced variation for the following cases:
     //      - valid and invalid user ID

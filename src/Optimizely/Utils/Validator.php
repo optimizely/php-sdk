@@ -139,8 +139,15 @@ class Validator
      *
      * @return boolean Representing whether user meets audience conditions to be in experiment or not.
      */
-    public static function isUserInExperiment($config, $experiment, $userAttributes, $logger)
+    public static function isUserInExperiment($config, $experiment, $userAttributes, $logger, $isRollout = null, $rolloutRule = null)
     {
+
+        $loggingStr = "experiment \"{$experiment->getKey()}\"";
+
+        if ($isRollout) {
+            $loggingStr = "rule {$rolloutRule}";
+        }
+
         $audienceConditions = $experiment->getAudienceConditions();
         if ($audienceConditions === null) {
             $audienceConditions = $experiment->getAudienceIds();
@@ -148,7 +155,7 @@ class Validator
 
         $logger->log(Logger::DEBUG, sprintf(
             AudienceEvaluationLogs::EVALUATING_AUDIENCES_COMBINED,
-            $experiment->getKey(),
+            $loggingStr,
             json_encode($audienceConditions)
         ));
 
@@ -156,7 +163,7 @@ class Validator
         if (empty($audienceConditions)) {
             $logger->log(Logger::INFO, sprintf(
                 AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
-                $experiment->getKey(),
+                $loggingStr,
                 'TRUE'
             ));
             return true;
@@ -202,7 +209,7 @@ class Validator
 
         $logger->log(Logger::INFO, sprintf(
             AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
-            $experiment->getKey(),
+            $loggingStr,
             strtoupper(var_export($evalResult, true))
         ));
 

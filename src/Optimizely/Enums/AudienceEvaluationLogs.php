@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ namespace Optimizely\Enums;
 class AudienceEvaluationLogs
 {
     const AUDIENCE_EVALUATION_RESULT = "Audience \"%s\" evaluated to %s.";
-    const AUDIENCE_EVALUATION_RESULT_COMBINED = "Audiences for experiment \"%s\" collectively evaluated to %s.";
-    const EVALUATING_AUDIENCES_COMBINED = "Evaluating audiences for experiment \"%s\": %s.";
+    const AUDIENCE_EVALUATION_RESULT_COMBINED = "Audiences for %s collectively evaluated to %s.";
+    const EVALUATING_AUDIENCES_COMBINED = "Evaluating audiences for %s: %s.";
     const EVALUATING_AUDIENCE = "Starting to evaluate audience \"%s\" with conditions: %s.";
     const INFINITE_ATTRIBUTE_VALUE = "Audience condition %s evaluated to UNKNOWN because the number value for user attribute \"%s\" is not in the range [-2^53, +2^53].";
     const MISSING_ATTRIBUTE_VALUE = "Audience condition %s evaluated to UNKNOWN because no value was passed for user attribute \"%s\".";
