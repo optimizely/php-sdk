@@ -17,6 +17,7 @@
 namespace Optimizely;
 
 use Optimizely\Optimizely;
+use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
 
 /**
  * Class OptimizelyFactory
@@ -25,18 +26,34 @@ use Optimizely\Optimizely;
  */
 class OptimizelyFactory
 {
-    public static function createDefaultInstance($sdkKey, $fallbackDatafile = null)
-    {
+    public static function createDefaultInstance(
+        $sdkKey,
+        $datafile = null,
+        $datafileAccessToken = null
+    ) {
+        $configManager = new HTTPProjectConfigManager(
+            $sdkKey,
+            null,
+            null,
+            true,
+            $datafile,
+            false,
+            null,
+            null,
+            null,
+            $datafileAccessToken
+        );
+
         return new Optimizely(
-            $fallbackDatafile,
             null,
             null,
             null,
             null,
             null,
             null,
+            $configManager,
             null,
-            $sdkKey
+            null
         );
     }
 }

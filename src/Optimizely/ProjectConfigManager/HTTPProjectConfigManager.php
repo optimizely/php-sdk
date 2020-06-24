@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely Inc and Contributors
+ * Copyright 2019-2020, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,11 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
      */
     private $_notificationCenter;
 
+    /**
+    * @var String datafile access token.
+    */
+    private $datafileAccessToken;
+
     public function __construct(
         $sdkKey = null,
         $url = null,
@@ -81,12 +86,16 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         $skipJsonValidation = false,
         LoggerInterface $logger = null,
         ErrorHandlerInterface $errorHandler = null,
-        NotificationCenter $notificationCenter = null
+        NotificationCenter $notificationCenter = null,
+        $datafileAccessToken = null
     ) {
         $this->_skipJsonValidation = $skipJsonValidation;
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
         $this->_notificationCenter = $notificationCenter ?: new NotificationCenter($this->_logger, $this->_errorHandler);
+        $this->datafileAccessToken = $datafileAccessToken;
+        $this->isDatafileAccessTokenValid = Validator::validateNonEmptyString($this->datafileAccessToken);
+
         $this->httpClient = new HttpClient();
         $this->_url = $this->getUrl($sdkKey, $url, $urlTemplate);
 
@@ -127,7 +136,11 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         if (!Validator::validateNonEmptyString($urlTemplate)) {
-            $urlTemplate = ProjectConfigManagerConstants::DEFAULT_URL_TEMPLATE;
+            if ($this->isDatafileAccessTokenValid) {
+                $urlTemplate = ProjectConfigManagerConstants::AUTHENTICATED_DATAFILE_URL_TEMPLATE;
+            } else {
+                $urlTemplate = ProjectConfigManagerConstants::DEFAULT_DATAFILE_URL_TEMPLATE;
+            }
         }
 
         $url = sprintf($urlTemplate, $sdkKey);
@@ -158,11 +171,16 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
      */
     protected function fetchDatafile()
     {
-        $headers = null;
+        $headers = [];
 
         // Add If-Modified-Since header.
         if (Validator::validateNonEmptyString($this->_lastModifiedSince)) {
-            $headers = array(ProjectConfigManagerConstants::IF_MODIFIED_SINCE => $this->_lastModifiedSince);
+            $headers[ProjectConfigManagerConstants::IF_MODIFIED_SINCE] = $this->_lastModifiedSince;
+        }
+
+        // Add Authorization header if access token available.
+        if ($this->isDatafileAccessTokenValid) {
+            $headers['Authorization'] = "Bearer {$this->datafileAccessToken}";
         }
 
         $options = [

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,12 @@ class ProjectConfigManagerConstants
    /**
     * @const String Default URL Template to use if only SDK key is provided.
     */
-    const DEFAULT_URL_TEMPLATE = "https://cdn.optimizely.com/datafiles/%s.json";
+    const DEFAULT_DATAFILE_URL_TEMPLATE = "https://cdn.optimizely.com/datafiles/%s.json";
+
+    /**
+    * @const  String Default URL Template to use if Access token is provided along with the SDK key.
+    */
+    const AUTHENTICATED_DATAFILE_URL_TEMPLATE = "https://config.optimizely.com/datafiles/auth/%s.json";
 
    /**
     * @const String to use while fetching the datafile.

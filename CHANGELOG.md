@@ -1,3 +1,10 @@
+# Optimizely PHP SDK Changelog
+
+## [Unreleased]
+
+### New Features:
+- Added support for authenticated datafiles. `HTTPProjectConfigManager` now accepts `datafileAccessToken` to be able to fetch authenticated datafiles.
+
 ## 3.3.1
 May 28th, 2020
 
