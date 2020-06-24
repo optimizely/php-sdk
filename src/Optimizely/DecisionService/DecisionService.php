@@ -161,9 +161,21 @@ class DecisionService
         }
 
         $variation = $this->_bucketer->bucket($projectConfig, $experiment, $bucketingId, $userId);
-        if (!is_null($variation)) {
+        if ($variation === null) {
+            $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no variation.', $userId));
+        } else {
             $this->saveVariation($experiment, $variation, $userProfile);
+            $this->_logger->log(
+                Logger::INFO,
+                sprintf(
+                    'User "%s" is in variation %s of experiment %s.',
+                    $userId,
+                    $variation->getKey(),
+                    $experiment->getKey()
+                )
+            );
         }
+
         return $variation;
     }
 

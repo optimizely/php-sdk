@@ -96,16 +96,13 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $bucketer = new TestBucketer($this->loggerMock);
         $bucketer->setBucketValues([1000, 3000, 7000, 9000]);
         // Total calls in this test
-        $this->loggerMock->expects($this->exactly(8))
+        $this->loggerMock->expects($this->exactly(4))
             ->method('log');
 
         // No variation (empty entity ID)
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 1000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
-        $this->loggerMock->expects($this->at(1))
-            ->method('log')
-            ->with(Logger::INFO, 'User "testUserId" is in no variation.');
 
         $this->assertNull(
             $bucketer->bucket(
@@ -120,12 +117,6 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 3000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
-        $this->loggerMock->expects($this->at(1))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "testUserId" is in variation control of experiment test_experiment.'
-            );
 
         $this->assertEquals(
             new Variation('7722370027', 'control'),
@@ -141,12 +132,6 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 7000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
-        $this->loggerMock->expects($this->at(1))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "testUserId" is in variation variation of experiment test_experiment.'
-            );
 
         $this->assertEquals(
             new Variation('7721010009', 'variation'),
@@ -162,9 +147,6 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 9000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
-        $this->loggerMock->expects($this->at(1))
-            ->method('log')
-            ->with(Logger::INFO, 'User "testUserId" is in no variation.');
 
         $this->assertNull(
             $bucketer->bucket(
@@ -180,7 +162,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     {
         $bucketer = new TestBucketer($this->loggerMock);
         // Total calls in this test
-        $this->loggerMock->expects($this->exactly(14))
+        $this->loggerMock->expects($this->exactly(12))
             ->method('log');
 
         // group_experiment_1 (15% experiment)
@@ -195,12 +177,6 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(2))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 4000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
-        $this->loggerMock->expects($this->at(3))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "testUserId" is in variation group_exp_1_var_1 of experiment group_experiment_1.'
-            );
 
         $this->assertEquals(
             new Variation(
@@ -233,12 +209,6 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(2))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 7000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
-        $this->loggerMock->expects($this->at(3))
-            ->method('log')
-            ->with(
-                Logger::INFO,
-                'User "testUserId" is in variation group_exp_1_var_2 of experiment group_experiment_1.'
-            );
 
         $this->assertEquals(
             new Variation(
