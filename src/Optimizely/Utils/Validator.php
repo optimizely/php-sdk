@@ -20,7 +20,8 @@ use JsonSchema;
 use Monolog\Logger;
 use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
-use Optimizely\Enums\AudienceEvaluationLogs;
+use Optimizely\Enums\ExperimentAudienceEvaluationLogs;
+use Optimizely\Enums\RolloutAudienceEvaluationLogs;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Utils\ConditionTreeEvaluator;
 use Optimizely\Utils\CustomAttributeConditionEvaluator;
@@ -143,11 +144,12 @@ class Validator
      */
     public static function doesUserMeetAudienceConditions($config, $experiment, $userAttributes, $logger, $isRollout = null, $rolloutRule = null)
     {
-
-        $loggingStr = "experiment \"{$experiment->getKey()}\"";
+        $loggingClass = 'Optimizely\Enums\ExperimentAudienceEvaluationLogs';
+        $loggingStr = $experiment->getKey();
 
         if ($isRollout) {
-            $loggingStr = "rule {$rolloutRule}";
+            $loggingClass = 'Optimizely\Enums\RolloutAudienceEvaluationLogs';
+            $loggingStr = $rolloutRule;
         }
 
         $audienceConditions = $experiment->getAudienceConditions();
@@ -156,7 +158,7 @@ class Validator
         }
 
         $logger->log(Logger::DEBUG, sprintf(
-            AudienceEvaluationLogs::EVALUATING_AUDIENCES_COMBINED,
+            $loggingClass::EVALUATING_AUDIENCES_COMBINED,
             $loggingStr,
             json_encode($audienceConditions)
         ));
@@ -164,7 +166,7 @@ class Validator
         // Return true if experiment is not targeted to any audience.
         if (empty($audienceConditions)) {
             $logger->log(Logger::INFO, sprintf(
-                AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
+                $loggingClass::AUDIENCE_EVALUATION_RESULT_COMBINED,
                 $loggingStr,
                 'TRUE'
             ));
@@ -180,14 +182,14 @@ class Validator
             return $customAttrCondEval->evaluate($leafCondition);
         };
 
-        $evaluateAudience = function ($audienceId) use ($config, $evaluateCustomAttr, $logger) {
+        $evaluateAudience = function ($audienceId) use ($config, $evaluateCustomAttr, $logger, $loggingClass) {
             $audience = $config->getAudience($audienceId);
             if ($audience === null) {
                 return null;
             }
             
             $logger->log(Logger::DEBUG, sprintf(
-                AudienceEvaluationLogs::EVALUATING_AUDIENCE,
+                $loggingClass::EVALUATING_AUDIENCE,
                 $audienceId,
                 json_encode($audience->getConditionsList())
             ));
@@ -197,7 +199,7 @@ class Validator
             $resultStr = $result === null ? 'UNKNOWN' : strtoupper(var_export($result, true));
 
             $logger->log(Logger::DEBUG, sprintf(
-                AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT,
+                $loggingClass::AUDIENCE_EVALUATION_RESULT,
                 $audienceId,
                 $resultStr
             ));
@@ -210,7 +212,7 @@ class Validator
         $evalResult = $evalResult || false;
 
         $logger->log(Logger::INFO, sprintf(
-            AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
+            $loggingClass::AUDIENCE_EVALUATION_RESULT_COMBINED,
             $loggingStr,
             strtoupper(var_export($evalResult, true))
         ));
