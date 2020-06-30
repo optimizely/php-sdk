@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2019, Optimizely
+ * Copyright 2016-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,7 +188,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     // test that Audience evaluation proceeds if provided attributes are empty or null.
-    public function testIsUserInExperimentAudienceUsedInExperimentNoAttributesProvided()
+    public function testdoesUserMeetAudienceConditionsAudienceUsedInExperimentNoAttributesProvided()
     {
         $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, $this->loggerMock, new NoOpErrorHandler()))
@@ -213,7 +213,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($audience));
 
         $this->assertTrue(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $configMock,
                 $experiment,
                 null,
@@ -222,7 +222,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertTrue(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $configMock,
                 $experiment,
                 [],
@@ -231,11 +231,11 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testIsUserInExperimentAudienceMatch()
+    public function testdoesUserMeetAudienceConditionsAudienceMatch()
     {
         $config = new DatafileProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertTrue(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $config,
                 $config->getExperimentFromKey('test_experiment'),
                 ['device_type' => 'iPhone', 'location' => 'San Francisco'],
@@ -244,11 +244,11 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testIsUserInExperimentAudienceNoMatch()
+    public function testdoesUserMeetAudienceConditionsAudienceNoMatch()
     {
         $config = new DatafileProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertFalse(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $config,
                 $config->getExperimentFromKey('test_experiment'),
                 ['device_type' => 'Android', 'location' => 'San Francisco'],
@@ -257,8 +257,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    // test that isUserInExperiment returns true when no audience is attached to experiment.
-    public function testIsUserInExperimentNoAudienceUsedInExperiment()
+    // test that doesUserMeetAudienceConditions returns true when no audience is attached to experiment.
+    public function testdoesUserMeetAudienceConditionsNoAudienceUsedInExperiment()
     {
         $config = new DatafileProjectConfig(DATAFILE, null, null);
         $experiment = $config->getExperimentFromKey('test_experiment');
@@ -267,7 +267,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $experiment->setAudienceIds([]);
         $experiment->setAudienceConditions([]);
         $this->assertTrue(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $config,
                 $experiment,
                 [],
@@ -279,7 +279,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $experiment->setAudienceIds(['7718080042']);
         $experiment->setAudienceConditions([]);
         $this->assertTrue(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $config,
                 $experiment,
                 [],
@@ -291,7 +291,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $experiment->setAudienceIds([]);
         $experiment->setAudienceConditions(null);
         $this->assertTrue(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $config,
                 $experiment,
                 [],
@@ -300,9 +300,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    // test that isUserInExperiment returns false when some audience is attached to experiment
+    // test that doesUserMeetAudienceConditions returns false when some audience is attached to experiment
     // and user attributes do not match.
-    public function testIsUserInExperimentSomeAudienceUsedInExperiment()
+    public function testdoesUserMeetAudienceConditionsSomeAudienceUsedInExperiment()
     {
         $config = new DatafileProjectConfig(DATAFILE, null, null);
         $experiment = $config->getExperimentFromKey('test_experiment');
@@ -312,7 +312,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $experiment->setAudienceConditions(['11155']);
 
         $this->assertFalse(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $config,
                 $experiment,
                 ['device_type' => 'Android', 'location' => 'San Francisco'],
@@ -326,7 +326,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $experiment->setAudienceConditions(null);
 
         $this->assertFalse(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $config,
                 $experiment,
                 ['device_type' => 'iPhone', 'location' => 'San Francisco'],
@@ -335,8 +335,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    // test that isUserInExperiment evaluates audience when audienceConditions is an audience leaf node.
-    public function testIsUserInExperimentWithAudienceConditionsSetToAudienceIdString()
+    // test that doesUserMeetAudienceConditions evaluates audience when audienceConditions is an audience leaf node.
+    public function testdoesUserMeetAudienceConditionsWithAudienceConditionsSetToAudienceIdString()
     {
         $config = new DatafileProjectConfig(DATAFILE, null, null);
         $experiment = $config->getExperimentFromKey('test_experiment');
@@ -346,7 +346,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $experiment->setAudienceConditions('7718080042');
         
         $this->assertTrue(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $config,
                 $experiment,
                 ['device_type' => 'iPhone', 'location' => 'San Francisco'],
@@ -355,7 +355,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testIsUserInExperimentWithUnknownAudienceId()
+    public function testdoesUserMeetAudienceConditionsWithUnknownAudienceId()
     {
         $config = new DatafileProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
         $experiment = $config->getExperimentFromKey('test_experiment');
@@ -366,7 +366,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         
         // User qualifies for audience with ID "7718080042".
         $this->assertTrue(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $config,
                 $experiment,
                 ['device_type' => 'iPhone', 'location' => 'San Francisco'],
@@ -375,8 +375,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    // test that isUserInExperiment evaluates simple audience.
-    public function testIsUserInExperimentWithSimpleAudience()
+    // test that doesUserMeetAudienceConditions evaluates simple audience.
+    public function testdoesUserMeetAudienceConditionsWithSimpleAudience()
     {
         $config = new DatafileProjectConfig(DATAFILE, null, null);
         $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
@@ -399,7 +399,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($config->getAudience('7718080042')));
 
         $this->assertTrue(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $configMock,
                 $experiment,
                 ['device_type' => 'iPhone', 'location' => 'San Francisco'],
@@ -408,8 +408,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    // test that isUserInExperiment evaluates complex audience.
-    public function testIsUserInExperimentWithComplexAudience()
+    // test that doesUserMeetAudienceConditions evaluates complex audience.
+    public function testdoesUserMeetAudienceConditionsWithComplexAudience()
     {
         $config = new DatafileProjectConfig(DATAFILE_WITH_TYPED_AUDIENCES, null, null);
         $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
@@ -456,7 +456,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($config->getAudience('3468206643')));
 
         $this->assertTrue(
-            Validator::isUserInExperiment(
+            Validator::doesUserMeetAudienceConditions(
                 $configMock,
                 $experiment,
                 ['should_do_it' => true, 'house' => 'foo'],

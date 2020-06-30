@@ -141,7 +141,7 @@ class Validator
      *
      * @return boolean Representing whether user meets audience conditions to be in experiment or not.
      */
-    public static function isUserInExperiment($config, $experiment, $userAttributes, $logger, $isRollout = null, $rolloutRule = null)
+    public static function doesUserMeetAudienceConditions($config, $experiment, $userAttributes, $logger, $isRollout = null, $rolloutRule = null)
     {
 
         $loggingStr = "experiment \"{$experiment->getKey()}\"";
