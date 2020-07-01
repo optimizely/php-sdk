@@ -313,7 +313,7 @@ class DecisionService
             $rolloutRule = $rolloutRules[$i];
 
             // Evaluate if user meets the audience condition of this rollout rule
-            if (!Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, true, $i + 1)) {
+            if (!Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', $i + 1)) {
                 $this->_logger->log(
                     Logger::DEBUG,
                     sprintf("User '%s' does not meet conditions for targeting rule %s.", $userId, $i+1)
@@ -333,7 +333,7 @@ class DecisionService
         $rolloutRule = $rolloutRules[sizeof($rolloutRules)-1];
 
         // Evaluate if user meets the audience condition of Everyone Else Rule / Last Rule now
-        if (!Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, true, 'Everyone Else')) {
+        if (!Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', 'Everyone Else')) {
             $this->_logger->log(
                 Logger::DEBUG,
                 sprintf("User '%s' does not meet conditions for targeting rule 'Everyone Else'.", $userId)

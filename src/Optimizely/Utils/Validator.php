@@ -20,8 +20,6 @@ use JsonSchema;
 use Monolog\Logger;
 use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
-use Optimizely\Enums\ExperimentAudienceEvaluationLogs;
-use Optimizely\Enums\RolloutAudienceEvaluationLogs;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Utils\ConditionTreeEvaluator;
 use Optimizely\Utils\CustomAttributeConditionEvaluator;
@@ -134,22 +132,22 @@ class Validator
 
     /**
      * @param $config ProjectConfigInterface Configuration for the project.
-     * @param $experiment Experiment Entity representing the experiment.
+     * @param $experiment Experiment Entity representing the experiment or rollout rule.
      * @param $userAttributes array Attributes of the user.
      * @param $logger LoggerInterface.
-     * @param $isRollout Boolean true if experiment to evaluate is a rollout rule.
-     * @param $rolloutRule String Rollout rule identifier to log.
+     * @param $loggingClass String Class holding log strings with placeholders.
+     * @param $loggingKey String Identifier of an experiment/rollout rule.
      *
      * @return boolean Representing whether user meets audience conditions to be in experiment or not.
      */
-    public static function doesUserMeetAudienceConditions($config, $experiment, $userAttributes, $logger, $isRollout = null, $rolloutRule = null)
+    public static function doesUserMeetAudienceConditions($config, $experiment, $userAttributes, $logger, $loggingClass = null, $loggingKey = null)
     {
-        $loggingClass = 'Optimizely\Enums\ExperimentAudienceEvaluationLogs';
-        $loggingStr = $experiment->getKey();
+        if ($loggingClass === null) {
+            $loggingClass = 'Optimizely\Enums\ExperimentAudienceEvaluationLogs';
+        }
 
-        if ($isRollout) {
-            $loggingClass = 'Optimizely\Enums\RolloutAudienceEvaluationLogs';
-            $loggingStr = $rolloutRule;
+        if ($loggingKey === null) {
+            $loggingKey = $experiment->getKey();
         }
 
         $audienceConditions = $experiment->getAudienceConditions();
@@ -159,7 +157,7 @@ class Validator
 
         $logger->log(Logger::DEBUG, sprintf(
             $loggingClass::EVALUATING_AUDIENCES_COMBINED,
-            $loggingStr,
+            $loggingKey,
             json_encode($audienceConditions)
         ));
 
@@ -167,7 +165,7 @@ class Validator
         if (empty($audienceConditions)) {
             $logger->log(Logger::INFO, sprintf(
                 $loggingClass::AUDIENCE_EVALUATION_RESULT_COMBINED,
-                $loggingStr,
+                $loggingKey,
                 'TRUE'
             ));
             return true;
@@ -213,7 +211,7 @@ class Validator
 
         $logger->log(Logger::INFO, sprintf(
             $loggingClass::AUDIENCE_EVALUATION_RESULT_COMBINED,
-            $loggingStr,
+            $loggingKey,
             strtoupper(var_export($evalResult, true))
         ));
 
