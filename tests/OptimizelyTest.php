@@ -4009,7 +4009,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testgetFeatureVariableJSON()
+    public function testGetFeatureVariableJSON()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
             ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
@@ -4027,7 +4027,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testgetFeatureVariableJSONCallsDecisionListenerGivenUserInExperimentAndFeatureFlagIsEnabled()
+    public function testGetFeatureVariableJSONCallsDecisionListenerGivenUserInExperimentAndFeatureFlagIsEnabled()
     {
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
