@@ -809,7 +809,7 @@ class Optimizely
     *
     * @return array Associative array of json variable including key and value
     */
-    public function getFeatureVariableJson($featureFlagKey, $variableKey, $userId, $attributes = null)
+    public function getFeatureVariableJSON($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
         return $this->getFeatureVariableValueForType(
             $featureFlagKey,

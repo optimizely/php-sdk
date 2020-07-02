@@ -4009,7 +4009,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGetFeatureVariableJson()
+    public function testgetFeatureVariableJSON()
     {
         $optimizelyMock = $this->getMockBuilder(Optimizely::class)
             ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
@@ -4023,11 +4023,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValueMap($map));
         $this->assertSame(
             json_decode("{\"text\": \"variable value\"}", true),
-            $optimizelyMock->getFeatureVariableJson('json_single_variable_feature', 'json_variable', 'user_id', [])
+            $optimizelyMock->getFeatureVariableJSON('json_single_variable_feature', 'json_variable', 'user_id', [])
         );
     }
 
-    public function testGetFeatureVariableJsonCallsDecisionListenerGivenUserInExperimentAndFeatureFlagIsEnabled()
+    public function testgetFeatureVariableJSONCallsDecisionListenerGivenUserInExperimentAndFeatureFlagIsEnabled()
     {
         // should return specific value
         $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
@@ -4076,7 +4076,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $this->optimizelyObject->notificationCenter = $this->notificationCenterMock;
 
-        $this->optimizelyObject->getFeatureVariableJson('multiple_variables_feature', 'json_variable', 'user_id', []);
+        $this->optimizelyObject->getFeatureVariableJSON('multiple_variables_feature', 'json_variable', 'user_id', []);
     }
 
     public function testGetAllFeatureVariablesReturnsValuesGivenUserInExperimentAndFeatureFlagIsEnabled()
