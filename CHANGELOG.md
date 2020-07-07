@@ -1,9 +1,15 @@
 # Optimizely PHP SDK Changelog
 
-## [Unreleased]
+### New Features:
+
+## 3.4.0
+July 8th, 2020
 
 ### New Features:
-- Added support for authenticated datafiles. `HTTPProjectConfigManager` now accepts `datafileAccessToken` to be able to fetch authenticated datafiles.
+- Introduced 2 APIs to interact with feature variables:
+  - `getFeatureVariableJSON` allows you to get value for JSON variables related to a feature.
+  - `getAllFeatureVariables` gets values for all variables under a feature.
+- Added support for fetching authenticated datafiles. `HTTPProjectConfigManager` now accepts `datafileAccessToken` to be able to fetch datafiles belonging to secure environments.
 
 ## 3.3.1
 May 28th, 2020
