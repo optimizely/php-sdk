@@ -11,6 +11,9 @@ July 8th, 2020
   - `getAllFeatureVariables` gets values for all variables under a feature.
 - Added support for fetching authenticated datafiles. `HTTPProjectConfigManager` now accepts `datafileAccessToken` to be able to fetch datafiles belonging to secure environments.
 
+### Bug Fixes:
+- Adjusted log level for audience evaluation logs. [#198](https://github.com/optimizely/php-sdk/pull/198)
+
 ## 3.3.1
 May 28th, 2020
 
