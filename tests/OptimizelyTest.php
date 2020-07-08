@@ -3634,8 +3634,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::INFO,
-                "Feature 'double_single_variable_feature' for variation 'control' is not enabled, ".
-                "returning default value '14.99'."
+                "Feature 'double_single_variable_feature' is not enabled for user 'user_id'. ".
+                "Returning the default variable value '14.99'."
             );
 
         $this->assertSame(
@@ -3714,8 +3714,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::INFO,
-                "Feature 'boolean_single_variable_feature' for variation '177771' is not enabled, ".
-                "returning default value 'true'."
+                "Feature 'boolean_single_variable_feature' is not enabled for user 'user_id'. ".
+                "Returning the default variable value 'true'."
             );
 
         $this->assertTrue($this->optimizelyObject->getFeatureVariableBoolean('boolean_single_variable_feature', 'boolean_variable', 'user_id', []));

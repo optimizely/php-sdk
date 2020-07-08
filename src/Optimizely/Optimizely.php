@@ -954,8 +954,8 @@ class Optimizely
             } else {
                 $this->_logger->log(
                     Logger::INFO,
-                    "Feature '{$featureFlagKey}' for variation '{$variation->getKey()}' is not enabled, ".
-                    "returning default value '{$variableValue}'."
+                    "Feature '{$featureFlagKey}' is not enabled for user '{$userId}'. ".
+                    "Returning the default variable value '{$variableValue}'."
                 );
             }
         }
