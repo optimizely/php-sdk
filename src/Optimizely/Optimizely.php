@@ -809,7 +809,7 @@ class Optimizely
     *
     * @return array Associative array of json variable including key and value
     */
-    public function getFeatureVariableJson($featureFlagKey, $variableKey, $userId, $attributes = null)
+    public function getFeatureVariableJSON($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
         return $this->getFeatureVariableValueForType(
             $featureFlagKey,
@@ -954,8 +954,8 @@ class Optimizely
             } else {
                 $this->_logger->log(
                     Logger::INFO,
-                    "Feature '{$featureFlagKey}' for variation '{$variation->getKey()}' is not enabled, ".
-                    "returning default value '{$variableValue}'."
+                    "Feature '{$featureFlagKey}' is not enabled for user '{$userId}'. ".
+                    "Returning the default variable value '{$variableValue}'."
                 );
             }
         }

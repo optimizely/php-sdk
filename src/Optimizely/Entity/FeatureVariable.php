@@ -151,7 +151,7 @@ class FeatureVariable
             case FeatureVariable::INTEGER_TYPE:
                 return "getFeatureVariableInteger";
             case FeatureVariable::JSON_TYPE:
-                return "getFeatureVariableJson";
+                return "getFeatureVariableJSON";
             case FeatureVariable::STRING_TYPE:
                 return "getFeatureVariableString";
             default:
