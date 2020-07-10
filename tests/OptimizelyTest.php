@@ -3558,7 +3558,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::INFO,
-                "User 'user_id'is not in any variation, returning default value '14.99'."
+                "User 'user_id' is not in experiment or rollout, returning default value '14.99'."
             );
 
         $this->assertSame(
@@ -3595,8 +3595,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::INFO,
-                "Returning variable value '42.42' for variation 'control' ".
-                    "of feature flag 'double_single_variable_feature'"
+                "Returning variable value '42.42' for variable key 'double_variable' ".
+                "of feature flag 'double_single_variable_feature'."
             );
 
         $this->assertSame(
@@ -3675,8 +3675,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::INFO,
-                "Returning variable value 'true' for variation '177771' ".
-                "of feature flag 'boolean_single_variable_feature'"
+                "Returning variable value 'true' for variable key 'boolean_variable' ".
+                "of feature flag 'boolean_single_variable_feature'."
             );
 
         $this->assertTrue($this->optimizelyObject->getFeatureVariableBoolean('boolean_single_variable_feature', 'boolean_variable', 'user_id', []));
@@ -3751,7 +3751,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::INFO,
-                "Variable 'double_variable' is not used in variation 'control', returning default value '14.99'."
+                "Variable value is not defined. Returning the default variable value '14.99'."
             );
 
         $this->assertSame(
@@ -3793,11 +3793,11 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::INFO,
-                "User ''is not in any variation, returning default value '14.99'."
+                "User 'test_user' is not in experiment or rollout, returning default value '14.99'."
             );
 
         $this->assertSame(
-            $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', '', [], 'double'),
+            $this->optimizelyObject->getFeatureVariableValueForType('double_single_variable_feature', 'double_variable', 'test_user', [], 'double'),
             14.99
         );
     }
@@ -4254,8 +4254,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::INFO,
-                "Returning variable value '42.42' for variation 'control' ".
-                "of feature flag 'double_single_variable_feature'"
+                "Returning variable value '42.42' for variable key 'double_variable'".
+                " of feature flag 'double_single_variable_feature'."
             );
 
         $this->assertSame(
