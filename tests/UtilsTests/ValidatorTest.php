@@ -188,7 +188,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     // test that Audience evaluation proceeds if provided attributes are empty or null.
-    public function testdoesUserMeetAudienceConditionsAudienceUsedInExperimentNoAttributesProvided()
+    public function testDoesUserMeetAudienceConditionsAudienceUsedInExperimentNoAttributesProvided()
     {
         $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
             ->setConstructorArgs(array(DATAFILE, $this->loggerMock, new NoOpErrorHandler()))
@@ -231,7 +231,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testdoesUserMeetAudienceConditionsAudienceMatch()
+    public function testDoesUserMeetAudienceConditionsAudienceMatch()
     {
         $config = new DatafileProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertTrue(
@@ -244,7 +244,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testdoesUserMeetAudienceConditionsAudienceNoMatch()
+    public function testDoesUserMeetAudienceConditionsAudienceNoMatch()
     {
         $config = new DatafileProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
         $this->assertFalse(
@@ -258,7 +258,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     // test that doesUserMeetAudienceConditions returns true when no audience is attached to experiment.
-    public function testdoesUserMeetAudienceConditionsNoAudienceUsedInExperiment()
+    public function testDoesUserMeetAudienceConditionsNoAudienceUsedInExperiment()
     {
         $config = new DatafileProjectConfig(DATAFILE, null, null);
         $experiment = $config->getExperimentFromKey('test_experiment');
@@ -302,7 +302,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     // test that doesUserMeetAudienceConditions returns false when some audience is attached to experiment
     // and user attributes do not match.
-    public function testdoesUserMeetAudienceConditionsSomeAudienceUsedInExperiment()
+    public function testDoesUserMeetAudienceConditionsSomeAudienceUsedInExperiment()
     {
         $config = new DatafileProjectConfig(DATAFILE, null, null);
         $experiment = $config->getExperimentFromKey('test_experiment');
@@ -336,7 +336,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     // test that doesUserMeetAudienceConditions evaluates audience when audienceConditions is an audience leaf node.
-    public function testdoesUserMeetAudienceConditionsWithAudienceConditionsSetToAudienceIdString()
+    public function testDoesUserMeetAudienceConditionsWithAudienceConditionsSetToAudienceIdString()
     {
         $config = new DatafileProjectConfig(DATAFILE, null, null);
         $experiment = $config->getExperimentFromKey('test_experiment');
@@ -355,7 +355,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testdoesUserMeetAudienceConditionsWithUnknownAudienceId()
+    public function testDoesUserMeetAudienceConditionsWithUnknownAudienceId()
     {
         $config = new DatafileProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
         $experiment = $config->getExperimentFromKey('test_experiment');
@@ -376,7 +376,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     // test that doesUserMeetAudienceConditions evaluates simple audience.
-    public function testdoesUserMeetAudienceConditionsWithSimpleAudience()
+    public function testDoesUserMeetAudienceConditionsWithSimpleAudience()
     {
         $config = new DatafileProjectConfig(DATAFILE, null, null);
         $configMock = $this->getMockBuilder(DatafileProjectConfig::class)
@@ -409,7 +409,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     // test that doesUserMeetAudienceConditions evaluates complex audience.
-    public function testdoesUserMeetAudienceConditionsWithComplexAudience()
+    public function testDoesUserMeetAudienceConditionsWithComplexAudience()
     {
         $config = new DatafileProjectConfig(DATAFILE_WITH_TYPED_AUDIENCES, null, null);
         $configMock = $this->getMockBuilder(DatafileProjectConfig::class)

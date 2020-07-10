@@ -330,7 +330,7 @@ class DecisionService
             break;
         }
         // Evaluate Everyone Else Rule / Last Rule now
-        $rolloutRule = $rolloutRules[sizeof($rolloutRules)-1];
+        $rolloutRule = $rolloutRules[sizeof($rolloutRules) - 1];
 
         // Evaluate if user meets the audience condition of Everyone Else Rule / Last Rule now
         if (!Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', 'Everyone Else')) {
