@@ -8,8 +8,6 @@ php:
   - '7.2'
   - '7.3'
 install: "composer install"
-addons:
-  srcclr: true
 script:
 - mkdir -p build/logs
 - ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
@@ -20,6 +18,7 @@ stages:
   - 'Linting'
   - 'Integration tests'
   - 'Test'
+  - 'Source Clear'
 
 jobs:
   include:
@@ -41,3 +40,14 @@ jobs:
       script:
         - $HOME/travisci-tools/trigger-script-with-status-update.sh
       after_success: travis_terminate 0
+
+    - stage: 'Source Clear'
+      if: type = cron
+      addons:
+        srcclr: true
+      before_install: skip
+      install: skip
+      before_script: skip
+      script: skip
+      after_script: skip
+      after_success: skip
