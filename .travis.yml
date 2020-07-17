@@ -1,12 +1,9 @@
 language: php
 dist: trusty
 php:
-  - '5.5'
-  - '5.6'
-  - '7.0'
-  - '7.1'
   - '7.2'
   - '7.3'
+  - '7.4'
 install: "composer install"
 script:
 - mkdir -p build/logs
@@ -24,7 +21,7 @@ jobs:
   include:
     - stage: 'Linting'
       language: php
-      php: '7.0'
+      php: '7.4'
       install: 'composer require "squizlabs/php_codesniffer=*"'
       script: 'composer lint'
       after_script: skip
