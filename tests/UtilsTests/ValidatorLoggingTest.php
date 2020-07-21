@@ -42,7 +42,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
         };
     }
 
-    public function testIsUserInExperimentWithNoAudience()
+    public function testdoesUserMeetAudienceConditionsWithNoAudience()
     {
         $experiment = $this->config->getExperimentFromKey('test_experiment');
         $experiment->setAudienceIds([]);
@@ -56,10 +56,10 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to TRUE.");
 
-        $this->assertTrue(Validator::isUserInExperiment($this->config, $experiment, [], $this->loggerMock));
+        $this->assertTrue(Validator::doesUserMeetAudienceConditions($this->config, $experiment, [], $this->loggerMock));
     }
 
-    public function testIsUserInExperimentEvaluatesAudienceIds()
+    public function testdoesUserMeetAudienceConditionsEvaluatesAudienceIds()
     {
         $userAttributes = [
            "test_attribute" => "test_value_1"
@@ -73,7 +73,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
                          ->method('log')
                          ->will($this->returnCallback($this->collectLogsForAssertion));
 
-        Validator::isUserInExperiment($this->config, $experiment, $userAttributes, $this->loggerMock);
+        Validator::doesUserMeetAudienceConditions($this->config, $experiment, $userAttributes, $this->loggerMock);
 
         $this->assertContains([Logger::DEBUG, "Evaluating audiences for experiment \"test_experiment\": [\"11155\"]."], $this->collectedLogs);
         $this->assertContains(
@@ -94,7 +94,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
                         ->method('log')
                         ->will($this->returnCallback($this->collectLogsForAssertion));
 
-        Validator::isUserInExperiment($this->typedConfig, $experiment, ["house" => "I am in Slytherin"], $this->loggerMock);
+        Validator::doesUserMeetAudienceConditions($this->typedConfig, $experiment, ["house" => "I am in Slytherin"], $this->loggerMock);
 
         $this->assertContains(
             [Logger::DEBUG, "Evaluating audiences for experiment \"audience_combinations_experiment\": [\"or\",[\"or\",\"3468206642\",\"3988293898\"]]."],

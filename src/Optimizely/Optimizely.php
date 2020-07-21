@@ -931,7 +931,7 @@ class Optimizely
         if ($variation === null) {
             $this->_logger->log(
                 Logger::INFO,
-                "User '{$userId}'is not in any variation, ".
+                "User '{$userId}' is not in experiment or rollout, ".
                 "returning default value '{$variableValue}'."
             );
         } else {
@@ -941,21 +941,20 @@ class Optimizely
                     $variableValue = $variableUsage->getValue();
                     $this->_logger->log(
                         Logger::INFO,
-                        "Returning variable value '{$variableValue}' for variation '{$variation->getKey()}' ".
-                        "of feature flag '{$featureFlagKey}'"
+                        "Returning variable value '{$variableValue}' for variable key '{$variableKey}' ".
+                        "of feature flag '{$featureFlagKey}'."
                     );
                 } else {
                     $this->_logger->log(
                         Logger::INFO,
-                        "Variable '{$variableKey}' is not used in variation '{$variation->getKey()}', ".
-                        "returning default value '{$variableValue}'."
+                        "Variable value is not defined. Returning the default variable value '{$variableValue}'."
                     );
                 }
             } else {
                 $this->_logger->log(
                     Logger::INFO,
-                    "Feature '{$featureFlagKey}' for variation '{$variation->getKey()}' is not enabled, ".
-                    "returning default value '{$variableValue}'."
+                    "Feature '{$featureFlagKey}' is not enabled for user '{$userId}'. ".
+                    "Returning the default variable value '{$variableValue}'."
                 );
             }
         }

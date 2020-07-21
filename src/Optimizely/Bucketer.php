@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2019, Optimizely
+ * Copyright 2016-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ class Bucketer
      * Determine variation the user should be put in.
      *
      * @param $config ProjectConfigInterface Configuration for the project.
-     * @param $experiment Experiment Experiment in which user is to be bucketed.
+     * @param $experiment Experiment Experiment or Rollout rule in which user is to be bucketed.
      * @param $bucketingId string A customer-assigned value used to create the key for the murmur hash.
      * @param $userId string User identifier.
      *
@@ -146,6 +146,7 @@ class Bucketer
         }
 
         // Determine if experiment is in a mutually exclusive group.
+        // This will not affect evaluation of rollout rules.
         if ($experiment->isInMutexGroup()) {
             $group = $config->getGroup($experiment->getGroupId());
 
@@ -188,19 +189,9 @@ class Bucketer
         if (!empty($variationId)) {
             $variation = $config->getVariationFromId($experiment->getKey(), $variationId);
 
-            $this->_logger->log(
-                Logger::INFO,
-                sprintf(
-                    'User "%s" is in variation %s of experiment %s.',
-                    $userId,
-                    $variation->getKey(),
-                    $experiment->getKey()
-                )
-            );
             return $variation;
         }
         
-        $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no variation.', $userId));
         return null;
     }
 }

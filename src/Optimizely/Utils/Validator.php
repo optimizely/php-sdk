@@ -20,7 +20,6 @@ use JsonSchema;
 use Monolog\Logger;
 use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
-use Optimizely\Enums\AudienceEvaluationLogs;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Utils\ConditionTreeEvaluator;
 use Optimizely\Utils\CustomAttributeConditionEvaluator;
@@ -133,30 +132,40 @@ class Validator
 
     /**
      * @param $config ProjectConfigInterface Configuration for the project.
-     * @param $experiment Experiment Entity representing the experiment.
+     * @param $experiment Experiment Entity representing the experiment or rollout rule.
      * @param $userAttributes array Attributes of the user.
      * @param $logger LoggerInterface.
+     * @param $loggingClass String Class holding log strings with placeholders.
+     * @param $loggingKey String Identifier of an experiment/rollout rule.
      *
      * @return boolean Representing whether user meets audience conditions to be in experiment or not.
      */
-    public static function isUserInExperiment($config, $experiment, $userAttributes, $logger)
+    public static function doesUserMeetAudienceConditions($config, $experiment, $userAttributes, $logger, $loggingClass = null, $loggingKey = null)
     {
+        if ($loggingClass === null) {
+            $loggingClass = 'Optimizely\Enums\ExperimentAudienceEvaluationLogs';
+        }
+
+        if ($loggingKey === null) {
+            $loggingKey = $experiment->getKey();
+        }
+
         $audienceConditions = $experiment->getAudienceConditions();
         if ($audienceConditions === null) {
             $audienceConditions = $experiment->getAudienceIds();
         }
 
         $logger->log(Logger::DEBUG, sprintf(
-            AudienceEvaluationLogs::EVALUATING_AUDIENCES_COMBINED,
-            $experiment->getKey(),
+            $loggingClass::EVALUATING_AUDIENCES_COMBINED,
+            $loggingKey,
             json_encode($audienceConditions)
         ));
 
         // Return true if experiment is not targeted to any audience.
         if (empty($audienceConditions)) {
             $logger->log(Logger::INFO, sprintf(
-                AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
-                $experiment->getKey(),
+                $loggingClass::AUDIENCE_EVALUATION_RESULT_COMBINED,
+                $loggingKey,
                 'TRUE'
             ));
             return true;
@@ -171,14 +180,14 @@ class Validator
             return $customAttrCondEval->evaluate($leafCondition);
         };
 
-        $evaluateAudience = function ($audienceId) use ($config, $evaluateCustomAttr, $logger) {
+        $evaluateAudience = function ($audienceId) use ($config, $evaluateCustomAttr, $logger, $loggingClass) {
             $audience = $config->getAudience($audienceId);
             if ($audience === null) {
                 return null;
             }
             
             $logger->log(Logger::DEBUG, sprintf(
-                AudienceEvaluationLogs::EVALUATING_AUDIENCE,
+                $loggingClass::EVALUATING_AUDIENCE,
                 $audienceId,
                 json_encode($audience->getConditionsList())
             ));
@@ -188,7 +197,7 @@ class Validator
             $resultStr = $result === null ? 'UNKNOWN' : strtoupper(var_export($result, true));
 
             $logger->log(Logger::DEBUG, sprintf(
-                AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT,
+                $loggingClass::AUDIENCE_EVALUATION_RESULT,
                 $audienceId,
                 $resultStr
             ));
@@ -201,8 +210,8 @@ class Validator
         $evalResult = $evalResult || false;
 
         $logger->log(Logger::INFO, sprintf(
-            AudienceEvaluationLogs::AUDIENCE_EVALUATION_RESULT_COMBINED,
-            $experiment->getKey(),
+            $loggingClass::AUDIENCE_EVALUATION_RESULT_COMBINED,
+            $loggingKey,
             strtoupper(var_export($evalResult, true))
         ));
 

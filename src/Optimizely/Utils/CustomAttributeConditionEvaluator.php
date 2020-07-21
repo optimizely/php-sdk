@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2018-2019, Optimizely
+ * Copyright 2018-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 namespace Optimizely\Utils;
 
 use Monolog\Logger;
-use Optimizely\Enums\AudienceEvaluationLogs as logs;
+use Optimizely\Enums\CommonAudienceEvaluationLogs as logs;
 use Optimizely\Utils\Validator;
 
 class CustomAttributeConditionEvaluator
