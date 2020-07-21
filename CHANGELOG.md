@@ -1,7 +1,5 @@
 # Optimizely PHP SDK Changelog
 
-### New Features:
-
 ## 3.4.0
 July 8th, 2020
 
