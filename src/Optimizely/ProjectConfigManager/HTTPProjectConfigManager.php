@@ -192,7 +192,8 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         try {
             $response = $this->httpClient->get($this->_url, $options);
         } catch (Exception $exception) {
-            $this->_logger->log(Logger::ERROR, 'Unexpected response when trying to fetch datafile, status code: ' . $exception->getCode());
+            $this->_logger->log(Logger::ERROR, 'Unexpected response when trying to fetch datafile, status code: ' . $exception->getCode(). '. ' .
+                'Please check your SDK key and/or datafile access token.');
             return null;
         }
 
@@ -220,7 +221,8 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         // Failed to retrieve datafile from Url.
-        $this->_logger->log(Logger::ERROR, 'Unexpected response when trying to fetch datafile, status code: ' . $status);
+        $this->_logger->log(Logger::ERROR, 'Unexpected response when trying to fetch datafile, status code: ' . $status . '. ' .
+            'Please check your SDK key and/or datafile access token.');
         return null;
     }
 
