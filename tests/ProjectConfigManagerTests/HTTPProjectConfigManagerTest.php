@@ -227,13 +227,13 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
     public function testGetConfigReturnsProvidedDatafileWhenHttpClientReturnsUnhandledStatusCode()
     {
         $configManagerMock = $this->getMockBuilder(HTTPProjectConfigManager::class)
-        ->setConstructorArgs(array(null, $this->url, null, false, DATAFILE, false,
-                                $this->loggerMock, $this->errorHandlerMock))
-        ->setMethods(array('handleResponse'))
-        ->getMock();
+            ->setConstructorArgs(array(null, $this->url, null, false, DATAFILE, false,
+                                    $this->loggerMock, $this->errorHandlerMock))
+            ->setMethods(array('handleResponse'))
+            ->getMock();
 
         $mock = new MockHandler([
-        new Response(307, [], '')
+            new Response(307, [], '')
         ]);
 
         $handler = HandlerStack::create($mock);
@@ -244,8 +244,8 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
         $httpClient->setValue($configManagerMock, $client);
 
         $this->loggerMock->expects($this->once())
-        ->method('log')
-        ->with(Logger::ERROR, sprintf("Unexpected response when trying to fetch datafile, status code: 307. Please check your SDK key and/or datafile access token."));
+            ->method('log')
+            ->with(Logger::ERROR, sprintf("Unexpected response when trying to fetch datafile, status code: 307. Please check your SDK key and/or datafile access token."));
 
         $configManagerMock->fetch();
 
