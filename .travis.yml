@@ -15,10 +15,10 @@ after_script: "vendor/bin/php-coveralls -v"
 
 # Linting and integration tests need to run first to reset the PR build status to pending
 stages:
+  - 'Source Clear'
   - 'Linting'
   - 'Integration tests'
   - 'Test'
-  - 'Source Clear'
 
 jobs:
   include:
