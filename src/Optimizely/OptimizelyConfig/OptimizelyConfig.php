@@ -37,18 +37,11 @@ class OptimizelyConfig implements \JsonSerializable
      */
     private $featuresMap;
 
-    /**
-     * @var string Contents of datafile.
-     */
-    private $datafile;
-    
-
-    public function __construct($revision, array $experimentsMap, array $featuresMap, $datafile=null)
+    public function __construct($revision, array $experimentsMap, array $featuresMap)
     {
         $this->revision = $revision;
         $this->experimentsMap = $experimentsMap;
         $this->featuresMap = $featuresMap;
-        $this->datafile = $datafile;
     }
 
     /**
@@ -57,14 +50,6 @@ class OptimizelyConfig implements \JsonSerializable
     public function getRevision()
     {
         return $this->revision;
-    }
-
-    /**
-     * @return string Datafile contents.
-     */
-    public function getDatafile()
-    {
-        return $this->datafile;
     }
 
     /**
