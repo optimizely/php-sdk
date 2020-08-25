@@ -38,6 +38,11 @@ class OptimizelyConfigService
     private $revision;
 
     /**
+     * @var string config datafile.
+     */
+    private $datafile;
+
+    /**
      * Map of experiment IDs to FeatureFlags.
      *
      * @var <string, FeatureFlag> associative array.
@@ -63,6 +68,7 @@ class OptimizelyConfigService
         $this->experiments = $projectConfig->getAllExperiments();
         $this->featureFlags = $projectConfig->getFeatureFlags();
         $this->revision = $projectConfig->getRevision();
+        $this->datafile = $$projectConfig->toDatafile();
         
         $this->createLookupMaps();
     }

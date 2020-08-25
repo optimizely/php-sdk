@@ -467,4 +467,11 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(json_encode(json_decode($expectedJSON)), json_encode($response));
     }
+
+    public function testGetDatafile()
+    {
+      $expectedDatafile = DATAFILE_FOR_OPTIMIZELY_CONFIG;
+      $actualDatafile = $this->optConfigService->getDatafile();
+      $this->assertEquals($expectedDatafile, $actualDatafile);
+    }
 }
