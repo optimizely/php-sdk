@@ -470,8 +470,8 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetDatafile()
     {
-      $expectedDatafile = DATAFILE_FOR_OPTIMIZELY_CONFIG;
-      $actualDatafile = $this->optConfigService->getDatafile();
-      $this->assertEquals($expectedDatafile, $actualDatafile);
+        $expectedDatafile = DATAFILE_FOR_OPTIMIZELY_CONFIG;
+        $actualDatafile = $this->optConfigService->getDatafile();
+        $this->assertEquals($expectedDatafile, $actualDatafile);
     }
 }
