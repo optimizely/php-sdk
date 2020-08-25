@@ -159,4 +159,11 @@ interface ProjectConfigInterface
      * @return boolean A boolean value that indicates if the experiment is a feature test.
      */
     public function isFeatureExperiment($experimentId);
+
+    /**
+     * Gets datafile.
+     *
+     * @return string A string value that contains datafile contents.
+     */
+    public function toDatafile();
 }

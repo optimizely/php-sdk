@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019-2020, Optimizely
+ * Copyright 2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,654 +14,464 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-namespace Optimizely\Config;
+namespace Optimizely\Tests;
 
 use Exception;
-use Monolog\Logger;
-use Optimizely\Entity\Attribute;
-use Optimizely\Entity\Audience;
-use Optimizely\Entity\Event;
-use Optimizely\Entity\Experiment;
-use Optimizely\Entity\FeatureFlag;
-use Optimizely\Entity\FeatureVariable;
-use Optimizely\Entity\Group;
-use Optimizely\Entity\Rollout;
-use Optimizely\Entity\Variation;
-use Optimizely\Enums\ControlAttributes;
-use Optimizely\ErrorHandler\ErrorHandlerInterface;
-use Optimizely\Exceptions\InvalidAttributeException;
-use Optimizely\Exceptions\InvalidAudienceException;
-use Optimizely\Exceptions\InvalidDatafileVersionException;
-use Optimizely\Exceptions\InvalidEventException;
-use Optimizely\Exceptions\InvalidExperimentException;
-use Optimizely\Exceptions\InvalidFeatureFlagException;
-use Optimizely\Exceptions\InvalidFeatureVariableException;
-use Optimizely\Exceptions\InvalidGroupException;
-use Optimizely\Exceptions\InvalidInputException;
-use Optimizely\Exceptions\InvalidRolloutException;
-use Optimizely\Exceptions\InvalidVariationException;
-use Optimizely\Logger\LoggerInterface;
-use Optimizely\Logger\DefaultLogger;
-use Optimizely\Optimizely;
-use Optimizely\Utils\ConditionDecoder;
-use Optimizely\Utils\ConfigParser;
-use Optimizely\Utils\Errors;
-use Optimizely\Utils\Validator;
+use Optimizely\Config\DatafileProjectConfig;
+use Optimizely\ErrorHandler\NoOpErrorHandler;
+use Optimizely\Logger\NoOpLogger;
+use Optimizely\OptimizelyConfig\OptimizelyConfig;
+use Optimizely\OptimizelyConfig\OptimizelyConfigService;
+use Optimizely\OptimizelyConfig\OptimizelyExperiment;
+use Optimizely\OptimizelyConfig\OptimizelyFeature;
+use Optimizely\OptimizelyConfig\OptimizelyVariable;
+use Optimizely\OptimizelyConfig\OptimizelyVariation;
 
-/**
- * Class DatafileProjectConfig
- *
- * @package Optimizely
- */
-class DatafileProjectConfig implements ProjectConfigInterface
+class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 {
-    const RESERVED_ATTRIBUTE_PREFIX = '$opt_';
-    const V2 = '2';
-    const V3 = '3';
-    const V4 = '4';
 
-    /**
-     * @var string Version of the datafile.
-     */
-    private $_version;
-
-    /**
-     * @var string Account ID of the account using the SDK.
-     */
-    private $_accountId;
-
-    /**
-     * @var string Project ID of the Full Stack project.
-     */
-    private $_projectId;
-
-    /**
-     * @var boolean denotes if Optimizely should remove the
-     * last block of visitors' IP address before storing event data
-     */
-    private $_anonymizeIP;
-
-    /**
-     * @var boolean denotes if Optimizely should perform
-     * bot filtering on your dispatched events.
-     */
-    private $_botFiltering;
-
-    /**
-     * @var string Revision of the datafile.
-     */
-    private $_revision;
-
-    /**
-     * @var array Associative array of group ID to Group(s) in the datafile.
-     */
-    private $_groupIdMap;
-
-    /**
-     * @var array Associative array of experiment key to Experiment(s) in the datafile.
-     */
-    private $_experimentKeyMap;
-
-    /**
-     * @var array Associative array of experiment ID to Experiment(s) in the datafile.
-     */
-    private $_experimentIdMap;
-
-    /**
-     * @var array Associative array of experiment key to associative array of variation key to variations.
-     */
-    private $_variationKeyMap;
-
-    /**
-     * @var array Associative array of experiment key to associative array of variation ID to variations.
-     */
-    private $_variationIdMap;
-
-    /**
-     * @var array Associative array of event key to Event(s) in the datafile.
-     */
-    private $_eventKeyMap;
-
-    /**
-     * @var array Associative array of attribute key to Attribute(s) in the datafile.
-     */
-    private $_attributeKeyMap;
-
-    /**
-     * @var array Associative array of audience ID to Audience(s) in the datafile.
-     */
-    private $_audienceIdMap;
-
-    /**
-     * @var LoggerInterface Logger for logging messages.
-     */
-    private $_logger;
-
-    /**
-     * @var ErrorHandlerInterface Handler for exceptions.
-     */
-    private $_errorHandler;
-
-    /**
-     * list of Feature Flags that will be parsed from the datafile.
-     *
-     * @var [FeatureFlag]
-     */
-    private $_featureFlags;
-
-    /**
-     * list of Rollouts that will be parsed from the datafile
-     *
-     * @var [Rollout]
-     */
-    private $_rollouts;
-
-    /**
-     * internal mapping of feature keys to feature flag models.
-     *
-     * @var <String, FeatureFlag>  associative array of feature keys to feature flags
-     */
-    private $_featureKeyMap;
-
-    /**
-     * internal mapping of rollout IDs to Rollout models.
-     *
-     * @var <String, Rollout>  associative array of rollout ids to rollouts
-     */
-    private $_rolloutIdMap;
-
-    /**
-     * Feature Flag key to Feature Variable key to Feature Variable map
-     *
-     * @var <String, <String, FeatureVariable>>
-     */
-    private $_featureFlagVariableMap;
-
-    /**
-     * Associative array of experiment ID to Feature ID(s) in the datafile.
-     *
-     * @var <String, Array>
-     */
-    private $_experimentFeatureMap;
-
-    /**
-     * DatafileProjectConfig constructor to load and set project configuration data.
-     *
-     * @param $datafile string JSON string representing the project.
-     * @param $logger LoggerInterface
-     * @param $errorHandler ErrorHandlerInterface
-     */
-    public function __construct($datafile, $logger, $errorHandler)
+    public function setUp()
     {
-        $supportedVersions = array(self::V2, self::V3, self::V4);
-        $config = json_decode($datafile, true);
-        $this->_logger = $logger;
-        $this->_errorHandler = $errorHandler;
-        $this->_version = $config['version'];
-        if (!in_array($this->_version, $supportedVersions)) {
-            throw new InvalidDatafileVersionException(
-                "This version of the PHP SDK does not support the given datafile version: {$this->_version}."
+        $this->datafile = DATAFILE_FOR_OPTIMIZELY_CONFIG;
+
+        $this->projectConfig = new DatafileProjectConfig(
+            $this->datafile,
+            new NoOpLogger(),
+            new NoOpErrorHandler()
+        );
+
+        $this->optConfigService = new OptimizelyConfigService($this->projectConfig);
+
+        // Create expected default variables map for feat_experiment variation_b
+        $boolDefaultVariable = new OptimizelyVariable('17252790456', 'boolean_var', 'boolean', 'false');
+        $intDefaultVariable = new OptimizelyVariable('17258820367', 'integer_var', 'integer', 1);
+        $doubleDefaultVariable = new OptimizelyVariable('17260550714', 'double_var', 'double', 0.5);
+        $strDefaultVariable = new OptimizelyVariable('17290540010', 'string_var', 'string', 'i am default value');
+        $jsonDefaultVariable = new OptimizelyVariable('17260550458', 'json_var', 'json', "{\"text\": \"default value\"}");
+
+        $this->expectedDefaultVariableKeyMap = [];
+        $this->expectedDefaultVariableKeyMap['boolean_var'] = $boolDefaultVariable;
+        $this->expectedDefaultVariableKeyMap['integer_var'] = $intDefaultVariable;
+        $this->expectedDefaultVariableKeyMap['double_var'] = $doubleDefaultVariable;
+        $this->expectedDefaultVariableKeyMap['string_var'] = $strDefaultVariable;
+        $this->expectedDefaultVariableKeyMap['json_var'] = $jsonDefaultVariable;
+
+        // Create variable variables map for feat_experiment variation_a
+        $boolFeatVariable = new OptimizelyVariable('17252790456', 'boolean_var', 'boolean', 'true');
+        $intFeatVariable = new OptimizelyVariable('17258820367', 'integer_var', 'integer', 5);
+        $doubleFeatVariable = new OptimizelyVariable('17260550714', 'double_var', 'double', 5.5);
+        $strFeatVariable = new OptimizelyVariable('17290540010', 'string_var', 'string', 'i am variable value');
+        $jsonFeatVariable = new OptimizelyVariable('17260550458', 'json_var', 'json', "{\"text\": \"variable value\"}");
+
+        $this->expectedVariableKeyMap = [];
+        $this->expectedVariableKeyMap['boolean_var'] = $boolFeatVariable;
+        $this->expectedVariableKeyMap['integer_var'] = $intFeatVariable;
+        $this->expectedVariableKeyMap['double_var'] = $doubleFeatVariable;
+        $this->expectedVariableKeyMap['string_var'] = $strFeatVariable;
+        $this->expectedVariableKeyMap['json_var'] = $jsonFeatVariable;
+
+        // Create variations map for feat_experiment
+        $this->featExpVariationMap = [];
+        $this->featExpVariationMap['variation_a'] =
+            new OptimizelyVariation('17289540366', 'variation_a', true, $this->expectedVariableKeyMap);
+    
+        $this->featExpVariationMap['variation_b'] =
+            new OptimizelyVariation('17304990114', 'variation_b', false, $this->expectedDefaultVariableKeyMap);
+
+        // create feat_experiment
+        $featExperiment =
+            new OptimizelyExperiment("17279300791", "feat_experiment", $this->featExpVariationMap);
+
+
+        // create feature
+        $experimentsMap = ['feat_experiment' => $featExperiment];
+        $this->feature =
+            new OptimizelyFeature(
+                '17266500726',
+                'test_feature',
+                $experimentsMap,
+                $this->expectedDefaultVariableKeyMap
             );
-        }
 
-        $this->_accountId = $config['accountId'];
-        $this->_projectId = $config['projectId'];
-        $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
-        $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
-        $this->_revision = $config['revision'];
+        // create ab experiment and variations
+        $variationA = new OptimizelyVariation('17277380360', 'variation_a', null, []);
+        $variationB = new OptimizelyVariation('17273501081', 'variation_b', null, []);
+        $variationsMap = [];
+        $variationsMap['variation_a'] = $variationA;
+        $variationsMap['variation_b'] = $variationB;
 
-        $groups = $config['groups'] ?: [];
-        $experiments = $config['experiments'] ?: [];
-        $events = $config['events'] ?: [];
-        $attributes = $config['attributes'] ?: [];
-        $audiences = $config['audiences'] ?: [];
-        $typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences']: [];
-        $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
-        $featureFlags = isset($config['featureFlags']) ? $config['featureFlags']: [];
+        $abExperiment = new OptimizelyExperiment('17301270474', 'ab_experiment', $variationsMap);
 
-        // JSON type is represented in datafile as a subtype of string for the sake of backwards compatibility.
-        // Converting it to a first-class json type while creating Project Config
-        foreach ($featureFlags as $featureFlagKey => $featureFlag) {
-            foreach ($featureFlag['variables'] as $variableKey => $variable) {
-                if (isset($variable['subType']) && $variable['type'] === FeatureVariable::STRING_TYPE && $variable['subType'] === FeatureVariable::JSON_TYPE) {
-                    $variable['type'] = FeatureVariable::JSON_TYPE;
-                    unset($variable['subType']);
-                    $featureFlags[$featureFlagKey]['variables'][$variableKey] = $variable;
+        // create group_ab_experiment and variations
+        $variationA = new OptimizelyVariation('17287500312', 'variation_a', null, []);
+        $variationB = new OptimizelyVariation('17283640326', 'variation_b', null, []);
+        $variationsMap = [];
+        $variationsMap['variation_a'] = $variationA;
+        $variationsMap['variation_b'] = $variationB;
+
+        $groupExperiment =
+            new OptimizelyExperiment('17258450439', 'group_ab_experiment', $variationsMap);
+
+        // create experiment key map
+        $this->expectedExpKeyMap = [];
+        $this->expectedExpKeyMap['ab_experiment'] = $abExperiment;
+        $this->expectedExpKeyMap['group_ab_experiment'] = $groupExperiment;
+        $this->expectedExpKeyMap['feat_experiment'] = $featExperiment;
+
+        // create experiment id map
+        $this->expectedExpIdMap = [];
+        $this->expectedExpIdMap['17301270474'] = $abExperiment;
+        $this->expectedExpIdMap['17258450439'] = $groupExperiment;
+        $this->expectedExpIdMap['17279300791'] = $featExperiment;
+    }
+
+    protected static function getMethod($name)
+    {
+        $class = new \ReflectionClass('Optimizely\\OptimizelyConfig\\OptimizelyConfigService');
+        $method = $class->getMethod($name);
+        $method->setAccessible(true);
+        return $method;
+    }
+
+    public function testGetVariablesMapReturnsEmptyForAbExpVariation()
+    {
+        $abExp = $this->projectConfig->getExperimentFromKey("ab_experiment");
+        $abExpVarA = $abExp->getVariations()[0];
+
+        $getVariablesMap = self::getMethod("getVariablesMap");
+        $response = $getVariablesMap->invokeArgs($this->optConfigService, array($abExp, $abExpVarA));
+
+        $this->assertEmpty($response);
+    }
+
+    public function testGetVariablesMapReturnsVariableMapForEnabledVariation()
+    {
+        $featExp = $this->projectConfig->getExperimentFromKey("feat_experiment");
+        $featureDisabledVar = $featExp->getVariations()[0];
+
+        $getVariablesMap = self::getMethod("getVariablesMap");
+        $response = $getVariablesMap->invokeArgs($this->optConfigService, array($featExp, $featureDisabledVar));
+
+        $this->assertEquals($this->expectedVariableKeyMap, $response);
+    }
+
+    public function testGetVariablesMapReturnsVariableMapForDisabledVariation()
+    {
+        $featExp = $this->projectConfig->getExperimentFromKey("feat_experiment");
+        $featureDisabledVar = $featExp->getVariations()[1];
+
+        $getVariablesMap = self::getMethod("getVariablesMap");
+        $response = $getVariablesMap->invokeArgs($this->optConfigService, array($featExp, $featureDisabledVar));
+
+        $this->assertEquals($this->expectedDefaultVariableKeyMap, $response);
+    }
+
+    public function testGetVariationsMap()
+    {
+        $featExp = $this->projectConfig->getExperimentFromKey("feat_experiment");
+
+        $getVariationsMap = self::getMethod("getVariationsMap");
+        $response = $getVariationsMap->invokeArgs($this->optConfigService, array($featExp));
+
+        $this->assertEquals($this->featExpVariationMap, $response);
+    }
+
+    public function testGetExperimentsMaps()
+    {
+        $getExperimentsMap = self::getMethod("getExperimentsMaps");
+        $response = $getExperimentsMap->invokeArgs($this->optConfigService, array());
+
+        // assert experiment key map
+        $this->assertEquals($this->expectedExpKeyMap, $response[0]);
+
+        // assert experiment id map
+        $this->assertEquals($this->expectedExpIdMap, $response[1]);
+    }
+
+    public function testGetFeaturesMap()
+    {
+        $getFeaturesMap = self::getMethod("getFeaturesMap");
+        $response = $getFeaturesMap->invokeArgs(
+            $this->optConfigService,
+            array($this->expectedExpIdMap)
+        );
+
+        $this->assertEquals(['test_feature' => $this->feature], $response);
+    }
+
+    public function testGetConfig()
+    {
+        $response = $this->optConfigService->getConfig();
+
+        $this->assertInstanceof(OptimizelyConfig::class, $response);
+
+        // assert revision
+        $this->assertEquals('16', $response->getRevision());
+
+        // assert experiments map
+        $this->assertEquals($this->expectedExpKeyMap, $response->getExperimentsMap());
+
+        // assert features map
+        $this->assertEquals(['test_feature' => $this->feature], $response->getFeaturesMap());
+    }
+
+    public function testJsonEncodeofOptimizelyConfig()
+    {
+        $response = $this->optConfigService->getConfig();
+
+        $expectedJSON = '{
+          "revision": "16",
+          "experimentsMap": {
+            "ab_experiment": {
+              "id": "17301270474",
+              "key": "ab_experiment",
+              "variationsMap": {
+                "variation_a": {
+                  "id": "17277380360",
+                  "key": "variation_a",
+                  "variablesMap": [
+                    
+                  ]
+                },
+                "variation_b": {
+                  "id": "17273501081",
+                  "key": "variation_b",
+                  "variablesMap": [
+                    
+                  ]
                 }
-            }
-        }
-
-        $this->_groupIdMap = ConfigParser::generateMap($groups, 'id', Group::class);
-        $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);
-        $this->_eventKeyMap = ConfigParser::generateMap($events, 'key', Event::class);
-        $this->_attributeKeyMap = ConfigParser::generateMap($attributes, 'key', Attribute::class);
-        $typedAudienceIdMap = ConfigParser::generateMap($typedAudiences, 'id', Audience::class);
-        $this->_audienceIdMap = ConfigParser::generateMap($audiences, 'id', Audience::class);
-        $this->_rollouts = ConfigParser::generateMap($rollouts, null, Rollout::class);
-        $this->_featureFlags = ConfigParser::generateMap($featureFlags, null, FeatureFlag::class);
-
-        foreach (array_values($this->_groupIdMap) as $group) {
-            $experimentsInGroup = ConfigParser::generateMap($group->getExperiments(), 'key', Experiment::class);
-            foreach (array_values($experimentsInGroup) as $experiment) {
-                $experiment->setGroupId($group->getId());
-                $experiment->setGroupPolicy($group->getPolicy());
-            }
-            $this->_experimentKeyMap = $this->_experimentKeyMap + $experimentsInGroup;
-        }
-
-        $this->_variationKeyMap = [];
-        $this->_variationIdMap = [];
-        $this->_experimentIdMap = [];
-
-        foreach (array_values($this->_experimentKeyMap) as $experiment) {
-            $this->_variationKeyMap[$experiment->getKey()] = [];
-            $this->_variationIdMap[$experiment->getKey()] = [];
-            $this->_experimentIdMap[$experiment->getId()] = $experiment;
-
-            foreach ($experiment->getVariations() as $variation) {
-                $this->_variationKeyMap[$experiment->getKey()][$variation->getKey()] = $variation;
-                $this->_variationIdMap[$experiment->getKey()][$variation->getId()] = $variation;
-            }
-        }
-
-        foreach (array_values($this->_audienceIdMap) as $audience) {
-            $audience->setConditionsList(json_decode($audience->getConditions(), true));
-        }
-
-        // Conditions in typedAudiences are not expected to be string-encoded so they don't need
-        // to be decoded unlike audiences.
-        foreach (array_values($typedAudienceIdMap) as $typedAudience) {
-            $typedAudience->setConditionsList($typedAudience->getConditions());
-        }
-
-        // Overwrite audiences by typedAudiences.
-        $this->_audienceIdMap = array_replace($this->_audienceIdMap, $typedAudienceIdMap);
-
-        $rolloutVariationIdMap = [];
-        $rolloutVariationKeyMap = [];
-        foreach ($this->_rollouts as $rollout) {
-            $this->_rolloutIdMap[$rollout->getId()] = $rollout;
-
-            foreach ($rollout->getExperiments() as $rule) {
-                $rolloutVariationIdMap[$rule->getKey()] = [];
-                $rolloutVariationKeyMap[$rule->getKey()] = [];
-
-                $variations = $rule->getVariations();
-                foreach ($variations as $variation) {
-                    $rolloutVariationIdMap[$rule->getKey()][$variation->getId()] = $variation;
-                    $rolloutVariationKeyMap[$rule->getKey()][$variation->getKey()] = $variation;
+              }
+            },
+            "feat_experiment": {
+              "id": "17279300791",
+              "key": "feat_experiment",
+              "variationsMap": {
+                "variation_a": {
+                  "id": "17289540366",
+                  "key": "variation_a",
+                  "featureEnabled": true,
+                  "variablesMap": {
+                    "boolean_var": {
+                      "id": "17252790456",
+                      "key": "boolean_var",
+                      "type": "boolean",
+                      "value": "true"
+                    },
+                    "integer_var": {
+                      "id": "17258820367",
+                      "key": "integer_var",
+                      "type": "integer",
+                      "value": "5"
+                    },
+                    "double_var": {
+                      "id": "17260550714",
+                      "key": "double_var",
+                      "type": "double",
+                      "value": "5.5"
+                    },
+                    "string_var": {
+                      "id": "17290540010",
+                      "key": "string_var",
+                      "type": "string",
+                      "value": "i am variable value"
+                    },
+                    "json_var": {
+                      "id": "17260550458",
+                      "key": "json_var",
+                      "type": "json",
+                      "value": "{\"text\": \"variable value\"}"
+                    }
+                  }
+                },
+                "variation_b": {
+                  "id": "17304990114",
+                  "key": "variation_b",
+                  "featureEnabled": false,
+                  "variablesMap": {
+                    "boolean_var": {
+                      "id": "17252790456",
+                      "key": "boolean_var",
+                      "type": "boolean",
+                      "value": "false"
+                    },
+                    "integer_var": {
+                      "id": "17258820367",
+                      "key": "integer_var",
+                      "type": "integer",
+                      "value": "1"
+                    },
+                    "double_var": {
+                      "id": "17260550714",
+                      "key": "double_var",
+                      "type": "double",
+                      "value": "0.5"
+                    },
+                    "string_var": {
+                      "id": "17290540010",
+                      "key": "string_var",
+                      "type": "string",
+                      "value": "i am default value"
+                    },
+                    "json_var": {
+                      "id": "17260550458",
+                      "key": "json_var",
+                      "type": "json",
+                      "value": "{\"text\": \"default value\"}"
+                    }
+                  }
                 }
-            }
-        }
-
-        // Add variations for rollout experiments to variationIdMap and variationKeyMap
-        $this->_variationIdMap = $this->_variationIdMap + $rolloutVariationIdMap;
-        $this->_variationKeyMap = $this->_variationKeyMap + $rolloutVariationKeyMap;
-
-        foreach (array_values($this->_featureFlags) as $featureFlag) {
-            $this->_featureKeyMap[$featureFlag->getKey()] = $featureFlag;
-        }
-
-        $this->_experimentFeatureMap = [];
-        if ($this->_featureKeyMap) {
-            foreach ($this->_featureKeyMap as $featureKey => $featureFlag) {
-                $this->_featureFlagVariableMap[$featureKey] = ConfigParser::generateMap(
-                    $featureFlag->getVariables(),
-                    'key',
-                    FeatureVariable::class
-                );
-
-                $featureFlagId = $featureFlag->getId();
-                foreach ($featureFlag->getExperimentIds() as $experimentId) {
-                    $this->_experimentFeatureMap[$experimentId] = [$featureFlagId];
+              }
+            },
+            "group_ab_experiment": {
+              "id": "17258450439",
+              "key": "group_ab_experiment",
+              "variationsMap": {
+                "variation_a": {
+                  "id": "17287500312",
+                  "key": "variation_a",
+                  "variablesMap": [
+                    
+                  ]
+                },
+                "variation_b": {
+                  "id": "17283640326",
+                  "key": "variation_b",
+                  "variablesMap": [
+                    
+                  ]
                 }
+              }
             }
-        }
-    }
-
-    /**
-     * Create ProjectConfig based on datafile string.
-     *
-     * @param string                $datafile           JSON string representing the Optimizely project.
-     * @param bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
-     * @param LoggerInterface       $logger             Logger instance
-     * @param ErrorHandlerInterface $errorHandler       ErrorHandler instance.
-     * @return ProjectConfig ProjectConfig instance or null;
-     */
-    public static function createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler)
-    {
-        if (!$skipJsonValidation) {
-            if (!Validator::validateJsonSchema($datafile)) {
-                $defaultLogger = new DefaultLogger();
-                $defaultLogger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
-                $logger->log(Logger::ERROR, 'Provided "datafile" has invalid schema.');
-                return null;
+          },
+          "featuresMap": {
+            "test_feature": {
+              "id": "17266500726",
+              "key": "test_feature",
+              "experimentsMap": {
+                "feat_experiment": {
+                  "id": "17279300791",
+                  "key": "feat_experiment",
+                  "variationsMap": {
+                    "variation_a": {
+                      "id": "17289540366",
+                      "key": "variation_a",
+                      "featureEnabled": true,
+                      "variablesMap": {
+                        "boolean_var": {
+                          "id": "17252790456",
+                          "key": "boolean_var",
+                          "type": "boolean",
+                          "value": "true"
+                        },
+                        "integer_var": {
+                          "id": "17258820367",
+                          "key": "integer_var",
+                          "type": "integer",
+                          "value": "5"
+                        },
+                        "double_var": {
+                          "id": "17260550714",
+                          "key": "double_var",
+                          "type": "double",
+                          "value": "5.5"
+                        },
+                        "string_var": {
+                          "id": "17290540010",
+                          "key": "string_var",
+                          "type": "string",
+                          "value": "i am variable value"
+                        },
+                        "json_var": {
+                          "id": "17260550458",
+                          "key": "json_var",
+                          "type": "json",
+                          "value": "{\"text\": \"variable value\"}"
+                        }
+                      }
+                    },
+                    "variation_b": {
+                      "id": "17304990114",
+                      "key": "variation_b",
+                      "featureEnabled": false,
+                      "variablesMap": {
+                        "boolean_var": {
+                          "id": "17252790456",
+                          "key": "boolean_var",
+                          "type": "boolean",
+                          "value": "false"
+                        },
+                        "integer_var": {
+                          "id": "17258820367",
+                          "key": "integer_var",
+                          "type": "integer",
+                          "value": "1"
+                        },
+                        "double_var": {
+                          "id": "17260550714",
+                          "key": "double_var",
+                          "type": "double",
+                          "value": "0.5"
+                        },
+                        "string_var": {
+                          "id": "17290540010",
+                          "key": "string_var",
+                          "type": "string",
+                          "value": "i am default value"
+                        },
+                        "json_var": {
+                          "id": "17260550458",
+                          "key": "json_var",
+                          "type": "json",
+                          "value": "{\"text\": \"default value\"}"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "variablesMap": {
+                "boolean_var": {
+                  "id": "17252790456",
+                  "key": "boolean_var",
+                  "type": "boolean",
+                  "value": "false"
+                },
+                "integer_var": {
+                  "id": "17258820367",
+                  "key": "integer_var",
+                  "type": "integer",
+                  "value": "1"
+                },
+                "double_var": {
+                  "id": "17260550714",
+                  "key": "double_var",
+                  "type": "double",
+                  "value": "0.5"
+                },
+                "string_var": {
+                  "id": "17290540010",
+                  "key": "string_var",
+                  "type": "string",
+                  "value": "i am default value"
+                },
+                "json_var": {
+                  "id": "17260550458",
+                  "key": "json_var",
+                  "type": "json",
+                  "value": "{\"text\": \"default value\"}"
+                }
+              }
             }
-        }
+          }
+        }';
 
-        try {
-            $config = new DatafileProjectConfig($datafile, $logger, $errorHandler);
-        } catch (Exception $exception) {
-            $defaultLogger = new DefaultLogger();
-            $errorMsg = $exception->getCode() == InvalidDatafileVersionException::class ? $exception->getMessage() : sprintf(Errors::INVALID_FORMAT, 'datafile');
-            $errorToHandle = $exception->getCode() == InvalidDatafileVersionException::class ? new InvalidDatafileVersionException($errorMsg) : new InvalidInputException($errorMsg);
-            $defaultLogger->log(Logger::ERROR, $errorMsg);
-            $logger->log(Logger::ERROR, $errorMsg);
-            $errorHandler->handleError($errorToHandle);
-            return null;
-        }
-
-        return $config;
+        $this->assertEquals(json_encode(json_decode($expectedJSON)), json_encode($response));
     }
 
-    /**
-     * @return string String representing account ID from the datafile.
-     */
-    public function getAccountId()
+    public function testGetDatafile()
     {
-        return $this->_accountId;
-    }
-
-    /**
-     * @return string String representing project ID from the datafile.
-     */
-    public function getProjectId()
-    {
-        return $this->_projectId;
-    }
-
-    /**
-     * @return boolean Flag denoting if Optimizely should remove last block
-     * of visitors' IP address before storing event data
-     */
-    public function getAnonymizeIP()
-    {
-        return $this->_anonymizeIP;
-    }
-
-    /**
-     * @return boolean Flag denoting if Optimizely should perform
-     * bot filtering on your dispatched events.
-     */
-    public function getBotFiltering()
-    {
-        return $this->_botFiltering;
-    }
-
-    /**
-     * @return string String representing revision of the datafile.
-     */
-    public function getRevision()
-    {
-        return $this->_revision;
-    }
-
-    /**
-     * @return array List of feature flags parsed from the datafile
-     */
-    public function getFeatureFlags()
-    {
-        return $this->_featureFlags;
-    }
-
-    /**
-     * @return array List of all experiments (including group experiments)
-     *               parsed from the datafile
-     */
-    public function getAllExperiments()
-    {
-        return array_values($this->_experimentKeyMap);
-    }
-
-    /**
-     * @param $groupId string ID of the group.
-     *
-     * @return Group Entity corresponding to the ID.
-     *         Dummy entity is returned if ID is invalid.
-     */
-    public function getGroup($groupId)
-    {
-        if (isset($this->_groupIdMap[$groupId])) {
-            return $this->_groupIdMap[$groupId];
-        }
-
-        $this->_logger->log(Logger::ERROR, sprintf('Group ID "%s" is not in datafile.', $groupId));
-        $this->_errorHandler->handleError(new InvalidGroupException('Provided group is not in datafile.'));
-        return new Group();
-    }
-
-    /**
-     * @param $experimentKey string Key of the experiment.
-     *
-     * @return Experiment Entity corresponding to the key.
-     *         Dummy entity is returned if key is invalid.
-     */
-    public function getExperimentFromKey($experimentKey)
-    {
-        if (isset($this->_experimentKeyMap[$experimentKey])) {
-            return $this->_experimentKeyMap[$experimentKey];
-        }
-
-        $this->_logger->log(Logger::ERROR, sprintf('Experiment key "%s" is not in datafile.', $experimentKey));
-        $this->_errorHandler->handleError(new InvalidExperimentException('Provided experiment is not in datafile.'));
-        return new Experiment();
-    }
-
-    /**
-     * @param $experimentId string ID of the experiment.
-     *
-     * @return Experiment Entity corresponding to the key.
-     *         Dummy entity is returned if ID is invalid.
-     */
-    public function getExperimentFromId($experimentId)
-    {
-        if (isset($this->_experimentIdMap[$experimentId])) {
-            return $this->_experimentIdMap[$experimentId];
-        }
-
-        $this->_logger->log(Logger::ERROR, sprintf('Experiment ID "%s" is not in datafile.', $experimentId));
-        $this->_errorHandler->handleError(new InvalidExperimentException('Provided experiment is not in datafile.'));
-        return new Experiment();
-    }
-
-    /**
-     * @param String $featureKey Key of the feature flag
-     *
-     * @return FeatureFlag Entity corresponding to the key.
-     */
-    public function getFeatureFlagFromKey($featureKey)
-    {
-        if (isset($this->_featureKeyMap[$featureKey])) {
-            return $this->_featureKeyMap[$featureKey];
-        }
-
-        $this->_logger->log(Logger::ERROR, sprintf('FeatureFlag Key "%s" is not in datafile.', $featureKey));
-        $this->_errorHandler->handleError(new InvalidFeatureFlagException('Provided feature flag is not in datafile.'));
-        return new FeatureFlag();
-    }
-
-    /**
-     * @param String $rolloutId
-     *
-     * @return Rollout
-     */
-    public function getRolloutFromId($rolloutId)
-    {
-        if (isset($this->_rolloutIdMap[$rolloutId])) {
-            return $this->_rolloutIdMap[$rolloutId];
-        }
-
-        $this->_logger->log(Logger::ERROR, sprintf('Rollout with ID "%s" is not in the datafile.', $rolloutId));
-
-        $this->_errorHandler->handleError(new InvalidRolloutException('Provided rollout is not in datafile.'));
-        return new Rollout();
-    }
-
-    /**
-     * @param $eventKey string Key of the event.
-     *
-     * @return Event Entity corresponding to the key.
-     *         Dummy entity is returned if key is invalid.
-     */
-    public function getEvent($eventKey)
-    {
-        if (isset($this->_eventKeyMap[$eventKey])) {
-            return $this->_eventKeyMap[$eventKey];
-        }
-
-        $this->_logger->log(Logger::ERROR, sprintf('Event key "%s" is not in datafile.', $eventKey));
-        $this->_errorHandler->handleError(new InvalidEventException('Provided event is not in datafile.'));
-        return new Event();
-    }
-
-    /**
-     * @param $audienceId string ID of the audience.
-     *
-     * @return Audience Entity corresponding to the ID.
-     *         Null is returned if ID is invalid.
-     */
-    public function getAudience($audienceId)
-    {
-        if (isset($this->_audienceIdMap[$audienceId])) {
-            return $this->_audienceIdMap[$audienceId];
-        }
-
-        $this->_logger->log(Logger::ERROR, sprintf('Audience ID "%s" is not in datafile.', $audienceId));
-        $this->_errorHandler->handleError(new InvalidAudienceException('Provided audience is not in datafile.'));
-
-        return null;
-    }
-
-    /**
-     * @param $attributeKey string Key of the attribute.
-     *
-     * @return Attribute Entity corresponding to the key.
-     *         Null is returned if key is invalid.
-     */
-    public function getAttribute($attributeKey)
-    {
-        $hasReservedPrefix = strpos($attributeKey, self::RESERVED_ATTRIBUTE_PREFIX) === 0;
-
-        if (isset($this->_attributeKeyMap[$attributeKey])) {
-            if ($hasReservedPrefix) {
-                $this->_logger->log(
-                    Logger::WARNING,
-                    sprintf('Attribute %s unexpectedly has reserved prefix %s; using attribute ID instead of reserved attribute name.', $attributeKey, self::RESERVED_ATTRIBUTE_PREFIX)
-                );
-            }
-
-            return $this->_attributeKeyMap[$attributeKey];
-        }
-
-        if ($hasReservedPrefix) {
-            return new Attribute($attributeKey, $attributeKey);
-        }
-
-        $this->_logger->log(Logger::ERROR, sprintf('Attribute key "%s" is not in datafile.', $attributeKey));
-        $this->_errorHandler->handleError(new InvalidAttributeException('Provided attribute is not in datafile.'));
-
-        return null;
-    }
-
-    /**
-     * @param $experimentKey string Key for experiment.
-     * @param $variationKey string Key for variation.
-     *
-     * @return Variation Entity corresponding to the provided experiment key and variation key.
-     *         Dummy entity is returned if key or ID is invalid.
-     */
-    public function getVariationFromKey($experimentKey, $variationKey)
-    {
-        if (isset($this->_variationKeyMap[$experimentKey])
-            && isset($this->_variationKeyMap[$experimentKey][$variationKey])
-        ) {
-            return $this->_variationKeyMap[$experimentKey][$variationKey];
-        }
-
-        $this->_logger->log(
-            Logger::ERROR,
-            sprintf(
-                'No variation key "%s" defined in datafile for experiment "%s".',
-                $variationKey,
-                $experimentKey
-            )
-        );
-        $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
-        return new Variation();
-    }
-
-    /**
-     * @param $experimentKey string Key for experiment.
-     * @param $variationId string ID for variation.
-     *
-     * @return Variation Entity corresponding to the provided experiment key and variation ID.
-     *         Dummy entity is returned if key or ID is invalid.
-     */
-    public function getVariationFromId($experimentKey, $variationId)
-    {
-        if (isset($this->_variationIdMap[$experimentKey])
-            && isset($this->_variationIdMap[$experimentKey][$variationId])
-        ) {
-            return $this->_variationIdMap[$experimentKey][$variationId];
-        }
-
-        $this->_logger->log(
-            Logger::ERROR,
-            sprintf(
-                'No variation ID "%s" defined in datafile for experiment "%s".',
-                $variationId,
-                $experimentKey
-            )
-        );
-        $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
-        return new Variation();
-    }
-
-    /**
-     * Gets the feature variable instance given feature flag key and variable key
-     *
-     * @param string Feature flag key
-     * @param string Variable key
-     *
-     * @return FeatureVariable / null
-     */
-    public function getFeatureVariableFromKey($featureFlagKey, $variableKey)
-    {
-        $featureFlag = $this->getFeatureFlagFromKey($featureFlagKey);
-        if ($featureFlag && !($featureFlag->getKey())) {
-            return null;
-        }
-
-        if (isset($this->_featureFlagVariableMap[$featureFlagKey])
-            && isset($this->_featureFlagVariableMap[$featureFlagKey][$variableKey])
-        ) {
-            return $this->_featureFlagVariableMap[$featureFlagKey][$variableKey];
-        }
-
-        $this->_logger->log(
-            Logger::ERROR,
-            sprintf(
-                'No variable key "%s" defined in datafile for feature flag "%s".',
-                $variableKey,
-                $featureFlagKey
-            )
-        );
-        $this->_errorHandler->handleError(
-            new InvalidFeatureVariableException('Provided feature variable is not in datafile.')
-        );
-        return null;
-    }
-
-    /**
-     * Determines if given experiment is a feature test.
-     *
-     * @param string Experiment ID.
-     *
-     * @return boolean A boolean value that indicates if the experiment is a feature test.
-     */
-    public function isFeatureExperiment($experimentId)
-    {
-        return array_key_exists($experimentId, $this->_experimentFeatureMap);
+      $expectedDatafile = DATAFILE_FOR_OPTIMIZELY_CONFIG;
+      $actualDatafile = $this->optConfigService->getDatafile();
+      $this->assertEquals($expectedDatafile, $actualDatafile);
     }
 }
