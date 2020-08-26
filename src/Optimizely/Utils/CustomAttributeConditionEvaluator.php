@@ -19,6 +19,7 @@ namespace Optimizely\Utils;
 
 use Monolog\Logger;
 use Optimizely\Enums\CommonAudienceEvaluationLogs as logs;
+use Optimizely\Utils\SemVersionConditionEvaluator;
 use Optimizely\Utils\Validator;
 
 class CustomAttributeConditionEvaluator
@@ -122,6 +123,36 @@ class CustomAttributeConditionEvaluator
         }
 
         return false;
+    }
+
+    /**
+     * compares two semantic versions.
+     *
+     * @param  object $condition
+     *
+     * @return null|int 0 if user's semver attribute is equal to the semver condition value,
+     *                  1 if user's semver attribute is greater than the semver condition value,
+     *                  -1 if user's semver attribute is less than the semver condition value,
+     *                  null if the condition value or user attribute value has an invalid type, or
+     *                  if there is a mismatch between the user attribute type and the condition
+     *                  value type.
+     */
+    protected function semverEvaluator($condition)
+    {
+        $conditionName = $condition['name'];
+        $conditionValue = $condition['value'];
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName] : null;
+
+        if (!Validator::validateNonEmptyString($conditionValue) || !Validator::validateNonEmptyString($userValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
+            return null;
+        }
+
+        $semVerCondEval = new SemVersionConditionEvaluator($conditionValue, $this->logger);
+        return $semVerCondEval->compareVersion($userValue);
     }
 
     /**
@@ -409,6 +440,96 @@ class CustomAttributeConditionEvaluator
         }
 
         return strpos($userValue, $conditionValue) !== false;
+    }
+
+    /**
+     * Evaluate the given semantic version equal match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if user's semver attribute is equal to the semver condition value,
+     *                 false if the user's semver is greater or less than the semver condition value,
+     *                 null if the semver condition value or user's semver attribute is invalid.
+     */
+    protected function semverEqualEvaluator($condition)
+    {
+        $comparison = $this->semverEvaluator($condition);
+        if ($comparison !== null) {
+            return $comparison === 0;
+        }
+        return $comparison;
+    }
+
+    /**
+     * Evaluate the given semantic version greater than match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if user's semver attribute is greater than the semver condition value,
+     *                 false if the user's semver is less than or equal to the semver condition value,
+     *                 null if the semver condition value or user's semver attribute is invalid.
+     */
+    protected function semverGreaterThanEvaluator($condition)
+    {
+        $comparison = $this->semverEvaluator($condition);
+        if ($comparison !== null) {
+            return $comparison > 0;
+        }
+        return $comparison;
+    }
+
+    /**
+     * Evaluate the given semantic version greater than equal to match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if user's semver attribute is greater than or equal to the semver condition value,
+     *                 false if the user's semver is less than the semver condition value,
+     *                 null if the semver condition value or user's semver attribute is invalid.
+     */
+    protected function semverGreaterThanEqualToEvaluator($condition)
+    {
+        $comparison = $this->semverEvaluator($condition);
+        if ($comparison !== null) {
+            return $comparison >= 0;
+        }
+        return $comparison;
+    }
+
+    /**
+     * Evaluate the given semantic version less than match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if user's semver attribute is less than the semver condition value,
+     *                 false if the user's semver is greater than or equal to the semver condition value,
+     *                 null if the semver condition value or user's semver attribute is invalid.
+     */
+    protected function semverLessThanEvaluator($condition)
+    {
+        $comparison = $this->semverEvaluator($condition);
+        if ($comparison !== null) {
+            return $comparison < 0;
+        }
+        return $comparison;
+    }
+
+    /**
+     * Evaluate the given semantic version less than equal to match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if user's semver attribute is less than or equal to the semver condition value,
+     *                 false if the user's semver is greater than the semver condition value,
+     *                 null if the semver condition value or user's semver attribute is invalid.
+     */
+    protected function semverLessThanEqualToEvaluator($condition)
+    {
+        $comparison = $this->semverEvaluator($condition);
+        if ($comparison !== null) {
+            return $comparison <= 0;
+        }
+        return $comparison;
     }
 
     /**

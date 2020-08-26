@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2018-2019, Optimizely
+ * Copyright 2018-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,85 +31,109 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'type' => 'custom_attribute',
             'name' => 'browser_type',
             'value' => 'safari',
-            'match' => 'exact'
+            'match' => 'exact',
         ];
         $this->booleanCondition = [
             'type' => 'custom_attribute',
             'name' => 'is_firefox',
             'value' => true,
-            'match' => 'exact'
+            'match' => 'exact',
         ];
         $this->integerCondition = [
             'type' => 'custom_attribute',
             'name' => 'num_users',
             'value' => 10,
-            'match' => 'exact'
+            'match' => 'exact',
         ];
-        $this->doubleCondition =  [
+        $this->doubleCondition = [
             'type' => 'custom_attribute',
             'name' => 'pi_value',
             'value' => 3.14,
-            'match' => 'exact'
+            'match' => 'exact',
         ];
         $this->existsCondition = [
             'type' => 'custom_attribute',
             'name' => 'input_value',
             'value' => null,
-            'match' => 'exists'
+            'match' => 'exists',
         ];
         $this->exactStringCondition = [
             'name' => 'favorite_constellation',
-            'value' =>'Lacerta',
+            'value' => 'Lacerta',
             'type' => 'custom_attribute',
-            'match' =>'exact'
+            'match' => 'exact',
         ];
         $this->exactIntCondition = [
             'name' => 'lasers_count',
             'value' => 9000,
             'type' => 'custom_attribute',
-            'match' => 'exact'
+            'match' => 'exact',
         ];
         $this->exactFloatCondition = [
             'name' => 'lasers_count',
             'value' => 9000.0,
             'type' => 'custom_attribute',
-            'match' => 'exact'
+            'match' => 'exact',
         ];
         $this->exactBoolCondition = [
             'name' => 'did_register_user',
             'value' => false,
             'type' => 'custom_attribute',
-            'match' => 'exact'
+            'match' => 'exact',
         ];
         $this->substringCondition = [
             'name' => 'headline_text',
             'value' => 'buy now',
             'type' => 'custom_attribute',
-            'match' => 'substring'
+            'match' => 'substring',
         ];
         $this->gtIntCondition = [
             'name' => 'meters_travelled',
             'value' => 48,
             'type' => 'custom_attribute',
-            'match' => 'gt'
+            'match' => 'gt',
         ];
         $this->gtFloatCondition = [
             'name' => 'meters_travelled',
             'value' => 48.2,
             'type' => 'custom_attribute',
-            'match' => 'gt'
+            'match' => 'gt',
+        ];
+        $this->geIntCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
+        $this->geFloatCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48.2,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
         ];
         $this->ltIntCondition = [
             'name' => 'meters_travelled',
-             'value' => 48,
-             'type' => 'custom_attribute',
-             'match' => 'lt'
-          ];
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'lt',
+        ];
         $this->ltFloatCondition = [
             'name' => 'meters_travelled',
             'value' => 48.2,
             'type' => 'custom_attribute',
-            'match' => 'lt'
+            'match' => 'lt',
+        ];
+        $this->leIntCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
+        $this->leFloatCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48.2,
+            'type' => 'custom_attribute',
+            'match' => 'le',
         ];
     }
 
@@ -147,7 +171,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'browser_type' => 'safari',
             'is_firefox' => true,
             'num_users' => 10,
-            'pi_value' => 3.14
+            'pi_value' => 3.14,
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -193,7 +217,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                     'type' => 'custom_attribute',
                     'name' => 'weird_condition',
                     'value' => 'hi',
-                    'match' => 'weird_match'
+                    'match' => 'weird_match',
                 ]
             )
         );
@@ -212,7 +236,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                     'type' => 'custom_attribute',
                     'name' => 'favorite_constellation',
                     'value' => 'Lacerta',
-                    'match' => null
+                    'match' => null,
                 ]
             )
         );
@@ -231,7 +255,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                     'type' => 'weird_type',
                     'name' => 'weird_condition',
                     'value' => 'hi',
-                    'match' => 'exact'
+                    'match' => 'exact',
                 ]
             )
         );
@@ -798,6 +822,206 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testGreaterThanEqualToIntReturnsTrueWhenUserValueGreaterThanOrEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48.1],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geIntCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 49],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geIntCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geIntCondition
+            )
+        );
+    }
+
+    public function testGreaterThanEqualToFloatReturnsTrueWhenUserValueGreaterThanOrEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48.3],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geFloatCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 49],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geFloatCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48.2],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geFloatCondition
+            )
+        );
+    }
+
+    public function testGreaterThanEqualToIntReturnsFalseWhenUserValueLessThanConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 47.9],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geIntCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 47],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geIntCondition
+            )
+        );
+    }
+
+    public function testGreaterThanEqualToFloatReturnsFalseWhenUserValueLessThanConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48.1],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geFloatCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geFloatCondition
+            )
+        );
+    }
+
+    public function testGreaterThanEqualToIntReturnsNullWhenUserValueIsNotANumber()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 'a long way'],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geIntCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => false],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geIntCondition
+            )
+        );
+    }
+
+    public function testGreaterThanEqualToFloatReturnsNullWhenUserValueIsNotANumber()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 'a long way'],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geFloatCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => false],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geFloatCondition
+            )
+        );
+    }
+
+    public function testGreaterThanEqualToIntReturnsNullWhenNoUserProvidedValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            [],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geIntCondition
+            )
+        );
+    }
+
+    public function testGreaterThanEqualToFloatReturnsNullWhenNoUserProvidedValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            [],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->geFloatCondition
+            )
+        );
+    }
+
     public function testLessThanIntReturnsTrueWhenUserValueLessThanConditionValue()
     {
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -967,6 +1191,201 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
                 $this->ltFloatCondition
+            )
+        );
+    }
+
+    public function testLessThanEqualToIntReturnsTrueWhenUserValueLessThanOrEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 47.9],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leIntCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 47],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leIntCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leIntCondition
+            )
+        );
+    }
+
+    public function testLessThanEqualToFloatReturnsTrueWhenUserValueLessOrEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48.1],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leFloatCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leFloatCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48.2],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leFloatCondition
+            )
+        );
+    }
+
+    public function testLessThanEqualToIntReturnsFalseWhenUserValueGreaterThanConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48.1],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leIntCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 49],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leIntCondition
+            )
+        );
+    }
+
+    public function testLessThanEqualToFloatReturnsFalseWhenUserValueGreaterThanConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48.3],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leFloatCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 49],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leFloatCondition
+            )
+        );
+    }
+
+    public function testLessThanEqualToIntReturnsNullWhenUserValueIsNotANumber()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 'a long way'],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leIntCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => false],
+            $this->loggerMock
+        );
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leIntCondition
+            )
+        );
+    }
+
+    public function testLessThanEqualToFloatReturnsNullWhenUserValueIsNotANumber()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 'a long way'],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leFloatCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => false],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leFloatCondition
+            )
+        );
+    }
+
+    public function testLessThanEqualToIntReturnsNullWhenNoUserProvidedValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            [],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leIntCondition
+            )
+        );
+    }
+
+    public function testLessThanEqualToFloatReturnsNullWhenNoUserProvidedValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            [],
+            $this->loggerMock
+        );
+
+        $this->assertNull(
+            $customAttrConditionEvaluator->evaluate(
+                $this->leFloatCondition
             )
         );
     }
