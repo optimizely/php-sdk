@@ -82,7 +82,7 @@ class SemVersionConditionEvaluator
                 // both targetedVersionParts and versionParts are digits
                 if ($this->toInt($versionParts[$i]) < $this->toInt($targetedVersionParts[$i])) {
                     return -1;
-                } else if ($this->toInt($versionParts[$i]) > $this->toInt($targetedVersionParts[$i])) {
+                } elseif ($this->toInt($versionParts[$i]) > $this->toInt($targetedVersionParts[$i])) {
                     return 1;
                 }
             } else {
