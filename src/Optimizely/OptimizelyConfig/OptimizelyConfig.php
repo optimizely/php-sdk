@@ -43,7 +43,7 @@ class OptimizelyConfig implements \JsonSerializable
     private $datafile;
     
 
-    public function __construct($revision, array $experimentsMap, array $featuresMap, $datafile)
+    public function __construct($revision, array $experimentsMap, array $featuresMap, $datafile = null)
     {
         $this->revision = $revision;
         $this->experimentsMap = $experimentsMap;
