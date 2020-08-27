@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 namespace Optimizely\Tests;
-
+namespace Optimizely\Config\Tests;
 use Exception;
 use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
