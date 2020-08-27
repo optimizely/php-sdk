@@ -109,7 +109,7 @@ class SemVersionConditionEvaluator
         if (strpos($targetedVersion, self::WHITESPACE_SEPARATOR) !== false) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::ATTRIBUTE_FORMAT_INVALID,
-                json_encode($this->condition),
+                json_encode($this->condition)
             ));
             return null;
         }
@@ -131,7 +131,7 @@ class SemVersionConditionEvaluator
             if (count($targetParts) <= 1) {
                 $this->logger->log(Logger::WARNING, sprintf(
                     logs::ATTRIBUTE_FORMAT_INVALID,
-                    json_encode($this->condition),
+                    json_encode($this->condition)
                 ));
                 return null;
             }
@@ -144,7 +144,7 @@ class SemVersionConditionEvaluator
         if ($dotCount > 2) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::ATTRIBUTE_FORMAT_INVALID,
-                json_encode($this->condition),
+                json_encode($this->condition)
             ));
             return null;
         }
@@ -155,7 +155,7 @@ class SemVersionConditionEvaluator
         if ($targetedVersionPartsCount !== ($dotCount + 1)) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::ATTRIBUTE_FORMAT_INVALID,
-                json_encode($this->condition),
+                json_encode($this->condition)
             ));
             return null;
         }
@@ -164,7 +164,7 @@ class SemVersionConditionEvaluator
             if (!is_numeric($val)) {
                 $this->logger->log(Logger::WARNING, sprintf(
                     logs::ATTRIBUTE_FORMAT_INVALID,
-                    json_encode($this->condition),
+                    json_encode($this->condition)
                 ));
                 return null;
             }
