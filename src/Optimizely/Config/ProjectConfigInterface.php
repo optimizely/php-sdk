@@ -161,7 +161,7 @@ interface ProjectConfigInterface
     public function isFeatureExperiment($experimentId);
 
     /**
-     * Determines if given experiment is a feature test.
+     * Returns string representation of datafile.
      *
      * @return string A string value that contains datafile contents.
      */

@@ -31,7 +31,8 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
         $optConfig = new OptimizelyConfig(
             "20",
             ["a" => "apple"],
-            ["o" => "orange"]
+            ["o" => "orange"],
+            null
         );
 
         $this->assertEquals("20", $optConfig->getRevision());
@@ -41,7 +42,8 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
         $expectedJson = '{
             "revision": "20",
             "experimentsMap" : {"a": "apple"},
-            "featuresMap": {"o": "orange"}
+            "featuresMap": {"o": "orange"},
+            "datafile": null
         }';
 
         $expectedJson = json_encode(json_decode($expectedJson));

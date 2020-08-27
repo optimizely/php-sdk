@@ -68,7 +68,7 @@ class OptimizelyConfigService
         $this->experiments = $projectConfig->getAllExperiments();
         $this->featureFlags = $projectConfig->getFeatureFlags();
         $this->revision = $projectConfig->getRevision();
-        $this->datafile = $$projectConfig->toDatafile();
+        $this->datafile = $projectConfig->toDatafile();
         
         $this->createLookupMaps();
     }
@@ -84,7 +84,8 @@ class OptimizelyConfigService
         return new OptimizelyConfig(
             $this->revision,
             $experimentsMaps[0],
-            $featuresMap
+            $featuresMap,
+            $this->datafile
         );
     }
     
