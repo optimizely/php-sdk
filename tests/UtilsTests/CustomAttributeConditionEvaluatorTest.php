@@ -135,6 +135,36 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'type' => 'custom_attribute',
             'match' => 'le',
         ];
+        $this->semverGtCondition = [
+            'name' => 'semversion_gt',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_gt',
+        ];
+        $this->semverGeCondition = [
+            'name' => 'semversion_ge',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_ge',
+        ];
+        $this->semverLtCondition = [
+            'name' => 'semversion_lt',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_lt',
+        ];
+        $this->semverLeCondition = [
+            'name' => 'semversion_le',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_le',
+        ];
+        $this->semverEqCondition = [
+            'name' => 'semversion_eq',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
     }
 
     public function testEvaluateReturnsTrueWhenAttrsPassAudienceCondition()
@@ -1388,5 +1418,876 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                 $this->leFloatCondition
             )
         );
+    }
+
+    public function testSemVerGTMatcherReturnsFalseWhenAttributeValueIsLessThanOrEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "3.7.0"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "3.7.1"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "3.6"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "2"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGtCondition
+            )
+        );
+    }
+
+    public function testSemVerGTMatcherReturnsTrueWhenAttributeValueIsGreaterThanConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "3.7.2"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "3.7.2-beta"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "4.7.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "3.8"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "4"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGtCondition
+            )
+        );
+    }
+
+    public function testSemVerGTMatcherReturnsTrueWhenAttributeValueIsGreaterThanConditionValueBeta()
+    {
+        $semverGtCondition = [
+            'name' => 'semversion_gt',
+            'value' => "3.7.0-beta.2.3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_gt',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "3.7.0-beta.2.4"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverGtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_gt' => "3.7.0"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverGtCondition
+            )
+        );
+    }
+
+    public function testSemVerGEMatcherReturnsFalseWhenAttributeValueIsNotGreaterOrEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.7.0"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.7.1-beta"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.6"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "2"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGeCondition
+            )
+        );
+    }
+
+    public function testSemVerGEMatcherReturnsTrueWhenAttributeValueIsGreaterOrEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.7.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.7.2"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.8.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "4.7.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverGeCondition
+            )
+        );
+    }
+
+    public function testSemVerGEMatcherReturnsTrueWhenAttributeValueIsGreaterOrEqualToConditionValueMajorOnly()
+    {
+        $semverGeCondition = [
+            'name' => 'semversion_ge',
+            'value' => "3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_ge',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.7.0"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.0.0"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "4.0"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverGeCondition
+            )
+        );
+    }
+
+    public function testSemVerGEMatcherReturnsFalseWhenAttributeValueIsNotGreaterOrEqualToConditionValueMajorOnly()
+    {
+        $semverGeCondition = [
+            'name' => 'semversion_ge',
+            'value' => "3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_ge',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "2"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $semverGeCondition
+            )
+        );
+    }
+
+    public function testSemVerGEMatcherReturnsTrueWhenAttributeValueIsGreaterOrEqualToConditionValueBeta()
+    {
+        $semverGeCondition = [
+            'name' => 'semversion_ge',
+            'value' => "3.7.0-beta.2.3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_ge',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.7.0-beta.2.3"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.7.0-beta.2.4"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.7.0-beta.2.3+1.2.3"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverGeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_ge' => "3.7.1-beta.2.3"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverGeCondition
+            )
+        );
+    }
+
+    public function testSemVerLTMatcherReturnsFalseWhenAttributeValueIsGreaterThanOrEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "3.7.1"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "3.7.2"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "3.8"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "4"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLtCondition
+            )
+        );
+    }
+
+    public function testSemVerLTMatcherReturnsTrueWhenAttributeValueIsLessThanConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "3.7.0"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "3.7.1-beta"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "2.7.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "3.7"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "3"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLtCondition
+            )
+        );
+    }
+
+    public function testSemVerLTMatcherReturnsTrueWhenAttributeValueIsLessThanConditionValueBeta()
+    {
+        $semverLtCondition = [
+            'name' => 'semversion_lt',
+            'value' => "3.7.0-beta.2.3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_lt',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "3.7.0-beta.2.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLtCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_lt' => "3.7.0-beta"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLtCondition
+            )
+        );
+    }
+
+    public function testSemVerLEMatcherReturnsFalseWhenAttributeValueIsNotLessOrEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.7.2"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.8"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "4"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLeCondition
+            )
+        );
+    }
+
+    public function testSemVerLEMatcherReturnsTrueWhenAttributeValueIsLessOrEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.7.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.7.0"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.6.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "2.7.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.7.1-beta"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverLeCondition
+            )
+        );
+    }
+
+    public function testSemVerLEMatcherReturnsTrueWhenAttributeValueIsLessOrEqualToConditionValueMajorOnly()
+    {
+        $semverLeCondition = [
+            'name' => 'semversion_le',
+            'value' => "3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_le',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.7.0-beta.2.4"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.0.0"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.7.1-beta"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "2.0"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+    }
+
+    public function testSemVerLEMatcherReturnsFalseWhenAttributeValueIsNotLessOrEqualToConditionValueMajorOnly()
+    {
+        $semverLeCondition = [
+            'name' => 'semversion_le',
+            'value' => "3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_le',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "4"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+    }
+
+    public function testSemVerLEMatcherReturnsTrueWhenAttributeValueIsLessOrEqualToConditionValueBeta()
+    {
+        $semverLeCondition = [
+            'name' => 'semversion_le',
+            'value' => "3.7.0-beta.2.3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_le',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.7.0-beta.2.2"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.7.0-beta.2.3"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.7.0-beta.2.2+1.2.3"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "3.6.1-beta.2.3+1.2"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+    }
+
+    public function testSemVerEQMatcherReturnsFalseWhenAttributeValueIsNotEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "3.7.0"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverEqCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "3.7.2"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverEqCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "3.6"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverEqCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "2"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverEqCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "4"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverEqCondition
+            )
+        );
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "3"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverEqCondition
+            )
+        );
+    }
+
+    public function testSemVerEQMatcherReturnsTrueWhenAttributeValueIsEqualToConditionValue()
+    {
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "3.7.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $this->semverEqCondition
+            )
+        );
+    }
+
+    public function testSemVerEQMatcherReturnsTrueWhenAttributeValueIsEqualToConditionValueMajorOnly()
+    {
+        $semverEqCondition = [
+            'name' => 'semversion_eq',
+            'value' => "3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "3.0.0"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverEqCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "3.1"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverEqCondition
+            )
+        );
+    }
+
+    public function testSemVerEQMatcherReturnsFalseOrFalseWhenAttributeValueIsNotEqualToConditionValueMajorOnly()
+    {
+        $semverEqCondition = [
+            'name' => 'semversion_eq',
+            'value' => "3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "4.0"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $semverEqCondition
+            )
+        );
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "2"],
+            $this->loggerMock
+        );
+
+        $this->assertFalse(
+            $customAttrConditionEvaluator->evaluate(
+                $semverEqCondition
+            )
+        );
+    }
+
+    public function testSemVerEQMatcherReturnsTrueWhenAttributeValueIsEqualToConditionValueBeta()
+    {
+        $semverEqCondition = [
+            'name' => 'semversion_eq',
+            'value' => "3.7.0-beta.2.3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_eq' => "3.7.0-beta.2.3"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverEqCondition
+            )
+        );
+    }
+
+    public function testInvalidSemVersions()
+    {
+        $semverLeCondition = [
+            'name' => 'semversion_le',
+            'value' => "3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_le',
+        ];
+
+        $invalidValues = ["-", ".", "..", "+", "+test", " ", "2 .3. 0", "2.",
+            ".2.2", "3.7.2.2", "3.x", ",", "+build-prerelease"];
+
+        foreach ($invalidValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_le' => $val],
+                $this->loggerMock
+            );
+            $this->assertNull(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLeCondition
+                )
+            );
+        }
     }
 }

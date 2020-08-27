@@ -24,6 +24,7 @@ class SemVersionConditionEvaluator
 {
     const BUILD_SEPARATOR = '+';
     const PRE_RELEASE_SEPARATOR = '-';
+    const WHITESPACE_SEPARATOR = ' ';
 
     /**
      * @var Condition
@@ -54,20 +55,20 @@ class SemVersionConditionEvaluator
      *                  if there is a mismatch between the user attribute type and the condition
      *                  value type.
      */
-    public function compareVersion($attribute)
+    public function compareVersion($targetedVersion)
     {
-        $targetedVersionParts = $this->splitSemanticVersion($this->condition);
+        $targetedVersionParts = $this->splitSemanticVersion($targetedVersion);
         if ($targetedVersionParts === null) {
             return null;
         }
-        $versionParts = $this->splitSemanticVersion($attribute);
+        $versionParts = $this->splitSemanticVersion($this->condition);
         if ($versionParts === null) {
             return null;
         }
 
         for ($i = 0; $i < count($targetedVersionParts); $i++) {
             if (count($versionParts) <= $i) {
-                if ($this->isPreRelease($attribute)) {
+                if ($this->isPreRelease($targetedVersion)) {
                     return 1;
                 }
                 return -1;
@@ -89,7 +90,7 @@ class SemVersionConditionEvaluator
                 return -1;
             }
         }
-        if ($this->isPreRelease($attribute) && !$this->isPreRelease($this->condition)) {
+        if (!$this->isPreRelease($targetedVersion) && $this->isPreRelease($this->condition)) {
             return -1;
         }
         return 0;
@@ -105,7 +106,7 @@ class SemVersionConditionEvaluator
      */
     protected function splitSemanticVersion($targetedVersion)
     {
-        if (!preg_match('/\s/', $targetedVersion)) {
+        if (strpos($targetedVersion, self::WHITESPACE_SEPARATOR) !== false) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::ATTRIBUTE_FORMAT_INVALID,
                 json_encode($this->condition),
@@ -113,7 +114,7 @@ class SemVersionConditionEvaluator
             return null;
         }
 
-        $targetPrefix = clone $targetedVersion;
+        $targetPrefix = $targetedVersion;
         $targetSuffix = array();
 
         if ($this->isPreRelease($targetedVersion) || $this->isBuild($targetedVersion)) {
@@ -121,11 +122,13 @@ class SemVersionConditionEvaluator
             if ($this->isPreRelease($targetedVersion)) {
                 $sep = self::PRE_RELEASE_SEPARATOR;
             }
-            // this is going to slit with the first occurrence.
-            $targetParts = explode($sep, $targetedVersion);
+
+            // this is going to split with the first occurrence.
+            $targetParts = array_filter(explode($sep, $targetedVersion), 'strlen');
+
             // in the case it is neither a build or pre release it will return the
             // original string as the first element in the array
-            if (count($targetParts) == 0) {
+            if (count($targetParts) <= 1) {
                 $this->logger->log(Logger::WARNING, sprintf(
                     logs::ATTRIBUTE_FORMAT_INVALID,
                     json_encode($this->condition),
@@ -137,9 +140,8 @@ class SemVersionConditionEvaluator
         }
 
         // Expect a version string of the form x.y.z
-        $targetedVersionParts = explode(".", $targetPrefix);
-        $targetedVersionPartsCount = count($targetedVersionParts);
-        if ($targetedVersionPartsCount < 1 || targetedVersionPartsCount > 3) {
+        $dotCount = substr_count($targetPrefix, ".");
+        if ($dotCount > 2) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::ATTRIBUTE_FORMAT_INVALID,
                 json_encode($this->condition),
@@ -147,7 +149,31 @@ class SemVersionConditionEvaluator
             return null;
         }
 
-        return array_merge($targetedVersionParts, $targetSuffix);
+        $targetedVersionParts = array_filter(explode(".", $targetPrefix), 'strlen');
+        $targetedVersionPartsCount = count($targetedVersionParts);
+
+        if ($targetedVersionPartsCount !== ($dotCount + 1)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::ATTRIBUTE_FORMAT_INVALID,
+                json_encode($this->condition),
+            ));
+            return null;
+        }
+
+        foreach ($targetedVersionParts as $val) {
+            if (!is_numeric($val)) {
+                $this->logger->log(Logger::WARNING, sprintf(
+                    logs::ATTRIBUTE_FORMAT_INVALID,
+                    json_encode($this->condition),
+                ));
+                return null;
+            }
+        }
+
+        if ($targetSuffix !== null) {
+            return array_merge($targetedVersionParts, $targetSuffix);
+        }
+        return $targetedVersionParts;
     }
 
     /**
@@ -159,7 +185,7 @@ class SemVersionConditionEvaluator
      */
     private function toInt($str)
     {
-        if (is_int($str)) {
+        if (is_numeric($str)) {
             return intval($str);
         }
         return 0;
@@ -174,7 +200,7 @@ class SemVersionConditionEvaluator
      */
     private function isPreRelease($str)
     {
-        return strpos($str, self::PRE_RELEASE_SEPARATOR);
+        return strpos($str, self::PRE_RELEASE_SEPARATOR) !== false;
     }
 
     /**
@@ -186,6 +212,6 @@ class SemVersionConditionEvaluator
      */
     private function isBuild($str)
     {
-        return strpos($str, self::BUILD_SEPARATOR);
+        return strpos($str, self::BUILD_SEPARATOR) !== false;
     }
 }

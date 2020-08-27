@@ -151,8 +151,8 @@ class CustomAttributeConditionEvaluator
             return null;
         }
 
-        $semVerCondEval = new SemVersionConditionEvaluator($conditionValue, $this->logger);
-        return $semVerCondEval->compareVersion($userValue);
+        $semVerCondEval = new SemVersionConditionEvaluator($userValue, $this->logger);
+        return $semVerCondEval->compareVersion($conditionValue);
     }
 
     /**
