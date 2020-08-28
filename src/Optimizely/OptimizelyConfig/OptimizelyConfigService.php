@@ -38,7 +38,7 @@ class OptimizelyConfigService
     private $revision;
 
     /**
-     * @var string config datafile.
+     * @var string String denoting datafile.
      */
     private $datafile;
 
