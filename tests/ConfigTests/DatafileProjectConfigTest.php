@@ -719,4 +719,13 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->config->isFeatureExperiment($featureExperiment->getId()));
         $this->assertFalse($this->config->isFeatureExperiment($experiment->getId()));
     }
+
+    public function testToDatafile()
+    {
+        $expectedDatafile = DATAFILE_FOR_OPTIMIZELY_CONFIG;
+        $this->config = new DatafileProjectConfig($expectedDatafile, $this->loggerMock, $this->errorHandlerMock);
+        $actualDatafile = $this->config->toDatafile();
+
+        $this->assertEquals($expectedDatafile, $actualDatafile);
+    }
 }

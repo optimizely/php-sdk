@@ -89,6 +89,11 @@ class DatafileProjectConfig implements ProjectConfigInterface
     private $_botFiltering;
 
     /**
+     * @var string datafile.
+     */
+    private $datafile;
+
+    /**
      * @var string Revision of the datafile.
      */
     private $_revision;
@@ -196,6 +201,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
     {
         $supportedVersions = array(self::V2, self::V3, self::V4);
         $config = json_decode($datafile, true);
+        $this->datafile = $datafile;
         $this->_logger = $logger;
         $this->_errorHandler = $errorHandler;
         $this->_version = $config['version'];
@@ -353,6 +359,14 @@ class DatafileProjectConfig implements ProjectConfigInterface
         }
 
         return $config;
+    }
+
+    /**
+     * @return string String representing contents of datafile.
+     */
+    public function toDatafile()
+    {
+        return $this->datafile;
     }
 
     /**
