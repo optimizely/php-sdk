@@ -211,8 +211,8 @@ class SemVersionConditionEvaluator
      */
     private function getFirstOccurenceOfPrereleaseOrBuildSeparator($str)
     {
-        $preReleasePos = strpos($str, self::PRE_RELEASE_SEPARATOR) ?? count($str) + 1;
-        $buildPos = strpos($str, self::BUILD_SEPARATOR) ?? count($str) + 1;
+        $preReleasePos = strpos($str, self::PRE_RELEASE_SEPARATOR);
+        $buildPos = strpos($str, self::BUILD_SEPARATOR);
 
         switch (true) {
             case ($preReleasePos === $buildPos):
