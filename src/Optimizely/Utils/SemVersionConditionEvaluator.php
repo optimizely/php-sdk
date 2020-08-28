@@ -108,8 +108,7 @@ class SemVersionConditionEvaluator
     {
         if (strpos($targetedVersion, self::WHITESPACE_SEPARATOR) !== false) {
             $this->logger->log(Logger::WARNING, sprintf(
-                logs::ATTRIBUTE_FORMAT_INVALID,
-                json_encode($this->condition)
+                logs::ATTRIBUTE_FORMAT_INVALID
             ));
             return null;
         }
@@ -117,21 +116,16 @@ class SemVersionConditionEvaluator
         $targetPrefix = $targetedVersion;
         $targetSuffix = array();
 
-        if ($this->isPreRelease($targetedVersion) || $this->isBuild($targetedVersion)) {
-            $sep = self::BUILD_SEPARATOR;
-            if ($this->isPreRelease($targetedVersion)) {
-                $sep = self::PRE_RELEASE_SEPARATOR;
-            }
-
+        $pos = $this->getFirstOccurenceOfPrereleaseOrBuildSeparator($targetedVersion);
+        if ($pos !== false) {
             // this is going to split with the first occurrence.
-            $targetParts = array_filter(explode($sep, $targetedVersion), 'strlen');
+            $targetParts = array_filter($this->explodeByPosition($pos, $targetedVersion), 'strlen');
 
             // in the case it is neither a build or pre release it will return the
             // original string as the first element in the array
             if (count($targetParts) <= 1) {
                 $this->logger->log(Logger::WARNING, sprintf(
-                    logs::ATTRIBUTE_FORMAT_INVALID,
-                    json_encode($this->condition)
+                    logs::ATTRIBUTE_FORMAT_INVALID
                 ));
                 return null;
             }
@@ -143,8 +137,7 @@ class SemVersionConditionEvaluator
         $dotCount = substr_count($targetPrefix, ".");
         if ($dotCount > 2) {
             $this->logger->log(Logger::WARNING, sprintf(
-                logs::ATTRIBUTE_FORMAT_INVALID,
-                json_encode($this->condition)
+                logs::ATTRIBUTE_FORMAT_INVALID
             ));
             return null;
         }
@@ -154,8 +147,7 @@ class SemVersionConditionEvaluator
 
         if ($targetedVersionPartsCount !== ($dotCount + 1)) {
             $this->logger->log(Logger::WARNING, sprintf(
-                logs::ATTRIBUTE_FORMAT_INVALID,
-                json_encode($this->condition)
+                logs::ATTRIBUTE_FORMAT_INVALID
             ));
             return null;
         }
@@ -163,8 +155,7 @@ class SemVersionConditionEvaluator
         foreach ($targetedVersionParts as $val) {
             if (!is_numeric($val)) {
                 $this->logger->log(Logger::WARNING, sprintf(
-                    logs::ATTRIBUTE_FORMAT_INVALID,
-                    json_encode($this->condition)
+                    logs::ATTRIBUTE_FORMAT_INVALID
                 ));
                 return null;
             }
@@ -192,26 +183,61 @@ class SemVersionConditionEvaluator
     }
 
     /**
-     * checks if string contains prerelease seperator.
+     * checks if string contains prerelease seperator before build separator.
      *
      * @param  string $str value to be checked.
      *
-     * @return bool true if string contains prerelease seperator, false otherwise.
+     * @return bool true if string contains prerelease seperator comes first.
      */
     private function isPreRelease($str)
     {
-        return strpos($str, self::PRE_RELEASE_SEPARATOR) !== false;
+        $preReleasePos = strpos($str, self::PRE_RELEASE_SEPARATOR);
+        if ($preReleasePos !== false) {
+            $buildPos = strpos($str, self::BUILD_SEPARATOR);
+            if ($buildPos !== false) {
+                return $buildPos > $preReleasePos;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
-     * checks if string contains build seperator.
+     * returns position for first occurence of prerelease or build separator, whichever comes first.
      *
      * @param  string $str value to be checked.
      *
-     * @return bool true if string contains build seperator, false otherwise.
+     * @return int position of first occurence.
      */
-    private function isBuild($str)
+    private function getFirstOccurenceOfPrereleaseOrBuildSeparator($str)
     {
-        return strpos($str, self::BUILD_SEPARATOR) !== false;
+        $preReleasePos = strpos($str, self::PRE_RELEASE_SEPARATOR) ?? count($str) + 1;
+        $buildPos = strpos($str, self::BUILD_SEPARATOR) ?? count($str) + 1;
+
+        switch (true) {
+            case ($preReleasePos === $buildPos):
+                return $preReleasePos;
+            case ($preReleasePos === false):
+                return $buildPos;
+            case ($buildPos === false):
+                return $preReleasePos;
+            default:
+                return $preReleasePos > $buildPos ? $buildPos : $preReleasePos;
+        }
+    }
+
+    /**
+     * returns exploded string list w.r.t position of separator.
+     *
+     * @param  int $pos position of separator.
+     * @param  string $str string to be exploded.
+     *
+     * @return array list of strings.
+     */
+    private function explodeByPosition($pos, $str)
+    {
+        $str1 = substr($str, 0, $pos);
+        $str2 = substr($str, $pos + 1);
+        return [$str1, $str2];
     }
 }

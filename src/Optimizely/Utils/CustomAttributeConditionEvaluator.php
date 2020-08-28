@@ -143,10 +143,9 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName] : null;
 
-        if (!Validator::validateNonEmptyString($conditionValue) || !Validator::validateNonEmptyString($userValue)) {
+        if (!Validator::validateNonEmptyString($conditionValue)) {
             $this->logger->log(Logger::WARNING, sprintf(
-                logs::UNKNOWN_CONDITION_VALUE,
-                json_encode($condition)
+                logs::ATTRIBUTE_FORMAT_INVALID
             ));
             return null;
         }

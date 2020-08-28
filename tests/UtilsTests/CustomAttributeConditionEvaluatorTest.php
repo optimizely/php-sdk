@@ -2266,6 +2266,51 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testSemVersioningWithMultiplePrereleaseOrBuildSeparator()
+    {
+        $semverLeCondition = [
+            'name' => 'semversion_le',
+            'value' => "1.0.0-alpha+001+2",
+            'type' => 'custom_attribute',
+            'match' => 'semver_le',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "1.0.0-alpha+001"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+
+        $semverLeCondition["value"] = "1.0.0-x-y-z";
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "1.0.0-x-y"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+
+        $semverLeCondition["value"] = "1.0.0+21AF26D3+117B344092BD";
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['semversion_le' => "1.0.0+21AF26D3"],
+            $this->loggerMock
+        );
+
+        $this->assertTrue(
+            $customAttrConditionEvaluator->evaluate(
+                $semverLeCondition
+            )
+        );
+    }
+
     public function testInvalidSemVersions()
     {
         $semverLeCondition = [
