@@ -818,7 +818,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $geIntCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -843,7 +844,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $geFloatCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -868,7 +870,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 $customAttrConditionEvaluator->evaluate(
                     $geIntCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -893,7 +896,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 $customAttrConditionEvaluator->evaluate(
                     $geFloatCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -918,7 +922,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertNull(
                 $customAttrConditionEvaluator->evaluate(
                     $geIntCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -943,7 +948,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertNull(
                 $customAttrConditionEvaluator->evaluate(
                     $geFloatCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1183,7 +1189,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $leIntCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1208,7 +1215,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $leFloatCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1233,7 +1241,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 $customAttrConditionEvaluator->evaluate(
                     $leIntCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1258,7 +1267,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 $customAttrConditionEvaluator->evaluate(
                     $leFloatCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1283,7 +1293,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertNull(
                 $customAttrConditionEvaluator->evaluate(
                     $leIntCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1308,7 +1319,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertNull(
                 $customAttrConditionEvaluator->evaluate(
                     $leFloatCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1374,7 +1386,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 $customAttrConditionEvaluator->evaluate(
                     $semverGtCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1398,7 +1411,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverGtCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1423,7 +1437,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverGtCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1448,7 +1463,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 $customAttrConditionEvaluator->evaluate(
                     $semverGeCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1473,7 +1489,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverGeCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1498,7 +1515,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverGeCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1544,7 +1562,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverGeCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1569,7 +1588,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLtCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1594,7 +1614,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLtCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1619,7 +1640,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLtCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1644,7 +1666,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLeCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1669,7 +1692,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLeCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1694,7 +1718,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLeCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1740,7 +1765,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLeCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1765,7 +1791,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 $customAttrConditionEvaluator->evaluate(
                     $semverEqCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1811,7 +1838,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverEqCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1836,7 +1864,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse(
                 $customAttrConditionEvaluator->evaluate(
                     $semverEqCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1883,7 +1912,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLeCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
@@ -1908,7 +1938,8 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertNull(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLeCondition
-                )
+                ),
+                "Failed for user version: {$val}"
             );
         }
     }
