@@ -99,18 +99,6 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'type' => 'custom_attribute',
             'match' => 'gt',
         ];
-        $this->geIntCondition = [
-            'name' => 'meters_travelled',
-            'value' => 48,
-            'type' => 'custom_attribute',
-            'match' => 'ge',
-        ];
-        $this->geFloatCondition = [
-            'name' => 'meters_travelled',
-            'value' => 48.2,
-            'type' => 'custom_attribute',
-            'match' => 'ge',
-        ];
         $this->ltIntCondition = [
             'name' => 'meters_travelled',
             'value' => 48,
@@ -122,48 +110,6 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'value' => 48.2,
             'type' => 'custom_attribute',
             'match' => 'lt',
-        ];
-        $this->leIntCondition = [
-            'name' => 'meters_travelled',
-            'value' => 48,
-            'type' => 'custom_attribute',
-            'match' => 'le',
-        ];
-        $this->leFloatCondition = [
-            'name' => 'meters_travelled',
-            'value' => 48.2,
-            'type' => 'custom_attribute',
-            'match' => 'le',
-        ];
-        $this->semverGtCondition = [
-            'name' => 'semversion_gt',
-            'value' => "3.7.1",
-            'type' => 'custom_attribute',
-            'match' => 'semver_gt',
-        ];
-        $this->semverGeCondition = [
-            'name' => 'semversion_ge',
-            'value' => "3.7.1",
-            'type' => 'custom_attribute',
-            'match' => 'semver_ge',
-        ];
-        $this->semverLtCondition = [
-            'name' => 'semversion_lt',
-            'value' => "3.7.1",
-            'type' => 'custom_attribute',
-            'match' => 'semver_lt',
-        ];
-        $this->semverLeCondition = [
-            'name' => 'semversion_le',
-            'value' => "3.7.1",
-            'type' => 'custom_attribute',
-            'match' => 'semver_le',
-        ];
-        $this->semverEqCondition = [
-            'name' => 'semversion_eq',
-            'value' => "3.7.1",
-            'type' => 'custom_attribute',
-            'match' => 'semver_eq',
         ];
     }
 
@@ -854,178 +800,163 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
     public function testGreaterThanEqualToIntReturnsTrueWhenUserValueGreaterThanOrEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.1],
-            $this->loggerMock
-        );
+        $geIntCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geIntCondition
-            )
-        );
+        $testValues = [48.1, 49, 48];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 49],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geIntCondition
-            )
-        );
-
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geIntCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $geIntCondition
+                )
+            );
+        }
     }
 
     public function testGreaterThanEqualToFloatReturnsTrueWhenUserValueGreaterThanOrEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.3],
-            $this->loggerMock
-        );
+        $geFloatCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48.2,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geFloatCondition
-            )
-        );
+        $testValues = [48.3, 49, 48.2];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 49],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geFloatCondition
-            )
-        );
-
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.2],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geFloatCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $geFloatCondition
+                )
+            );
+        }
     }
 
     public function testGreaterThanEqualToIntReturnsFalseWhenUserValueLessThanConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 47.9],
-            $this->loggerMock
-        );
+        $geIntCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geIntCondition
-            )
-        );
+        $testValues = [47.9, 47];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 47],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geIntCondition
-            )
-        );
+            $this->assertFalse(
+                $customAttrConditionEvaluator->evaluate(
+                    $geIntCondition
+                )
+            );
+        }
     }
 
     public function testGreaterThanEqualToFloatReturnsFalseWhenUserValueLessThanConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.1],
-            $this->loggerMock
-        );
+        $geFloatCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48.2,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geFloatCondition
-            )
-        );
+        $testValues = [48.1, 48];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geFloatCondition
-            )
-        );
+            $this->assertFalse(
+                $customAttrConditionEvaluator->evaluate(
+                    $geFloatCondition
+                )
+            );
+        }
     }
 
     public function testGreaterThanEqualToIntReturnsNullWhenUserValueIsNotANumber()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 'a long way'],
-            $this->loggerMock
-        );
+        $geIntCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
 
-        $this->assertNull(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geIntCondition
-            )
-        );
+        $testValues = ['a long way', false];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => false],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertNull(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geIntCondition
-            )
-        );
+            $this->assertNull(
+                $customAttrConditionEvaluator->evaluate(
+                    $geIntCondition
+                )
+            );
+        }
     }
 
     public function testGreaterThanEqualToFloatReturnsNullWhenUserValueIsNotANumber()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 'a long way'],
-            $this->loggerMock
-        );
+        $geFloatCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48.2,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
 
-        $this->assertNull(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geFloatCondition
-            )
-        );
+        $testValues = ['a long way', false];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => false],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertNull(
-            $customAttrConditionEvaluator->evaluate(
-                $this->geFloatCondition
-            )
-        );
+            $this->assertNull(
+                $customAttrConditionEvaluator->evaluate(
+                    $geFloatCondition
+                )
+            );
+        }
     }
 
     public function testGreaterThanEqualToIntReturnsNullWhenNoUserProvidedValue()
     {
+        $geIntCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
             [],
             $this->loggerMock
@@ -1033,13 +964,20 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                $this->geIntCondition
+                $geIntCondition
             )
         );
     }
 
     public function testGreaterThanEqualToFloatReturnsNullWhenNoUserProvidedValue()
     {
+        $geFloatCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48.2,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
             [],
             $this->loggerMock
@@ -1047,7 +985,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                $this->geFloatCondition
+                $geFloatCondition
             )
         );
     }
@@ -1227,173 +1165,163 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
     public function testLessThanEqualToIntReturnsTrueWhenUserValueLessThanOrEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 47.9],
-            $this->loggerMock
-        );
+        $leIntCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leIntCondition
-            )
-        );
+        $testValues = [47.9, 47, 48];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 47],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leIntCondition
-            )
-        );
-
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leIntCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $leIntCondition
+                )
+            );
+        }
     }
 
     public function testLessThanEqualToFloatReturnsTrueWhenUserValueLessOrEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.1],
-            $this->loggerMock
-        );
+        $leFloatCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48.2,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leFloatCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48],
-            $this->loggerMock
-        );
+        $testValues = [48.1, 48, 48.2];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leFloatCondition
-            )
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.2],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leFloatCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $leFloatCondition
+                )
+            );
+        }
     }
 
     public function testLessThanEqualToIntReturnsFalseWhenUserValueGreaterThanConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.1],
-            $this->loggerMock
-        );
+        $leIntCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leIntCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 49],
-            $this->loggerMock
-        );
+        $testValues = [48.1, 49];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leIntCondition
-            )
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
+
+            $this->assertFalse(
+                $customAttrConditionEvaluator->evaluate(
+                    $leIntCondition
+                )
+            );
+        }
     }
 
     public function testLessThanEqualToFloatReturnsFalseWhenUserValueGreaterThanConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 48.3],
-            $this->loggerMock
-        );
+        $leFloatCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48.2,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leFloatCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 49],
-            $this->loggerMock
-        );
+        $testValues = [48.3, 49];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leFloatCondition
-            )
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
+
+            $this->assertFalse(
+                $customAttrConditionEvaluator->evaluate(
+                    $leFloatCondition
+                )
+            );
+        }
     }
 
     public function testLessThanEqualToIntReturnsNullWhenUserValueIsNotANumber()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 'a long way'],
-            $this->loggerMock
-        );
+        $leIntCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
 
-        $this->assertNull(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leIntCondition
-            )
-        );
+        $testValues = ['a long way', false];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => false],
-            $this->loggerMock
-        );
-        $this->assertNull(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leIntCondition
-            )
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
+
+            $this->assertNull(
+                $customAttrConditionEvaluator->evaluate(
+                    $leIntCondition
+                )
+            );
+        }
     }
 
     public function testLessThanEqualToFloatReturnsNullWhenUserValueIsNotANumber()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => 'a long way'],
-            $this->loggerMock
-        );
+        $leFloatCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48.2,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
 
-        $this->assertNull(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leFloatCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled' => false],
-            $this->loggerMock
-        );
+        $testValues = ['a long way', false];
 
-        $this->assertNull(
-            $customAttrConditionEvaluator->evaluate(
-                $this->leFloatCondition
-            )
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['meters_travelled' => $val],
+                $this->loggerMock
+            );
+
+            $this->assertNull(
+                $customAttrConditionEvaluator->evaluate(
+                    $leFloatCondition
+                )
+            );
+        }
     }
 
     public function testLessThanEqualToIntReturnsNullWhenNoUserProvidedValue()
     {
+        $leIntCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
             [],
             $this->loggerMock
@@ -1401,13 +1329,19 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                $this->leIntCondition
+                $leIntCondition
             )
         );
     }
 
     public function testLessThanEqualToFloatReturnsNullWhenNoUserProvidedValue()
     {
+        $leFloatCondition = [
+            'name' => 'meters_travelled',
+            'value' => 48.2,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
             [],
             $this->loggerMock
@@ -1415,107 +1349,58 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull(
             $customAttrConditionEvaluator->evaluate(
-                $this->leFloatCondition
+                $leFloatCondition
             )
         );
     }
 
     public function testSemVerGTMatcherReturnsFalseWhenAttributeValueIsLessThanOrEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "3.7.0"],
-            $this->loggerMock
-        );
+        $semverGtCondition = [
+            'name' => 'semversion_gt',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_gt',
+        ];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "3.7.1"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.0", "3.7.1", "3.6", "2"];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "3.6"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_gt' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "2"],
-            $this->loggerMock
-        );
-
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGtCondition
-            )
-        );
+            $this->assertFalse(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverGtCondition
+                )
+            );
+        }
     }
 
     public function testSemVerGTMatcherReturnsTrueWhenAttributeValueIsGreaterThanConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "3.7.2"],
-            $this->loggerMock
-        );
+        $semverGtCondition = [
+            'name' => 'semversion_gt',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_gt',
+        ];
+        $testValues = ["3.7.2", "3.7.2-beta", "4.7.1", "3.8", "4"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "3.7.2-beta"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_gt' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "4.7.1"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "3.8"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "4"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGtCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverGtCondition
+                )
+            );
+        }
     }
 
     public function testSemVerGTMatcherReturnsTrueWhenAttributeValueIsGreaterThanConditionValueBeta()
@@ -1527,124 +1412,70 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'match' => 'semver_gt',
         ];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "3.7.0-beta.2.4"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.0-beta.2.4", "3.7.0", "4.7.1", "3.8", "4"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverGtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_gt' => "3.7.0"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_gt' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverGtCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverGtCondition
+                )
+            );
+        }
     }
 
     public function testSemVerGEMatcherReturnsFalseWhenAttributeValueIsNotGreaterOrEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.7.0"],
-            $this->loggerMock
-        );
+        $semverGeCondition = [
+            'name' => 'semversion_ge',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_ge',
+        ];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.7.1-beta"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.0", "3.7.1-beta", "3.6", "2", "3"];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.6"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_ge' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "2"],
-            $this->loggerMock
-        );
-
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3"],
-            $this->loggerMock
-        );
-
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGeCondition
-            )
-        );
+            $this->assertFalse(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverGeCondition
+                )
+            );
+        }
     }
 
     public function testSemVerGEMatcherReturnsTrueWhenAttributeValueIsGreaterOrEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.7.1"],
-            $this->loggerMock
-        );
+        $semverGeCondition = [
+            'name' => 'semversion_ge',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_ge',
+        ];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.7.2"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.1", "3.7.2", "3.8.1", "4.7.1"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.8.1"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_ge' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "4.7.1"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverGeCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverGeCondition
+                )
+            );
+        }
     }
 
     public function testSemVerGEMatcherReturnsTrueWhenAttributeValueIsGreaterOrEqualToConditionValueMajorOnly()
@@ -1656,36 +1487,20 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'match' => 'semver_ge',
         ];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.7.0"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.0", "3.0.0", "4.0"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.0.0"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_ge' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "4.0"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverGeCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverGeCondition
+                )
+            );
+        }
     }
 
     public function testSemVerGEMatcherReturnsFalseWhenAttributeValueIsNotGreaterOrEqualToConditionValueMajorOnly()
@@ -1718,144 +1533,70 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'match' => 'semver_ge',
         ];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.7.0-beta.2.3"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.0-beta.2.3", "3.7.0-beta.2.4", "3.7.0-beta.2.3+1.2.3", "3.7.1-beta.2.3"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.7.0-beta.2.4"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_ge' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.7.0-beta.2.3+1.2.3"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverGeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_ge' => "3.7.1-beta.2.3"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverGeCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverGeCondition
+                )
+            );
+        }
     }
 
     public function testSemVerLTMatcherReturnsFalseWhenAttributeValueIsGreaterThanOrEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "3.7.1"],
-            $this->loggerMock
-        );
+        $semverLtCondition = [
+            'name' => 'semversion_lt',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_lt',
+        ];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "3.7.2"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.1", "3.7.2", "3.8", "4"];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "3.8"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_lt' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "4"],
-            $this->loggerMock
-        );
-
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLtCondition
-            )
-        );
+            $this->assertFalse(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLtCondition
+                )
+            );
+        }
     }
 
     public function testSemVerLTMatcherReturnsTrueWhenAttributeValueIsLessThanConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "3.7.0"],
-            $this->loggerMock
-        );
+        $semverLtCondition = [
+            'name' => 'semversion_lt',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_lt',
+        ];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "3.7.1-beta"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.0", "3.7.1-beta", "2.7.1", "3.7", "3"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "2.7.1"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_lt' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "3.7"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "3"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLtCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLtCondition
+                )
+            );
+        }
     }
 
     public function testSemVerLTMatcherReturnsTrueWhenAttributeValueIsLessThanConditionValueBeta()
@@ -1867,114 +1608,70 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'match' => 'semver_lt',
         ];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "3.7.0-beta.2.1"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.0-beta.2.1", "3.7.0-beta"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLtCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_lt' => "3.7.0-beta"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_lt' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLtCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLtCondition
+                )
+            );
+        }
     }
 
     public function testSemVerLEMatcherReturnsFalseWhenAttributeValueIsNotLessOrEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.7.2"],
-            $this->loggerMock
-        );
+        $semverLeCondition = [
+            'name' => 'semversion_le',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_le',
+        ];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.8"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.2", "3.8", "4"];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "4"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_le' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLeCondition
-            )
-        );
+            $this->assertFalse(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLeCondition
+                )
+            );
+        }
     }
 
     public function testSemVerLEMatcherReturnsTrueWhenAttributeValueIsLessOrEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.7.1"],
-            $this->loggerMock
-        );
+        $semverLeCondition = [
+            'name' => 'semversion_le',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_le',
+        ];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.7.0"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.1", "3.7.0", "3.6.1", "2.7.1", "3.7.1-beta"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.6.1"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_le' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "2.7.1"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.7.1-beta"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverLeCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLeCondition
+                )
+            );
+        }
     }
 
     public function testSemVerLEMatcherReturnsTrueWhenAttributeValueIsLessOrEqualToConditionValueMajorOnly()
@@ -1986,46 +1683,20 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'match' => 'semver_le',
         ];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.7.0-beta.2.4"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.0-beta.2.4", "3.0.0", "3.7.1-beta", "2.0"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.0.0"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_le' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.7.1-beta"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "2.0"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLeCondition
+                )
+            );
+        }
     }
 
     public function testSemVerLEMatcherReturnsFalseWhenAttributeValueIsNotLessOrEqualToConditionValueMajorOnly()
@@ -2058,119 +1729,56 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'match' => 'semver_le',
         ];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.7.0-beta.2.2"],
-            $this->loggerMock
-        );
+        $testValues = ["3.7.0-beta.2.2", "3.7.0-beta.2.3", "3.7.0-beta.2.2+1.2.3", "3.6.1-beta.2.3+1.2"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.7.0-beta.2.3"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_le' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.7.0-beta.2.2+1.2.3"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "3.6.1-beta.2.3+1.2"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLeCondition
+                )
+            );
+        }
     }
 
     public function testSemVerEQMatcherReturnsFalseWhenAttributeValueIsNotEqualToConditionValue()
     {
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_eq' => "3.7.0"],
-            $this->loggerMock
-        );
+        $semverEqCondition = [
+            'name' => 'semversion_eq',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverEqCondition
-            )
-        );
+        $testValues = ["3.7.0", "3.7.2", "3.6", "2", "4", "3"];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_eq' => "3.7.2"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_eq' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverEqCondition
-            )
-        );
-
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_eq' => "3.6"],
-            $this->loggerMock
-        );
-
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverEqCondition
-            )
-        );
-
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_eq' => "2"],
-            $this->loggerMock
-        );
-
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverEqCondition
-            )
-        );
-
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_eq' => "4"],
-            $this->loggerMock
-        );
-
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverEqCondition
-            )
-        );
-
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_eq' => "3"],
-            $this->loggerMock
-        );
-
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $this->semverEqCondition
-            )
-        );
+            $this->assertFalse(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverEqCondition
+                )
+            );
+        }
     }
 
     public function testSemVerEQMatcherReturnsTrueWhenAttributeValueIsEqualToConditionValue()
     {
+        $semverEqCondition = [
+            'name' => 'semversion_eq',
+            'value' => "3.7.1",
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
             ['semversion_eq' => "3.7.1"],
             $this->loggerMock
@@ -2178,7 +1786,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $customAttrConditionEvaluator->evaluate(
-                $this->semverEqCondition
+                $semverEqCondition
             )
         );
     }
@@ -2192,26 +1800,20 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'match' => 'semver_eq',
         ];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_eq' => "3.0.0"],
-            $this->loggerMock
-        );
+        $testValues = ["3.0.0", "3.1"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverEqCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_eq' => "3.1"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_eq' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverEqCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverEqCondition
+                )
+            );
+        }
     }
 
     public function testSemVerEQMatcherReturnsFalseOrFalseWhenAttributeValueIsNotEqualToConditionValueMajorOnly()
@@ -2223,26 +1825,20 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             'match' => 'semver_eq',
         ];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_eq' => "4.0"],
-            $this->loggerMock
-        );
+        $testValues = ["4.0", "2"];
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $semverEqCondition
-            )
-        );
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_eq' => "2"],
-            $this->loggerMock
-        );
+        foreach ($testValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_eq' => $val],
+                $this->loggerMock
+            );
 
-        $this->assertFalse(
-            $customAttrConditionEvaluator->evaluate(
-                $semverEqCondition
-            )
-        );
+            $this->assertFalse(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverEqCondition
+                )
+            );
+        }
     }
 
     public function testSemVerEQMatcherReturnsTrueWhenAttributeValueIsEqualToConditionValueBeta()
@@ -2270,45 +1866,26 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
     {
         $semverLeCondition = [
             'name' => 'semversion_le',
-            'value' => "1.0.0-alpha+001+2",
             'type' => 'custom_attribute',
             'match' => 'semver_le',
         ];
 
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "1.0.0-alpha+001"],
-            $this->loggerMock
-        );
+        $testValues = ["1.0.0-alpha+001+2" => "1.0.0-alpha+001", "1.0.0-x-y-z" => "1.0.0-x-y",
+            "1.0.0+21AF26D3+117B344092BD" => "1.0.0+21AF26D3"];
 
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
+        foreach ($testValues as $key => $value) {
+            $semverLeCondition["value"] = $key;
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_le' => $value],
+                $this->loggerMock
+            );
 
-        $semverLeCondition["value"] = "1.0.0-x-y-z";
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "1.0.0-x-y"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
-
-        $semverLeCondition["value"] = "1.0.0+21AF26D3+117B344092BD";
-        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['semversion_le' => "1.0.0+21AF26D3"],
-            $this->loggerMock
-        );
-
-        $this->assertTrue(
-            $customAttrConditionEvaluator->evaluate(
-                $semverLeCondition
-            )
-        );
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLeCondition
+                )
+            );
+        }
     }
 
     public function testInvalidSemVersions()

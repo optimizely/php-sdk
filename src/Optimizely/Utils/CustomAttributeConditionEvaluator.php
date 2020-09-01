@@ -453,10 +453,10 @@ class CustomAttributeConditionEvaluator
     protected function semverEqualEvaluator($condition)
     {
         $comparison = $this->semverEvaluator($condition);
-        if ($comparison !== null) {
-            return $comparison === 0;
+        if ($comparison === null) {
+            return null;
         }
-        return $comparison;
+        return $comparison === 0;
     }
 
     /**
@@ -471,10 +471,10 @@ class CustomAttributeConditionEvaluator
     protected function semverGreaterThanEvaluator($condition)
     {
         $comparison = $this->semverEvaluator($condition);
-        if ($comparison !== null) {
-            return $comparison > 0;
+        if ($comparison === null) {
+            return null;
         }
-        return $comparison;
+        return $comparison > 0;
     }
 
     /**
@@ -489,10 +489,10 @@ class CustomAttributeConditionEvaluator
     protected function semverGreaterThanEqualToEvaluator($condition)
     {
         $comparison = $this->semverEvaluator($condition);
-        if ($comparison !== null) {
-            return $comparison >= 0;
+        if ($comparison === null) {
+            return null;
         }
-        return $comparison;
+        return $comparison >= 0;
     }
 
     /**
@@ -507,10 +507,10 @@ class CustomAttributeConditionEvaluator
     protected function semverLessThanEvaluator($condition)
     {
         $comparison = $this->semverEvaluator($condition);
-        if ($comparison !== null) {
-            return $comparison < 0;
+        if ($comparison === null) {
+            return null;
         }
-        return $comparison;
+        return $comparison < 0;
     }
 
     /**
@@ -525,10 +525,10 @@ class CustomAttributeConditionEvaluator
     protected function semverLessThanEqualToEvaluator($condition)
     {
         $comparison = $this->semverEvaluator($condition);
-        if ($comparison !== null) {
-            return $comparison <= 0;
+        if ($comparison === null) {
+            return null;
         }
-        return $comparison;
+        return $comparison <= 0;
     }
 
     /**
