@@ -41,7 +41,8 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
         $expectedJson = '{
             "revision": "20",
             "experimentsMap" : {"a": "apple"},
-            "featuresMap": {"o": "orange"}
+            "featuresMap": {"o": "orange"},
+            "datafile": null
         }';
 
         $expectedJson = json_encode(json_decode($expectedJson));
