@@ -66,8 +66,10 @@ class SemVersionConditionEvaluator
             return null;
         }
 
+        // Up to the precision of targetedVersion, expect version to match exactly.
         for ($i = 0; $i < count($targetedVersionParts); $i++) {
             if (count($versionParts) <= $i) {
+                // even if they are equal at this point. if the target is a prerelease then it must be greater than the pre release.
                 if ($this->isPreRelease($targetedVersion)) {
                     return 1;
                 }
@@ -75,8 +77,14 @@ class SemVersionConditionEvaluator
             } elseif (!is_numeric($versionParts[$i])) {
                 // Compare strings
                 if (strcasecmp($versionParts[$i], $targetedVersionParts[$i]) < 0) {
+                    if ($this->isPreRelease($targetedVersion) && !$this->isPreRelease($this->condition)) {
+                        return 1;
+                    }
                     return -1;
                 } elseif (strcasecmp($versionParts[$i], $targetedVersionParts[$i]) > 0) {
+                    if (!$this->isPreRelease($targetedVersion) && $this->isPreRelease($this->condition)) {
+                        return -1;
+                    }
                     return 1;
                 }
             } elseif (is_numeric($targetedVersionParts[$i])) {
@@ -116,13 +124,8 @@ class SemVersionConditionEvaluator
         $targetPrefix = $targetedVersion;
         $targetSuffix = array();
 
-        $pos = $this->getFirstOccurenceOfPrereleaseOrBuildSeparator($targetedVersion);
-        if ($pos !== false) {
-            // this is going to split with the first occurrence.
-            $targetParts = array_filter($this->explodeByPosition($pos, $targetedVersion), 'strlen');
-
-            // in the case it is neither a build or pre release it will return the
-            // original string as the first element in the array
+        if ($this->isPreRelease($targetedVersion) || $this->isBuild($targetedVersion)) {
+            $targetParts = explode($this->isPreRelease($targetPrefix) ? self::PRE_RELEASE_SEPARATOR : self::BUILD_SEPARATOR, $targetedVersion, 2);
             if (count($targetParts) <= 1) {
                 $this->logger->log(Logger::WARNING, sprintf(
                     logs::ATTRIBUTE_FORMAT_INVALID
@@ -187,7 +190,7 @@ class SemVersionConditionEvaluator
      *
      * @param  string $str value to be checked.
      *
-     * @return bool true if string contains prerelease seperator comes first.
+     * @return bool true if prerelease seperator comes first.
      */
     private function isPreRelease($str)
     {
@@ -203,41 +206,22 @@ class SemVersionConditionEvaluator
     }
 
     /**
-     * returns position for first occurence of prerelease or build separator, whichever comes first.
+     * checks if string contains build seperator before prerelease separator.
      *
      * @param  string $str value to be checked.
      *
-     * @return int position of first occurence.
+     * @return bool true if build seperator comes first.
      */
-    private function getFirstOccurenceOfPrereleaseOrBuildSeparator($str)
+    private function isBuild($str)
     {
-        $preReleasePos = strpos($str, self::PRE_RELEASE_SEPARATOR);
         $buildPos = strpos($str, self::BUILD_SEPARATOR);
-
-        switch (true) {
-            case ($preReleasePos === $buildPos):
-                return $preReleasePos;
-            case ($preReleasePos === false):
-                return $buildPos;
-            case ($buildPos === false):
-                return $preReleasePos;
-            default:
-                return $preReleasePos > $buildPos ? $buildPos : $preReleasePos;
+        if ($buildPos !== false) {
+            $preReleasePos = strpos($str, self::PRE_RELEASE_SEPARATOR);
+            if ($preReleasePos !== false) {
+                return $preReleasePos > $buildPos;
+            }
+            return true;
         }
-    }
-
-    /**
-     * returns exploded string list w.r.t position of separator.
-     *
-     * @param  int $pos position of separator.
-     * @param  string $str string to be exploded.
-     *
-     * @return array list of strings.
-     */
-    private function explodeByPosition($pos, $str)
-    {
-        $str1 = substr($str, 0, $pos);
-        $str2 = substr($str, $pos + 1);
-        return [$str1, $str2];
+        return false;
     }
 }

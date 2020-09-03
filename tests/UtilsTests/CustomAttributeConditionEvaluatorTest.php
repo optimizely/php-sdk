@@ -1891,29 +1891,58 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testSemVersioningWithMultiplePrereleaseOrBuildSeparator()
+    public function testTargetComplex()
     {
-        $semverLeCondition = [
-            'name' => 'semversion_le',
-            'type' => 'custom_attribute',
-            'match' => 'semver_le',
-        ];
+        $targetVersions = ["2.1.3-beta+1", "2.1.3+build-1.2.3"];
+        $userVersions = ["2.1.3-beta+1.2.3", "2.1.3+build-1"];
+        $matchTypes = ["semver_gt", "semver_lt"];
 
-        $testValues = ["1.0.0-alpha+001+2" => "1.0.0-alpha+001", "1.0.0-x-y-z" => "1.0.0-x-y",
-            "1.0.0+21AF26D3+117B344092BD" => "1.0.0+21AF26D3"];
+        for ($i = 0; $i < count($targetVersions); $i++) {
+            $semverCondition = [
+                'name' => 'semversion',
+                'value' => $targetVersions[$i],
+                'type' => 'custom_attribute',
+                'match' => $matchTypes[$i],
+            ];
 
-        foreach ($testValues as $key => $value) {
-            $semverLeCondition["value"] = $key;
             $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-                ['semversion_le' => $value],
+                ['semversion' => $userVersions[$i]],
                 $this->loggerMock
             );
 
             $this->assertTrue(
                 $customAttrConditionEvaluator->evaluate(
-                    $semverLeCondition
+                    $semverCondition
                 ),
-                "Failed for user version: {$val}"
+                "Failed for user version: {$userVersions[$i]}"
+            );
+        }
+    }
+
+    public function testDifferentAttributeComplex()
+    {
+        $targetVersions = ["3.7.0", "3.7.0", "3.7.0-prerelease", "3.7.0-prerelease+build"];
+        $userVersions = ["3.7.0+build", "3.7.0-prerelease", "3.7.0+build", "3.7.0-prerelease-prelrease+rc"];
+        $matchTypes = ["semver_eq", "semver_lt", "semver_gt", "semver_gt"];
+
+        for ($i = 0; $i < count($targetVersions); $i++) {
+            $semverCondition = [
+                'name' => 'semversion',
+                'value' => $targetVersions[$i],
+                'type' => 'custom_attribute',
+                'match' => $matchTypes[$i],
+            ];
+
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion' => $userVersions[$i]],
+                $this->loggerMock
+            );
+
+            $this->assertTrue(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverCondition
+                ),
+                "Failed for user version: {$userVersions[$i]}"
             );
         }
     }
