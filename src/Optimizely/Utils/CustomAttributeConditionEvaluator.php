@@ -143,15 +143,13 @@ class CustomAttributeConditionEvaluator
         $conditionValue = $condition['value'];
         $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName] : null;
 
-        if (!Validator::validateNonEmptyString($conditionValue)) {
+        if (!Validator::validateNonEmptyString($conditionValue) || !Validator::validateNonEmptyString($userValue)) {
             $this->logger->log(Logger::WARNING, sprintf(
                 logs::ATTRIBUTE_FORMAT_INVALID
             ));
             return null;
         }
-
-        $semVerCondEval = new SemVersionConditionEvaluator($userValue, $this->logger);
-        return $semVerCondEval->compareVersion($conditionValue);
+        return SemVersionConditionEvaluator::compareVersion($conditionValue, $userValue, $this->logger);
     }
 
     /**

@@ -27,26 +27,11 @@ class SemVersionConditionEvaluator
     const WHITESPACE_SEPARATOR = ' ';
 
     /**
-     * @var Condition
-     */
-    protected $condition;
-
-    /**
-     * SemVersionConditionEvaluator constructor
+     * compares targeted version with the provided user version.
      *
-     * @param string $condition string for semantic version.
-     * @param $logger LoggerInterface.
-     */
-    public function __construct($condition, $logger)
-    {
-        $this->condition = $condition;
-        $this->logger = $logger;
-    }
-
-    /**
-     * compares condition version with the provided attribute version.
-     *
-     * @param  object $attribute
+     * @param  object $targetedVersion
+     * @param  object $userVersion
+     * @param  object $logger
      *
      * @return null|int 0 if user's semver attribute is equal to the semver condition value,
      *                  1 if user's semver attribute is greater than the semver condition value,
@@ -55,50 +40,49 @@ class SemVersionConditionEvaluator
      *                  if there is a mismatch between the user attribute type and the condition
      *                  value type.
      */
-    public function compareVersion($targetedVersion)
+    public static function compareVersion($targetedVersion, $userVersion, $logger)
     {
-        $targetedVersionParts = $this->splitSemanticVersion($targetedVersion);
+        $targetedVersionParts = self::splitSemanticVersion($targetedVersion, $logger);
         if ($targetedVersionParts === null) {
             return null;
         }
-        $versionParts = $this->splitSemanticVersion($this->condition);
-        if ($versionParts === null) {
+        $userVersionParts = self::splitSemanticVersion($userVersion, $logger);
+        if ($userVersionParts === null) {
             return null;
         }
-
+        $userVersionPartsCount = count($userVersionParts);
         // Up to the precision of targetedVersion, expect version to match exactly.
         for ($i = 0; $i < count($targetedVersionParts); $i++) {
-            if (count($versionParts) <= $i) {
-                // even if they are equal at this point. if the target is a prerelease then it must be greater than the pre release.
-                if ($this->isPreRelease($targetedVersion)) {
+            if ($userVersionPartsCount <= $i) {
+                if (self::isPreRelease($targetedVersion)) {
                     return 1;
                 }
                 return -1;
-            } elseif (!is_numeric($versionParts[$i])) {
+            } elseif (!is_numeric($userVersionParts[$i])) {
                 // Compare strings
-                if (strcasecmp($versionParts[$i], $targetedVersionParts[$i]) < 0) {
-                    if ($this->isPreRelease($targetedVersion) && !$this->isPreRelease($this->condition)) {
+                if (strcasecmp($userVersionParts[$i], $targetedVersionParts[$i]) < 0) {
+                    if (self::isPreRelease($targetedVersion) && !self::isPreRelease($userVersion)) {
                         return 1;
                     }
                     return -1;
-                } elseif (strcasecmp($versionParts[$i], $targetedVersionParts[$i]) > 0) {
-                    if (!$this->isPreRelease($targetedVersion) && $this->isPreRelease($this->condition)) {
+                } elseif (strcasecmp($userVersionParts[$i], $targetedVersionParts[$i]) > 0) {
+                    if (!self::isPreRelease($targetedVersion) && self::isPreRelease($userVersion)) {
                         return -1;
                     }
                     return 1;
                 }
             } elseif (is_numeric($targetedVersionParts[$i])) {
                 // both targetedVersionParts and versionParts are digits
-                if ($this->toInt($versionParts[$i]) < $this->toInt($targetedVersionParts[$i])) {
+                if (intval($userVersionParts[$i]) < intval($targetedVersionParts[$i])) {
                     return -1;
-                } elseif ($this->toInt($versionParts[$i]) > $this->toInt($targetedVersionParts[$i])) {
+                } elseif (intval($userVersionParts[$i]) > intval($targetedVersionParts[$i])) {
                     return 1;
                 }
             } else {
                 return -1;
             }
         }
-        if (!$this->isPreRelease($targetedVersion) && $this->isPreRelease($this->condition)) {
+        if (!self::isPreRelease($targetedVersion) && self::isPreRelease($userVersion)) {
             return -1;
         }
         return 0;
@@ -112,22 +96,23 @@ class SemVersionConditionEvaluator
      * @return null|array   array if provided string was successfully split,
      *                      null if any issues occured.
      */
-    protected function splitSemanticVersion($targetedVersion)
+    private static function splitSemanticVersion($version, $logger)
     {
-        if (strpos($targetedVersion, self::WHITESPACE_SEPARATOR) !== false) {
-            $this->logger->log(Logger::WARNING, sprintf(
+        if (strpos($version, self::WHITESPACE_SEPARATOR) !== false) {
+            $logger->log(Logger::WARNING, sprintf(
                 logs::ATTRIBUTE_FORMAT_INVALID
             ));
             return null;
         }
 
-        $targetPrefix = $targetedVersion;
+        $targetPrefix = $version;
         $targetSuffix = array();
 
-        if ($this->isPreRelease($targetedVersion) || $this->isBuild($targetedVersion)) {
-            $targetParts = explode($this->isPreRelease($targetPrefix) ? self::PRE_RELEASE_SEPARATOR : self::BUILD_SEPARATOR, $targetedVersion, 2);
+        if (self::isPreRelease($version) || self::isBuild($version)) {
+            $separator = self::isPreRelease($targetPrefix) ? self::PRE_RELEASE_SEPARATOR : self::BUILD_SEPARATOR;
+            $targetParts = explode($separator, $version, 2);
             if (count($targetParts) <= 1) {
-                $this->logger->log(Logger::WARNING, sprintf(
+                $logger->log(Logger::WARNING, sprintf(
                     logs::ATTRIBUTE_FORMAT_INVALID
                 ));
                 return null;
@@ -139,7 +124,7 @@ class SemVersionConditionEvaluator
         // Expect a version string of the form x.y.z
         $dotCount = substr_count($targetPrefix, ".");
         if ($dotCount > 2) {
-            $this->logger->log(Logger::WARNING, sprintf(
+            $logger->log(Logger::WARNING, sprintf(
                 logs::ATTRIBUTE_FORMAT_INVALID
             ));
             return null;
@@ -149,7 +134,7 @@ class SemVersionConditionEvaluator
         $targetedVersionPartsCount = count($targetedVersionParts);
 
         if ($targetedVersionPartsCount !== ($dotCount + 1)) {
-            $this->logger->log(Logger::WARNING, sprintf(
+            $logger->log(Logger::WARNING, sprintf(
                 logs::ATTRIBUTE_FORMAT_INVALID
             ));
             return null;
@@ -157,7 +142,7 @@ class SemVersionConditionEvaluator
 
         foreach ($targetedVersionParts as $val) {
             if (!is_numeric($val)) {
-                $this->logger->log(Logger::WARNING, sprintf(
+                $logger->log(Logger::WARNING, sprintf(
                     logs::ATTRIBUTE_FORMAT_INVALID
                 ));
                 return null;
@@ -171,57 +156,46 @@ class SemVersionConditionEvaluator
     }
 
     /**
-     * converts string value to int.
+     * Checks if given string is a prerelease version.
      *
-     * @param  string $str value to be converted to int.
+     * @param  string $version value to be checked.
      *
-     * @return int converted value or 0 if value could not be converted.
+     * @return bool true if given version is a prerelease.
      */
-    private function toInt($str)
+    private static function isPreRelease($version)
     {
-        if (is_numeric($str)) {
-            return intval($str);
+        //check if string contains prerelease seperator before build separator
+        $preReleasePos = strpos($version, self::PRE_RELEASE_SEPARATOR);
+        if ($preReleasePos === false) {
+            return false;
         }
-        return 0;
+
+        $buildPos = strpos($version, self::BUILD_SEPARATOR);
+        if ($buildPos === false) {
+            return true;
+        }
+        return $buildPos > $preReleasePos;
     }
 
     /**
-     * checks if string contains prerelease seperator before build separator.
+     * Checks if given string is a build version.
      *
-     * @param  string $str value to be checked.
+     * @param  string $version value to be checked.
      *
-     * @return bool true if prerelease seperator comes first.
+     * @return bool true if given version is a build.
      */
-    private function isPreRelease($str)
+    private static function isBuild($version)
     {
-        $preReleasePos = strpos($str, self::PRE_RELEASE_SEPARATOR);
-        if ($preReleasePos !== false) {
-            $buildPos = strpos($str, self::BUILD_SEPARATOR);
-            if ($buildPos !== false) {
-                return $buildPos > $preReleasePos;
-            }
-            return true;
+        // checks if string contains build seperator before prerelease separator
+        $buildPos = strpos($version, self::BUILD_SEPARATOR);
+        if ($buildPos === false) {
+            return false;
         }
-        return false;
-    }
 
-    /**
-     * checks if string contains build seperator before prerelease separator.
-     *
-     * @param  string $str value to be checked.
-     *
-     * @return bool true if build seperator comes first.
-     */
-    private function isBuild($str)
-    {
-        $buildPos = strpos($str, self::BUILD_SEPARATOR);
-        if ($buildPos !== false) {
-            $preReleasePos = strpos($str, self::PRE_RELEASE_SEPARATOR);
-            if ($preReleasePos !== false) {
-                return $preReleasePos > $buildPos;
-            }
+        $preReleasePos = strpos($version, self::PRE_RELEASE_SEPARATOR);
+        if ($preReleasePos == false) {
             return true;
         }
-        return false;
+        return $preReleasePos > $buildPos;
     }
 }

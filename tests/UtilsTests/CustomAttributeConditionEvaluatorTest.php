@@ -1947,6 +1947,56 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function testInvalidTargetVersionTypes()
+    {
+        $semverLeCondition = [
+            'name' => 'semversion_le',
+            'type' => 'custom_attribute',
+            'match' => 'semver_le',
+        ];
+
+        $invalidTypeValues = [true, ["abc"], 10, ""];
+
+        foreach ($invalidTypeValues as $val) {
+            $semverLeCondition['value'] = $val;
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_le' => "3"],
+                $this->loggerMock
+            );
+            $this->assertNull(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLeCondition
+                ),
+                "Failed for targeted version: {$val}"
+            );
+        }
+    }
+
+    public function testInvalidUserVersionTypes()
+    {
+        $semverLeCondition = [
+            'name' => 'semversion_le',
+            'value' => "3",
+            'type' => 'custom_attribute',
+            'match' => 'semver_le',
+        ];
+
+        $invalidTypeValues = [true, ["abc"], 10, ""];
+
+        foreach ($invalidTypeValues as $val) {
+            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                ['semversion_le' => $val],
+                $this->loggerMock
+            );
+            $this->assertNull(
+                $customAttrConditionEvaluator->evaluate(
+                    $semverLeCondition
+                ),
+                "Failed for user version: {$val}"
+            );
+        }
+    }
+
     public function testInvalidSemVersions()
     {
         $semverLeCondition = [
