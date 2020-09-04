@@ -1967,7 +1967,6 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                 $customAttrConditionEvaluator->evaluate(
                     $semverLeCondition
                 ),
-                "Failed for targeted version: {$val}"
             );
         }
     }
@@ -1992,7 +1991,6 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
                 $customAttrConditionEvaluator->evaluate(
                     $semverLeCondition
                 ),
-                "Failed for user version: {$val}"
             );
         }
     }
