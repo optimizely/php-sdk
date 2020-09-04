@@ -1966,7 +1966,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertNull(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLeCondition
-                ),
+                )
             );
         }
     }
@@ -1990,7 +1990,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
             $this->assertNull(
                 $customAttrConditionEvaluator->evaluate(
                     $semverLeCondition
-                ),
+                )
             );
         }
     }
