@@ -111,6 +111,7 @@ class SemVersionConditionEvaluator
         $targetPrefix = $version;
         $targetSuffix = array();
 
+        $separator = null;
         if (self::isPreRelease($version)) {
             $separator = self::PRE_RELEASE_SEPARATOR;
         } elseif (self::isBuild($version)) {
