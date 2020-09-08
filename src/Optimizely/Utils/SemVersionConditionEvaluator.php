@@ -51,22 +51,25 @@ class SemVersionConditionEvaluator
             return null;
         }
         $userVersionPartsCount = count($userVersionParts);
+        $isPreReleaseTargetedVersion = self::isPreRelease($targetedVersion);
+        $isPreReleaseUserVersion = self::isPreRelease($userVersion);
+
         // Up to the precision of targetedVersion, expect version to match exactly.
         for ($i = 0; $i < count($targetedVersionParts); $i++) {
             if ($userVersionPartsCount <= $i) {
-                if (self::isPreRelease($targetedVersion)) {
+                if ($isPreReleaseTargetedVersion) {
                     return 1;
                 }
                 return -1;
             } elseif (!is_numeric($userVersionParts[$i])) {
                 // Compare strings
                 if (strcasecmp($userVersionParts[$i], $targetedVersionParts[$i]) < 0) {
-                    if (self::isPreRelease($targetedVersion) && !self::isPreRelease($userVersion)) {
+                    if ($isPreReleaseTargetedVersion && !$isPreReleaseUserVersion) {
                         return 1;
                     }
                     return -1;
                 } elseif (strcasecmp($userVersionParts[$i], $targetedVersionParts[$i]) > 0) {
-                    if (!self::isPreRelease($targetedVersion) && self::isPreRelease($userVersion)) {
+                    if (!$isPreReleaseTargetedVersion && $isPreReleaseUserVersion) {
                         return -1;
                     }
                     return 1;
@@ -82,7 +85,7 @@ class SemVersionConditionEvaluator
                 return -1;
             }
         }
-        if (!self::isPreRelease($targetedVersion) && self::isPreRelease($userVersion)) {
+        if (!$isPreReleaseTargetedVersion && $isPreReleaseUserVersion) {
             return -1;
         }
         return 0;
@@ -108,8 +111,13 @@ class SemVersionConditionEvaluator
         $targetPrefix = $version;
         $targetSuffix = array();
 
-        if (self::isPreRelease($version) || self::isBuild($version)) {
-            $separator = self::isPreRelease($targetPrefix) ? self::PRE_RELEASE_SEPARATOR : self::BUILD_SEPARATOR;
+        if (self::isPreRelease($version)) {
+            $separator = self::PRE_RELEASE_SEPARATOR;
+        } elseif (self::isBuild($version)) {
+            $separator = self::BUILD_SEPARATOR;
+        }
+
+        if ($separator !== null) {
             $targetParts = explode($separator, $version, 2);
             if (count($targetParts) <= 1) {
                 $logger->log(Logger::WARNING, sprintf(

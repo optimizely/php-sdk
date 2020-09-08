@@ -126,7 +126,7 @@ class CustomAttributeConditionEvaluator
     }
 
     /**
-     * compares two semantic versions.
+     * returns result of SemVersionConditionEvaluator::compareVersion for given target and user versions.
      *
      * @param  object $condition
      *
