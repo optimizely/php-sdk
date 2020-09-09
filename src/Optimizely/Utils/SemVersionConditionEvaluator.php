@@ -29,8 +29,8 @@ class SemVersionConditionEvaluator
     /**
      * compares targeted version with the provided user version.
      *
-     * @param  object $targetedVersion
-     * @param  object $userVersion
+     * @param  string $targetedVersion
+     * @param  string $userVersion
      * @param  object $logger
      *
      * @return null|int 0 if user's semver attribute is equal to the semver condition value,
@@ -51,8 +51,8 @@ class SemVersionConditionEvaluator
             return null;
         }
         $userVersionPartsCount = count($userVersionParts);
-        $isPreReleaseTargetedVersion = self::isPreRelease($targetedVersion);
-        $isPreReleaseUserVersion = self::isPreRelease($userVersion);
+        $isPreReleaseTargetedVersion = self::isPreReleaseVersion($targetedVersion);
+        $isPreReleaseUserVersion = self::isPreReleaseVersion($userVersion);
 
         // Up to the precision of targetedVersion, expect version to match exactly.
         for ($i = 0; $i < count($targetedVersionParts); $i++) {
@@ -85,6 +85,8 @@ class SemVersionConditionEvaluator
                 return -1;
             }
         }
+        // checking if user's version attribute is a prerelease and targeted version isn't
+        // since pre-release versions have a lower precedence than the associated normal version
         if (!$isPreReleaseTargetedVersion && $isPreReleaseUserVersion) {
             return -1;
         }
@@ -112,9 +114,9 @@ class SemVersionConditionEvaluator
         $targetSuffix = array();
 
         $separator = null;
-        if (self::isPreRelease($version)) {
+        if (self::isPreReleaseVersion($version)) {
             $separator = self::PRE_RELEASE_SEPARATOR;
-        } elseif (self::isBuild($version)) {
+        } elseif (self::isBuildVersion($version)) {
             $separator = self::BUILD_SEPARATOR;
         }
 
@@ -171,7 +173,7 @@ class SemVersionConditionEvaluator
      *
      * @return bool true if given version is a prerelease.
      */
-    private static function isPreRelease($version)
+    private static function isPreReleaseVersion($version)
     {
         //check if string contains prerelease seperator before build separator
         $preReleasePos = strpos($version, self::PRE_RELEASE_SEPARATOR);
@@ -193,7 +195,7 @@ class SemVersionConditionEvaluator
      *
      * @return bool true if given version is a build.
      */
-    private static function isBuild($version)
+    private static function isBuildVersion($version)
     {
         // checks if string contains build seperator before prerelease separator
         $buildPos = strpos($version, self::BUILD_SEPARATOR);

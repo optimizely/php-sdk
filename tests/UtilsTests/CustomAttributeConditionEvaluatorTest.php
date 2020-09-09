@@ -1844,7 +1844,7 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    public function testSemVerEQMatcherReturnsFalseOrFalseWhenAttributeValueIsNotEqualToConditionValueMajorOnly()
+    public function testSemVerEQMatcherReturnsFalseWhenAttributeValueIsNotEqualToConditionValueMajorOnly()
     {
         $semverEqCondition = [
             'name' => 'semversion_eq',
@@ -1949,25 +1949,28 @@ class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 
     public function testInvalidTargetVersionTypes()
     {
-        $semverLeCondition = [
-            'name' => 'semversion_le',
+        $semverCondition = [
+            'name' => 'semversion',
             'type' => 'custom_attribute',
-            'match' => 'semver_le',
         ];
 
         $invalidTypeValues = [true, ["abc"], 10, ""];
+        $semverMatchTypes = ["semver_eq", "semver_gt", "semver_ge", "semver_lt", "semver_le"];
 
-        foreach ($invalidTypeValues as $val) {
-            $semverLeCondition['value'] = $val;
-            $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-                ['semversion_le' => "3"],
-                $this->loggerMock
-            );
-            $this->assertNull(
-                $customAttrConditionEvaluator->evaluate(
-                    $semverLeCondition
-                )
-            );
+        for ($i = 0; $i < count($semverMatchTypes); $i++) {
+            foreach ($invalidTypeValues as $val) {
+                $semverCondition['match'] = $semverMatchTypes[$i];
+                $semverCondition['value'] = $val;
+                $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+                    ['semversion' => "3"],
+                    $this->loggerMock
+                );
+                $this->assertNull(
+                    $customAttrConditionEvaluator->evaluate(
+                        $semverCondition
+                    )
+                );
+            }
         }
     }
 

@@ -28,16 +28,16 @@ class CustomAttributeConditionEvaluator
 
     const EXACT_MATCH_TYPE = 'exact';
     const EXISTS_MATCH_TYPE = 'exists';
-    const GREATER_THAN_MATCH_TYPE = 'gt';
     const GREATER_THAN_EQUAL_TO_MATCH_TYPE = 'ge';
-    const LESS_THAN_MATCH_TYPE = 'lt';
+    const GREATER_THAN_MATCH_TYPE = 'gt';
     const LESS_THAN_EQUAL_TO_MATCH_TYPE = 'le';
-    const SUBSTRING_MATCH_TYPE = 'substring';
+    const LESS_THAN_MATCH_TYPE = 'lt';
     const SEMVER_EQ = 'semver_eq';
-    const SEMVER_GT = 'semver_gt';
     const SEMVER_GE = 'semver_ge';
-    const SEMVER_LT = 'semver_lt';
+    const SEMVER_GT = 'semver_gt';
     const SEMVER_LE = 'semver_le';
+    const SEMVER_LT = 'semver_lt';
+    const SUBSTRING_MATCH_TYPE = 'substring';
 
     /**
      * @var UserAttributes
@@ -78,9 +78,20 @@ class CustomAttributeConditionEvaluator
      */
     protected function getMatchTypes()
     {
-        return array(self::EXACT_MATCH_TYPE, self::EXISTS_MATCH_TYPE, self::GREATER_THAN_MATCH_TYPE, self::GREATER_THAN_EQUAL_TO_MATCH_TYPE,
-            self::LESS_THAN_MATCH_TYPE, self::LESS_THAN_EQUAL_TO_MATCH_TYPE, self::SUBSTRING_MATCH_TYPE, self::SEMVER_EQ,
-            self::SEMVER_GT, self::SEMVER_GE, self::SEMVER_LT, self::SEMVER_LE);
+        return array(
+            self::EXACT_MATCH_TYPE,
+            self::EXISTS_MATCH_TYPE,
+            self::GREATER_THAN_EQUAL_TO_MATCH_TYPE,
+            self::GREATER_THAN_MATCH_TYPE,
+            self::LESS_THAN_EQUAL_TO_MATCH_TYPE,
+            self::LESS_THAN_MATCH_TYPE,
+            self::SEMVER_EQ,
+            self::SEMVER_GE,
+            self::SEMVER_GT,
+            self::SEMVER_LE,
+            self::SEMVER_LT,
+            self::SUBSTRING_MATCH_TYPE,
+        );
     }
 
     /**
@@ -95,16 +106,16 @@ class CustomAttributeConditionEvaluator
         $evaluatorsByMatchType = array();
         $evaluatorsByMatchType[self::EXACT_MATCH_TYPE] = 'exactEvaluator';
         $evaluatorsByMatchType[self::EXISTS_MATCH_TYPE] = 'existsEvaluator';
-        $evaluatorsByMatchType[self::GREATER_THAN_MATCH_TYPE] = 'greaterThanEvaluator';
         $evaluatorsByMatchType[self::GREATER_THAN_EQUAL_TO_MATCH_TYPE] = 'greaterThanEqualToEvaluator';
-        $evaluatorsByMatchType[self::LESS_THAN_MATCH_TYPE] = 'lessThanEvaluator';
+        $evaluatorsByMatchType[self::GREATER_THAN_MATCH_TYPE] = 'greaterThanEvaluator';
         $evaluatorsByMatchType[self::LESS_THAN_EQUAL_TO_MATCH_TYPE] = 'lessThanEqualToEvaluator';
-        $evaluatorsByMatchType[self::SUBSTRING_MATCH_TYPE] = 'substringEvaluator';
+        $evaluatorsByMatchType[self::LESS_THAN_MATCH_TYPE] = 'lessThanEvaluator';
         $evaluatorsByMatchType[self::SEMVER_EQ] = 'semverEqualEvaluator';
-        $evaluatorsByMatchType[self::SEMVER_GT] = 'semverGreaterThanEvaluator';
         $evaluatorsByMatchType[self::SEMVER_GE] = 'semverGreaterThanEqualToEvaluator';
-        $evaluatorsByMatchType[self::SEMVER_LT] = 'semverLessThanEvaluator';
+        $evaluatorsByMatchType[self::SEMVER_GT] = 'semverGreaterThanEvaluator';
         $evaluatorsByMatchType[self::SEMVER_LE] = 'semverLessThanEqualToEvaluator';
+        $evaluatorsByMatchType[self::SEMVER_LT] = 'semverLessThanEvaluator';
+        $evaluatorsByMatchType[self::SUBSTRING_MATCH_TYPE] = 'substringEvaluator';
 
         return $evaluatorsByMatchType[$matchType];
     }
@@ -126,13 +137,13 @@ class CustomAttributeConditionEvaluator
     }
 
     /**
-     * returns result of SemVersionConditionEvaluator::compareVersion for given target and user versions.
+     * Returns result of SemVersionConditionEvaluator::compareVersion for given target and user versions.
      *
      * @param  object $condition
      *
-     * @return null|int 0 if user's semver attribute is equal to the semver condition value,
-     *                  1 if user's semver attribute is greater than the semver condition value,
-     *                  -1 if user's semver attribute is less than the semver condition value,
+     * @return null|int 0 if user's version attribute is equal to the semver condition value,
+     *                  1 if user's version attribute is greater than the semver condition value,
+     *                  -1 if user's version attribute is less than the semver condition value,
      *                  null if the condition value or user attribute value has an invalid type, or
      *                  if there is a mismatch between the user attribute type and the condition
      *                  value type.
@@ -444,9 +455,9 @@ class CustomAttributeConditionEvaluator
      *
      * @param  object $condition
      *
-     * @return boolean true if user's semver attribute is equal to the semver condition value,
-     *                 false if the user's semver is greater or less than the semver condition value,
-     *                 null if the semver condition value or user's semver attribute is invalid.
+     * @return boolean true if user's version attribute is equal to the semver condition value,
+     *                 false if the user's version attribute is greater or less than the semver condition value,
+     *                 null if the semver condition value or user's version attribute is invalid.
      */
     protected function semverEqualEvaluator($condition)
     {
@@ -462,9 +473,9 @@ class CustomAttributeConditionEvaluator
      *
      * @param  object $condition
      *
-     * @return boolean true if user's semver attribute is greater than the semver condition value,
-     *                 false if the user's semver is less than or equal to the semver condition value,
-     *                 null if the semver condition value or user's semver attribute is invalid.
+     * @return boolean true if user's version attribute is greater than the semver condition value,
+     *                 false if the user's version attribute  is less than or equal to the semver condition value,
+     *                 null if the semver condition value or user's version attribute is invalid.
      */
     protected function semverGreaterThanEvaluator($condition)
     {
@@ -480,9 +491,9 @@ class CustomAttributeConditionEvaluator
      *
      * @param  object $condition
      *
-     * @return boolean true if user's semver attribute is greater than or equal to the semver condition value,
-     *                 false if the user's semver is less than the semver condition value,
-     *                 null if the semver condition value or user's semver attribute is invalid.
+     * @return boolean true if user's version attribute is greater than or equal to the semver condition value,
+     *                 false if the user's version attribute is less than the semver condition value,
+     *                 null if the semver condition value or user's version attribute is invalid.
      */
     protected function semverGreaterThanEqualToEvaluator($condition)
     {
@@ -498,9 +509,9 @@ class CustomAttributeConditionEvaluator
      *
      * @param  object $condition
      *
-     * @return boolean true if user's semver attribute is less than the semver condition value,
-     *                 false if the user's semver is greater than or equal to the semver condition value,
-     *                 null if the semver condition value or user's semver attribute is invalid.
+     * @return boolean true if user's version attribute is less than the semver condition value,
+     *                 false if the user's version attribute is greater than or equal to the semver condition value,
+     *                 null if the semver condition value or user's version attribute is invalid.
      */
     protected function semverLessThanEvaluator($condition)
     {
@@ -516,9 +527,9 @@ class CustomAttributeConditionEvaluator
      *
      * @param  object $condition
      *
-     * @return boolean true if user's semver attribute is less than or equal to the semver condition value,
-     *                 false if the user's semver is greater than the semver condition value,
-     *                 null if the semver condition value or user's semver attribute is invalid.
+     * @return boolean true if user's version attribute is less than or equal to the semver condition value,
+     *                 false if the user's version attribute is greater than the semver condition value,
+     *                 null if the semver condition value or user's version attribute is invalid.
      */
     protected function semverLessThanEqualToEvaluator($condition)
     {
