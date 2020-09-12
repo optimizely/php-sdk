@@ -1,3 +1,8 @@
+# Note about this Fork
+
+This is a forked repository, published separately from the mainstream Optimizely SDK on [packagist](https://packagist.org/packages/okdewit/optimizely-php-sdk).
+It is tagged as a new Major Release v4.0.0, and depends on Monolog v2.0.0 to resolve a conflict with Laravel 7 and 8 which can not use Monolog v1.0.0.
+
 # Optimizely PHP SDK
 [![Build Status](https://travis-ci.org/optimizely/php-sdk.svg?branch=master)](https://travis-ci.org/optimizely/php-sdk)
 [![Coverage Status](https://coveralls.io/repos/github/optimizely/php-sdk/badge.svg?branch=master)](https://coveralls.io/github/optimizely/php-sdk?branch=master)
