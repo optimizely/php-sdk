@@ -1,5 +1,5 @@
 {
-  "name": "optimizely/optimizely-sdk",
+  "name": "okdewit/optimizely-php-sdk",
   "description": "Optimizely SDK for Full Stack PHP projects.",
   "keywords": ["optimizely", "sdk"],
   "license": "Apache-2.0",
