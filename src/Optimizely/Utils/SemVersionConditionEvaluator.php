@@ -33,9 +33,9 @@ class SemVersionConditionEvaluator
      * @param  string $userVersion
      * @param  object $logger
      *
-     * @return null|int 0 if user's semver attribute is equal to the semver condition value,
-     *                  1 if user's semver attribute is greater than the semver condition value,
-     *                  -1 if user's semver attribute is less than the semver condition value,
+     * @return null|int 0 if user's version attribute is equal to the semver condition value,
+     *                  1 if user's version attribute is greater than the semver condition value,
+     *                  -1 if user's version attribute is less than the semver condition value,
      *                  null if the condition value or user attribute value has an invalid type, or
      *                  if there is a mismatch between the user attribute type and the condition
      *                  value type.
