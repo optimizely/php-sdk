@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely
+ * Copyright 2019-2020, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@
 namespace Optimizely\Tests;
 
 use Monolog\Logger;
-use Optimizely\Entity\Audience;
-use Optimizely\Enums\AudienceEvaluationLogs;
 use Optimizely\Utils\CustomAttributeConditionEvaluator;
 
 class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_TestCase
@@ -35,10 +33,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::WARNING;
         $conditionList = [
-          'name' => 'favorite_constellation',
-          'value' => 'Lacerta',
-          'type' => 'custom_attribute',
-          'match' => 'regex'
+            'name' => 'favorite_constellation',
+            'value' => 'Lacerta',
+            'type' => 'custom_attribute',
+            'match' => 'regex',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -47,11 +45,11 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                        ->method('log')
-                        ->with(
-                            $logLevel,
-                            "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"regex\"} uses an unknown match type. You may need to upgrade to a newer release of the Optimizely SDK."
-                        );
+            ->method('log')
+            ->with(
+                $logLevel,
+                "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"regex\"} uses an unknown match type. You may need to upgrade to a newer release of the Optimizely SDK."
+            );
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -60,10 +58,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::WARNING;
         $conditionList = [
-          'name' => 'favorite_constellation',
-          'value' => 'Lacerta',
-          'type' => 'sdk_version',
-          'match' => 'exact'
+            'name' => 'favorite_constellation',
+            'value' => 'Lacerta',
+            'type' => 'sdk_version',
+            'match' => 'exact',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -72,11 +70,11 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                        ->method('log')
-                        ->with(
-                            $logLevel,
-                            "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"sdk_version\",\"match\":\"exact\"} uses an unknown condition type. You may need to upgrade to a newer release of the Optimizely SDK."
-                        );
+            ->method('log')
+            ->with(
+                $logLevel,
+                "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"sdk_version\",\"match\":\"exact\"} uses an unknown condition type. You may need to upgrade to a newer release of the Optimizely SDK."
+            );
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -88,11 +86,11 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
             'name' => 'favorite_constellation',
             'value' => [],
             'type' => 'custom_attribute',
-            'match' => 'exact'
+            'match' => 'exact',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['favorite_constellation'=> 9000],
+            ['favorite_constellation' => 9000],
             $this->loggerMock
         );
 
@@ -110,10 +108,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::DEBUG;
         $conditionList = [
-          'name' => 'favorite_constellation',
-          'value' => 'Lacerta',
-          'type' => 'custom_attribute',
-          'match' => 'exact'
+            'name' => 'favorite_constellation',
+            'value' => 'Lacerta',
+            'type' => 'custom_attribute',
+            'match' => 'exact',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -122,8 +120,8 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"exact\"} evaluated to UNKNOWN because no value was passed for user attribute \"favorite_constellation\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"exact\"} evaluated to UNKNOWN because no value was passed for user attribute \"favorite_constellation\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -132,10 +130,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::DEBUG;
         $conditionList = [
-          'name' => 'favorite_constellation',
-          'value' => 'Lacerta',
-          'type' => 'custom_attribute',
-          'match' => 'exact'
+            'name' => 'favorite_constellation',
+            'value' => 'Lacerta',
+            'type' => 'custom_attribute',
+            'match' => 'exact',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -144,8 +142,8 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"exact\"} evaluated to UNKNOWN because a null value was passed for user attribute \"favorite_constellation\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"exact\"} evaluated to UNKNOWN because a null value was passed for user attribute \"favorite_constellation\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -157,11 +155,11 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
             'name' => 'meters_travelled',
             'value' => [],
             'type' => 'custom_attribute',
-            'match' => 'gt'
+            'match' => 'gt',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled'=> 9000],
+            ['meters_travelled' => 9000],
             $this->loggerMock
         );
 
@@ -176,10 +174,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::DEBUG;
         $conditionList = [
-          'name' => 'meters_travelled',
-          'value' => 48,
-          'type' => 'custom_attribute',
-          'match' => 'gt'
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'gt',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -188,8 +186,8 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"gt\"} evaluated to UNKNOWN because no value was passed for user attribute \"meters_travelled\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"gt\"} evaluated to UNKNOWN because no value was passed for user attribute \"meters_travelled\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -198,10 +196,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::DEBUG;
         $conditionList = [
-          'name' => 'meters_travelled',
-          'value' => 48,
-          'type' => 'custom_attribute',
-          'match' => 'gt'
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'gt',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -210,8 +208,74 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"gt\"} evaluated to UNKNOWN because a null value was passed for user attribute \"meters_travelled\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"gt\"} evaluated to UNKNOWN because a null value was passed for user attribute \"meters_travelled\".");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testGreaterThanEqualToConditionValueUnknown()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'meters_travelled',
+            'value' => [],
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 9000],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":[],\"type\":\"custom_attribute\",\"match\":\"ge\"} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testGreaterThanEqualToUserValueMissing()
+    {
+        $logLevel = Logger::DEBUG;
+        $conditionList = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            [],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"ge\"} evaluated to UNKNOWN because no value was passed for user attribute \"meters_travelled\".");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testGreaterEqualToThanUserValueNull()
+    {
+        $logLevel = Logger::DEBUG;
+        $conditionList = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => null],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"ge\"} evaluated to UNKNOWN because a null value was passed for user attribute \"meters_travelled\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -223,11 +287,11 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
             'name' => 'meters_travelled',
             'value' => [],
             'type' => 'custom_attribute',
-            'match' => 'lt'
+            'match' => 'lt',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['meters_travelled'=> 48],
+            ['meters_travelled' => 48],
             $this->loggerMock
         );
 
@@ -242,10 +306,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::DEBUG;
         $conditionList = [
-          'name' => 'meters_travelled',
-          'value' => 48,
-          'type' => 'custom_attribute',
-          'match' => 'lt'
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'lt',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -254,8 +318,8 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"lt\"} evaluated to UNKNOWN because no value was passed for user attribute \"meters_travelled\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"lt\"} evaluated to UNKNOWN because no value was passed for user attribute \"meters_travelled\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -264,10 +328,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::DEBUG;
         $conditionList = [
-          'name' => 'meters_travelled',
-          'value' => 48,
-          'type' => 'custom_attribute',
-          'match' => 'lt'
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'lt',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -276,8 +340,74 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"lt\"} evaluated to UNKNOWN because a null value was passed for user attribute \"meters_travelled\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"lt\"} evaluated to UNKNOWN because a null value was passed for user attribute \"meters_travelled\".");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testLessThanEqualToConditionValueUnknown()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'meters_travelled',
+            'value' => [],
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => 48],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":[],\"type\":\"custom_attribute\",\"match\":\"le\"} has an unsupported condition value. You may need to upgrade to a newer release of the Optimizely SDK.");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testLessThanEqualToUserValueMissing()
+    {
+        $logLevel = Logger::DEBUG;
+        $conditionList = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            [],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"le\"} evaluated to UNKNOWN because no value was passed for user attribute \"meters_travelled\".");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testLessThanEqualToUserValueNull()
+    {
+        $logLevel = Logger::DEBUG;
+        $conditionList = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => null],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"le\"} evaluated to UNKNOWN because a null value was passed for user attribute \"meters_travelled\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -289,11 +419,11 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
             'name' => 'headline_text',
             'value' => 900,
             'type' => 'custom_attribute',
-            'match' => 'substring'
+            'match' => 'substring',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
-            ['headline_text'=> 'buy now'],
+            ['headline_text' => 'buy now'],
             $this->loggerMock
         );
 
@@ -308,10 +438,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::DEBUG;
         $conditionList = [
-          'name' => 'headline_text',
-          'value' => 'buy now',
-          'type' => 'custom_attribute',
-          'match' => 'substring'
+            'name' => 'headline_text',
+            'value' => 'buy now',
+            'type' => 'custom_attribute',
+            'match' => 'substring',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -320,8 +450,8 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"headline_text\",\"value\":\"buy now\",\"type\":\"custom_attribute\",\"match\":\"substring\"} evaluated to UNKNOWN because no value was passed for user attribute \"headline_text\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"headline_text\",\"value\":\"buy now\",\"type\":\"custom_attribute\",\"match\":\"substring\"} evaluated to UNKNOWN because no value was passed for user attribute \"headline_text\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -330,10 +460,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::DEBUG;
         $conditionList = [
-          'name' => 'headline_text',
-          'value' => 'buy now',
-          'type' => 'custom_attribute',
-          'match' => 'substring'
+            'name' => 'headline_text',
+            'value' => 'buy now',
+            'type' => 'custom_attribute',
+            'match' => 'substring',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -342,8 +472,8 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"headline_text\",\"value\":\"buy now\",\"type\":\"custom_attribute\",\"match\":\"substring\"} evaluated to UNKNOWN because a null value was passed for user attribute \"headline_text\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"headline_text\",\"value\":\"buy now\",\"type\":\"custom_attribute\",\"match\":\"substring\"} evaluated to UNKNOWN because a null value was passed for user attribute \"headline_text\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -351,10 +481,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     public function testExistsUserValueMissing()
     {
         $conditionList = [
-          'name' => 'input_value',
-          'value' => null,
-          'type' => 'custom_attribute',
-          'match' => 'exists'
+            'name' => 'input_value',
+            'value' => null,
+            'type' => 'custom_attribute',
+            'match' => 'exists',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -363,7 +493,7 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->never())
-                         ->method('log');
+            ->method('log');
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -375,7 +505,7 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
             'name' => 'favorite_constellation',
             'value' => 900,
             'type' => 'custom_attribute',
-            'match' => 'exact'
+            'match' => 'exact',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -394,10 +524,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::WARNING;
         $conditionList = [
-          'name' => 'favorite_constellation',
-          'value' => 'Lacerta',
-          'type' => 'custom_attribute',
-          'match' => 'exact'
+            'name' => 'favorite_constellation',
+            'value' => 'Lacerta',
+            'type' => 'custom_attribute',
+            'match' => 'exact',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -406,8 +536,8 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"exact\"} evaluated to UNKNOWN because a value of type \"array\" was passed for user attribute \"favorite_constellation\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"exact\"} evaluated to UNKNOWN because a value of type \"array\" was passed for user attribute \"favorite_constellation\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -419,7 +549,7 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
             'name' => 'meters_travelled',
             'value' => 900,
             'type' => 'custom_attribute',
-            'match' => 'gt'
+            'match' => 'gt',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -438,10 +568,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::WARNING;
         $conditionList = [
-          'name' => 'meters_travelled',
-          'value' => 48,
-          'type' => 'custom_attribute',
-          'match' => 'gt'
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'gt',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -450,8 +580,52 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"gt\"} evaluated to UNKNOWN because a value of type \"string\" was passed for user attribute \"meters_travelled\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"gt\"} evaluated to UNKNOWN because a value of type \"string\" was passed for user attribute \"meters_travelled\".");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testGreaterThanEqualToUserValueInfinite()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'meters_travelled',
+            'value' => 900,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => INF],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":900,\"type\":\"custom_attribute\",\"match\":\"ge\"} evaluated to UNKNOWN because the number value for user attribute \"meters_travelled\" is not in the range [-2^53, +2^53].");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testGreaterThanEqualToUserValueUnexpectedType()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'ge',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => '48'],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"ge\"} evaluated to UNKNOWN because a value of type \"string\" was passed for user attribute \"meters_travelled\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -463,7 +637,7 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
             'name' => 'meters_travelled',
             'value' => 900,
             'type' => 'custom_attribute',
-            'match' => 'lt'
+            'match' => 'lt',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -482,10 +656,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::WARNING;
         $conditionList = [
-          'name' => 'meters_travelled',
-          'value' => 48,
-          'type' => 'custom_attribute',
-          'match' => 'lt'
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'lt',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -494,8 +668,52 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"lt\"} evaluated to UNKNOWN because a value of type \"boolean\" was passed for user attribute \"meters_travelled\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"lt\"} evaluated to UNKNOWN because a value of type \"boolean\" was passed for user attribute \"meters_travelled\".");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testLessThanEqualToUserValueInfinite()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'meters_travelled',
+            'value' => 900,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => INF],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":900,\"type\":\"custom_attribute\",\"match\":\"le\"} evaluated to UNKNOWN because the number value for user attribute \"meters_travelled\" is not in the range [-2^53, +2^53].");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testLessThanEqualToUserValueUnexpectedType()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'meters_travelled',
+            'value' => 48,
+            'type' => 'custom_attribute',
+            'match' => 'le',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['meters_travelled' => true],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"meters_travelled\",\"value\":48,\"type\":\"custom_attribute\",\"match\":\"le\"} evaluated to UNKNOWN because a value of type \"boolean\" was passed for user attribute \"meters_travelled\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -504,10 +722,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::WARNING;
         $conditionList = [
-          'name' => 'headline_text',
-          'value' => 'buy now',
-          'type' => 'custom_attribute',
-          'match' => 'substring'
+            'name' => 'headline_text',
+            'value' => 'buy now',
+            'type' => 'custom_attribute',
+            'match' => 'substring',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -516,8 +734,8 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"headline_text\",\"value\":\"buy now\",\"type\":\"custom_attribute\",\"match\":\"substring\"} evaluated to UNKNOWN because a value of type \"integer\" was passed for user attribute \"headline_text\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"headline_text\",\"value\":\"buy now\",\"type\":\"custom_attribute\",\"match\":\"substring\"} evaluated to UNKNOWN because a value of type \"integer\" was passed for user attribute \"headline_text\".");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
@@ -526,10 +744,10 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
     {
         $logLevel = Logger::WARNING;
         $conditionList = [
-          'name' => 'favorite_constellation',
-          'value' => 'Lacerta',
-          'type' => 'custom_attribute',
-          'match' => 'exact'
+            'name' => 'favorite_constellation',
+            'value' => 'Lacerta',
+            'type' => 'custom_attribute',
+            'match' => 'exact',
         ];
 
         $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
@@ -538,8 +756,162 @@ class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_Te
         );
 
         $this->loggerMock->expects($this->once())
-                         ->method('log')
-                         ->with($logLevel, "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"exact\"} evaluated to UNKNOWN because a value of type \"integer\" was passed for user attribute \"favorite_constellation\".");
+            ->method('log')
+            ->with($logLevel, "Audience condition {\"name\":\"favorite_constellation\",\"value\":\"Lacerta\",\"type\":\"custom_attribute\",\"match\":\"exact\"} evaluated to UNKNOWN because a value of type \"integer\" was passed for user attribute \"favorite_constellation\".");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testSemVerEmptyConditionValue()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'favorite_constellation',
+            'value' => '',
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['favorite_constellation' => '1.2.3'],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Provided attributes are in an invalid format.");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testSemVerConditionWithWhiteSpace()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'favorite_constellation',
+            'value' => '1.2.3 ',
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['favorite_constellation' => '1.2.3'],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Provided attributes are in an invalid format.");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testInvalidSemVerConditionWithBuildSeparator()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'favorite_constellation',
+            'value' => '+beta',
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['favorite_constellation' => '1.2.3'],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Provided attributes are in an invalid format.");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testInvalidSemVerConditionWithPrereleaseSeparator()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'favorite_constellation',
+            'value' => '-beta',
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['favorite_constellation' => '1.2.3'],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Provided attributes are in an invalid format.");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testInvalidSemVerConditionWithDotCountGreaterThanThree()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'favorite_constellation',
+            'value' => '1.2.3.4-beta',
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['favorite_constellation' => '1.2.3'],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Provided attributes are in an invalid format.");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testInvalidSemVerConditionWithInvalidPatchLevel()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'favorite_constellation',
+            'value' => '1.2.beta',
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['favorite_constellation' => '1.2.3'],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Provided attributes are in an invalid format.");
+
+        $customAttrConditionEvaluator->evaluate($conditionList);
+    }
+
+    public function testInvalidSemVerConditionWithUnequalDotCount()
+    {
+        $logLevel = Logger::WARNING;
+        $conditionList = [
+            'name' => 'favorite_constellation',
+            'value' => '.2.3',
+            'type' => 'custom_attribute',
+            'match' => 'semver_eq',
+        ];
+
+        $customAttrConditionEvaluator = new CustomAttributeConditionEvaluator(
+            ['favorite_constellation' => '1.2.3'],
+            $this->loggerMock
+        );
+
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with($logLevel, "Provided attributes are in an invalid format.");
 
         $customAttrConditionEvaluator->evaluate($conditionList);
     }
