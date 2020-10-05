@@ -39,3 +39,7 @@ define('VALUE', 'value');
 define('VARIATION_ID', 'variation_id');
 define('VISITOR_ID', 'visitor_id');
 define('VISITORS', 'visitors');
+define('METADATA', 'metadata');
+define('FLAG_KEY', 'flag_key');
+define('FLAG_TYPE', 'flag_type');
+define('VARIATION_KEY', 'variation_key');
