@@ -191,6 +191,13 @@ class DatafileProjectConfig implements ProjectConfigInterface
     private $_experimentFeatureMap;
 
     /**
+     * Boolean indicating if flag decisions should be sent to server or not
+     *
+     * @return boolean
+     */
+    private $_sendFlagDecisions;
+
+    /**
      * DatafileProjectConfig constructor to load and set project configuration data.
      *
      * @param $datafile string JSON string representing the project.
@@ -216,6 +223,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
         $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
+        $this->_sendFlagDecisions = isset($config['sendFlagDecisions']) ? $config['sendFlagDecisions'] : false;
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
@@ -692,5 +700,15 @@ class DatafileProjectConfig implements ProjectConfigInterface
     public function isFeatureExperiment($experimentId)
     {
         return array_key_exists($experimentId, $this->_experimentFeatureMap);
+    }
+
+    /**
+     * Returns if flag decisions should be sent to server or not
+     *
+     * @return boolean
+     */
+    public function getSendFlagDecisions()
+    {
+        return $this->_sendFlagDecisions;
     }
 }

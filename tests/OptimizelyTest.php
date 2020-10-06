@@ -2764,10 +2764,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('getVariationForFeature')
             ->will($this->returnValue($expected_decision));
 
-        // assert that sendImpressionEvent is called with expected params
-        $optimizelyMock->expects($this->exactly(1))
-            ->method('sendImpressionEvent')
-            ->with($this->projectConfig, 'rollout_1_exp_1', '177771', 'boolean_single_variable_feature', FeatureDecision::DECISION_SOURCE_ROLLOUT, 'user_id', []);
+        // assert that sendImpressionEvent is not called
+        $optimizelyMock->expects($this->never())
+            ->method('sendImpressionEvent');
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -2877,10 +2876,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('getVariationForFeature')
             ->will($this->returnValue($expected_decision));
 
-        // assert that sendImpressionEvent is called with expected params
-        $optimizelyMock->expects($this->exactly(1))
-            ->method('sendImpressionEvent')
-            ->with($this->anything(), 'rollout_1_exp_1', '177771', 'boolean_single_variable_feature', FeatureDecision::DECISION_SOURCE_ROLLOUT, 'user_id', []);
+        // assert that sendImpressionEvent is not called
+        $optimizelyMock->expects($this->never())
+            ->method('sendImpressionEvent');
 
         // confirm log messages seen
         $this->loggerMock->expects($this->at(0))
