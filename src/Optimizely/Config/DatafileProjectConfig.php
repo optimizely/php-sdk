@@ -256,6 +256,12 @@ class DatafileProjectConfig implements ProjectConfigInterface
             $this->_experimentKeyMap = $this->_experimentKeyMap + $experimentsInGroup;
         }
 
+        foreach ($this->_rollouts as $rollout) {
+            foreach ($rollout->getExperiments() as $experiment) {
+                $this->_experimentKeyMap[$experiment->getKey()] = $experiment;
+            }
+        }
+
         $this->_variationKeyMap = [];
         $this->_variationIdMap = [];
         $this->_experimentIdMap = [];
@@ -425,7 +431,16 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getAllExperiments()
     {
-        return array_values($this->_experimentKeyMap);
+        // Exclude rollout experiments
+        $rolloutExperimentIds = [];
+        foreach ($this->_rollouts as $rollout) {
+            foreach ($rollout->getExperiments() as $experiment) {
+                $rolloutExperimentIds[] = $experiment->getId();
+            }
+        }
+        return array_filter(array_values($this->_experimentKeyMap), function ($experiment) use ($rolloutExperimentIds) {
+            return !in_array($experiment->getId(), $rolloutExperimentIds);
+        });
     }
 
     /**
