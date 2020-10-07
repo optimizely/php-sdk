@@ -154,7 +154,8 @@ class EventBuilder
                     METADATA => [
                       [
                         FLAG_KEY => $flagKey,
-                        FLAG_TYPE => $flagType,
+                        RULE_KEY => $experiment->getKey(),
+                        RULE_TYPE => $flagType,
                         VARIATION_KEY => $variation->getKey()
                       ]
                     ],

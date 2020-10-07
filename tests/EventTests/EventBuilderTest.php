@@ -79,7 +79,8 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                               'variation_id'=> '7721010009',
                               'metadata'=> [[
                                 'flag_key' => 'test_experiment',
-                                'flag_type' => 'experiment',
+                                'rule_key' => 'test_experiment',
+                                'rule_type' => 'experiment',
                                 'variation_key'=> 'variation'
                               ]]
                             ]]

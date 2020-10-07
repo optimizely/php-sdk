@@ -41,5 +41,6 @@ define('VISITOR_ID', 'visitor_id');
 define('VISITORS', 'visitors');
 define('METADATA', 'metadata');
 define('FLAG_KEY', 'flag_key');
-define('FLAG_TYPE', 'flag_type');
+define('RULE_KEY', 'rule_key');
+define('RULE_TYPE', 'rule_type');
 define('VARIATION_KEY', 'variation_key');
