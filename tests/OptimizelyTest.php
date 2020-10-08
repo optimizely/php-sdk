@@ -4920,4 +4920,84 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optConfig = $this->optimizelyTypedAudienceObject->getOptimizelyConfig();
         $this->assertInstanceof(OptimizelyConfig::class, $optConfig);
     }
+
+    public function testRolloutNotSendImpressionWhenSendFlagDecisionFlagNotInDatafile()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($optimizelyMock, $decisionServiceMock);
+
+        // Mock getVariationForFeature to return a valid decision with experiment and variation keys
+        $rollout = $this->projectConfig->getRolloutFromId('166660');
+        $experiment = $rollout->getExperiments()[0];
+        $variation = $experiment->getVariations()[0];
+
+        $expected_decision = new FeatureDecision(
+            $experiment,
+            $variation,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expected_decision));
+
+        // assert that sendImpressionEvent is not called
+        $optimizelyMock->expects($this->never())
+            ->method('sendImpressionEvent');
+
+        $this->assertTrue($optimizelyMock->isFeatureEnabled('boolean_single_variable_feature', 'user_id', []));
+    }
+
+    public function testRolloutSendImpressionWhenSendFlagDecisionFlagInDatafile()
+    {
+        $datafileWithSendFlagDecisionsTrue = json_decode($this->datafile);
+        $datafileWithSendFlagDecisionsTrue->sendFlagDecisions = true;
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array(json_encode($datafileWithSendFlagDecisionsTrue), null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $decisionServiceMock = $this->getMockBuilder(DecisionService::class)
+            ->setConstructorArgs(array($this->loggerMock))
+            ->setMethods(array('getVariationForFeature'))
+            ->getMock();
+
+        $decisionService = new \ReflectionProperty(Optimizely::class, '_decisionService');
+        $decisionService->setAccessible(true);
+        $decisionService->setValue($optimizelyMock, $decisionServiceMock);
+
+        // Mock getVariationForFeature to return a valid decision with experiment and variation keys
+        $rollout = $this->projectConfig->getRolloutFromId('166660');
+        $experiment = $rollout->getExperiments()[0];
+        $variation = $experiment->getVariations()[0];
+
+        $expected_decision = new FeatureDecision(
+            $experiment,
+            $variation,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+
+        $decisionServiceMock->expects($this->exactly(1))
+            ->method('getVariationForFeature')
+            ->will($this->returnValue($expected_decision));
+
+        // Verify that sendImpressionEvent is called with expected attributes
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with($this->anything(), 'rollout_1_exp_1', '177771', 'boolean_single_variable_feature', 'rollout', 'user_id', []);
+
+        $this->assertTrue($optimizelyMock->isFeatureEnabled('boolean_single_variable_feature', 'user_id', []));
+    }
 }

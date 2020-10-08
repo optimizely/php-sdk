@@ -274,7 +274,7 @@ class Optimizely
             return null;
         }
 
-        $this->sendImpressionEvent($config, $experimentKey, $variationKey, $experimentKey, 'experiment', $userId, $attributes);
+        $this->sendImpressionEvent($config, $experimentKey, $variationKey, $experimentKey, FeatureDecision::DECITION_SOURCE_EXPERIMENT, $userId, $attributes);
 
         return $variationKey;
     }
