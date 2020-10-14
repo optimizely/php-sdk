@@ -152,12 +152,10 @@ class EventBuilder
                     EXPERIMENT_ID => $experiment->getId(),
                     VARIATION_ID => $variation->getId(),
                     METADATA => [
-                      [
                         FLAG_KEY => $flagKey,
                         RULE_KEY => $experiment->getKey(),
                         RULE_TYPE => $flagType,
                         VARIATION_KEY => $variation->getKey()
-                      ]
                     ],
                 ]
             ],

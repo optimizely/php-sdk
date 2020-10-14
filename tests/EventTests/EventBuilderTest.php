@@ -77,12 +77,12 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                               'campaign_id'=> '7719770039',
                               'experiment_id'=> '7716830082',
                               'variation_id'=> '7721010009',
-                              'metadata'=> [[
-                                'flag_key' => 'test_experiment',
-                                'rule_key' => 'test_experiment',
-                                'rule_type' => 'experiment',
-                                'variation_key'=> 'variation'
-                              ]]
+                              'metadata'=> [
+                                  'flag_key' => 'test_experiment',
+                                  'rule_key' => 'test_experiment',
+                                  'rule_type' => 'experiment',
+                                  'variation_key'=> 'variation'
+                              ]
                             ]]
                           );
         $this->expectedImpressionEventParams = $this->expectedEventParams;
