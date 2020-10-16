@@ -143,8 +143,9 @@ class EventBuilder
      *
      * @return array Hash representing parameters particular to impression event.
      */
-    private function getImpressionParams(Experiment $experiment, $variation, $flagKey, $flagType)
+    private function getImpressionParams(Experiment $experiment, $variation, $flagKey, $ruleKey, $ruleType)
     {
+        $variationKey = $variation->getKey() ? $variation->getKey() : '';
         $impressionParams = [
             DECISIONS => [
                 [
@@ -153,9 +154,9 @@ class EventBuilder
                     VARIATION_ID => $variation->getId(),
                     METADATA => [
                         FLAG_KEY => $flagKey,
-                        RULE_KEY => $experiment->getKey(),
-                        RULE_TYPE => $flagType,
-                        VARIATION_KEY => $variation->getKey()
+                        RULE_KEY => $ruleKey,
+                        RULE_TYPE => $ruleType,
+                        VARIATION_KEY => $variationKey
                     ],
                 ]
             ],
@@ -227,13 +228,13 @@ class EventBuilder
      *
      * @return LogEvent Event object to be sent to dispatcher.
      */
-    public function createImpressionEvent($config, $experimentKey, $variationKey, $flagKey, $flagType, $userId, $attributes)
+    public function createImpressionEvent($config, $experimentKey, $variationKey, $flagKey, $ruleKey, $ruleType, $userId, $attributes)
     {
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
 
         $experiment = $config->getExperimentFromKey($experimentKey);
         $variation = $config->getVariationFromKey($experimentKey, $variationKey);
-        $impressionParams = $this->getImpressionParams($experiment, $variation, $flagKey, $flagType);
+        $impressionParams = $this->getImpressionParams($experiment, $variation, $flagKey, $ruleKey, $ruleType);
 
         $eventParams[VISITORS][0][SNAPSHOTS][] = $impressionParams;
 
