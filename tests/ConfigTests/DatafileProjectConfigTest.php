@@ -116,7 +116,12 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             'test_experiment_double_feature' =>  $this->config->getExperimentFromKey('test_experiment_double_feature'),
             'test_experiment_integer_feature' =>  $this->config->getExperimentFromKey('test_experiment_integer_feature'),
             'test_experiment_2' =>  $this->config->getExperimentFromKey('test_experiment_2'),
-            'test_experiment_json_feature' =>  $this->config->getExperimentFromKey('test_experiment_json_feature')
+            'test_experiment_json_feature' =>  $this->config->getExperimentFromKey('test_experiment_json_feature'),
+            'rollout_1_exp_1' =>  $this->config->getExperimentFromKey('rollout_1_exp_1'),
+            'rollout_1_exp_2' =>  $this->config->getExperimentFromKey('rollout_1_exp_2'),
+            'rollout_1_exp_3' =>  $this->config->getExperimentFromKey('rollout_1_exp_3'),
+            'rollout_2_exp_1' =>  $this->config->getExperimentFromKey('rollout_2_exp_1'),
+            'rollout_2_exp_2' =>  $this->config->getExperimentFromKey('rollout_2_exp_2'),
             ],
             $experimentKeyMap->getValue($this->config)
         );
@@ -135,7 +140,12 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             '122238' => $this->config->getExperimentFromId('122238'),
             '122241' => $this->config->getExperimentFromId('122241'),
             '111133' => $this->config->getExperimentFromId('111133'),
-            '122245' => $this->config->getExperimentFromId('122245')
+            '122245' => $this->config->getExperimentFromId('122245'),
+            '177770' => $this->config->getExperimentFromId('177770'),
+            '177772' => $this->config->getExperimentFromId('177772'),
+            '177776' => $this->config->getExperimentFromId('177776'),
+            '177774' => $this->config->getExperimentFromId('177774'),
+            '177779' => $this->config->getExperimentFromId('177779'),
             ],
             $experimentIdMap->getValue($this->config)
         );

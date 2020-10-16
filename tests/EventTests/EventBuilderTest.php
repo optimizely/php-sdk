@@ -76,7 +76,13 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $decisions = array('decisions' => [[
                               'campaign_id'=> '7719770039',
                               'experiment_id'=> '7716830082',
-                              'variation_id'=> '7721010009'
+                              'variation_id'=> '7721010009',
+                              'metadata'=> [
+                                  'flag_key' => 'test_experiment',
+                                  'rule_key' => 'test_experiment',
+                                  'rule_type' => 'experiment',
+                                  'variation_key'=> 'variation'
+                              ]
                             ]]
                           );
         $this->expectedImpressionEventParams = $this->expectedEventParams;
@@ -137,6 +143,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->config,
             'test_experiment',
             'variation',
+            'test_experiment',
+            'test_experiment',
+            'experiment',
             $this->testUserId,
             null
         );
@@ -193,6 +202,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->config,
             'test_experiment',
             'variation',
+            'test_experiment',
+            'test_experiment',
+            'experiment',
             $this->testUserId,
             $userAttributes
         );
@@ -230,6 +242,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->config,
             'test_experiment',
             'variation',
+            'test_experiment',
+            'test_experiment',
+            'experiment',
             $this->testUserId,
             $userAttributes
         );
@@ -268,6 +283,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->config,
             'test_experiment',
             'variation',
+            'test_experiment',
+            'test_experiment',
+            'experiment',
             $this->testUserId,
             $userAttributes
         );
@@ -296,6 +314,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->config,
             'test_experiment',
             'variation',
+            'test_experiment',
+            'test_experiment',
+            'experiment',
             $this->testUserId,
             $userAttributes
         );
@@ -333,6 +354,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->config,
             'test_experiment',
             'variation',
+            'test_experiment',
+            'test_experiment',
+            'experiment',
             $this->testUserId,
             $userAttributes
         );
@@ -377,6 +401,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->config,
             'test_experiment',
             'variation',
+            'test_experiment',
+            'test_experiment',
+            'experiment',
             $this->testUserId,
             $userAttributes
         );
@@ -424,6 +451,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $configMock,
             'test_experiment',
             'variation',
+            'test_experiment',
+            'test_experiment',
+            'experiment',
             $this->testUserId,
             $userAttributes
         );
@@ -467,6 +497,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $configMock,
             'test_experiment',
             'variation',
+            'test_experiment',
+            'test_experiment',
+            'experiment',
             $this->testUserId,
             $userAttributes
         );
@@ -793,6 +826,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             $this->config,
             'test_experiment',
             'variation',
+            'test_experiment',
+            'test_experiment',
+            'experiment',
             $this->testUserId,
             $userAttributes
         );
