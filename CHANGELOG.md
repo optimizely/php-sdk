@@ -1,5 +1,11 @@
 # Optimizely PHP SDK Changelog
 
+## 3.6.0
+November 2nd, 2020
+
+### New Features
+- Added support for upcoming application-controlled introduction of tracking for non-experiment Flag decisions. [#215](https://github.com/optimizely/php-sdk/pull/215)
+
 ## 3.5.0
 October 1st, 2020
 
