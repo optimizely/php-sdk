@@ -147,6 +147,12 @@ class Optimizely
         }
     }
 
+    public function createUserContext($userId, $attributes = null)
+    {
+        $userContext = new OptimizelyUserContext($this, $userId, $attributes);
+        return $userContext;
+    }
+
     /**
      * Returns DatafileProjectConfig instance.
      * @return DatafileProjectConfig DatafileProjectConfig instance or null
