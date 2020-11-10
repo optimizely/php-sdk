@@ -4683,7 +4683,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'group_experiment_1',
                 'experiment',
                 'user_1',
-                null
+                null,
+                true
             )
             ->willReturn(
                 new LogEvent(
@@ -4734,7 +4735,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Dispatching impression event to URL logx.optimizely.com/decision with params {"param1":"val1","param2":"val2"}.'
             );
 
-        $optlyObject->sendImpressionEvent($this->projectConfig, 'group_experiment_1', 'group_exp_1_var_2', 'group_experiment_1', 'group_experiment_1', 'experiment', 'user_1', null);
+        $optlyObject->sendImpressionEvent($this->projectConfig, 'group_experiment_1', 'group_exp_1_var_2', 'group_experiment_1', 'group_experiment_1', 'experiment', 'user_1', null, true);
     }
 
     public function testSendImpressionEventDispatchFailure()
@@ -4757,7 +4758,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::ERROR, 'Unable to dispatch impression event. Error ');
 
-        $optlyObject->sendImpressionEvent($this->projectConfig, 'test_experiment', 'control', 'test_experiment', 'test_experiment', 'experiment', 'test_user', []);
+        $optlyObject->sendImpressionEvent($this->projectConfig, 'test_experiment', 'control', 'test_experiment', 'test_experiment', 'experiment', 'test_user', [], true);
     }
 
     public function testSendImpressionEventWithAttributes()
@@ -4822,7 +4823,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optlyObject->notificationCenter = $this->notificationCenterMock;
 
-        $optlyObject->sendImpressionEvent($this->projectConfig, 'test_experiment', 'control', 'test_experiment', 'test_experiment', 'experiment', 'test_user', $userAttributes);
+        $optlyObject->sendImpressionEvent($this->projectConfig, 'test_experiment', 'control', 'test_experiment', 'test_experiment', 'experiment', 'test_user', $userAttributes, true);
     }
 
     /*
