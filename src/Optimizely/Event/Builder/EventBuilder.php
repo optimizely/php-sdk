@@ -229,7 +229,7 @@ class EventBuilder
      *
      * @return LogEvent Event object to be sent to dispatcher.
      */
-    public function createImpressionEvent($config, $experimentKey, $variationKey, $flagKey, $ruleKey, $ruleType, $userId, $attributes, $enabled)
+    public function createImpressionEvent($config, $experimentKey, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
     {
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
 

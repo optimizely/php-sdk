@@ -147,9 +147,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
-            null,
-            true
+            null
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
@@ -207,9 +207,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
-            $userAttributes,
-            true
+            $userAttributes
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
@@ -248,9 +248,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
-            $userAttributes,
-            true
+            $userAttributes
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
@@ -290,9 +290,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
-            $userAttributes,
-            true
+            $userAttributes
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
@@ -322,9 +322,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
-            $userAttributes,
-            true
+            $userAttributes
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
@@ -363,9 +363,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
-            $userAttributes,
-            true
+            $userAttributes
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
@@ -411,9 +411,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
-            $userAttributes,
-            true
+            $userAttributes
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
@@ -462,9 +462,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
-            $userAttributes,
-            true
+            $userAttributes
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
@@ -509,9 +509,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
-            $userAttributes,
-            true
+            $userAttributes
         );
 
         $logEvent = $this->fakeParamsToReconcile($logEvent);
@@ -839,9 +839,9 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
-            $userAttributes,
-            true
+            $userAttributes
         );
 
 
