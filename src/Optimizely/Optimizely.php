@@ -556,6 +556,9 @@ class Optimizely
         $variation = $decision->getVariation();
 
         if ($config->getSendFlagDecisions() && ($decision->getSource() == FeatureDecision::DECISION_SOURCE_ROLLOUT || !$variation)) {
+            if ($variation) {
+                $featureEnabled = $variation->getFeatureEnabled();
+            }
             $ruleKey = $decision->getExperiment() ? $decision->getExperiment()->getKey() : '';
             $this->sendImpressionEvent($config, $ruleKey, $variation ? $variation->getKey() : '', $featureFlagKey, $ruleKey, $decision->getSource(), $featureEnabled, $userId, $attributes);
         }

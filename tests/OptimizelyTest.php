@@ -5000,7 +5000,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->anything(), 'rollout_1_exp_1', '177771', 'boolean_single_variable_feature', 'rollout_1_exp_1', 'rollout', false, 'user_id', []);
+            ->with($this->anything(), 'rollout_1_exp_1', '177771', 'boolean_single_variable_feature', 'rollout_1_exp_1', 'rollout', true, 'user_id', []);
 
         $this->assertTrue($optimizelyMock->isFeatureEnabled('boolean_single_variable_feature', 'user_id', []));
     }
