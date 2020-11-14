@@ -44,3 +44,4 @@ define('FLAG_KEY', 'flag_key');
 define('RULE_KEY', 'rule_key');
 define('RULE_TYPE', 'rule_type');
 define('VARIATION_KEY', 'variation_key');
+define('ENABLED', 'enabled');

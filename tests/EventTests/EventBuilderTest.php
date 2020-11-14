@@ -81,7 +81,8 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                                   'flag_key' => 'test_experiment',
                                   'rule_key' => 'test_experiment',
                                   'rule_type' => 'experiment',
-                                  'variation_key'=> 'variation'
+                                  'variation_key'=> 'variation',
+                                  'enabled' => true
                               ]
                             ]]
                           );
@@ -146,6 +147,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
             null
         );
@@ -205,6 +207,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
             $userAttributes
         );
@@ -245,6 +248,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
             $userAttributes
         );
@@ -286,6 +290,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
             $userAttributes
         );
@@ -317,6 +322,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
             $userAttributes
         );
@@ -357,6 +363,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
             $userAttributes
         );
@@ -404,6 +411,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
             $userAttributes
         );
@@ -454,6 +462,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
             $userAttributes
         );
@@ -500,6 +509,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
             $userAttributes
         );
@@ -829,6 +839,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
             'test_experiment',
             'test_experiment',
             'experiment',
+            true,
             $this->testUserId,
             $userAttributes
         );
