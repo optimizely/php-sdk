@@ -19,24 +19,21 @@ namespace Optimizely;
 
 class OptimizelyUserContext
 {
+    private $optimizelyClient;
     private $userId;
-    private $userAttributes;
+    private $attributes;
     
     
-    public function __construct($userId, array $userAttributes = [])
+    public function __construct(Optimizely $optimizelyClient, $userId, array $attributes = [])
     {
+        $this->optimizelyClient = $optimizelyClient;
         $this->userId = $userId;
-        $this->userAttributes = $userAttributes;
-
-        // todo: check cloning and if null can be passed with [] as default param
-        if ($userAttributes === null) {
-            $userAttributes = [];
-        }
+        $this->attributes = $attributes;
     }
 
     public function setAttribute($key, $value)
     {
-        $this->userAttributes[$key] = $value;
+        $this->attributes[$key] = $value;
     }
 
     public function decide($key, $options = [])
@@ -53,5 +50,20 @@ class OptimizelyUserContext
 
     public function trackEvent($eventKey, $eventTags = [])
     {
+    }
+
+    public function getUserId()
+    {
+        return $this->userId;
+    }
+
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+
+    public function getOptimizely()
+    {
+        return $this->optimizelyClient;
     }
 }

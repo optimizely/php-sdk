@@ -38,6 +38,7 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\OptimizelyConfig\OptimizelyConfigService;
+use Optimizely\OptimizelyUserContext;
 use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
 use Optimizely\ProjectConfigManager\ProjectConfigManagerInterface;
 use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
@@ -95,6 +96,8 @@ class Optimizely
      */
     private $_logger;
 
+    private $defaultDecideOptions;
+
     /**
      * @var ProjectConfigManagerInterface
      */
@@ -127,7 +130,8 @@ class Optimizely
         UserProfileServiceInterface $userProfileService = null,
         ProjectConfigManagerInterface $configManager = null,
         NotificationCenter $notificationCenter = null,
-        $sdkKey = null
+        $sdkKey = null,
+        array $defaultDecideOptions = []
     ) {
         $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
@@ -145,6 +149,8 @@ class Optimizely
                 $this->configManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
             }
         }
+
+        $this->defaultDecideOptions = $defaultDecideOptions;
     }
 
     /**
@@ -239,6 +245,29 @@ class Optimizely
                 $impressionEvent
             )
         );
+    }
+
+
+    public function createUserContext($userId, array $userAttributes = [])
+    {
+        // We do not check if config is ready as UserContext can be created evne when SDK is not ready.
+
+        // validate userId
+        if (!$this->validateInputs(
+            [
+                self::USER_ID => $userId
+            ]
+        )
+        ) {
+            return null;
+        }
+
+        // validate attributes
+        if (!$this->validateUserInputs($userAttributes)) {
+            return null;
+        }
+
+        return new OptimizelyUserContext($this, $userId, $userAttributes);
     }
 
     /**

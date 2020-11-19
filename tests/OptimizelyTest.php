@@ -16,6 +16,8 @@
  */
 namespace Optimizely\Tests;
 
+// require(dirname(__FILE__).'/TestData.php');
+
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -45,6 +47,7 @@ use Optimizely\ErrorHandler\DefaultErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\Optimizely;
+use Optimizely\OptimizelyUserContext;
 
 class OptimizelyTest extends \PHPUnit_Framework_TestCase
 {
@@ -308,6 +311,68 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optimizelyClient->configManager->fetch();
 
         $this->assertEquals('3', $optimizelyClient->configManager->getConfig()->getRevision());
+    }
+
+    public function testCreateUserContextInvalidOptimizelyObject()
+    {
+        $optimizely = new Optimizely('Random datafile');
+
+        $userCxt = $optimizely->createUserContext('test_user');
+        $this->assertInstanceof(OptimizelyUserContext::class, $userCxt);
+    }
+
+    public function testCreateUserContextCallsValidateInputsWithUserId()
+    {
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile))
+            ->setMethods(array('validateInputs'))
+            ->getMock();
+
+        $userId = 'test_user';
+        $inputArray = [
+            Optimizely::USER_ID => $userId
+        ];
+
+        // assert that validateInputs gets called with exactly same keys
+        $optimizelyMock->expects($this->once())
+            ->method('validateInputs')
+            ->with($inputArray)
+            ->willReturn(false);
+
+        $this->assertNull($optimizelyMock->createUserContext($userId));
+    }
+
+    public function testCreateUserContextWithNonArrayAttributes()
+    {
+        try {
+            $this->optimizelyObject->createUserContext('test_user', 42);
+        } catch (Exception $exception) {
+            return;
+        } catch (TypeError $exception) {
+            return;
+        }
+
+        $this->fail('Unexpected behavior. UserContext should have thrown an error.');
+    }
+
+    public function testCreateUserContextInvalidAttributes()
+    {
+        $this->loggerMock->expects($this->exactly(1))
+            ->method('log');
+        $this->loggerMock->expects($this->at(0))
+            ->method('log')
+            ->with(Logger::ERROR, 'Provided attributes are in an invalid format.');
+
+        $errorHandlerMock = $this->getMockBuilder(NoOpErrorHandler::class)
+            ->setMethods(array('handleError'))
+            ->getMock();
+        $errorHandlerMock->expects($this->once())
+            ->method('handleError')
+            ->with(new InvalidAttributeException('Provided attributes are in an invalid format.'));
+
+        $optimizely = new Optimizely($this->datafile, null, $this->loggerMock, $errorHandlerMock);
+
+        $this->assertNull($optimizely->createUserContext('test_user', [5,6,7]));
     }
 
     public function testActivateInvalidOptimizelyObject()
