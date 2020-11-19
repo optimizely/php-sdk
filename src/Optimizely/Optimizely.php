@@ -23,6 +23,9 @@ use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
 use Monolog\Logger;
+use Optimizely\Decide\OptimizelyDecideOption;
+use Optimizely\Decide\OptimizelyDecision;
+use Optimizely\Decide\OptimizelyDecisionMessage;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
@@ -268,6 +271,100 @@ class Optimizely
         }
 
         return new OptimizelyUserContext($this, $userId, $userAttributes);
+    }
+
+
+    public function decide(OptimizelyUserContext $userContext, $key, array $decideOptions = [])
+    {
+        $decideReasons = [];
+
+        // check if SDK is ready
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
+            $decideReasons[] = OptimizelyDecisionMessage::SDK_NOT_READY;
+            return new OptimizelyDecision(null, null, null, null, key, $userContext, reasons);
+        }
+
+        // validate that key is a string
+        if (!$this->validateInputs(
+            [
+                self::FEATURE_FLAG_KEY =>$key
+            ]
+        )
+        ) {
+            $errorMessage = sprintf(OptimizelyDecisionMessage::FLAG_KEY_INVALID, $key);
+            $this->_logger->log(Logger::ERROR, $errorMessage);
+            $decideReasons[] = $errorMessage;
+            return new OptimizelyDecision(null, null, null, null, key, $userContext, reasons);
+        }
+
+
+        // validate that key maps to a feature flag
+        $featureFlag = $config->getFeatureFlagFromKey($key);
+        if ($featureFlag && (!$featureFlag->getId())) {
+            // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
+            $decideReasons[] = sprintf(OptimizelyDecisionMessage::FLAG_KEY_INVALID, $key);
+            return new OptimizelyDecision(null, null, null, null, key, $userContext, reasons);
+        }
+
+        // merge decide options and default decide options
+        $decideOptions += $this->defaultDecideOptions;
+
+        // create optimizely decision result
+        $userId = $userContext->getUserId();
+        $userAttributes = $userContext->getAttributes();
+        $variationKey = null;
+        $featureEnabled = false;
+        $ruleKey = null;
+        $flagKey = key;
+        $allVariables = [];
+        $decisionEventDispatched = false;
+
+        
+        // Copied from is FeatureEnabled
+
+        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
+        $variation = $decision->getVariation();
+
+        if ($config->getSendFlagDecisions() && ($decision->getSource() == FeatureDecision::DECISION_SOURCE_ROLLOUT || !$variation)) {
+            if ($variation) {
+                $featureEnabled = $variation->getFeatureEnabled();
+            }
+            $ruleKey = $decision->getExperiment() ? $decision->getExperiment()->getKey() : '';
+            $this->sendImpressionEvent($config, $ruleKey, $variation ? $variation->getKey() : '', $featureFlagKey, $ruleKey, $decision->getSource(), $featureEnabled, $userId, $attributes);
+        }
+
+        if ($variation) {
+            $experimentKey = $decision->getExperiment()->getKey();
+            $featureEnabled = $variation->getFeatureEnabled();
+            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_FEATURE_TEST) {
+                $sourceInfo = (object) array(
+                    'experimentKey'=> $experimentKey,
+                    'variationKey'=> $variation->getKey()
+                );
+
+                $this->sendImpressionEvent($config, $experimentKey, $variation->getKey(), $featureFlagKey, $experimentKey, $decision->getSource(), $featureEnabled, $userId, $attributes);
+            } else {
+                $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
+            }
+        }
+
+        $attributes = is_null($attributes) ? [] : $attributes;
+        $this->notificationCenter->sendNotifications(
+            NotificationType::DECISION,
+            array(
+                DecisionNotificationTypes::FEATURE,
+                $userId,
+                $attributes,
+                (object) array(
+                    'featureKey'=>$featureFlagKey,
+                    'featureEnabled'=> $featureEnabled,
+                    'source'=> $decision->getSource(),
+                    'sourceInfo'=> isset($sourceInfo) ? $sourceInfo : (object) array()
+                )
+            )
+        );
     }
 
     /**

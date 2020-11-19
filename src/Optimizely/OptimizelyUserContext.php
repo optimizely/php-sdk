@@ -36,20 +36,24 @@ class OptimizelyUserContext
         $this->attributes[$key] = $value;
     }
 
-    public function decide($key, $options = [])
+    public function decide($key, array $options = [])
     {
+        return $optimizelyClient->decide($this, $key, $options)
     }
 
-    public function decideForKeys(array $keys, $options = [])
+    public function decideForKeys(array $keys, array $options = [])
     {
+        return $optimizelyClient->decideForKeys($this, $keys, $options);
     }
 
-    public function decideAll($options = [])
+    public function decideAll(array $options = [])
     {
+        return $this->optimizelyClient->decideAll($this, $keys);
     }
 
-    public function trackEvent($eventKey, $eventTags = [])
+    public function trackEvent($eventKey, array $eventTags = [])
     {
+        return $this->optimizelyClient->track($eventKey, $this->userId, $this->attributes, $eventTags);
     }
 
     public function getUserId()

@@ -28,15 +28,22 @@ class OptimizelyDecision
     private $reasons;
     
     
-    public function __construct($variationKey, $enabled, $variables, $ruleKey, $flagKey, $userContext, $reasons)
-    {
+    public function __construct(
+        $variationKey = null,
+        $enabled = null,
+        $variables = null,
+        $ruleKey = null,
+        $flagKey = null,
+        $userContext = null,
+        $reasons = null
+    ) {
         $this->variationKey = $variationKey;
-        $this->enabled = $enabled;
-        $this->variables = $variables;
+        $this->enabled = $enabled === null ? false : $enabled;
+        $this->variables = $variables === null ? [] : $variables;
         $this->ruleKey = $ruleKey;
         $this->flagKey = $flagKey;
         $this->userContext = $userContext;
-        $this->reasons = $reasons;
+        $this->reasons = $reasons === null ? [] : $reasons;
     }
 
     public function jsonSerialize()
