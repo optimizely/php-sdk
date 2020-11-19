@@ -112,7 +112,7 @@ class Bucketer
      *
      * @return string ID representing experiment or variation.
      */
-    private function findBucket($bucketingId, $userId, $parentId, $trafficAllocations, &$decideReasons = null)
+    private function findBucket($bucketingId, $userId, $parentId, $trafficAllocations, &$decideReasons = [])
     {
         // Generate the bucketing key based on combination of user ID and experiment ID or group ID.
         $bucketingKey = $bucketingId.$parentId;
@@ -141,7 +141,7 @@ class Bucketer
      *
      * @return Variation Variation which will be shown to the user.
      */
-    public function bucket(ProjectConfigInterface $config, Experiment $experiment, $bucketingId, $userId, &$decideReasons = null)
+    public function bucket(ProjectConfigInterface $config, Experiment $experiment, $bucketingId, $userId, &$decideReasons = [])
     {
         if (is_null($experiment->getKey())) {
             return null;

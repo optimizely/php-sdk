@@ -95,7 +95,7 @@ class DecisionService
      *
      * @return String representing bucketing ID if it is a String type in attributes else return user ID.
      */
-    protected function getBucketingId($userId, $userAttributes)
+    protected function getBucketingId($userId, $userAttributes, &$decideReasons = [])
     {
         $bucketingIdKey = ControlAttributes::BUCKETING_ID;
 
@@ -103,7 +103,10 @@ class DecisionService
             if (is_string($userAttributes[$bucketingIdKey])) {
                 return $userAttributes[$bucketingIdKey];
             }
-            $this->_logger->log(Logger::WARNING, 'Bucketing ID attribute is not a string. Defaulted to user ID.');
+
+            $message = 'Bucketing ID attribute is not a string. Defaulted to user ID.';
+            $this->_logger->log(Logger::WARNING, $message);
+            $decideReasons[] = $message;
         }
         return $userId;
     }
@@ -118,34 +121,37 @@ class DecisionService
      *
      * @return Variation   Variation  which the user is bucketed into.
      */
-    public function getVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, $userId, $attributes = null)
+    public function getVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, $userId, $attributes = null, $decideOptions = [], &$decideReasons = [])
     {
-        $bucketingId = $this->getBucketingId($userId, $attributes);
+        $bucketingId = $this->getBucketingId($userId, $attributes, $decideReasons);
 
         if (!$experiment->isExperimentRunning()) {
-            $this->_logger->log(Logger::INFO, sprintf('Experiment "%s" is not running.', $experiment->getKey()));
+            $message = sprintf('Experiment "%s" is not running.', $experiment->getKey());
+            $this->_logger->log(Logger::INFO, $message);
+            $decideReasons[] = $message;
             return null;
         }
 
         // check if a forced variation is set
-        $forcedVariation = $this->getForcedVariation($projectConfig, $experiment->getKey(), $userId);
+        $forcedVariation = $this->getForcedVariation($projectConfig, $experiment->getKey(), $userId, $decideReasons);
         if (!is_null($forcedVariation)) {
             return $forcedVariation;
         }
 
         // check if the user has been whitelisted
-        $variation = $this->getWhitelistedVariation($projectConfig, $experiment, $userId);
+        $variation = $this->getWhitelistedVariation($projectConfig, $experiment, $userId, $decideReasons);
         if (!is_null($variation)) {
             return $variation;
         }
 
         // check for sticky bucketing
+        // todo: Add logic for IGNORE_USER_PROFILE
         $userProfile = new UserProfile($userId);
         if (!is_null($this->_userProfileService)) {
-            $storedUserProfile = $this->getStoredUserProfile($userId);
+            $storedUserProfile = $this->getStoredUserProfile($userId, $decideReasons);
             if (!is_null($storedUserProfile)) {
                 $userProfile = $storedUserProfile;
-                $variation = $this->getStoredVariation($projectConfig, $experiment, $userProfile);
+                $variation = $this->getStoredVariation($projectConfig, $experiment, $userProfile, $decideReasons);
                 if (!is_null($variation)) {
                     return $variation;
                 }
@@ -153,27 +159,33 @@ class DecisionService
         }
 
         if (!Validator::doesUserMeetAudienceConditions($projectConfig, $experiment, $attributes, $this->_logger)) {
+            $message = sprintf('User "%s" does not meet conditions to be in experiment "%s".', $userId, $experiment->getKey());
             $this->_logger->log(
                 Logger::INFO,
-                sprintf('User "%s" does not meet conditions to be in experiment "%s".', $userId, $experiment->getKey())
+                $message
             );
+            $decideReasons[] = $message;
             return null;
         }
 
-        $variation = $this->_bucketer->bucket($projectConfig, $experiment, $bucketingId, $userId);
+        $variation = $this->_bucketer->bucket($projectConfig, $experiment, $bucketingId, $userId, $decideReasons);
         if ($variation === null) {
-            $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no variation.', $userId));
+            $message = sprintf('User "%s" is in no variation.', $userId);
+            $this->_logger->log(Logger::INFO, $message);
+            $decideReasons[] = $message;
         } else {
-            $this->saveVariation($experiment, $variation, $userProfile);
+            $this->saveVariation($experiment, $variation, $userProfile, $decideReasons);
+            $message = sprintf(
+                'User "%s" is in variation %s of experiment %s.',
+                $userId,
+                $variation->getKey(),
+                $experiment->getKey()
+            );
             $this->_logger->log(
                 Logger::INFO,
-                sprintf(
-                    'User "%s" is in variation %s of experiment %s.',
-                    $userId,
-                    $variation->getKey(),
-                    $experiment->getKey()
-                )
+                $message
             );
+            $decideReasons[] = $message;
         }
 
         return $variation;
@@ -189,33 +201,37 @@ class DecisionService
      * @return Decision  if getVariationForFeatureExperiment or getVariationForFeatureRollout returns a Decision
      *         null      otherwise
      */
-    public function getVariationForFeature(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
+    public function getVariationForFeature(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes, $decideOptions = [], &$decideReasons = [])
     {
         //Evaluate in this order:
         //1. Attempt to bucket user into experiment using feature flag.
         //2. Attempt to bucket user into rollout using the feature flag.
 
         // Check if the feature flag is under an experiment and the the user is bucketed into one of these experiments
-        $decision = $this->getVariationForFeatureExperiment($projectConfig, $featureFlag, $userId, $userAttributes);
+        $decision = $this->getVariationForFeatureExperiment($projectConfig, $featureFlag, $userId, $userAttributes, $decideOptions, $decideReasons);
         if ($decision) {
             return $decision;
         }
 
         // Check if the feature flag has rollout and the user is bucketed into one of it's rules
-        $decision = $this->getVariationForFeatureRollout($projectConfig, $featureFlag, $userId, $userAttributes);
+        $decision = $this->getVariationForFeatureRollout($projectConfig, $featureFlag, $userId, $userAttributes, $decideReasons);
         if ($decision) {
+            $message = "User '{$userId}' is bucketed into rollout for feature flag '{$featureFlag->getKey()}'.";
             $this->_logger->log(
                 Logger::INFO,
-                "User '{$userId}' is bucketed into rollout for feature flag '{$featureFlag->getKey()}'."
+                $message
             );
+            $decideReasons[] = $message;
 
             return $decision;
         }
 
+        $message = "User '{$userId}' is not bucketed into rollout for feature flag '{$featureFlag->getKey()}'.";
         $this->_logger->log(
             Logger::INFO,
-            "User '{$userId}' is not bucketed into rollout for feature flag '{$featureFlag->getKey()}'."
+            $message
         );
+        $decideReasons[] = $message;
 
         return new FeatureDecision(null, null, FeatureDecision::DECISION_SOURCE_ROLLOUT);
     }
@@ -230,17 +246,19 @@ class DecisionService
      * @return Decision  if a variation is returned for the user
      *         null  if feature flag is not used in any experiments or no variation is returned for the user
      */
-    public function getVariationForFeatureExperiment(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
+    public function getVariationForFeatureExperiment(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes, $decideOptions = [], &$decideReasons = [])
     {
         $featureFlagKey = $featureFlag->getKey();
         $experimentIds = $featureFlag->getExperimentIds();
 
         // Check if there are any experiment IDs inside feature flag
         if (empty($experimentIds)) {
+            $message = "The feature flag '{$featureFlagKey}' is not used in any experiments.";
             $this->_logger->log(
                 Logger::DEBUG,
-                "The feature flag '{$featureFlagKey}' is not used in any experiments."
+                $message
             );
+            $decideReasons[] = $message;
             return null;
         }
 
@@ -252,21 +270,25 @@ class DecisionService
                 continue;
             }
 
-            $variation = $this->getVariation($projectConfig, $experiment, $userId, $userAttributes);
+            $variation = $this->getVariation($projectConfig, $experiment, $userId, $userAttributes, $decideOptions, $decideReasons);
             if ($variation && $variation->getKey()) {
+                $message = "The user '{$userId}' is bucketed into experiment '{$experiment->getKey()}' of feature '{$featureFlagKey}'.";
                 $this->_logger->log(
                     Logger::INFO,
-                    "The user '{$userId}' is bucketed into experiment '{$experiment->getKey()}' of feature '{$featureFlagKey}'."
+                    $message
                 );
+                $decideReasons[] = $message;
 
                 return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_FEATURE_TEST);
             }
         }
 
+        $message = "The user '{$userId}' is not bucketed into any of the experiments using the feature '{$featureFlagKey}'.";
         $this->_logger->log(
             Logger::INFO,
-            "The user '{$userId}' is not bucketed into any of the experiments using the feature '{$featureFlagKey}'."
+            $message
         );
+        $decideReasons[] = $message;
 
         return null;
     }
@@ -285,16 +307,18 @@ class DecisionService
      *               no rollout found against the rollout ID or
      *               no variation is returned for the user
      */
-    public function getVariationForFeatureRollout(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
+    public function getVariationForFeatureRollout(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes, &$decideReasons = [])
     {
-        $bucketing_id = $this->getBucketingId($userId, $userAttributes);
+        $bucketing_id = $this->getBucketingId($userId, $userAttributes, $decideReasons);
         $featureFlagKey = $featureFlag->getKey();
         $rollout_id = $featureFlag->getRolloutId();
         if (empty($rollout_id)) {
+            $message = "Feature flag '{$featureFlagKey}' is not used in a rollout.";
             $this->_logger->log(
                 Logger::DEBUG,
-                "Feature flag '{$featureFlagKey}' is not used in a rollout."
+                $message
             );
+            $decideReasons[] = $message;
             return null;
         }
         $rollout = $projectConfig->getRolloutFromId($rollout_id);
@@ -314,16 +338,18 @@ class DecisionService
 
             // Evaluate if user meets the audience condition of this rollout rule
             if (!Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', $i + 1)) {
+                $message = sprintf("User '%s' does not meet conditions for targeting rule %s.", $userId, $i+1);
                 $this->_logger->log(
                     Logger::DEBUG,
-                    sprintf("User '%s' does not meet conditions for targeting rule %s.", $userId, $i+1)
+                    $message
                 );
+                $decideReasons[] = $message;
                 // Evaluate this user for the next rule
                 continue;
             }
 
             // Evaluate if user satisfies the traffic allocation for this rollout rule
-            $variation = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId);
+            $variation = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId, $decideReasons);
             if ($variation && $variation->getKey()) {
                 return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
             }
@@ -334,14 +360,16 @@ class DecisionService
 
         // Evaluate if user meets the audience condition of Everyone Else Rule / Last Rule now
         if (!Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', 'Everyone Else')) {
+            $message = sprintf("User '%s' does not meet conditions for targeting rule 'Everyone Else'.", $userId);
             $this->_logger->log(
                 Logger::DEBUG,
-                sprintf("User '%s' does not meet conditions for targeting rule 'Everyone Else'.", $userId)
+                $message
             );
+            $decideReasons[] = $message;
             return null;
         }
 
-        $variation = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId);
+        $variation = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId, $decideReasons);
         if ($variation && $variation->getKey()) {
             return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
         }
@@ -358,7 +386,7 @@ class DecisionService
      *
      * @return Variation The variation which the given user and experiment should be forced into.
      */
-    public function getForcedVariation(ProjectConfigInterface $projectConfig, $experimentKey, $userId)
+    public function getForcedVariation(ProjectConfigInterface $projectConfig, $experimentKey, $userId, &$decideReasons = [])
     {
         if (!isset($this->_forcedVariationMap[$userId])) {
             $this->_logger->log(Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId));
@@ -375,7 +403,9 @@ class DecisionService
         }
 
         if (!isset($experimentToVariationMap[$experimentId])) {
-            $this->_logger->log(Logger::DEBUG, sprintf('No experiment "%s" mapped to user "%s" in the forced variation map.', $experimentKey, $userId));
+            $message = sprintf('No experiment "%s" mapped to user "%s" in the forced variation map.', $experimentKey, $userId);
+            $this->_logger->log(Logger::DEBUG, $message);
+            $decideReasons[] = $message;
             return null;
         }
 
@@ -383,7 +413,9 @@ class DecisionService
         $variation = $projectConfig->getVariationFromId($experimentKey, $variationId);
         $variationKey = $variation->getKey();
 
-        $this->_logger->log(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
+        $message = sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId);
+        $this->_logger->log(Logger::DEBUG, $message);
+        $decideReasons[] = $message;
         return $variation;
     }
 
@@ -445,7 +477,7 @@ class DecisionService
      *
      * @return null|Variation Representing the variation the user is forced into.
      */
-    private function getWhitelistedVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, $userId)
+    private function getWhitelistedVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, $userId, &$decideReasons = [])
     {
         // Check if user is whitelisted for a variation.
         $forcedVariations = $experiment->getForcedVariations();
@@ -453,10 +485,10 @@ class DecisionService
             $variationKey = $forcedVariations[$userId];
             $variation = $projectConfig->getVariationFromKey($experiment->getKey(), $variationKey);
             if ($variationKey && !empty($variation->getKey())) {
-                $this->_logger->log(
-                    Logger::INFO,
-                    sprintf('User "%s" is forced in variation "%s" of experiment "%s".', $userId, $variationKey, $experiment->getKey())
-                );
+                $message = sprintf('User "%s" is forced in variation "%s" of experiment "%s".', $userId, $variationKey, $experiment->getKey());
+
+                $this->_logger->log(Logger::INFO, $message);
+                $decideReasons[] = $message;
             } else {
                 return null;
             }
@@ -472,7 +504,7 @@ class DecisionService
      *
      * @return null|UserProfile the stored user profile.
      */
-    private function getStoredUserProfile($userId)
+    private function getStoredUserProfile($userId, &$decideReasons = [])
     {
         if (is_null($this->_userProfileService)) {
             return null;
@@ -494,10 +526,9 @@ class DecisionService
                 );
             }
         } catch (Exception $e) {
-            $this->_logger->log(
-                Logger::ERROR,
-                sprintf('The User Profile Service lookup method failed: %s.', $e->getMessage())
-            );
+            $message = sprintf('The User Profile Service lookup method failed: %s.', $e->getMessage());
+            $this->_logger->log(Logger::ERROR, $message);
+            $decideReasons[] = $message;
         }
 
         return null;
@@ -512,7 +543,7 @@ class DecisionService
      *
      * @return null|Variation the stored variation or null if not found.
      */
-    private function getStoredVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, UserProfile $userProfile)
+    private function getStoredVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, UserProfile $userProfile, &$decideReasons = [])
     {
         $experimentKey = $experiment->getKey();
         $userId = $userProfile->getUserId();
@@ -528,15 +559,20 @@ class DecisionService
         
         $variation = $projectConfig->getVariationFromId($experimentKey, $variationId);
         if (!($variation->getId())) {
+            $message = sprintf(
+                'User "%s" was previously bucketed into variation with ID "%s" for experiment "%s", but no matching variation was found for that user. We will re-bucket the user.',
+                $userId,
+                $variationId,
+                $experimentKey
+            );
+
             $this->_logger->log(
                 Logger::INFO,
-                sprintf(
-                    'User "%s" was previously bucketed into variation with ID "%s" for experiment "%s", but no matching variation was found for that user. We will re-bucket the user.',
-                    $userId,
-                    $variationId,
-                    $experimentKey
-                )
+                $message
             );
+
+            $decideReasons[] = $message;
+
             return null;
         }
 
@@ -559,7 +595,7 @@ class DecisionService
      * @param $variation   Variation   Variation the user is bucketed into.
      * @param $userProfile UserProfile User profile object to which we are persisting the variation assignment.
      */
-    private function saveVariation(Experiment $experiment, Variation $variation, UserProfile $userProfile)
+    private function saveVariation(Experiment $experiment, Variation $variation, UserProfile $userProfile, &$decideReasons = [])
     {
         if (is_null($this->_userProfileService)) {
             return;
@@ -579,25 +615,25 @@ class DecisionService
 
         try {
             $this->_userProfileService->save($userProfileMap);
-            $this->_logger->log(
-                Logger::INFO,
-                sprintf(
-                    'Saved variation "%s" of experiment "%s" for user "%s".',
-                    $variation->getKey(),
-                    $experiment->getKey(),
-                    $userProfile->getUserId()
-                )
+            $message = sprintf(
+                'Saved variation "%s" of experiment "%s" for user "%s".',
+                $variation->getKey(),
+                $experiment->getKey(),
+                $userProfile->getUserId()
             );
+
+            $this->_logger->log(Logger::INFO, $message);
+            $decideReasons[] = $message;
         } catch (Exception $e) {
-            $this->_logger->log(
-                Logger::WARNING,
-                sprintf(
-                    'Failed to save variation "%s" of experiment "%s" for user "%s".',
-                    $variation->getKey(),
-                    $experiment->getKey(),
-                    $userProfile->getUserId()
-                )
+            $message = sprintf(
+                'Failed to save variation "%s" of experiment "%s" for user "%s".',
+                $variation->getKey(),
+                $experiment->getKey(),
+                $userProfile->getUserId()
             );
+
+            $this->_logger->log(Logger::WARNING, $message);
+            $decideReasons[] = $message;
         }
     }
 }
