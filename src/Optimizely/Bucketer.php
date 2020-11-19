@@ -112,12 +112,14 @@ class Bucketer
      *
      * @return string ID representing experiment or variation.
      */
-    private function findBucket($bucketingId, $userId, $parentId, $trafficAllocations)
+    private function findBucket($bucketingId, $userId, $parentId, $trafficAllocations, &$decideReasons = null)
     {
         // Generate the bucketing key based on combination of user ID and experiment ID or group ID.
         $bucketingKey = $bucketingId.$parentId;
         $bucketingNumber = $this->generateBucketValue($bucketingKey);
-        $this->_logger->log(Logger::DEBUG, sprintf('Assigned bucket %s to user "%s" with bucketing ID "%s".', $bucketingNumber, $userId, $bucketingId));
+        $message = sprintf('Assigned bucket %s to user "%s" with bucketing ID "%s".', $bucketingNumber, $userId, $bucketingId);
+        $this->_logger->log(Logger::DEBUG, $message);
+        $decideReasons[] = $message;
 
         foreach ($trafficAllocations as $trafficAllocation) {
             $currentEnd = $trafficAllocation->getEndOfRange();
@@ -139,7 +141,7 @@ class Bucketer
      *
      * @return Variation Variation which will be shown to the user.
      */
-    public function bucket(ProjectConfigInterface $config, Experiment $experiment, $bucketingId, $userId)
+    public function bucket(ProjectConfigInterface $config, Experiment $experiment, $bucketingId, $userId, &$decideReasons = null)
     {
         if (is_null($experiment->getKey())) {
             return null;
@@ -156,32 +158,34 @@ class Bucketer
 
             $userExperimentId = $this->findBucket($bucketingId, $userId, $group->getId(), $group->getTrafficAllocation());
             if (empty($userExperimentId)) {
-                $this->_logger->log(Logger::INFO, sprintf('User "%s" is in no experiment.', $userId));
+                $message = sprintf('User "%s" is in no experiment.', $userId);
+                $this->_logger->log(Logger::INFO, $message);
+                $decideReasons[] = $message;
                 return null;
             }
 
             if ($userExperimentId != $experiment->getId()) {
-                $this->_logger->log(
-                    Logger::INFO,
-                    sprintf(
-                        'User "%s" is not in experiment %s of group %s.',
-                        $userId,
-                        $experiment->getKey(),
-                        $experiment->getGroupId()
-                    )
-                );
-                return null;
-            }
-
-            $this->_logger->log(
-                Logger::INFO,
-                sprintf(
-                    'User "%s" is in experiment %s of group %s.',
+                $message = sprintf(
+                    'User "%s" is not in experiment %s of group %s.',
                     $userId,
                     $experiment->getKey(),
                     $experiment->getGroupId()
-                )
+                );
+
+                $this->_logger->log(Logger::INFO, $message);
+                $decideReasons[] = $message;
+                return null;
+            }
+
+            $message = sprintf(
+                'User "%s" is in experiment %s of group %s.',
+                $userId,
+                $experiment->getKey(),
+                $experiment->getGroupId()
             );
+
+            $this->_logger->log(Logger::INFO, $message);
+            $decideReasons[] = $message;
         }
 
         // Bucket user if not in whitelist and in group (if any).
