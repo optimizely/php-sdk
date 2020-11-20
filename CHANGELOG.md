@@ -1,5 +1,11 @@
 # Optimizely PHP SDK Changelog
 
+## 3.6.1
+November 19th, 2020
+
+### Bug Fixes
+- Added "enabled" field to decision metadata structure. [#217](https://github.com/optimizely/php-sdk/pull/217)
+
 ## 3.6.0
 November 2nd, 2020
 
