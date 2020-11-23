@@ -20,7 +20,7 @@ class FeatureDecision
 {
     const DECISION_SOURCE_FEATURE_TEST = 'feature-test';
     const DECISION_SOURCE_ROLLOUT = 'rollout';
-    const DECITION_SOURCE_EXPERIMENT = 'experiment';
+    const DECISION_SOURCE_EXPERIMENT = 'experiment';
 
     /**
      * The experiment in this decision.

@@ -17,7 +17,7 @@
 
 namespace Optimizely;
 
-class OptimizelyUserContext
+class OptimizelyUserContext implements \JsonSerializable
 {
     private $optimizelyClient;
     private $userId;
@@ -38,12 +38,12 @@ class OptimizelyUserContext
 
     public function decide($key, array $options = [])
     {
-        return $optimizelyClient->decide($this, $key, $options)
+        return $this->optimizelyClient->decide($this, $key, $options);
     }
 
     public function decideForKeys(array $keys, array $options = [])
     {
-        return $optimizelyClient->decideForKeys($this, $keys, $options);
+        return $this->optimizelyClient->decideForKeys($this, $keys, $options);
     }
 
     public function decideAll(array $options = [])
@@ -69,5 +69,13 @@ class OptimizelyUserContext
     public function getOptimizely()
     {
         return $this->optimizelyClient;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            'userId' => $this->userId,
+            'attributes' => $this->attributes
+        ];
     }
 }

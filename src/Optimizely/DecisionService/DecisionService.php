@@ -20,6 +20,7 @@ use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
 use Optimizely\Config\ProjectConfigInterface;
+use Optimizely\Decide\OptimizelyDecideOption;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
 use Optimizely\Entity\Rollout;
@@ -145,15 +146,16 @@ class DecisionService
         }
 
         // check for sticky bucketing
-        // todo: Add logic for IGNORE_USER_PROFILE
-        $userProfile = new UserProfile($userId);
-        if (!is_null($this->_userProfileService)) {
-            $storedUserProfile = $this->getStoredUserProfile($userId, $decideReasons);
-            if (!is_null($storedUserProfile)) {
-                $userProfile = $storedUserProfile;
-                $variation = $this->getStoredVariation($projectConfig, $experiment, $userProfile, $decideReasons);
-                if (!is_null($variation)) {
-                    return $variation;
+        if (!in_array(OptimizelyDecideOption::IGNORE_USER_PROFILE_SERVICE, $decideOptions)) {
+            $userProfile = new UserProfile($userId);
+            if (!is_null($this->_userProfileService)) {
+                $storedUserProfile = $this->getStoredUserProfile($userId, $decideReasons);
+                if (!is_null($storedUserProfile)) {
+                    $userProfile = $storedUserProfile;
+                    $variation = $this->getStoredVariation($projectConfig, $experiment, $userProfile, $decideReasons);
+                    if (!is_null($variation)) {
+                        return $variation;
+                    }
                 }
             }
         }
@@ -174,7 +176,9 @@ class DecisionService
             $this->_logger->log(Logger::INFO, $message);
             $decideReasons[] = $message;
         } else {
-            $this->saveVariation($experiment, $variation, $userProfile, $decideReasons);
+            if (!in_array(OptimizelyDecideOption::IGNORE_USER_PROFILE_SERVICE, $decideOptions)) {
+                $this->saveVariation($experiment, $variation, $userProfile, $decideReasons);
+            }
             $message = sprintf(
                 'User "%s" is in variation %s of experiment %s.',
                 $userId,

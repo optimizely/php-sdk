@@ -273,7 +273,6 @@ class Optimizely
         return new OptimizelyUserContext($this, $userId, $userAttributes);
     }
 
-
     public function decide(OptimizelyUserContext $userContext, $key, array $decideOptions = [])
     {
         $decideReasons = [];
@@ -283,20 +282,20 @@ class Optimizely
         if ($config === null) {
             $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
             $decideReasons[] = OptimizelyDecisionMessage::SDK_NOT_READY;
-            return new OptimizelyDecision(null, null, null, null, key, $userContext, reasons);
+            return new OptimizelyDecision(null, null, null, null, $key, $userContext, $decideReasons);
         }
 
         // validate that key is a string
         if (!$this->validateInputs(
             [
-                self::FEATURE_FLAG_KEY =>$key
+                self::FEATURE_FLAG_KEY => $key
             ]
         )
         ) {
             $errorMessage = sprintf(OptimizelyDecisionMessage::FLAG_KEY_INVALID, $key);
             $this->_logger->log(Logger::ERROR, $errorMessage);
             $decideReasons[] = $errorMessage;
-            return new OptimizelyDecision(null, null, null, null, key, $userContext, reasons);
+            return new OptimizelyDecision(null, null, null, null, $key, $userContext, $decideReasons);
         }
 
 
@@ -305,7 +304,7 @@ class Optimizely
         if ($featureFlag && (!$featureFlag->getId())) {
             // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
             $decideReasons[] = sprintf(OptimizelyDecisionMessage::FLAG_KEY_INVALID, $key);
-            return new OptimizelyDecision(null, null, null, null, key, $userContext, reasons);
+            return new OptimizelyDecision(null, null, null, null, $key, $userContext, $decideReasons);
         }
 
         // merge decide options and default decide options
@@ -317,53 +316,96 @@ class Optimizely
         $variationKey = null;
         $featureEnabled = false;
         $ruleKey = null;
-        $flagKey = key;
+        $flagKey = $key;
         $allVariables = [];
         $decisionEventDispatched = false;
 
-        
-        // Copied from is FeatureEnabled
-
-        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
+        // get decision
+        $decision = $this->_decisionService->getVariationForFeature(
+            $config,
+            $featureFlag,
+            $userId,
+            $userAttributes,
+            $decideOptions,
+            $decideReasons
+        );
         $variation = $decision->getVariation();
 
-        if ($config->getSendFlagDecisions() && ($decision->getSource() == FeatureDecision::DECISION_SOURCE_ROLLOUT || !$variation)) {
-            if ($variation) {
-                $featureEnabled = $variation->getFeatureEnabled();
-            }
-            $ruleKey = $decision->getExperiment() ? $decision->getExperiment()->getKey() : '';
-            $this->sendImpressionEvent($config, $ruleKey, $variation ? $variation->getKey() : '', $featureFlagKey, $ruleKey, $decision->getSource(), $featureEnabled, $userId, $attributes);
+        if ($variation) {
+            $variationKey = $variation->getKey();
+            $featureEnabled = $variation->getFeatureEnabled();
+            $ruleKey = $decision->getExperiment()->getKey();
+        } else {
+            $variationKey = null;
+            $ruleKey = null;
         }
 
-        if ($variation) {
-            $experimentKey = $decision->getExperiment()->getKey();
-            $featureEnabled = $variation->getFeatureEnabled();
-            if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_FEATURE_TEST) {
-                $sourceInfo = (object) array(
-                    'experimentKey'=> $experimentKey,
-                    'variationKey'=> $variation->getKey()
+        // send impression only if decide options do not contain DISABLE_DECISION_EVENT
+        if (!in_array(OptimizelyDecideOption::DISABLE_DECISION_EVENT, $decideOptions)) {
+            $sendFlagDecisions = $config->getSendFlagDecisions();
+            $source = $decision->getSource();
+
+            // send impression for rollout when sendFlagDecisions is enabled.
+            if ($source == FeatureDecision::DECISION_SOURCE_FEATURE_TEST || $sendFlagDecisions) {
+                $this->sendImpressionEvent(
+                    $config,
+                    $ruleKey,
+                    $variationKey,
+                    $flagKey,
+                    $ruleKey,
+                    $source,
+                    $featureEnabled,
+                    $userId,
+                    $userAttributes
                 );
 
-                $this->sendImpressionEvent($config, $experimentKey, $variation->getKey(), $featureFlagKey, $experimentKey, $decision->getSource(), $featureEnabled, $userId, $attributes);
-            } else {
-                $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
+                $decisionEventDispatched = true;
             }
         }
 
-        $attributes = is_null($attributes) ? [] : $attributes;
+        // Generate all variables map if decide options doesn't include excludeVariables
+        if (!in_array(OptimizelyDecideOption::EXCLUDE_VARIABLES, $decideOptions)) {
+            foreach ($featureFlag->getVariables() as $variable) {
+                $allVariables[$variable->getKey()] = $this->getFeatureVariableValueFromVariation(
+                    $flagKey,
+                    $variable->getKey(),
+                    null,
+                    $featureEnabled,
+                    $variation,
+                    $userId
+                );
+            }
+        }
+
+        // send notification
         $this->notificationCenter->sendNotifications(
             NotificationType::DECISION,
             array(
-                DecisionNotificationTypes::FEATURE,
+                DecisionNotificationTypes::FLAG,
                 $userId,
-                $attributes,
+                $userAttributes,
                 (object) array(
-                    'featureKey'=>$featureFlagKey,
+                    'flagKey'=> $flagKey,
                     'featureEnabled'=> $featureEnabled,
-                    'source'=> $decision->getSource(),
-                    'sourceInfo'=> isset($sourceInfo) ? $sourceInfo : (object) array()
+                    'variables' => $allVariables,
+                    'variation' => $variationKey,
+                    'ruleKey' => $ruleKey,
+                    'reasons' => $decideReasons,
+                    'decisionEventDispatched' => $decisionEventDispatched
                 )
             )
+        );
+
+        $shouldIncludeReasons = in_array(OptimizelyDecideOption::INCLUDE_REASONS, $decideOptions);
+
+        return new OptimizelyDecision(
+            $variationKey,
+            $featureEnabled,
+            $allVariables,
+            $ruleKey,
+            $flagKey,
+            $userContext,
+            $shouldIncludeReasons ? $decideReasons:[]
         );
     }
 
@@ -400,7 +442,7 @@ class Optimizely
             return null;
         }
 
-        $this->sendImpressionEvent($config, $experimentKey, $variationKey, '', $experimentKey, FeatureDecision::DECITION_SOURCE_EXPERIMENT, true, $userId, $attributes);
+        $this->sendImpressionEvent($config, $experimentKey, $variationKey, '', $experimentKey, FeatureDecision::DECISION_SOURCE_EXPERIMENT, true, $userId, $attributes);
 
         return $variationKey;
     }

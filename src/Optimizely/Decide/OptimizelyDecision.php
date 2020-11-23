@@ -17,7 +17,7 @@
 
 namespace Optimizely\Decide;
 
-class OptimizelyDecision
+class OptimizelyDecision implements \JsonSerializable
 {
     private $variationKey;
     private $enabled;
@@ -44,6 +44,41 @@ class OptimizelyDecision
         $this->flagKey = $flagKey;
         $this->userContext = $userContext;
         $this->reasons = $reasons === null ? [] : $reasons;
+    }
+
+    public function getVariationKey()
+    {
+        return $this->variationKey;
+    }
+
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
+    public function getVariables()
+    {
+        return $this->variables;
+    }
+
+    public function getRuleKey()
+    {
+        return $this->ruleKey;
+    }
+
+    public function getFlagKey()
+    {
+        return $this->flagKey;
+    }
+
+    public function getUserContext()
+    {
+        return $this->userContext;
+    }
+
+    public function getReasons()
+    {
+        return $this->reasons;
     }
 
     public function jsonSerialize()
