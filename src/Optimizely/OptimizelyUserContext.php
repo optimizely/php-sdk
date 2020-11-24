@@ -48,11 +48,12 @@ class OptimizelyUserContext implements \JsonSerializable
 
     public function decideAll(array $options = [])
     {
-        return $this->optimizelyClient->decideAll($this, $keys);
+        return $this->optimizelyClient->decideAll($this, $options);
     }
 
     public function trackEvent($eventKey, array $eventTags = [])
     {
+        $eventTags = $eventTags ?: null;
         return $this->optimizelyClient->track($eventKey, $this->userId, $this->attributes, $eventTags);
     }
 

@@ -409,6 +409,47 @@ class Optimizely
         );
     }
 
+    public function decideAll(OptimizelyUserContext $userContext, array $decideOptions = [])
+    {
+        // check if SDK is ready
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
+            return [];
+        }
+
+        // get all feature keys
+        $keys = [];
+        $featureFlags = $config->getFeatureFlags();
+        foreach ($featureFlags as $feature) {
+            $keys [] = $feature->getKey();
+        }
+
+        return $this->decideForKeys($userContext, $keys, $decideOptions);
+    }
+
+    public function decideForKeys(OptimizelyUserContext $userContext, array $keys, array $decideOptions = [])
+    {
+        // check if SDK is ready
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
+            return [];
+        }
+
+        $enabledFlagsOnly = in_array(OptimizelyDecideOption::ENABLED_FLAGS_ONLY, $decideOptions);
+        $decisions = [];
+
+        foreach ($keys as $key) {
+            $decision = $this->decide($userContext, $key, $decideOptions);
+            if (!$enabledFlagsOnly || $decision->getEnabled() === true) {
+                $decisions [$key] = $decision;
+            }
+        }
+
+        return $decisions;
+    }
+
     /**
      * Buckets visitor and sends impression event to Optimizely.
      *
