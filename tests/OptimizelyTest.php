@@ -118,6 +118,17 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->staticConfigManager = new StaticProjectConfigManager($this->datafile, true, $this->loggerMock, new NoOpErrorHandler);
     }
 
+    public function compareOptimizelyDecisions(OptimizelyDecision $expectedOptimizelyDecision, OptimizelyDecision $optimizelyDecision)
+    {
+        $this->assertEquals($expectedOptimizelyDecision->getVariationKey(), $optimizelyDecision->getVariationKey());
+        $this->assertEquals($expectedOptimizelyDecision->getEnabled(), $optimizelyDecision->getEnabled());
+        $this->assertEquals($expectedOptimizelyDecision->getVariables(), $optimizelyDecision->getVariables());
+        $this->assertEquals($expectedOptimizelyDecision->getRuleKey(), $optimizelyDecision->getRuleKey());
+        $this->assertEquals($expectedOptimizelyDecision->getFlagKey(), $optimizelyDecision->getFlagKey());
+        $this->assertEquals($expectedOptimizelyDecision->getUserContext(), $optimizelyDecision->getUserContext());
+        $this->assertEquals($expectedOptimizelyDecision->getFlagKey(), $optimizelyDecision->getFlagKey());
+    }
+
     public function testIsValidForInvalidOptimizelyObject()
     {
         $optlyObject = new Optimizely('Random datafile');
@@ -461,13 +472,8 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             $userContext,
             []
         );
-        $this->assertEquals($expectedOptimizelyDecision->getVariationKey(), $optimizelyDecision->getVariationKey());
-        $this->assertEquals($expectedOptimizelyDecision->getEnabled(), $optimizelyDecision->getEnabled());
-        $this->assertEquals($expectedOptimizelyDecision->getVariables(), $optimizelyDecision->getVariables());
-        $this->assertEquals($expectedOptimizelyDecision->getRuleKey(), $optimizelyDecision->getRuleKey());
-        $this->assertEquals($expectedOptimizelyDecision->getFlagKey(), $optimizelyDecision->getFlagKey());
-        $this->assertEquals($expectedOptimizelyDecision->getUserContext(), $optimizelyDecision->getUserContext());
-        $this->assertEquals($expectedOptimizelyDecision->getFlagKey(), $optimizelyDecision->getFlagKey());
+
+        $this->compareOptimizelyDecisions($expectedOptimizelyDecision, $optimizelyDecision);
     }
 
     public function testActivateInvalidOptimizelyObject()

@@ -96,4 +96,50 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $optUserContext->setAttribute('browser', 'firefox');
         $this->assertEquals(["browser" => "firefox"], $optUserContext->getAttributes());
     }
+
+    public function testDecideCallsAndReturnsOptimizelyDecideAPI()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('decide'))
+            ->getMock();
+
+
+        $optUserContext = new OptimizelyUserContext($optimizelyMock, $userId, $attributes);
+
+        //assert that sendImpressionEvent is called with expected params
+        $optimizelyMock->expects($this->exactly(1))
+        ->method('decide')
+        ->with(
+            $optUserContext,
+            'test_feature',
+            ['DISABLE_DECISION_EVENT', 'ENABLED_FLAGS_ONLY']
+        )
+        ->will($this->returnValue('Mocked return value'));
+
+        $this->assertEquals(
+            'Mocked return value',
+            $optUserContext->decide('test_feature', ['DISABLE_DECISION_EVENT', 'ENABLED_FLAGS_ONLY'])
+        );
+    }
+
+    public function testDecideAllCallsAndReturnsOptimizelyDecideAPI()
+    {
+    }
+
+    public function testDecideForKeysCallsAndReturnsOptimizelyDecideAPI()
+    {
+    }
+
+    public function testTrackEventCallsAndReturnsOptimizelyDecideAPI()
+    {
+    }
+
+    public function testJsonSerialize()
+    {
+    }
 }
