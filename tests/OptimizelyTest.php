@@ -16,8 +16,6 @@
  */
 namespace Optimizely\Tests;
 
-// require(dirname(__FILE__).'/TestData.php');
-
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;

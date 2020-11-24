@@ -253,7 +253,7 @@ class Optimizely
 
     public function createUserContext($userId, array $userAttributes = [])
     {
-        // We do not check if config is ready as UserContext can be created evne when SDK is not ready.
+        // We do not check if config is ready as UserContext can be created even when SDK is not ready.
 
         // validate userId
         if (!$this->validateInputs(

@@ -177,7 +177,7 @@ class DecisionService
             $decideReasons[] = $message;
         } else {
             if (!in_array(OptimizelyDecideOption::IGNORE_USER_PROFILE_SERVICE, $decideOptions)) {
-                $this->saveVariation($experiment, $variation, $userProfile, $decideReasons);
+                $this->saveVariation($experiment, $variation, $userProfile);
             }
             $message = sprintf(
                 'User "%s" is in variation %s of experiment %s.',
@@ -599,7 +599,7 @@ class DecisionService
      * @param $variation   Variation   Variation the user is bucketed into.
      * @param $userProfile UserProfile User profile object to which we are persisting the variation assignment.
      */
-    private function saveVariation(Experiment $experiment, Variation $variation, UserProfile $userProfile, &$decideReasons = [])
+    private function saveVariation(Experiment $experiment, Variation $variation, UserProfile $userProfile)
     {
         if (is_null($this->_userProfileService)) {
             return;
@@ -627,7 +627,6 @@ class DecisionService
             );
 
             $this->_logger->log(Logger::INFO, $message);
-            $decideReasons[] = $message;
         } catch (Exception $e) {
             $message = sprintf(
                 'Failed to save variation "%s" of experiment "%s" for user "%s".',
@@ -637,7 +636,6 @@ class DecisionService
             );
 
             $this->_logger->log(Logger::WARNING, $message);
-            $decideReasons[] = $message;
         }
     }
 }

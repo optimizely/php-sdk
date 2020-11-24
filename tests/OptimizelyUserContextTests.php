@@ -18,7 +18,6 @@ namespace Optimizely\Tests;
 
 require(dirname(__FILE__).'/TestData.php');
 
-
 use Exception;
 use TypeError;
 
@@ -29,8 +28,6 @@ use Optimizely\OptimizelyUserContext;
 
 class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
 {
-    const OUTPUT_STREAM = 'output';
-
     private $datafile;
     private $loggerMock;
     private $optimizelyObject;
