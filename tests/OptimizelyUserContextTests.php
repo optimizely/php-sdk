@@ -129,10 +129,61 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
 
     public function testDecideAllCallsAndReturnsOptimizelyDecideAPI()
     {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('decideAll'))
+            ->getMock();
+
+
+        $optUserContext = new OptimizelyUserContext($optimizelyMock, $userId, $attributes);
+
+        //assert that sendImpressionEvent is called with expected params
+        $optimizelyMock->expects($this->exactly(1))
+        ->method('decideAll')
+        ->with(
+            $optUserContext,
+            ['DISABLE_DECISION_EVENT', 'ENABLED_FLAGS_ONLY']
+        )
+        ->will($this->returnValue('Mocked return value'));
+
+        $this->assertEquals(
+            'Mocked return value',
+            $optUserContext->decideAll(['DISABLE_DECISION_EVENT', 'ENABLED_FLAGS_ONLY'])
+        );
     }
 
     public function testDecideForKeysCallsAndReturnsOptimizelyDecideAPI()
     {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('decideForKeys'))
+            ->getMock();
+
+
+        $optUserContext = new OptimizelyUserContext($optimizelyMock, $userId, $attributes);
+
+        //assert that sendImpressionEvent is called with expected params
+        $optimizelyMock->expects($this->exactly(1))
+        ->method('decideForKeys')
+        ->with(
+            $optUserContext,
+            ['test_feature', 'test_experiment'],
+            ['DISABLE_DECISION_EVENT', 'ENABLED_FLAGS_ONLY']
+        )
+        ->will($this->returnValue('Mocked return value'));
+
+        $this->assertEquals(
+            'Mocked return value',
+            $optUserContext->decideForKeys(['test_feature', 'test_experiment'], ['DISABLE_DECISION_EVENT', 'ENABLED_FLAGS_ONLY'])
+        );
     }
 
     public function testTrackEventCallsAndReturnsOptimizelyDecideAPI()
@@ -141,5 +192,13 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
 
     public function testJsonSerialize()
     {
-    }
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+        $optUserContext = new OptimizelyUserContext($this->optimizelyObject, $userId, $attributes);
+
+        $this->assertEquals([
+            'userId' => $this->userId,
+            'attributes' => $this->attributes
+        ], $optUserContext->jsonSerialize());
+     }
 }
