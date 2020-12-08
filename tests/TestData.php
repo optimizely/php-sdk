@@ -1768,9 +1768,9 @@ class InvalidErrorHandler
  */
 class DecisionTester extends DecisionService
 {
-    public function getBucketingId($userId, $userAttributes)
+    public function getBucketingId($userId, $userAttributes, &$decideReasons = [])
     {
-        return parent::getBucketingId($userId, $userAttributes);
+        return parent::getBucketingId($userId, $userAttributes, $decideReasons);
     }
 }
 
