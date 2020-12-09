@@ -93,6 +93,7 @@ class DecisionService
      *
      * @param string $userId         user ID
      * @param array  $userAttributes user attributes
+     * @param array  $decideReasons evaluation logs
      *
      * @return String representing bucketing ID if it is a String type in attributes else return user ID.
      */
@@ -119,6 +120,8 @@ class DecisionService
      * @param $experiment       Experiment      Experiment to get the variation for.
      * @param $userId           string          User identifier.
      * @param $attributes       array           Attributes of the user.
+     * @param $decideOptions    array           Options to customize evaluation.
+     * @param $decideReasons    array           Evaluation Logs.
      *
      * @return Variation   Variation  which the user is bucketed into.
      */
@@ -202,6 +205,8 @@ class DecisionService
      * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
      * @param  string        $userId         user ID
      * @param  array         $userAttributes user attributes
+     * @param  array         $decideOptions   Options to customize evaluation.
+     * @param  array         $decideReasons   Evaluation Logs.
      * @return Decision  if getVariationForFeatureExperiment or getVariationForFeatureRollout returns a Decision
      *         null      otherwise
      */
@@ -247,6 +252,8 @@ class DecisionService
      * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
      * @param  string        $userId         user id
      * @param  array         $userAttributes user userAttributes
+     * @param  array         $decideOptions   Options to customize evaluation.
+     * @param  array         $decideReasons   Evaluation Logs.
      * @return Decision  if a variation is returned for the user
      *         null  if feature flag is not used in any experiments or no variation is returned for the user
      */
@@ -306,6 +313,7 @@ class DecisionService
      * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
      * @param  string        $userId         user id
      * @param  array         $userAttributes user userAttributes
+     * @param  array         $decideReasons   Evaluation Logs.
      * @return Decision  if a variation is returned for the user
      *         null  if feature flag is not used in a rollout or
      *               no rollout found against the rollout ID or
@@ -387,6 +395,7 @@ class DecisionService
      * @param $projectConfig ProjectConfigInterface  ProjectConfigInterface instance.
      * @param $experimentKey string         Key for experiment.
      * @param $userId        string         The user Id.
+     * @param $decideReasons array          Evaluation Logs.
      *
      * @return Variation The variation which the given user and experiment should be forced into.
      */
@@ -478,6 +487,7 @@ class DecisionService
      * @param $projectConfig ProjectConfigInterface  ProjectConfigInterface instance.
      * @param $experiment    Experiment     Experiment in which user is to be bucketed.
      * @param $userId        string         string
+     * @param $decideReasons array          Evaluation Logs.
      *
      * @return null|Variation Representing the variation the user is forced into.
      */
@@ -504,7 +514,8 @@ class DecisionService
     /**
      * Get the stored user profile for the given user ID.
      *
-     * @param $userId string the ID of the user.
+     * @param $userId        string  ID of the user.
+     * @param $decideReasons array   Evaluation Logs.
      *
      * @return null|UserProfile the stored user profile.
      */
@@ -544,6 +555,7 @@ class DecisionService
      * @param $projectConfig ProjectConfigInterface  ProjectConfigInterface instance.
      * @param $experiment    Experiment     The experiment for which we are getting the stored variation.
      * @param $userProfile   UserProfile    The user profile from which we are getting the stored variation.
+     * @param $decideReasons array          Evaluation Logs.
      *
      * @return null|Variation the stored variation or null if not found.
      */

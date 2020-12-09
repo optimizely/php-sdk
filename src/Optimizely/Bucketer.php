@@ -109,6 +109,7 @@ class Bucketer
      * @param $userId string ID for user.
      * @param $parentId mixed ID representing Experiment or Group.
      * @param $trafficAllocations array Traffic allocations for variation or experiment.
+     * @param $decideReasons array Evaluation Logs.
      *
      * @return string ID representing experiment or variation.
      */
@@ -138,6 +139,7 @@ class Bucketer
      * @param $experiment Experiment Experiment or Rollout rule in which user is to be bucketed.
      * @param $bucketingId string A customer-assigned value used to create the key for the murmur hash.
      * @param $userId string User identifier.
+     * @param $decideReasons array Evaluation Logs.
      *
      * @return Variation Variation which will be shown to the user.
      */

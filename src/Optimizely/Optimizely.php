@@ -99,6 +99,9 @@ class Optimizely
      */
     private $_logger;
 
+    /**
+     * @var array A default list of options for decision making.
+     */
     private $defaultDecideOptions;
 
     /**
