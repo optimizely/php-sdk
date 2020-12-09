@@ -250,7 +250,17 @@ class Optimizely
         );
     }
 
-
+    /**
+     * Create a context of the user for which decision APIs will be called.
+     * 
+     * A user context will be created successfully even when the SDK is not fully configured yet.
+     *
+     * @param $userId string The user ID to be used for bucketing.
+     * @param $userAttributes array A Hash representing user attribute names and values.
+     *
+     * @return OptimizelyUserContext|null An OptimizelyUserContext associated with this OptimizelyClient,
+     *                                    or null If user attributes are not in valid format. 
+     */
     public function createUserContext($userId, array $userAttributes = [])
     {
         // We do not check if config is ready as UserContext can be created even when SDK is not ready.
@@ -273,6 +283,17 @@ class Optimizely
         return new OptimizelyUserContext($this, $userId, $userAttributes);
     }
 
+    /**
+     * Returns a decision result (OptimizelyDecision) for a given flag key and a user context, which contains all data required to deliver the flag.
+     * 
+     * If the SDK finds an error, it'll return a `decision` with null for `variationKey`. The decision will include an error message in `reasons`
+     *
+     * @param $userContext OptimizelyUserContext context of the user for which decision will be called.
+     * @param $key string A flag key for which a decision will be made.
+     * @param $decideOptions array A list of options for decision making.
+     *
+     * @return OptimizelyDecision A decision result 
+     */
     public function decide(OptimizelyUserContext $userContext, $key, array $decideOptions = [])
     {
         $decideReasons = [];
@@ -409,6 +430,14 @@ class Optimizely
         );
     }
 
+    /**
+     * Returns a hash of decision results (OptimizelyDecision) for all active flag keys.
+     * 
+     * @param $userContext OptimizelyUserContext context of the user for which decision will be called.
+     * @param $decideOptions array A list of options for decision making.
+     *
+     * @return array Hash of decisions containing flag keys as hash keys and corresponding decisions as their values.
+     */
     public function decideAll(OptimizelyUserContext $userContext, array $decideOptions = [])
     {
         // check if SDK is ready
@@ -428,6 +457,19 @@ class Optimizely
         return $this->decideForKeys($userContext, $keys, $decideOptions);
     }
 
+    /**
+     * Returns a hash of decision results (OptimizelyDecision) for multiple flag keys and a user context.
+     * 
+     * If the SDK finds an error for a key, the response will include a decision for the key showing `reasons` for the error.
+     * 
+     * The SDK will always return hash of decisions. When it can not process requests, it'll return an empty hash after logging the errors.
+     *
+     * @param $userContext OptimizelyUserContext context of the user for which decision will be called.
+     * @param $keys array A list of flag keys for which the decisions will be made.
+     * @param $decideOptions array A list of options for decision making.
+     *
+     * @return array Hash of decisions containing flag keys as hash keys and corresponding decisions as their values.
+     */
     public function decideForKeys(OptimizelyUserContext $userContext, array $keys, array $decideOptions = [])
     {
         // check if SDK is ready
