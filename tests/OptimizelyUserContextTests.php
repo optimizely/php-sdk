@@ -96,6 +96,17 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(["browser" => "firefox"], $optUserContext->getAttributes());
     }
 
+    public function testSetAttributeWhenNoAttributesProvidedInConstructor()
+    {
+        $userId = 'test_user';
+        $optUserContext = new OptimizelyUserContext($this->optimizelyObject, $userId);
+
+        $this->assertEquals([], $optUserContext->getAttributes());
+
+        $optUserContext->setAttribute('browser', 'firefox');
+        $this->assertEquals(["browser" => "firefox"], $optUserContext->getAttributes());
+    }
+
     public function testDecideCallsAndReturnsOptimizelyDecideAPI()
     {
         $userId = 'test_user';

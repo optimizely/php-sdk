@@ -332,7 +332,7 @@ class Optimizely
         }
 
         // merge decide options and default decide options
-        $decideOptions += $this->defaultDecideOptions;
+        $decideOptions = array_merge($decideOptions, $this->defaultDecideOptions);
 
         // create optimizely decision result
         $userId = $userContext->getUserId();
@@ -481,6 +481,9 @@ class Optimizely
             $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
             return [];
         }
+
+        // merge decide options and default decide options
+        $decideOptions = array_merge($decideOptions, $this->defaultDecideOptions);
 
         $enabledFlagsOnly = in_array(OptimizelyDecideOption::ENABLED_FLAGS_ONLY, $decideOptions);
         $decisions = [];

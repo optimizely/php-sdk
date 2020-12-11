@@ -418,7 +418,6 @@ class DecisionService
         if (!isset($experimentToVariationMap[$experimentId])) {
             $message = sprintf('No experiment "%s" mapped to user "%s" in the forced variation map.', $experimentKey, $userId);
             $this->_logger->log(Logger::DEBUG, $message);
-            $decideReasons[] = $message;
             return null;
         }
 
