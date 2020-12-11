@@ -428,7 +428,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ['device_type' => 'iPhone'],
             (object) array(
                 'flagKey'=>'double_single_variable_feature',
-                'featureEnabled'=> true,
+                'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
                 'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',

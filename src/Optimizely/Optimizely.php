@@ -410,7 +410,7 @@ class Optimizely
                 $userAttributes,
                 (object) array(
                     'flagKey'=> $flagKey,
-                    'featureEnabled'=> $featureEnabled,
+                    'enabled'=> $featureEnabled,
                     'variables' => $allVariables,
                     'variation' => $variationKey,
                     'ruleKey' => $ruleKey,
