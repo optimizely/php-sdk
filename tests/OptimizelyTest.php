@@ -47,6 +47,7 @@ use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\Optimizely;
 use Optimizely\OptimizelyUserContext;
+use Optimizely\UserProfile\UserProfileServiceInterface;
 
 class OptimizelyTest extends \PHPUnit_Framework_TestCase
 {
@@ -1098,6 +1099,303 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optimizelyMock->notificationCenter = $this->notificationCenterMock;
         
         $optimizelyDecision = $optimizelyMock->decide($userContext, 'double_single_variable_feature');
+    }
+
+    public function testDecideRespectsUserProfileServiceLookup()
+    {
+        $userProfileServiceMock = $this->getMockBuilder(UserProfileServiceInterface::class)
+            ->getMock();
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock, null, null, $userProfileServiceMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $userContext = $optimizelyMock->createUserContext('test_user', ['device_type' => 'iPhone']);
+
+        // mock userProfileServiceMock to return stored variation 'variation' rather than 'control'.
+        $storedUserProfile = array(
+            'user_id' => 'test_user',
+            'experiment_bucket_map' => array(
+                '122238' => array(
+                    'variation_id' => '122240'
+                )
+            )
+        );
+
+        $userProfileServiceMock->expects($this->once())
+            ->method('lookup')
+            ->willReturn($storedUserProfile);
+
+        
+        $userProfileServiceMock->expects($this->never())
+            ->method('save');
+
+        //Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            DecisionNotificationTypes::FLAG,
+            'test_user',
+            ['device_type' => 'iPhone'],
+            (object) array(
+                'flagKey'=>'double_single_variable_feature',
+                'enabled'=> false,
+                'variables'=> ["double_variable" => 14.99],
+                'variation' => 'variation',
+                'ruleKey' => 'test_experiment_double_feature',
+                'reasons' => [],
+                'decisionEventDispatched' => true
+            )
+        );
+
+        $this->notificationCenterMock->expects($this->exactly(1))
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+
+        //assert that sendImpressionEvent is called with expected params
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with(
+                $this->projectConfig,
+                'test_experiment_double_feature',
+                'variation',
+                'double_single_variable_feature',
+                'test_experiment_double_feature',
+                FeatureDecision::DECISION_SOURCE_FEATURE_TEST,
+                false,
+                'test_user',
+                ['device_type' => 'iPhone']
+            );
+
+        $optimizelyMock->notificationCenter = $this->notificationCenterMock;
+        
+        $optimizelyDecision = $optimizelyMock->decide($userContext, 'double_single_variable_feature', []);
+    }
+
+    public function testDecideRespectsUserProfileServiceSave()
+    {
+        $userProfileServiceMock = $this->getMockBuilder(UserProfileServiceInterface::class)
+            ->getMock();
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock, null, null, $userProfileServiceMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $userContext = $optimizelyMock->createUserContext('test_user', ['device_type' => 'iPhone']);
+
+        // mock lookup to return null so that normal bucketing happens
+        $userProfileServiceMock->expects($this->once())
+            ->method('lookup')
+            ->willReturn(null);
+
+        
+        // assert that save is called with expected user profile map.
+        $storedUserProfile = array(
+            'user_id' => 'test_user',
+            'experiment_bucket_map' => array(
+                '122238' => array(
+                    'variation_id' => '122239'
+                )
+            )
+        );
+        $userProfileServiceMock->expects($this->once())
+            ->method('save')
+            ->with($storedUserProfile);
+
+        //Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            DecisionNotificationTypes::FLAG,
+            'test_user',
+            ['device_type' => 'iPhone'],
+            (object) array(
+                'flagKey'=>'double_single_variable_feature',
+                'enabled'=> true,
+                'variables'=> ["double_variable" => 42.42],
+                'variation' => 'control',
+                'ruleKey' => 'test_experiment_double_feature',
+                'reasons' => [],
+                'decisionEventDispatched' => true
+            )
+        );
+
+        $this->notificationCenterMock->expects($this->exactly(1))
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+
+        //assert that sendImpressionEvent is called with expected params
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with(
+                $this->projectConfig,
+                'test_experiment_double_feature',
+                'control',
+                'double_single_variable_feature',
+                'test_experiment_double_feature',
+                FeatureDecision::DECISION_SOURCE_FEATURE_TEST,
+                true,
+                'test_user',
+                ['device_type' => 'iPhone']
+            );
+
+        $optimizelyMock->notificationCenter = $this->notificationCenterMock;
+        
+        $optimizelyDecision = $optimizelyMock->decide($userContext, 'double_single_variable_feature', []);
+    }
+
+    public function testDecideOptionIgnoreUserProfileService()
+    {
+        $userProfileServiceMock = $this->getMockBuilder(UserProfileServiceInterface::class)
+            ->getMock();
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock, null, null, $userProfileServiceMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $userContext = $optimizelyMock->createUserContext('test_user', ['device_type' => 'iPhone']);
+
+        // mock userProfileServiceMock to return stored variation 'variation' rather than 'control'.
+        $storedUserProfile = array(
+            'user_id' => 'test_user',
+            'experiment_bucket_map' => array(
+                '122238' => array(
+                    'variation_id' => '122240'
+                )
+            )
+        );
+
+        // assert lookup isn't called.
+        $userProfileServiceMock->expects($this->never())
+            ->method('lookup');
+
+        // assert save isn't called.
+        $userProfileServiceMock->expects($this->never())
+            ->method('save');
+
+
+        //Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            DecisionNotificationTypes::FLAG,
+            'test_user',
+            ['device_type' => 'iPhone'],
+            (object) array(
+                'flagKey'=>'double_single_variable_feature',
+                'enabled'=> true,
+                'variables'=> ["double_variable" => 42.42],
+                'variation' => 'control',
+                'ruleKey' => 'test_experiment_double_feature',
+                'reasons' => [],
+                'decisionEventDispatched' => true
+            )
+        );
+
+        $this->notificationCenterMock->expects($this->exactly(1))
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+
+        //assert that sendImpressionEvent is called with expected params
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with(
+                $this->projectConfig,
+                'test_experiment_double_feature',
+                'control',
+                'double_single_variable_feature',
+                'test_experiment_double_feature',
+                FeatureDecision::DECISION_SOURCE_FEATURE_TEST,
+                true,
+                'test_user',
+                ['device_type' => 'iPhone']
+            );
+
+        $optimizelyMock->notificationCenter = $this->notificationCenterMock;
+        
+        $optimizelyDecision = $optimizelyMock->decide($userContext, 'double_single_variable_feature', ['IGNORE_USER_PROFILE_SERVICE']);
+    }
+
+    public function testDecideOptionIgnoreUserProfileServiceWhenPassedInDefaultOptions()
+    {
+        $userProfileServiceMock = $this->getMockBuilder(UserProfileServiceInterface::class)
+            ->getMock();
+
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile,
+                null, $this->loggerMock, null, null, $userProfileServiceMock, null, null, null, ['IGNORE_USER_PROFILE_SERVICE']
+            ))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $userContext = $optimizelyMock->createUserContext('test_user', ['device_type' => 'iPhone']);
+
+        // mock userProfileServiceMock to return stored variation 'variation' rather than 'control'.
+        $storedUserProfile = array(
+            'user_id' => 'test_user',
+            'experiment_bucket_map' => array(
+                '122238' => array(
+                    'variation_id' => '122240'
+                )
+            )
+        );
+
+        // assert lookup isn't called.
+        $userProfileServiceMock->expects($this->never())
+            ->method('lookup');
+
+        // assert save isn't called.
+        $userProfileServiceMock->expects($this->never())
+            ->method('save');
+
+
+        //Verify that sendNotifications is called with expected params
+        $arrayParam = array(
+            DecisionNotificationTypes::FLAG,
+            'test_user',
+            ['device_type' => 'iPhone'],
+            (object) array(
+                'flagKey'=>'double_single_variable_feature',
+                'enabled'=> true,
+                'variables'=> ["double_variable" => 42.42],
+                'variation' => 'control',
+                'ruleKey' => 'test_experiment_double_feature',
+                'reasons' => [],
+                'decisionEventDispatched' => true
+            )
+        );
+
+        $this->notificationCenterMock->expects($this->exactly(1))
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                $arrayParam
+            );
+
+        //assert that sendImpressionEvent is called with expected params
+        $optimizelyMock->expects($this->exactly(1))
+            ->method('sendImpressionEvent')
+            ->with(
+                $this->projectConfig,
+                'test_experiment_double_feature',
+                'control',
+                'double_single_variable_feature',
+                'test_experiment_double_feature',
+                FeatureDecision::DECISION_SOURCE_FEATURE_TEST,
+                true,
+                'test_user',
+                ['device_type' => 'iPhone']
+            );
+
+        $optimizelyMock->notificationCenter = $this->notificationCenterMock;
+        
+        $optimizelyDecision = $optimizelyMock->decide($userContext, 'double_single_variable_feature', []);
     }
 
     public function testDecideOptionExcludeVariables()

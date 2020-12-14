@@ -401,6 +401,8 @@ class Optimizely
             }
         }
 
+        $shouldIncludeReasons = in_array(OptimizelyDecideOption::INCLUDE_REASONS, $decideOptions);
+
         // send notification
         $this->notificationCenter->sendNotifications(
             NotificationType::DECISION,
@@ -414,13 +416,11 @@ class Optimizely
                     'variables' => $allVariables,
                     'variation' => $variationKey,
                     'ruleKey' => $ruleKey,
-                    'reasons' => $decideReasons,
+                    'reasons' => $shouldIncludeReasons ? $decideReasons:[],
                     'decisionEventDispatched' => $decisionEventDispatched
                 )
             )
         );
-
-        $shouldIncludeReasons = in_array(OptimizelyDecideOption::INCLUDE_REASONS, $decideOptions);
 
         return new OptimizelyDecision(
             $variationKey,
