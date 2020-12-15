@@ -350,9 +350,10 @@ class Optimizely
             $featureFlag,
             $userId,
             $userAttributes,
-            $decideOptions,
-            $decideReasons
+            $decideOptions
         );
+
+        $decideReasons = $decision->getReasons();
         $variation = $decision->getVariation();
 
         if ($variation) {

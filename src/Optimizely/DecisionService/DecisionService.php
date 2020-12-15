@@ -217,22 +217,23 @@ class DecisionService
         //2. Attempt to bucket user into rollout using the feature flag.
 
         // Check if the feature flag is under an experiment and the the user is bucketed into one of these experiments
-        $decision = $this->getVariationForFeatureExperiment($projectConfig, $featureFlag, $userId, $userAttributes, $decideOptions, $decideReasons);
-        if ($decision) {
+        $decision = $this->getVariationForFeatureExperiment($projectConfig, $featureFlag, $userId, $userAttributes, $decideOptions);
+        if ($decision->getVariation()) {
             return $decision;
         }
 
         // Check if the feature flag has rollout and the user is bucketed into one of it's rules
-        $decision = $this->getVariationForFeatureRollout($projectConfig, $featureFlag, $userId, $userAttributes, $decideReasons);
-        if ($decision) {
+        $decision = $this->getVariationForFeatureRollout($projectConfig, $featureFlag, $userId, $userAttributes);
+        if ($decision->getVariation()) {
             $message = "User '{$userId}' is bucketed into rollout for feature flag '{$featureFlag->getKey()}'.";
             $this->_logger->log(
                 Logger::INFO,
                 $message
             );
+            $decideReasons = $decision->getReasons();
             $decideReasons[] = $message;
 
-            return $decision;
+            return new FeatureDecision($decision->getExperiment(), $decision->getVariation(), FeatureDecision::DECISION_SOURCE_ROLLOUT, $decideReasons);
         }
 
         $message = "User '{$userId}' is not bucketed into rollout for feature flag '{$featureFlag->getKey()}'.";
@@ -242,7 +243,7 @@ class DecisionService
         );
         $decideReasons[] = $message;
 
-        return new FeatureDecision(null, null, FeatureDecision::DECISION_SOURCE_ROLLOUT);
+        return new FeatureDecision(null, null, FeatureDecision::DECISION_SOURCE_ROLLOUT, $decideReasons);
     }
 
     /**
@@ -270,7 +271,7 @@ class DecisionService
                 $message
             );
             $decideReasons[] = $message;
-            return null;
+            return new FeatureDecision(null, null, null, $decideReasons);
         }
 
         // Evaluate each experiment ID and return the first bucketed experiment variation
@@ -290,7 +291,7 @@ class DecisionService
                 );
                 $decideReasons[] = $message;
 
-                return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_FEATURE_TEST);
+                return new FeatureDecision($experiment, $variation, FeatureDecision::DECISION_SOURCE_FEATURE_TEST, $decideReasons);
             }
         }
 
@@ -301,7 +302,7 @@ class DecisionService
         );
         $decideReasons[] = $message;
 
-        return null;
+        return new FeatureDecision(null, null, null, $decideReasons);
     }
 
     /**
@@ -331,17 +332,17 @@ class DecisionService
                 $message
             );
             $decideReasons[] = $message;
-            return null;
+            return new FeatureDecision(null, null, null, $decideReasons);
         }
         $rollout = $projectConfig->getRolloutFromId($rollout_id);
         if ($rollout && !($rollout->getId())) {
             // Error logged and thrown in getRolloutFromId
-            return null;
+            return new FeatureDecision(null, null, null, $decideReasons);
         }
 
         $rolloutRules = $rollout->getExperiments();
         if (sizeof($rolloutRules) == 0) {
-            return null;
+            return new FeatureDecision(null, null, null, $decideReasons);
         }
 
         // Evaluate all rollout rules except for last one
@@ -363,7 +364,7 @@ class DecisionService
             // Evaluate if user satisfies the traffic allocation for this rollout rule
             $variation = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId, $decideReasons);
             if ($variation && $variation->getKey()) {
-                return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
+                return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT, $decideReasons);
             }
             break;
         }
@@ -378,14 +379,14 @@ class DecisionService
                 $message
             );
             $decideReasons[] = $message;
-            return null;
+            return new FeatureDecision(null, null, null, $decideReasons);
         }
 
         $variation = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId, $decideReasons);
         if ($variation && $variation->getKey()) {
             return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
         }
-        return null;
+        return new FeatureDecision(null, null, null, $decideReasons);
     }
 
 
