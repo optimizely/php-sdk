@@ -104,28 +104,30 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 1000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
-        $this->assertNull(
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('test_experiment'),
-                $this->testBucketingIdControl,
-                $this->testUserId
-            )
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('test_experiment'),
+            $this->testBucketingIdControl,
+            $this->testUserId
         );
+
+        $this->assertNull($actualVariation);
 
         // control
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 3000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('test_experiment'),
+            $this->testBucketingIdControl,
+            $this->testUserId
+        );
+
         $this->assertEquals(
             new Variation('7722370027', 'control'),
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('test_experiment'),
-                $this->testBucketingIdControl,
-                $this->testUserId
-            )
+            $actualVariation
         );
 
         // variation
@@ -133,14 +135,16 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 7000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('test_experiment'),
+            $this->testBucketingIdControl,
+            $this->testUserId
+        );
+
         $this->assertEquals(
             new Variation('7721010009', 'variation'),
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('test_experiment'),
-                $this->testBucketingIdControl,
-                $this->testUserId
-            )
+            $actualVariation
         );
 
         // No variation
@@ -148,14 +152,14 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 9000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
-        $this->assertNull(
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('test_experiment'),
-                $this->testBucketingIdControl,
-                $this->testUserId
-            )
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('test_experiment'),
+            $this->testBucketingIdControl,
+            $this->testUserId
         );
+
+        $this->assertNull($actualVariation);
     }
 
     public function testBucketValidExperimentInGroup()
@@ -178,6 +182,13 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 4000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('group_experiment_1'),
+            $this->testBucketingIdControl,
+            $this->testUserId
+        );
+
         $this->assertEquals(
             new Variation(
                 '7722260071',
@@ -190,12 +201,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
                 ]
                 ]
             ),
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('group_experiment_1'),
-                $this->testBucketingIdControl,
-                $this->testUserId
-            )
+            $actualVariation
         );
 
         // variation 2
@@ -210,6 +216,14 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 7000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
+
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('group_experiment_1'),
+            $this->testBucketingIdControl,
+            $this->testUserId
+        );
+
         $this->assertEquals(
             new Variation(
                 '7722360022',
@@ -222,12 +236,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
                 ]
                 ]
             ),
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('group_experiment_1'),
-                $this->testBucketingIdControl,
-                $this->testUserId
-            )
+            $actualVariation
         );
 
         // User not in experiment
@@ -239,14 +248,14 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is not in experiment group_experiment_1 of group 7722400015.');
 
-        $this->assertNull(
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('group_experiment_1'),
-                $this->testBucketingIdControl,
-                $this->testUserId
-            )
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('group_experiment_1'),
+            $this->testBucketingIdControl,
+            $this->testUserId
         );
+
+        $this->assertNull($actualVariation);
 
         // User not in any experiment (previously allocated space)
         $bucketer->setBucketValues([400]);
@@ -257,14 +266,14 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
 
-        $this->assertNull(
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('group_experiment_1'),
-                $this->testBucketingIdControl,
-                $this->testUserId
-            )
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('group_experiment_1'),
+            $this->testBucketingIdControl,
+            $this->testUserId
         );
+
+        $this->assertNull($actualVariation);
 
         // User not in any experiment (never allocated space)
         $bucketer->setBucketValues([9000]);
@@ -274,14 +283,15 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(1))
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
-        $this->assertNull(
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('group_experiment_1'),
-                $this->testBucketingIdControl,
-                $this->testUserId
-            )
+
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('group_experiment_1'),
+            $this->testBucketingIdControl,
+            $this->testUserId
         );
+
+        $this->assertNull($actualVariation);
     }
 
     public function testBucketInvalidExperiment()
@@ -290,9 +300,13 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->never())
             ->method('log');
 
-        $this->assertNull(
-            $bucketer->bucket($this->config, new Experiment(), $this->testBucketingIdControl, $this->testUserId)
-        );
+        $actualResponse = $bucketer->bucket($this->config, new Experiment(), $this->testBucketingIdControl, $this->testUserId);
+
+        $this->assertNull($actualResponse[0]);
+
+    //     $this->assertNull(
+    //         $bucketer->bucket($this->config, new Experiment(), $this->testBucketingIdControl, $this->testUserId)
+    //     );
     }
 
     public function testBucketWithBucketingId()
@@ -302,14 +316,17 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
 
         // make sure that the bucketing ID is used for the variation
         // bucketing and not the user ID
+        
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $experiment,
+            $this->testBucketingIdControl,
+            $this->testUserIdBucketsToVariation
+        );
+
         $this->assertEquals(
             new Variation('7722370027', 'control'),
-            $bucketer->bucket(
-                $this->config,
-                $experiment,
-                $this->testBucketingIdControl,
-                $this->testUserIdBucketsToVariation
-            )
+            $actualVariation
         );
     }
 
@@ -320,14 +337,14 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $bucketer = new TestBucketer($this->loggerMock);
         $bucketer->setBucketValues([1000, 3000, 7000, 9000]);
 
-        $this->assertNull(
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('invalid_experiment'),
-                $this->testBucketingIdVariation,
-                $this->testUserId
-            )
+        $actualResponse = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('invalid_experiment'),
+            $this->testBucketingIdVariation,
+            $this->testUserId
         );
+
+        $this->assertNull($actualResponse[0]);
     }
 
     // make sure that the bucketing ID is used to bucket the user into a group
@@ -336,25 +353,28 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     {
         $bucketer = new Bucketer($this->loggerMock);
 
-        $this->assertEquals(
-            new Variation(
-                '7725250007',
-                'group_exp_2_var_2',
-                true,
-                [
-                [
-                  "id" => "155563",
-                  "value" => "groupie_2_v1"
-                ]
-                ]
-            ),
-            $bucketer->bucket(
-                $this->config,
-                $this->config->getExperimentFromKey('group_experiment_2'),
-                $this->testBucketingIdGroupExp2Var2,
-                $this->testUserIdBucketsToNoGroup
-            )
+        $expectedVariation = new Variation(
+            '7725250007',
+            'group_exp_2_var_2',
+            true,
+            [
+            [
+              "id" => "155563",
+              "value" => "groupie_2_v1"
+            ]
+            ]
         );
+
+        $actualResponse = $bucketer->bucket(
+            $this->config,
+            $this->config->getExperimentFromKey('group_experiment_2'),
+            $this->testBucketingIdGroupExp2Var2,
+            $this->testUserIdBucketsToNoGroup
+        );
+
+        $actualVariation = $actualResponse[0];
+
+        $this->assertEquals($expectedVariation, $actualVariation);
     }
 
     public function testBucketWithRolloutRule()
@@ -383,23 +403,25 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
               ]
         );
 
-        $this->assertEquals(
-            $expectedVariation,
-            $bucketer->bucket(
-                $this->config,
-                $rollout_rule,
-                'bucketingId',
-                'userId'
-            )
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $rollout_rule,
+            'bucketingId',
+            'userId'
         );
 
-        $this->assertNull(
-            $bucketer->bucket(
-                $this->config,
-                $rollout_rule,
-                'bucketingId',
-                'userId'
-            )
+        $this->assertEquals(
+            $expectedVariation,
+            $actualVariation
         );
+
+        [$actualVariation, $reasons] = $bucketer->bucket(
+            $this->config,
+            $rollout_rule,
+            'bucketingId',
+            'userId'
+        );
+
+        $this->assertNull($actualVariation);
     }
 }

@@ -173,7 +173,8 @@ class DecisionService
             return null;
         }
 
-        $variation = $this->_bucketer->bucket($projectConfig, $experiment, $bucketingId, $userId, $decideReasons);
+        [$variation, $reasons] = $this->_bucketer->bucket($projectConfig, $experiment, $bucketingId, $userId);
+        $decideReasons = array_merge($decideReasons, $reasons);
         if ($variation === null) {
             $message = sprintf('User "%s" is in no variation.', $userId);
             $this->_logger->log(Logger::INFO, $message);
@@ -322,6 +323,7 @@ class DecisionService
      */
     public function getVariationForFeatureRollout(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes, &$decideReasons = [])
     {
+        $decideReasons = [];
         $bucketing_id = $this->getBucketingId($userId, $userAttributes, $decideReasons);
         $featureFlagKey = $featureFlag->getKey();
         $rollout_id = $featureFlag->getRolloutId();
@@ -362,7 +364,8 @@ class DecisionService
             }
 
             // Evaluate if user satisfies the traffic allocation for this rollout rule
-            $variation = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId, $decideReasons);
+            [$variation, $reasons] = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId);
+            $decideReasons = array_merge($decideReasons, $reasons);
             if ($variation && $variation->getKey()) {
                 return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT, $decideReasons);
             }
@@ -382,7 +385,8 @@ class DecisionService
             return new FeatureDecision(null, null, null, $decideReasons);
         }
 
-        $variation = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId, $decideReasons);
+        [$variation, $reasons] = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId);
+        $decideReasons = array_merge($decideReasons, $reasons);
         if ($variation && $variation->getKey()) {
             return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
         }

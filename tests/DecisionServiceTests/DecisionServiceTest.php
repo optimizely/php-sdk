@@ -114,7 +114,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expectedVariation = new Variation('7722370027', 'control');
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
-            ->willReturn($expectedVariation);
+            ->willReturn([$expectedVariation, []]);
 
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
 
@@ -264,7 +264,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expectedVariation = new Variation('7722370027', 'control');
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
-            ->willReturn($expectedVariation);
+            ->willReturn([$expectedVariation, []]);
 
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
 
@@ -290,7 +290,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expectedVariation = new Variation('7722370027', 'control');
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
-            ->willReturn($expectedVariation);
+            ->willReturn([$expectedVariation, []]);
 
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
 
@@ -321,7 +321,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expectedVariation = new Variation('7722370027', 'control');
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
-            ->willReturn($expectedVariation);
+            ->willReturn([$expectedVariation, []]);
 
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
 
@@ -398,7 +398,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
-            ->willReturn($expectedVariation);
+            ->willReturn([$expectedVariation, []]);
 
         $this->loggerMock->expects($this->any())
             ->method('log')
@@ -447,7 +447,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
-            ->willReturn($expectedVariation);
+            ->willReturn([$expectedVariation, []]);
 
         $this->loggerMock->expects($this->any())
             ->method('log')
@@ -500,7 +500,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
-            ->willReturn($expectedVariation);
+            ->willReturn([$expectedVariation, []]);
 
         $this->loggerMock->expects($this->any())
             ->method('log')
@@ -553,7 +553,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
-            ->willReturn($expectedVariation);
+            ->willReturn([$expectedVariation, []]);
 
         $this->loggerMock->expects($this->any())
             ->method('log')
@@ -1029,7 +1029,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->bucketerMock
             ->method('bucket')
-            ->willReturn($expected_variation);
+            ->willReturn([$expected_variation, []]);
 
         $this->assertEquals(
             $expected_decision,
@@ -1063,11 +1063,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         // Make bucket return null when called for first targeting rule
         $this->bucketerMock->expects($this->at(0))
             ->method('bucket')
-            ->willReturn(null);
+            ->willReturn([null, []]);
         // Make bucket return expected variation when called second time for everyone else
         $this->bucketerMock->expects($this->at(1))
             ->method('bucket')
-            ->willReturn($expected_variation);
+            ->willReturn([$expected_variation, []]);
 
         $this->assertEquals(
             $expected_decision,
@@ -1095,11 +1095,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         // Make bucket return null when called for first targeting rule
         $this->bucketerMock->expects($this->at(0))
             ->method('bucket')
-            ->willReturn(null);
+            ->willReturn([null, []]);
         // Make bucket return null when called second time for everyone else
         $this->bucketerMock->expects($this->at(1))
             ->method('bucket')
-            ->willReturn(null);
+            ->willReturn([null, []]);
 
         $actualFeatureDecision = $this->decisionService->getVariationForFeatureRollout(
             $this->config,
@@ -1143,7 +1143,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         // Expect bucket to be called exactly once for the everyone else/last rule.
         $this->bucketerMock->expects($this->exactly(1))
             ->method('bucket')
-            ->willReturn($expected_variation);
+            ->willReturn([$expected_variation, []]);
 
         $this->loggerMock->expects($this->any())
                         ->method('log')
@@ -1225,7 +1225,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         // Expect bucket to be called exactly once for the everyone else/last rule.
         $this->bucketerMock->expects($this->exactly(1))
             ->method('bucket')
-            ->willReturn($expected_variation);
+            ->willReturn([$expected_variation, []]);
 
         $this->loggerMock->expects($this->any())
                         ->method('log')
