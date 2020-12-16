@@ -86,6 +86,13 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->getMock();
     }
 
+    public function compareFeatureDecisionsExceptReasons(FeatureDecision $expectedObj, FeatureDecision $actualObj)
+    {
+        $this->assertEquals($expectedObj->getVariation(), $actualObj->getVariation());
+        $this->assertEquals($expectedObj->getExperiment(), $actualObj->getExperiment());
+        $this->assertEquals($expectedObj->getSource(), $actualObj->getSource());
+    }
+
     public function testGetVariationReturnsNullWhenExperimentIsNotRunning()
     {
         $this->bucketerMock->expects($this->never())
@@ -696,7 +703,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, "The feature flag 'empty_feature' is not used in any experiments.");
 
-        $this->assertNull($this->decisionService->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []));
+        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []);
+        $this->assertNull($actualDecision->getVariation());
     }
 
     // should return nil and log a message when the experiment is not in the datafile
@@ -718,7 +726,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "The user 'user1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
             );
 
-        $this->assertNull($this->decisionService->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []));
+        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []);
+        $this->assertNull($actualDecision->getVariation());
     }
 
     // should return nil and log when the user is not bucketed into the feature flag's experiments
@@ -739,7 +748,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "The user 'user1' is not bucketed into any of the experiments using the feature 'multi_variate_feature'."
             );
         $featureFlag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []));
+
+        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []);
+        $this->assertNull($actualDecision->getVariation());
     }
 
     //  should return the variation when the user is bucketed into a variation for the experiment on the feature flag
@@ -759,13 +770,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(
                 Logger::INFO,
-                "The user 'user1' is bucketed into experiment 'test_experiment_multivariate' of feature 'multi_variate_feature'."
+                "The user 'user_1' is bucketed into experiment 'test_experiment_multivariate' of feature 'multi_variate_feature'."
             );
 
-        $this->assertEquals(
-            $expected_decision,
-            $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', [])
-        );
+        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user_1', []);
+        $this->compareFeatureDecisionsExceptReasons($expected_decision, $actualDecision);
     }
 
     // should return the variation the user is bucketed into when the user is bucketed into one of the experiments
@@ -788,10 +797,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 Logger::INFO,
                 "The user 'user_1' is bucketed into experiment 'group_experiment_1' of feature 'mutex_group_feature'."
             );
-        $this->assertEquals(
-            $expected_decision,
-            $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user_1', [])
-        );
+
+        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user_1', []);
+        $this->compareFeatureDecisionsExceptReasons($expected_decision, $actualDecision);
     }
 
     // should return nil and log a message when the user is not bucketed into any of the mutex experiments
@@ -812,7 +820,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 Logger::INFO,
                 "The user 'user_1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
             );
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user_1', []));
+
+        $actualFeatureDecision = $this->decisionServiceMock->getVariationForFeatureExperiment(
+            $this->config,
+            $featureFlag,
+            'user_1',
+            []
+        );
+        $this->assertNull($actualFeatureDecision->getVariation());
     }
 
     // should return the bucketed experiment and variation
@@ -862,10 +877,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 
-
         $decisionServiceMock
             ->method('getVariationForFeatureExperiment')
-            ->will($this->returnValue(null));
+            ->will($this->returnValue(new FeatureDecision(null, null, null)));
 
         $decisionServiceMock
             ->method('getVariationForFeatureRollout')
@@ -878,10 +892,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "User 'user_1' is bucketed into rollout for feature flag 'string_single_variable_feature'."
             );
 
-        $this->assertEquals(
-            $expected_decision,
-            $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, 'user_1', [])
-        );
+        $actualFeatureDecision = $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, 'user_1', []);
+        $this->compareFeatureDecisionsExceptReasons($expected_decision, $actualFeatureDecision);
     }
 
     // should return null
@@ -896,11 +908,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $decisionServiceMock
             ->method('getVariationForFeatureExperiment')
-            ->will($this->returnValue(null));
+            ->will($this->returnValue(new FeatureDecision(null, null, null)));
 
         $decisionServiceMock
             ->method('getVariationForFeatureRollout')
-            ->will($this->returnValue(null));
+            ->will($this->returnValue(new FeatureDecision(null, null, null)));
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -915,10 +927,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             null,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
-        $this->assertEquals(
-            $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, 'user_1', []),
-            $expectedDecision
-        );
+
+        $actualFeatureDecision = $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, 'user_1', []);
+
+        $this->compareFeatureDecisionsExceptReasons($expectedDecision, $actualFeatureDecision);
     }
 
     // should return null
@@ -934,7 +946,13 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "Feature flag 'boolean_feature' is not used in a rollout."
             );
 
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', []));
+        $actualFeatureDecision = $this->decisionServiceMock->getVariationForFeatureRollout(
+            $this->config,
+            $featureFlag,
+            'user_1',
+            []
+        );
+        $this->assertNull($actualFeatureDecision->getVariation());
     }
 
     // should return null
@@ -952,7 +970,13 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 'Rollout with ID "invalid_rollout_id" is not in the datafile.'
             );
 
-        $this->assertNull($this->decisionServiceMock->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', []));
+        $actualFeatureDecision = $this->decisionServiceMock->getVariationForFeatureRollout(
+            $this->config,
+            $featureFlag,
+            'user_1',
+            []
+        );
+        $this->assertNull($actualFeatureDecision->getVariation());
     }
 
     // should return null
@@ -976,7 +1000,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('getRolloutFromId')
             ->will($this->returnValue($experiment_less_rollout));
 
-        $this->assertNull($this->decisionService->getVariationForFeatureRollout($configMock, $featureFlag, 'user_1', []));
+        $actualFeatureDecision = $this->decisionService->getVariationForFeatureRollout($configMock, $featureFlag, 'user_1', []);
+        $this->assertNull($actualFeatureDecision->getVariation());
     }
 
     // ============== when the user qualifies for targeting rule (audience match) ======================
@@ -1076,9 +1101,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket')
             ->willReturn(null);
 
-        $this->assertNull(
-            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
+        $actualFeatureDecision = $this->decisionService->getVariationForFeatureRollout(
+            $this->config,
+            $featureFlag,
+            'user_1',
+            $user_attributes
         );
+        
+        $this->assertNull($actualFeatureDecision->getVariation());
     }
 
     // ============== END of tests - when the user qualifies for targeting rule (audience match) ======================
@@ -1158,7 +1188,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->will($this->returnCallback($this->collectLogsForAssertion));
 
-        $this->assertNull($this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes));
+        $actualFeatureDecision = $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes);
+
+        $this->assertNull($actualFeatureDecision->getVariation());
 
         // Verify Logs
         $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 1."], $this->collectedLogs);
