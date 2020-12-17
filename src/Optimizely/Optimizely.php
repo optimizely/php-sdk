@@ -682,7 +682,7 @@ class Optimizely
             return null;
         }
 
-        $variation = $this->_decisionService->getVariation($config, $experiment, $userId, $attributes);
+        [ $variation, $reasons ] = $this->_decisionService->getVariation($config, $experiment, $userId, $attributes);
         $variationKey = ($variation === null) ? null : $variation->getKey();
 
         if ($config->isFeatureExperiment($experiment->getId())) {
@@ -762,7 +762,7 @@ class Optimizely
             return null;
         }
 
-        $forcedVariation = $this->_decisionService->getForcedVariation($config, $experimentKey, $userId);
+        [ $forcedVariation, $reasons ]  = $this->_decisionService->getForcedVariation($config, $experimentKey, $userId);
         if (isset($forcedVariation)) {
             return $forcedVariation->getKey();
         } else {
