@@ -104,7 +104,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $pausedExperiment, $this->testUserId);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $pausedExperiment, $this->testUserId);
 
         $this->assertNull($variation);
     }
@@ -122,7 +122,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, $this->testUserId, $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->testUserId, $this->testUserAttributes);
 
         $this->assertEquals(
             $expectedVariation,
@@ -214,7 +214,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1');
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1');
 
         $this->assertEquals(
             $expectedVariation,
@@ -251,7 +251,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1');
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1');
 
         $this->assertEquals(
             $expectedVariation,
@@ -277,7 +277,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1', $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1', $this->testUserAttributes);
 
         $this->assertEquals(
             $expectedVariation,
@@ -308,7 +308,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1', $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1', $this->testUserAttributes);
 
         $this->assertEquals(
             $expectedVariation,
@@ -329,7 +329,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, 'not_whitelisted_user', $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, 'not_whitelisted_user', $this->testUserAttributes);
 
         $this->assertEquals(
             $expectedVariation,
@@ -348,7 +348,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, $this->testUserId); // no matching attributes
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->testUserId); // no matching attributes
 
         $this->assertNull($variation);
     }
@@ -386,7 +386,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, $userId);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $userId);
         $this->assertEquals($expectedVariation, $variation);
     }
 
@@ -430,7 +430,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -483,7 +483,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -536,7 +536,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -580,7 +580,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        [ $variation, $reasons ] = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs

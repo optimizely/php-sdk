@@ -110,7 +110,7 @@ class Bucketer
      * @param $parentId mixed ID representing Experiment or Group.
      * @param $trafficAllocations array Traffic allocations for variation or experiment.
      *
-     * @return string ID representing experiment or variation.
+     * @return [ string, array ]  ID representing experiment or variation and array of log messages representing decision making.
      */
     private function findBucket($bucketingId, $userId, $parentId, $trafficAllocations)
     {
@@ -140,7 +140,7 @@ class Bucketer
      * @param $bucketingId string A customer-assigned value used to create the key for the murmur hash.
      * @param $userId string User identifier.
      *
-     * @return Variation Variation which will be shown to the user.
+     * @return [ Variation, array ]  Variation which will be shown to the user and array of log messages representing decision making.
      */
     public function bucket(ProjectConfigInterface $config, Experiment $experiment, $bucketingId, $userId)
     {
@@ -159,7 +159,7 @@ class Bucketer
                 return [ null, $decideReasons ];
             }
 
-            [$userExperimentId, $reasons] = $this->findBucket($bucketingId, $userId, $group->getId(), $group->getTrafficAllocation());
+            list($userExperimentId, $reasons) = $this->findBucket($bucketingId, $userId, $group->getId(), $group->getTrafficAllocation());
             $decideReasons = array_merge($decideReasons, $reasons);
 
             if (empty($userExperimentId)) {
@@ -194,7 +194,7 @@ class Bucketer
         }
 
         // Bucket user if not in whitelist and in group (if any).
-        [$variationId, $reasons] = $this->findBucket($bucketingId, $userId, $experiment->getId(), $experiment->getTrafficAllocation());
+        list($variationId, $reasons) = $this->findBucket($bucketingId, $userId, $experiment->getId(), $experiment->getTrafficAllocation());
         $decideReasons = array_merge($decideReasons, $reasons);
         if (!empty($variationId)) {
             $variation = $config->getVariationFromId($experiment->getKey(), $variationId);

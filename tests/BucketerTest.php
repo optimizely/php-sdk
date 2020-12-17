@@ -104,7 +104,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 1000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $this->config->getExperimentFromKey('test_experiment'),
             $this->testBucketingIdControl,
@@ -118,7 +118,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 3000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $this->config->getExperimentFromKey('test_experiment'),
             $this->testBucketingIdControl,
@@ -135,7 +135,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 7000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $this->config->getExperimentFromKey('test_experiment'),
             $this->testBucketingIdControl,
@@ -152,7 +152,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 9000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $this->config->getExperimentFromKey('test_experiment'),
             $this->testBucketingIdControl,
@@ -182,7 +182,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 4000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $this->config->getExperimentFromKey('group_experiment_1'),
             $this->testBucketingIdControl,
@@ -217,7 +217,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->with(Logger::DEBUG, sprintf('Assigned bucket 7000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
 
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $this->config->getExperimentFromKey('group_experiment_1'),
             $this->testBucketingIdControl,
@@ -248,7 +248,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is not in experiment group_experiment_1 of group 7722400015.');
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $this->config->getExperimentFromKey('group_experiment_1'),
             $this->testBucketingIdControl,
@@ -266,7 +266,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $this->config->getExperimentFromKey('group_experiment_1'),
             $this->testBucketingIdControl,
@@ -284,7 +284,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $this->config->getExperimentFromKey('group_experiment_1'),
             $this->testBucketingIdControl,
@@ -317,7 +317,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         // make sure that the bucketing ID is used for the variation
         // bucketing and not the user ID
         
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $experiment,
             $this->testBucketingIdControl,
@@ -403,7 +403,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
               ]
         );
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $rollout_rule,
             'bucketingId',
@@ -415,7 +415,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $actualVariation
         );
 
-        [$actualVariation, $reasons] = $bucketer->bucket(
+        list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
             $rollout_rule,
             'bucketingId',

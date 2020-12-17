@@ -137,14 +137,14 @@ class DecisionService
         }
 
         // check if a forced variation is set
-        [ $forcedVariation, $reasons ] = $this->getForcedVariation($projectConfig, $experiment->getKey(), $userId);
+        list($forcedVariation, $reasons) = $this->getForcedVariation($projectConfig, $experiment->getKey(), $userId);
         $decideReasons = array_merge($decideReasons, $reasons);
         if (!is_null($forcedVariation)) {
             return [ $forcedVariation, $decideReasons];
         }
 
         // check if the user has been whitelisted
-        [ $variation, $reasons ] = $this->getWhitelistedVariation($projectConfig, $experiment, $userId);
+        list($variation, $reasons) = $this->getWhitelistedVariation($projectConfig, $experiment, $userId);
         $decideReasons = array_merge($decideReasons, $reasons);
         if (!is_null($variation)) {
             return [ $variation, $decideReasons ];
@@ -154,11 +154,11 @@ class DecisionService
         if (!in_array(OptimizelyDecideOption::IGNORE_USER_PROFILE_SERVICE, $decideOptions)) {
             $userProfile = new UserProfile($userId);
             if (!is_null($this->_userProfileService)) {
-                [ $storedUserProfile, $reasons ] = $this->getStoredUserProfile($userId);
+                list($storedUserProfile, $reasons) = $this->getStoredUserProfile($userId);
                 $decideReasons = array_merge($decideReasons, $reasons);
                 if (!is_null($storedUserProfile)) {
                     $userProfile = $storedUserProfile;
-                    [ $variation, $reasons ] = $this->getStoredVariation($projectConfig, $experiment, $userProfile);
+                    list($variation, $reasons) = $this->getStoredVariation($projectConfig, $experiment, $userProfile);
                     $decideReasons = array_merge($decideReasons, $reasons);
                     if (!is_null($variation)) {
                         return [ $variation, $decideReasons ];
@@ -177,7 +177,7 @@ class DecisionService
             return [ null, $decideReasons];
         }
 
-        [$variation, $reasons] = $this->_bucketer->bucket($projectConfig, $experiment, $bucketingId, $userId);
+        list($variation, $reasons) = $this->_bucketer->bucket($projectConfig, $experiment, $bucketingId, $userId);
         $decideReasons = array_merge($decideReasons, $reasons);
         if ($variation === null) {
             $message = sprintf('User "%s" is in no variation.', $userId);
@@ -291,7 +291,7 @@ class DecisionService
                 continue;
             }
 
-            [$variation, $reasons] = $this->getVariation($projectConfig, $experiment, $userId, $userAttributes, $decideOptions);
+            list($variation, $reasons) = $this->getVariation($projectConfig, $experiment, $userId, $userAttributes, $decideOptions);
             $decideReasons = array_merge($decideReasons, $reasons);
             if ($variation && $variation->getKey()) {
                 $message = "The user '{$userId}' is bucketed into experiment '{$experiment->getKey()}' of feature '{$featureFlagKey}'.";
@@ -372,7 +372,7 @@ class DecisionService
             }
 
             // Evaluate if user satisfies the traffic allocation for this rollout rule
-            [$variation, $reasons] = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId);
+            list($variation, $reasons) = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId);
             $decideReasons = array_merge($decideReasons, $reasons);
             if ($variation && $variation->getKey()) {
                 return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT, $decideReasons);
@@ -393,7 +393,7 @@ class DecisionService
             return new FeatureDecision(null, null, null, $decideReasons);
         }
 
-        [$variation, $reasons] = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId);
+        list($variation, $reasons) = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId);
         $decideReasons = array_merge($decideReasons, $reasons);
         if ($variation && $variation->getKey()) {
             return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
