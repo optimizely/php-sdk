@@ -143,8 +143,13 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::WARNING, 'Bucketing ID attribute is not a string. Defaulted to user ID.');
+        
+        $expectedReasons = ['Bucketing ID attribute is not a string. Defaulted to user ID.'];
 
-        $this->assertSame($this->testUserId, $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
+        $this->assertEquals(
+            [$this->testUserId, $expectedReasons],
+            $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId)
+        );
     }
 
     public function testGetBucketingIdWhenBucketingIdIsNull()
@@ -160,7 +165,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->never())
             ->method('log');
 
-        $this->assertSame($this->testUserId, $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
+        $this->assertEquals([$this->testUserId, []], $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
     }
 
     public function testGetBucketingIdWhenBucketingIdIsString()
@@ -176,7 +181,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->never())
             ->method('log');
 
-        $this->assertSame('i_am_bucketing_id', $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
+        $this->assertEquals(['i_am_bucketing_id', []], $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
     }
 
     public function testGetBucketingIdWhenBucketingIdIsEmptyString()
@@ -192,7 +197,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->never())
             ->method('log');
 
-        $this->assertSame('', $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
+        $this->assertEquals(['', []], $decisionService->getBucketingId($this->testUserId, $userAttributesWithBucketingId));
     }
 
     public function testGetVariationReturnsWhitelistedVariation()

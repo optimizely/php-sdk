@@ -94,7 +94,8 @@ class DecisionService
      * @param string $userId         user ID
      * @param array  $userAttributes user attributes
      *
-     * @return String representing bucketing ID if it is a String type in attributes else return user ID.
+     * @return [ String, array ] bucketing ID if it is a String type in attributes else return user ID and
+     *                           array of log messages representing decision making.
      */
     protected function getBucketingId($userId, $userAttributes)
     {
@@ -103,14 +104,14 @@ class DecisionService
 
         if (isset($userAttributes[$bucketingIdKey])) {
             if (is_string($userAttributes[$bucketingIdKey])) {
-                return $userAttributes[$bucketingIdKey];
+                return [ $userAttributes[$bucketingIdKey], $decideReasons ];
             }
 
             $message = 'Bucketing ID attribute is not a string. Defaulted to user ID.';
             $this->_logger->log(Logger::WARNING, $message);
             $decideReasons[] = $message;
         }
-        return $userId;
+        return [ $userId, $decideReasons ];
     }
 
     /**
@@ -122,12 +123,14 @@ class DecisionService
      * @param $attributes       array           Attributes of the user.
      * @param $decideOptions    array           Options to customize evaluation.
      *
-     * @return Variation   Variation  which the user is bucketed into.
+     * @return [ Variation, array ]   Variation  which the user is bucketed into and array of log messages representing decision making.
      */
     public function getVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, $userId, $attributes = null, $decideOptions = [])
     {
         $decideReasons = [];
-        $bucketingId = $this->getBucketingId($userId, $attributes, $decideReasons);
+        list($bucketingId, $reasons) = $this->getBucketingId($userId, $attributes);
+
+        $decideReasons = array_merge($decideReasons, $reasons);
 
         if (!$experiment->isExperimentRunning()) {
             $message = sprintf('Experiment "%s" is not running.', $experiment->getKey());
@@ -211,12 +214,13 @@ class DecisionService
      * @param  string        $userId         user ID
      * @param  array         $userAttributes user attributes
      * @param  array         $decideOptions   Options to customize evaluation.
-     * @return Decision  if getVariationForFeatureExperiment or getVariationForFeatureRollout returns a Decision
-     *         null      otherwise
+     *
+     * @return FeatureDecision  representing decision.
      */
     public function getVariationForFeature(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes, $decideOptions = [])
     {
         $decideReasons = [];
+
         //Evaluate in this order:
         //1. Attempt to bucket user into experiment using feature flag.
         //2. Attempt to bucket user into rollout using the feature flag.
@@ -263,8 +267,8 @@ class DecisionService
      * @param  string        $userId         user id
      * @param  array         $userAttributes user userAttributes
      * @param  array         $decideOptions   Options to customize evaluation.
-     * @return Decision  if a variation is returned for the user
-     *         null  if feature flag is not used in any experiments or no variation is returned for the user
+     *
+     * @return FeatureDecision  representing decision.
      */
     public function getVariationForFeatureExperiment(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes, $decideOptions = [])
     {
@@ -324,15 +328,12 @@ class DecisionService
      * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
      * @param  string        $userId         user id
      * @param  array         $userAttributes user userAttributes
-     * @return Decision  if a variation is returned for the user
-     *         null  if feature flag is not used in a rollout or
-     *               no rollout found against the rollout ID or
-     *               no variation is returned for the user
+     * @return FeatureDecision  representing decision.
      */
     public function getVariationForFeatureRollout(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
     {
         $decideReasons = [];
-        $bucketing_id = $this->getBucketingId($userId, $userAttributes);
+        list($bucketing_id, $reasons) = $this->getBucketingId($userId, $userAttributes);
         $featureFlagKey = $featureFlag->getKey();
         $rollout_id = $featureFlag->getRolloutId();
         if (empty($rollout_id)) {
@@ -409,7 +410,8 @@ class DecisionService
      * @param $experimentKey string         Key for experiment.
      * @param $userId        string         The user Id.
      *
-     * @return Variation The variation which the given user and experiment should be forced into.
+     * @return [ Variation, array ] The variation which the given user and experiment should be forced into and
+     *                              array of log messages representing decision making.
      */
     public function getForcedVariation(ProjectConfigInterface $projectConfig, $experimentKey, $userId)
     {
@@ -499,9 +501,9 @@ class DecisionService
      * @param $projectConfig ProjectConfigInterface  ProjectConfigInterface instance.
      * @param $experiment    Experiment     Experiment in which user is to be bucketed.
      * @param $userId        string         string
-     * @param $decideReasons array          Evaluation Logs.
      *
-     * @return null|Variation Representing the variation the user is forced into.
+     * @return [ Variation, array ] Representing the variation the user is forced into and
+     *                              array of log messages representing decision making.
      */
     private function getWhitelistedVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, $userId)
     {
@@ -529,7 +531,7 @@ class DecisionService
      *
      * @param $userId        string  ID of the user.
      *
-     * @return null|UserProfile the stored user profile.
+     * @return [UserProfile, array] the stored user profile and array of log messages representing decision making.
      */
     private function getStoredUserProfile($userId)
     {
@@ -571,7 +573,7 @@ class DecisionService
      * @param $experiment    Experiment     The experiment for which we are getting the stored variation.
      * @param $userProfile   UserProfile    The user profile from which we are getting the stored variation.
      *
-     * @return null|Variation the stored variation or null if not found.
+     * @return [ Variation, array ] the stored variation or null if not found, and array of log messages representing decision making.
      */
     private function getStoredVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, UserProfile $userProfile)
     {
