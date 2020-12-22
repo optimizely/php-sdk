@@ -611,23 +611,23 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $optlyObject->activate($experimentKey, $userId, $userAttributes);
 
         // confirm normal bucketing occurs before setting the forced variation
-        $forcedVariationKey  = $optlyObject->getVariation($experimentKey, $userId, $userAttributes);
+        $forcedVariationKey = $optlyObject->getVariation($experimentKey, $userId, $userAttributes);
         $this->assertEquals($bucketedVariationKey, $forcedVariationKey);
 
-        // // test valid experiment
-        // $this->assertTrue($optlyObject->setForcedVariation($experimentKey, $userId, $forcedVariationKey), sprintf('Set variation to "%s" failed.', $forcedVariationKey));
-        // $forcedVariationKey = $optlyObject->getVariation($experimentKey, $userId, $userAttributes);
-        // $this->assertEquals($forcedVariationKey, $forcedVariationKey);
+        // test valid experiment
+        $this->assertTrue($optlyObject->setForcedVariation($experimentKey, $userId, $forcedVariationKey), sprintf('Set variation to "%s" failed.', $forcedVariationKey));
+        $forcedVariationKey = $optlyObject->getVariation($experimentKey, $userId, $userAttributes);
+        $this->assertEquals($forcedVariationKey, $forcedVariationKey);
 
-        // // clear forced variation and confirm that normal bucketing occurs
-        // $this->assertTrue($optlyObject->setForcedVariation($experimentKey, $userId, null), sprintf('Set variation to "%s" failed.', $forcedVariationKey));
-        // $forcedVariationKey = $optlyObject->getVariation($experimentKey, $userId, $userAttributes);
-        // $this->assertEquals($bucketedVariationKey, $forcedVariationKey);
+        // clear forced variation and confirm that normal bucketing occurs
+        $this->assertTrue($optlyObject->setForcedVariation($experimentKey, $userId, null), sprintf('Set variation to "%s" failed.', $forcedVariationKey));
+        $forcedVariationKey = $optlyObject->getVariation($experimentKey, $userId, $userAttributes);
+        $this->assertEquals($bucketedVariationKey, $forcedVariationKey);
 
-        // // check that a paused experiment returns null
-        // $this->assertTrue($optlyObject->setForcedVariation($pausedExperimentKey, $userId, 'variation'), sprintf('Set variation to "%s" failed.', $forcedVariationKey));
-        // $forcedVariationKey = $optlyObject->getVariation($pausedExperimentKey, $userId, $userAttributes);
-        // $this->assertNull($forcedVariationKey);
+        // check that a paused experiment returns null
+        $this->assertTrue($optlyObject->setForcedVariation($pausedExperimentKey, $userId, 'variation'), sprintf('Set variation to "%s" failed.', $forcedVariationKey));
+        $forcedVariationKey = $optlyObject->getVariation($pausedExperimentKey, $userId, $userAttributes);
+        $this->assertNull($forcedVariationKey);
     }
 
     public function testGetVariationWithBucketingId()

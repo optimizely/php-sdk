@@ -138,10 +138,13 @@ class Validator
      * @param $loggingClass String Class holding log strings with placeholders.
      * @param $loggingKey String Identifier of an experiment/rollout rule.
      *
-     * @return boolean Representing whether user meets audience conditions to be in experiment or not.
+     * @return [boolean, array]  Returns a boolean representing whether user meets audience conditions to be in experiment or not.
+     *                           And an array of log messages representing decision making.
      */
     public static function doesUserMeetAudienceConditions($config, $experiment, $userAttributes, $logger, $loggingClass = null, $loggingKey = null)
     {
+        $decideReasons = [];
+
         if ($loggingClass === null) {
             $loggingClass = 'Optimizely\Enums\ExperimentAudienceEvaluationLogs';
         }
@@ -163,12 +166,14 @@ class Validator
 
         // Return true if experiment is not targeted to any audience.
         if (empty($audienceConditions)) {
-            $logger->log(Logger::INFO, sprintf(
+            $message = sprintf(
                 $loggingClass::AUDIENCE_EVALUATION_RESULT_COMBINED,
                 $loggingKey,
                 'TRUE'
-            ));
-            return true;
+            );
+            $logger->log(Logger::INFO, $message);
+            $decideReasons [] = $message;
+            return [ true, $decideReasons ];
         }
 
         if ($userAttributes === null) {
@@ -209,13 +214,16 @@ class Validator
         $evalResult = $conditionTreeEvaluator->evaluate($audienceConditions, $evaluateAudience);
         $evalResult = $evalResult || false;
 
-        $logger->log(Logger::INFO, sprintf(
+        $message = sprintf(
             $loggingClass::AUDIENCE_EVALUATION_RESULT_COMBINED,
             $loggingKey,
             strtoupper(var_export($evalResult, true))
-        ));
+        );
 
-        return $evalResult;
+        $logger->log(Logger::INFO, $message);
+        $decideReasons[] = $message;
+
+        return [ $evalResult, $decideReasons];
     }
 
     /**

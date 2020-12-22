@@ -52,11 +52,15 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, "Evaluating audiences for experiment \"test_experiment\": [].");
 
+        $evalCombinedAudienceMessage = "Audiences for experiment \"test_experiment\" collectively evaluated to TRUE.";
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::INFO, "Audiences for experiment \"test_experiment\" collectively evaluated to TRUE.");
+            ->with(Logger::INFO, $evalCombinedAudienceMessage);
 
-        $this->assertTrue(Validator::doesUserMeetAudienceConditions($this->config, $experiment, [], $this->loggerMock));
+        list($evalResult, $reasons) = Validator::doesUserMeetAudienceConditions($this->config, $experiment, [], $this->loggerMock);
+        $this->assertTrue($evalResult);
+        $this->assertContains($evalCombinedAudienceMessage, $reasons);
+        $this->assertCount(1, $reasons);
     }
 
     public function testdoesUserMeetAudienceConditionsEvaluatesAudienceIds()
@@ -94,7 +98,7 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
                         ->method('log')
                         ->will($this->returnCallback($this->collectLogsForAssertion));
 
-        Validator::doesUserMeetAudienceConditions($this->typedConfig, $experiment, ["house" => "I am in Slytherin"], $this->loggerMock);
+        list($result, $reasons) = Validator::doesUserMeetAudienceConditions($this->typedConfig, $experiment, ["house" => "I am in Slytherin"], $this->loggerMock);
 
         $this->assertContains(
             [Logger::DEBUG, "Evaluating audiences for experiment \"audience_combinations_experiment\": [\"or\",[\"or\",\"3468206642\",\"3988293898\"]]."],
@@ -116,6 +120,11 @@ class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
             [Logger::DEBUG, "Audience \"3988293898\" evaluated to TRUE."],
             $this->collectedLogs
         );
-        $this->assertContains([Logger::INFO, "Audiences for experiment \"audience_combinations_experiment\" collectively evaluated to TRUE."], $this->collectedLogs);
+
+        $evalCombinedAudienceMessage = "Audiences for experiment \"audience_combinations_experiment\" collectively evaluated to TRUE.";
+
+        $this->assertContains([Logger::INFO, $evalCombinedAudienceMessage], $this->collectedLogs);
+        $this->assertContains($evalCombinedAudienceMessage, $reasons);
+        $this->assertCount(1, $reasons);
     }
 }

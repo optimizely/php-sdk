@@ -218,7 +218,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 null,
                 $this->loggerMock
-            )
+            )[0]
         );
 
         $this->assertTrue(
@@ -227,21 +227,21 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 [],
                 $this->loggerMock
-            )
+            )[0]
         );
     }
 
     public function testDoesUserMeetAudienceConditionsAudienceMatch()
     {
         $config = new DatafileProjectConfig(DATAFILE, new NoOpLogger(), new NoOpErrorHandler());
-        $this->assertTrue(
-            Validator::doesUserMeetAudienceConditions(
-                $config,
-                $config->getExperimentFromKey('test_experiment'),
-                ['device_type' => 'iPhone', 'location' => 'San Francisco'],
-                $this->loggerMock
-            )
+        $result = Validator::doesUserMeetAudienceConditions(
+            $config,
+            $config->getExperimentFromKey('test_experiment'),
+            ['device_type' => 'iPhone', 'location' => 'San Francisco'],
+            $this->loggerMock
         );
+
+        $this->assertTrue($result[0]);
     }
 
     public function testDoesUserMeetAudienceConditionsAudienceNoMatch()
@@ -253,7 +253,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $config->getExperimentFromKey('test_experiment'),
                 ['device_type' => 'Android', 'location' => 'San Francisco'],
                 $this->loggerMock
-            )
+            )[0]
         );
     }
 
@@ -272,7 +272,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 [],
                 $this->loggerMock
-            )
+            )[0]
         );
 
         // Audience Ids exist but audience conditions is empty.
@@ -284,7 +284,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 [],
                 $this->loggerMock
-            )
+            )[0]
         );
 
         // Audience Ids is empty and audience conditions is null.
@@ -296,7 +296,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 [],
                 $this->loggerMock
-            )
+            )[0]
         );
     }
 
@@ -317,7 +317,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 ['device_type' => 'Android', 'location' => 'San Francisco'],
                 $this->loggerMock
-            )
+            )[0]
         );
 
         // Audience Ids exist and audience conditions is null.
@@ -331,7 +331,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 ['device_type' => 'iPhone', 'location' => 'San Francisco'],
                 $this->loggerMock
-            )
+            )[0]
         );
     }
 
@@ -351,7 +351,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 ['device_type' => 'iPhone', 'location' => 'San Francisco'],
                 $this->loggerMock
-            )
+            )[0]
         );
     }
 
@@ -371,7 +371,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 ['device_type' => 'iPhone', 'location' => 'San Francisco'],
                 $this->loggerMock
-            )
+            )[0]
         );
     }
 
@@ -404,7 +404,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 ['device_type' => 'iPhone', 'location' => 'San Francisco'],
                 $this->loggerMock
-            )
+            )[0]
         );
     }
 
@@ -461,7 +461,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $experiment,
                 ['should_do_it' => true, 'house' => 'foo'],
                 $this->loggerMock
-            )
+            )[0]
         );
     }
 
