@@ -245,12 +245,16 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $callIndex = 0;
         $this->bucketerMock->expects($this->never())
             ->method('bucket');
+        
+        $forcedVarMessage = 'User "user1" is not in the forced variation map.';
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, 'User "user1" is not in the forced variation map.');
+            ->with(Logger::DEBUG, $forcedVarMessage);
+        
+        $whitelistedVarMessage = 'User "user1" is forced in variation "group_exp_1_var_1" of experiment "group_experiment_1".';
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::INFO, 'User "user1" is forced in variation "group_exp_1_var_1" of experiment "group_experiment_1".');
+            ->with(Logger::INFO, $whitelistedVarMessage);
 
         $bucketer = new \ReflectionProperty(DecisionService::class, '_bucketer');
         $bucketer->setAccessible(true);
@@ -262,6 +266,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             $expectedVariation,
             $variation
         );
+
+        $this->assertNotContains($forcedVarMessage, $reasons);
+        $this->assertContains($whitelistedVarMessage, $reasons);
+        $this->assertCount(1, $reasons);
     }
 
     public function testGetVariationBucketsWhenForcedVariationsIsEmpty()
@@ -493,8 +501,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         // Verify Logs
         $this->assertContains([Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId)], $this->collectedLogs);
-        $this->assertContains([Logger::INFO, 'User "testUserId" was previously bucketed into variation with ID "invalid" for experiment "test_experiment", but no matching variation was found for that user. We will re-bucket the user.'], $this->collectedLogs);
+
+        $userProfileMsg = 'User "testUserId" was previously bucketed into variation with ID "invalid" for experiment "test_experiment", but no matching variation was found for that user. We will re-bucket the user.';
+        $this->assertContains([Logger::INFO, $userProfileMsg], $this->collectedLogs);
         $this->assertContains([Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".'], $this->collectedLogs);
+
+        $this->assertContains($userProfileMsg, $reasons);
     }
 
     public function testGetVariationBucketsIfUserProfileServiceLookupThrows()
@@ -546,8 +558,12 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         // Verify Logs
         $this->assertContains([Logger::DEBUG, sprintf('User "%s" is not in the forced variation map.', $userId)], $this->collectedLogs);
-        $this->assertContains([Logger::ERROR, 'The User Profile Service lookup method failed: I am error.'], $this->collectedLogs);
+        
+        $lookupFailedMsg = 'The User Profile Service lookup method failed: I am error.';
+        $this->assertContains([Logger::ERROR, $lookupFailedMsg], $this->collectedLogs);
         $this->assertContains([Logger::INFO, 'Saved variation "control" of experiment "test_experiment" for user "testUserId".'], $this->collectedLogs);
+    
+        $this->assertContains($lookupFailedMsg, $reasons);
     }
 
     public function testGetVariationBucketsIfUserProfileServiceSaveThrows()
@@ -1375,9 +1391,11 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('No experiment "%s" mapped to user "%s" in the forced variation map.', $pausedExperimentKey, $userId));
+        
+        $varMappedMsg = sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId);
         $this->loggerMock->expects($this->at($callIndex++))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Variation "%s" is mapped to experiment "%s" and user "%s" in the forced variation map', $variationKey, $experimentKey, $userId));
+            ->with(Logger::DEBUG, $varMappedMsg);
 
         $this->config = new DatafileProjectConfig(DATAFILE, $this->loggerMock, new NoOpErrorHandler());
 
@@ -1385,6 +1403,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->decisionService->getForcedVariation($this->config, $experimentKey, $invalidUserId);
         $this->decisionService->getForcedVariation($this->config, $invalidExperimentKey, $userId);
         $this->decisionService->getForcedVariation($this->config, $pausedExperimentKey, $userId);
-        $this->decisionService->getForcedVariation($this->config, $experimentKey, $userId);
+        list($var, $reasons) = $this->decisionService->getForcedVariation($this->config, $experimentKey, $userId);
+
+        $this->assertContains($varMappedMsg, $reasons);
     }
 }

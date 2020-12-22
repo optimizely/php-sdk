@@ -1712,6 +1712,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedReasons, $optimizelyDecision->getReasons());
     }
 
+    public function testDecideLogsWhenAudienceEvalFails()
+    {
+        $optimizely = new Optimizely($this->datafile);
+        $userContext = $optimizely->createUserContext('test_user');
+        
+        $optimizelyMock = $this->getMockBuilder(Optimizely::class)
+            ->setConstructorArgs(array($this->datafile, null, $this->loggerMock))
+            ->setMethods(array('sendImpressionEvent'))
+            ->getMock();
+
+        $expectedReasons = [
+            'User "test_user" does not meet conditions to be in experiment "test_experiment_multivariate".',
+            "The user 'test_user' is not bucketed into any of the experiments using the feature 'multi_variate_feature'.",
+            "Feature flag 'multi_variate_feature' is not used in a rollout.",
+            "User 'test_user' is not bucketed into rollout for feature flag 'multi_variate_feature'."
+        ];
+        
+        $optimizelyDecision = $optimizelyMock->decide($userContext, 'multi_variate_feature', ['INCLUDE_REASONS']);
+        $this->assertEquals($expectedReasons, $optimizelyDecision->getReasons());
+    }
+
     public function testDecideOptionIncludeReasonsWhenPassedInDefaultOptions()
     {
         $optimizely = new Optimizely($this->datafile);
