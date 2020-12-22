@@ -175,9 +175,11 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 1000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
+        
+        $inExpMessage = 'User "testUserId" is in experiment group_experiment_1 of group 7722400015.';
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::INFO, 'User "testUserId" is in experiment group_experiment_1 of group 7722400015.');
+            ->with(Logger::INFO, $inExpMessage);
         $this->loggerMock->expects($this->at(2))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 4000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
@@ -188,6 +190,8 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $this->testBucketingIdControl,
             $this->testUserId
         );
+
+        $this->assertContains($inExpMessage, $reasons);
 
         $this->assertEquals(
             new Variation(
@@ -244,9 +248,11 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
         $this->loggerMock->expects($this->at(0))
             ->method('log')
             ->with(Logger::DEBUG, sprintf('Assigned bucket 5000 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
+        
+        $noExpGroupMessage = 'User "testUserId" is not in experiment group_experiment_1 of group 7722400015.';
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::INFO, 'User "testUserId" is not in experiment group_experiment_1 of group 7722400015.');
+            ->with(Logger::INFO, $noExpGroupMessage);
 
         list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
@@ -254,17 +260,22 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $this->testBucketingIdControl,
             $this->testUserId
         );
+
+        $this->assertContains($noExpGroupMessage, $reasons);
 
         $this->assertNull($actualVariation);
 
         // User not in any experiment (previously allocated space)
         $bucketer->setBucketValues([400]);
+        $bucketingMessage  = sprintf('Assigned bucket 400 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl);
         $this->loggerMock->expects($this->at(0))
             ->method('log')
-            ->with(Logger::DEBUG, sprintf('Assigned bucket 400 to user "%s" with bucketing ID "%s".', $this->testUserId, $this->testBucketingIdControl));
+            ->with(Logger::DEBUG, $bucketingMessage);
+
+        $noExpMessage = 'User "testUserId" is in no experiment.';
         $this->loggerMock->expects($this->at(1))
             ->method('log')
-            ->with(Logger::INFO, 'User "testUserId" is in no experiment.');
+            ->with(Logger::INFO, $noExpMessage);
 
         list($actualVariation, $reasons) = $bucketer->bucket(
             $this->config,
@@ -272,6 +283,10 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
             $this->testBucketingIdControl,
             $this->testUserId
         );
+
+        $this->assertContains($bucketingMessage, $reasons);
+        $this->assertContains($noExpMessage, $reasons);
+        $this->assertCount(2, $reasons);
 
         $this->assertNull($actualVariation);
 
