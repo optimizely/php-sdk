@@ -171,6 +171,7 @@ class DecisionService
         }
 
         list($evalResult, $reasons) = Validator::doesUserMeetAudienceConditions($projectConfig, $experiment, $attributes, $this->_logger);
+        $decideReasons = array_merge($decideReasons, $reasons);
         if (!$evalResult) {
             $message = sprintf('User "%s" does not meet conditions to be in experiment "%s".', $userId, $experiment->getKey());
             $this->_logger->log(
@@ -363,7 +364,7 @@ class DecisionService
 
             // Evaluate if user meets the audience condition of this rollout rule
             list($evalResult, $reasons) = Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', $i + 1);
-
+            $decideReasons = array_merge($decideReasons, $reasons);
             if (!$evalResult) {
                 $message = sprintf("User '%s' does not meet conditions for targeting rule %s.", $userId, $i+1);
                 $this->_logger->log(
@@ -388,6 +389,7 @@ class DecisionService
 
         // Evaluate if user meets the audience condition of Everyone Else Rule / Last Rule now
         list($evalResult, $reasons) = Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', 'Everyone Else');
+        $decideReasons = array_merge($decideReasons, $reasons);
         if (!$evalResult) {
             $message = sprintf("User '%s' does not meet conditions for targeting rule 'Everyone Else'.", $userId);
             $this->_logger->log(

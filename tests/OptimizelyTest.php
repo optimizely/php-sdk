@@ -1652,6 +1652,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $expectedReasons = [
+            'Audiences for experiment "test_experiment_double_feature" collectively evaluated to TRUE.',
             'Assigned bucket 4513 to user "test_user" with bucketing ID "test_user".',
             'User "test_user" is in variation control of experiment test_experiment_double_feature.',
             "The user 'test_user' is bucketed into experiment 'test_experiment_double_feature' of feature 'double_single_variable_feature'."
@@ -1723,6 +1724,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $expectedReasons = [
+            'Audiences for experiment "test_experiment_multivariate" collectively evaluated to FALSE.',
             'User "test_user" does not meet conditions to be in experiment "test_experiment_multivariate".',
             "The user 'test_user' is not bucketed into any of the experiments using the feature 'multi_variate_feature'.",
             "Feature flag 'multi_variate_feature' is not used in a rollout.",

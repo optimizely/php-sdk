@@ -1051,7 +1051,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('bucket')
             ->willReturn([$expected_variation, []]);
 
-        $this->assertEquals(
+        $this->compareFeatureDecisionsExceptReasons(
             $expected_decision,
             $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
         );
