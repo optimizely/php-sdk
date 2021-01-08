@@ -350,9 +350,10 @@ class Optimizely
             $featureFlag,
             $userId,
             $userAttributes,
-            $decideOptions,
-            $decideReasons
+            $decideOptions
         );
+
+        $decideReasons = $decision->getReasons();
         $variation = $decision->getVariation();
 
         if ($variation) {
@@ -681,7 +682,7 @@ class Optimizely
             return null;
         }
 
-        $variation = $this->_decisionService->getVariation($config, $experiment, $userId, $attributes);
+        list($variation, $reasons) = $this->_decisionService->getVariation($config, $experiment, $userId, $attributes);
         $variationKey = ($variation === null) ? null : $variation->getKey();
 
         if ($config->isFeatureExperiment($experiment->getId())) {
@@ -761,7 +762,7 @@ class Optimizely
             return null;
         }
 
-        $forcedVariation = $this->_decisionService->getForcedVariation($config, $experimentKey, $userId);
+        list($forcedVariation, $reasons)  = $this->_decisionService->getForcedVariation($config, $experimentKey, $userId);
         if (isset($forcedVariation)) {
             return $forcedVariation->getKey();
         } else {

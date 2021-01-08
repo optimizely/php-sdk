@@ -109,12 +109,12 @@ class Bucketer
      * @param $userId string ID for user.
      * @param $parentId mixed ID representing Experiment or Group.
      * @param $trafficAllocations array Traffic allocations for variation or experiment.
-     * @param $decideReasons array Evaluation Logs.
      *
-     * @return string ID representing experiment or variation.
+     * @return [ string, array ]  ID representing experiment or variation and array of log messages representing decision making.
      */
-    private function findBucket($bucketingId, $userId, $parentId, $trafficAllocations, &$decideReasons = [])
+    private function findBucket($bucketingId, $userId, $parentId, $trafficAllocations)
     {
+        $decideReasons = [];
         // Generate the bucketing key based on combination of user ID and experiment ID or group ID.
         $bucketingKey = $bucketingId.$parentId;
         $bucketingNumber = $this->generateBucketValue($bucketingKey);
@@ -125,11 +125,11 @@ class Bucketer
         foreach ($trafficAllocations as $trafficAllocation) {
             $currentEnd = $trafficAllocation->getEndOfRange();
             if ($bucketingNumber < $currentEnd) {
-                return $trafficAllocation->getEntityId();
+                return [$trafficAllocation->getEntityId(), $decideReasons];
             }
         }
 
-        return null;
+        return [null, $decideReasons];
     }
 
     /**
@@ -139,14 +139,15 @@ class Bucketer
      * @param $experiment Experiment Experiment or Rollout rule in which user is to be bucketed.
      * @param $bucketingId string A customer-assigned value used to create the key for the murmur hash.
      * @param $userId string User identifier.
-     * @param $decideReasons array Evaluation Logs.
      *
-     * @return Variation Variation which will be shown to the user.
+     * @return [ Variation, array ]  Variation which will be shown to the user and array of log messages representing decision making.
      */
-    public function bucket(ProjectConfigInterface $config, Experiment $experiment, $bucketingId, $userId, &$decideReasons = [])
+    public function bucket(ProjectConfigInterface $config, Experiment $experiment, $bucketingId, $userId)
     {
+        $decideReasons = [];
+
         if (is_null($experiment->getKey())) {
-            return null;
+            return [ null, $decideReasons ];
         }
 
         // Determine if experiment is in a mutually exclusive group.
@@ -155,15 +156,17 @@ class Bucketer
             $group = $config->getGroup($experiment->getGroupId());
 
             if (is_null($group->getId())) {
-                return null;
+                return [ null, $decideReasons ];
             }
 
-            $userExperimentId = $this->findBucket($bucketingId, $userId, $group->getId(), $group->getTrafficAllocation());
+            list($userExperimentId, $reasons) = $this->findBucket($bucketingId, $userId, $group->getId(), $group->getTrafficAllocation());
+            $decideReasons = array_merge($decideReasons, $reasons);
+
             if (empty($userExperimentId)) {
                 $message = sprintf('User "%s" is in no experiment.', $userId);
                 $this->_logger->log(Logger::INFO, $message);
                 $decideReasons[] = $message;
-                return null;
+                return [ null, $decideReasons ];
             }
 
             if ($userExperimentId != $experiment->getId()) {
@@ -176,7 +179,7 @@ class Bucketer
 
                 $this->_logger->log(Logger::INFO, $message);
                 $decideReasons[] = $message;
-                return null;
+                return [ null, $decideReasons ];
             }
 
             $message = sprintf(
@@ -191,13 +194,14 @@ class Bucketer
         }
 
         // Bucket user if not in whitelist and in group (if any).
-        $variationId = $this->findBucket($bucketingId, $userId, $experiment->getId(), $experiment->getTrafficAllocation());
+        list($variationId, $reasons) = $this->findBucket($bucketingId, $userId, $experiment->getId(), $experiment->getTrafficAllocation());
+        $decideReasons = array_merge($decideReasons, $reasons);
         if (!empty($variationId)) {
             $variation = $config->getVariationFromId($experiment->getKey(), $variationId);
 
-            return $variation;
+            return [ $variation, $decideReasons ];
         }
         
-        return null;
+        return [ null, $decideReasons ];
     }
 }

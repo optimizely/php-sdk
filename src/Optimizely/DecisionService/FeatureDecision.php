@@ -44,17 +44,25 @@ class FeatureDecision
     private $_source;
 
     /**
+     * Array of log messages that represent decision making.
+     *
+     * @var array
+     */
+    private $reasons;
+
+    /**
      * FeatureDecision constructor.
      *
      * @param $experiment
      * @param $variation
      * @param $source
      */
-    public function __construct($experiment, $variation, $source)
+    public function __construct($experiment, $variation, $source, array $reasons = [])
     {
         $this->_experiment = $experiment;
         $this->_variation = $variation;
         $this->_source = $source;
+        $this->reasons = $reasons;
     }
 
     public function getExperiment()
@@ -70,5 +78,10 @@ class FeatureDecision
     public function getSource()
     {
         return $this->_source;
+    }
+
+    public function getReasons()
+    {
+        return $this->reasons;
     }
 }
