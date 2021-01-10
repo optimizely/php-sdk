@@ -166,4 +166,11 @@ interface ProjectConfigInterface
      * @return string A string value that contains datafile contents.
      */
     public function toDatafile();
+
+    /**
+     * Returns if flag decisions should be sent to server or not
+     *
+     * @return boolean
+     */
+    public function getSendFlagDecisions();
 }

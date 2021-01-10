@@ -1,5 +1,24 @@
 # Optimizely PHP SDK Changelog
 
+## 3.6.1
+November 19th, 2020
+
+### Bug Fixes
+- Added "enabled" field to decision metadata structure. [#217](https://github.com/optimizely/php-sdk/pull/217)
+
+## 3.6.0
+November 2nd, 2020
+
+### New Features
+- Added support for upcoming application-controlled introduction of tracking for non-experiment Flag decisions. [#215](https://github.com/optimizely/php-sdk/pull/215)
+
+## 3.5.0
+October 1st, 2020
+
+### New Features:
+- Version targeting using semantic version syntax. [#213](https://github.com/optimizely/php-sdk/pull/213)
+- Datafile accessor API added to access current config as a JSON string. [#211](https://github.com/optimizely/php-sdk/pull/211)
+
 ## 3.4.0
 July 8th, 2020
 

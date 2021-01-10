@@ -191,6 +191,13 @@ class DatafileProjectConfig implements ProjectConfigInterface
     private $_experimentFeatureMap;
 
     /**
+     * Boolean indicating if flag decisions should be sent to server or not
+     *
+     * @return boolean
+     */
+    private $_sendFlagDecisions;
+
+    /**
      * DatafileProjectConfig constructor to load and set project configuration data.
      *
      * @param $datafile string JSON string representing the project.
@@ -216,6 +223,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
         $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
+        $this->_sendFlagDecisions = isset($config['sendFlagDecisions']) ? $config['sendFlagDecisions'] : false;
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
@@ -254,6 +262,12 @@ class DatafileProjectConfig implements ProjectConfigInterface
                 $experiment->setGroupPolicy($group->getPolicy());
             }
             $this->_experimentKeyMap = $this->_experimentKeyMap + $experimentsInGroup;
+        }
+
+        foreach ($this->_rollouts as $rollout) {
+            foreach ($rollout->getExperiments() as $experiment) {
+                $this->_experimentKeyMap[$experiment->getKey()] = $experiment;
+            }
         }
 
         $this->_variationKeyMap = [];
@@ -425,7 +439,16 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getAllExperiments()
     {
-        return array_values($this->_experimentKeyMap);
+        // Exclude rollout experiments
+        $rolloutExperimentIds = [];
+        foreach ($this->_rollouts as $rollout) {
+            foreach ($rollout->getExperiments() as $experiment) {
+                $rolloutExperimentIds[] = $experiment->getId();
+            }
+        }
+        return array_filter(array_values($this->_experimentKeyMap), function ($experiment) use ($rolloutExperimentIds) {
+            return !in_array($experiment->getId(), $rolloutExperimentIds);
+        });
     }
 
     /**
@@ -677,5 +700,15 @@ class DatafileProjectConfig implements ProjectConfigInterface
     public function isFeatureExperiment($experimentId)
     {
         return array_key_exists($experimentId, $this->_experimentFeatureMap);
+    }
+
+    /**
+     * Returns if flag decisions should be sent to server or not
+     *
+     * @return boolean
+     */
+    public function getSendFlagDecisions()
+    {
+        return $this->_sendFlagDecisions;
     }
 }

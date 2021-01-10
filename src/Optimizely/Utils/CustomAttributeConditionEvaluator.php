@@ -19,6 +19,7 @@ namespace Optimizely\Utils;
 
 use Monolog\Logger;
 use Optimizely\Enums\CommonAudienceEvaluationLogs as logs;
+use Optimizely\Utils\SemVersionConditionEvaluator;
 use Optimizely\Utils\Validator;
 
 class CustomAttributeConditionEvaluator
@@ -27,13 +28,20 @@ class CustomAttributeConditionEvaluator
 
     const EXACT_MATCH_TYPE = 'exact';
     const EXISTS_MATCH_TYPE = 'exists';
+    const GREATER_THAN_EQUAL_TO_MATCH_TYPE = 'ge';
     const GREATER_THAN_MATCH_TYPE = 'gt';
+    const LESS_THAN_EQUAL_TO_MATCH_TYPE = 'le';
     const LESS_THAN_MATCH_TYPE = 'lt';
+    const SEMVER_EQ = 'semver_eq';
+    const SEMVER_GE = 'semver_ge';
+    const SEMVER_GT = 'semver_gt';
+    const SEMVER_LE = 'semver_le';
+    const SEMVER_LT = 'semver_lt';
     const SUBSTRING_MATCH_TYPE = 'substring';
 
     /**
      * @var UserAttributes
-    */
+     */
     protected $userAttributes;
 
     /**
@@ -57,7 +65,7 @@ class CustomAttributeConditionEvaluator
     {
         $keys = ['type', 'match', 'value'];
         foreach ($keys as $key) {
-            $leafCondition[$key] = isset($leafCondition[$key]) ? $leafCondition[$key]: null;
+            $leafCondition[$key] = isset($leafCondition[$key]) ? $leafCondition[$key] : null;
         }
 
         return $leafCondition;
@@ -70,8 +78,20 @@ class CustomAttributeConditionEvaluator
      */
     protected function getMatchTypes()
     {
-        return array(self::EXACT_MATCH_TYPE, self::EXISTS_MATCH_TYPE, self::GREATER_THAN_MATCH_TYPE,
-         self::LESS_THAN_MATCH_TYPE, self::SUBSTRING_MATCH_TYPE);
+        return array(
+            self::EXACT_MATCH_TYPE,
+            self::EXISTS_MATCH_TYPE,
+            self::GREATER_THAN_EQUAL_TO_MATCH_TYPE,
+            self::GREATER_THAN_MATCH_TYPE,
+            self::LESS_THAN_EQUAL_TO_MATCH_TYPE,
+            self::LESS_THAN_MATCH_TYPE,
+            self::SEMVER_EQ,
+            self::SEMVER_GE,
+            self::SEMVER_GT,
+            self::SEMVER_LE,
+            self::SEMVER_LT,
+            self::SUBSTRING_MATCH_TYPE,
+        );
     }
 
     /**
@@ -86,8 +106,15 @@ class CustomAttributeConditionEvaluator
         $evaluatorsByMatchType = array();
         $evaluatorsByMatchType[self::EXACT_MATCH_TYPE] = 'exactEvaluator';
         $evaluatorsByMatchType[self::EXISTS_MATCH_TYPE] = 'existsEvaluator';
+        $evaluatorsByMatchType[self::GREATER_THAN_EQUAL_TO_MATCH_TYPE] = 'greaterThanEqualToEvaluator';
         $evaluatorsByMatchType[self::GREATER_THAN_MATCH_TYPE] = 'greaterThanEvaluator';
+        $evaluatorsByMatchType[self::LESS_THAN_EQUAL_TO_MATCH_TYPE] = 'lessThanEqualToEvaluator';
         $evaluatorsByMatchType[self::LESS_THAN_MATCH_TYPE] = 'lessThanEvaluator';
+        $evaluatorsByMatchType[self::SEMVER_EQ] = 'semverEqualEvaluator';
+        $evaluatorsByMatchType[self::SEMVER_GE] = 'semverGreaterThanEqualToEvaluator';
+        $evaluatorsByMatchType[self::SEMVER_GT] = 'semverGreaterThanEvaluator';
+        $evaluatorsByMatchType[self::SEMVER_LE] = 'semverLessThanEqualToEvaluator';
+        $evaluatorsByMatchType[self::SEMVER_LT] = 'semverLessThanEvaluator';
         $evaluatorsByMatchType[self::SUBSTRING_MATCH_TYPE] = 'substringEvaluator';
 
         return $evaluatorsByMatchType[$matchType];
@@ -110,6 +137,33 @@ class CustomAttributeConditionEvaluator
     }
 
     /**
+     * Returns result of SemVersionConditionEvaluator::compareVersion for given target and user versions.
+     *
+     * @param  object $condition
+     *
+     * @return null|int 0 if user's version attribute is equal to the semver condition value,
+     *                  1 if user's version attribute is greater than the semver condition value,
+     *                  -1 if user's version attribute is less than the semver condition value,
+     *                  null if the condition value or user attribute value has an invalid type, or
+     *                  if there is a mismatch between the user attribute type and the condition
+     *                  value type.
+     */
+    protected function semverEvaluator($condition)
+    {
+        $conditionName = $condition['name'];
+        $conditionValue = $condition['value'];
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName] : null;
+
+        if (!Validator::validateNonEmptyString($conditionValue) || !Validator::validateNonEmptyString($userValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::ATTRIBUTE_FORMAT_INVALID
+            ));
+            return null;
+        }
+        return SemVersionConditionEvaluator::compareVersion($conditionValue, $userValue, $this->logger);
+    }
+
+    /**
      * Evaluate the given exact match condition for the given user attributes.
      *
      * @param  object $condition
@@ -124,7 +178,7 @@ class CustomAttributeConditionEvaluator
     {
         $conditionName = $condition['name'];
         $conditionValue = $condition['value'];
-        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName] : null;
 
         if (!$this->isValueTypeValidForExactConditions($conditionValue) ||
             ((is_int($conditionValue) || is_float($conditionValue)) && !Validator::isFiniteNumber($conditionValue))) {
@@ -189,7 +243,7 @@ class CustomAttributeConditionEvaluator
     {
         $conditionName = $condition['name'];
         $conditionValue = $condition['value'];
-        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName] : null;
 
         if (!Validator::isFiniteNumber($conditionValue)) {
             $this->logger->log(Logger::WARNING, sprintf(
@@ -222,6 +276,52 @@ class CustomAttributeConditionEvaluator
     }
 
     /**
+     * Evaluate the given greater than equal to match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if the user attribute value is greater than or equal to the condition value,
+     *                 false if the user attribute value is less than the condition value,
+     *                 null if the condition value isn't a number or the user attribute value
+     *                 isn't a number.
+     */
+    protected function greaterThanEqualToEvaluator($condition)
+    {
+        $conditionName = $condition['name'];
+        $conditionValue = $condition['value'];
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName] : null;
+
+        if (!Validator::isFiniteNumber($conditionValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
+            return null;
+        }
+
+        if (!(is_int($userValue) || is_float($userValue))) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNEXPECTED_TYPE,
+                json_encode($condition),
+                gettype($userValue),
+                $conditionName
+            ));
+            return null;
+        }
+
+        if (!Validator::isFiniteNumber($userValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::INFINITE_ATTRIBUTE_VALUE,
+                json_encode($condition),
+                $conditionName
+            ));
+            return null;
+        }
+
+        return $userValue >= $conditionValue;
+    }
+
+    /**
      * Evaluate the given less than match condition for the given user attributes.
      *
      * @param  object $condition
@@ -235,7 +335,7 @@ class CustomAttributeConditionEvaluator
     {
         $conditionName = $condition['name'];
         $conditionValue = $condition['value'];
-        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName] : null;
 
         if (!Validator::isFiniteNumber($conditionValue)) {
             $this->logger->log(Logger::WARNING, sprintf(
@@ -267,7 +367,53 @@ class CustomAttributeConditionEvaluator
         return $userValue < $conditionValue;
     }
 
-     /**
+    /**
+     * Evaluate the given less than equal to match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if the user attribute value is less than or equal to the condition value,
+     *                 false if the user attribute value is greater than the condition value,
+     *                 null if the condition value isn't a number or the user attribute value
+     *                 isn't a number.
+     */
+    protected function lessThanEqualToEvaluator($condition)
+    {
+        $conditionName = $condition['name'];
+        $conditionValue = $condition['value'];
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName] : null;
+
+        if (!Validator::isFiniteNumber($conditionValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNKNOWN_CONDITION_VALUE,
+                json_encode($condition)
+            ));
+            return null;
+        }
+
+        if (!(is_int($userValue) || is_float($userValue))) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::UNEXPECTED_TYPE,
+                json_encode($condition),
+                gettype($userValue),
+                $conditionName
+            ));
+            return null;
+        }
+
+        if (!Validator::isFiniteNumber($userValue)) {
+            $this->logger->log(Logger::WARNING, sprintf(
+                logs::INFINITE_ATTRIBUTE_VALUE,
+                json_encode($condition),
+                $conditionName
+            ));
+            return null;
+        }
+
+        return $userValue <= $conditionValue;
+    }
+
+    /**
      * Evaluate the given substring than match condition for the given user attributes.
      *
      * @param  object $condition
@@ -281,7 +427,7 @@ class CustomAttributeConditionEvaluator
     {
         $conditionName = $condition['name'];
         $conditionValue = $condition['value'];
-        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName]: null;
+        $userValue = isset($this->userAttributes[$conditionName]) ? $this->userAttributes[$conditionName] : null;
 
         if (!is_string($conditionValue)) {
             $this->logger->log(Logger::WARNING, sprintf(
@@ -302,6 +448,96 @@ class CustomAttributeConditionEvaluator
         }
 
         return strpos($userValue, $conditionValue) !== false;
+    }
+
+    /**
+     * Evaluate the given semantic version equal match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if user's version attribute is equal to the semver condition value,
+     *                 false if the user's version attribute is greater or less than the semver condition value,
+     *                 null if the semver condition value or user's version attribute is invalid.
+     */
+    protected function semverEqualEvaluator($condition)
+    {
+        $comparison = $this->semverEvaluator($condition);
+        if ($comparison === null) {
+            return null;
+        }
+        return $comparison === 0;
+    }
+
+    /**
+     * Evaluate the given semantic version greater than match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if user's version attribute is greater than the semver condition value,
+     *                 false if the user's version attribute  is less than or equal to the semver condition value,
+     *                 null if the semver condition value or user's version attribute is invalid.
+     */
+    protected function semverGreaterThanEvaluator($condition)
+    {
+        $comparison = $this->semverEvaluator($condition);
+        if ($comparison === null) {
+            return null;
+        }
+        return $comparison > 0;
+    }
+
+    /**
+     * Evaluate the given semantic version greater than equal to match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if user's version attribute is greater than or equal to the semver condition value,
+     *                 false if the user's version attribute is less than the semver condition value,
+     *                 null if the semver condition value or user's version attribute is invalid.
+     */
+    protected function semverGreaterThanEqualToEvaluator($condition)
+    {
+        $comparison = $this->semverEvaluator($condition);
+        if ($comparison === null) {
+            return null;
+        }
+        return $comparison >= 0;
+    }
+
+    /**
+     * Evaluate the given semantic version less than match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if user's version attribute is less than the semver condition value,
+     *                 false if the user's version attribute is greater than or equal to the semver condition value,
+     *                 null if the semver condition value or user's version attribute is invalid.
+     */
+    protected function semverLessThanEvaluator($condition)
+    {
+        $comparison = $this->semverEvaluator($condition);
+        if ($comparison === null) {
+            return null;
+        }
+        return $comparison < 0;
+    }
+
+    /**
+     * Evaluate the given semantic version less than equal to match condition for the given user attributes.
+     *
+     * @param  object $condition
+     *
+     * @return boolean true if user's version attribute is less than or equal to the semver condition value,
+     *                 false if the user's version attribute is greater than the semver condition value,
+     *                 null if the semver condition value or user's version attribute is invalid.
+     */
+    protected function semverLessThanEqualToEvaluator($condition)
+    {
+        $comparison = $this->semverEvaluator($condition);
+        if ($comparison === null) {
+            return null;
+        }
+        return $comparison <= 0;
     }
 
     /**
