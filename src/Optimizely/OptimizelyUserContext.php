@@ -31,6 +31,11 @@ class OptimizelyUserContext implements \JsonSerializable
         $this->attributes = $attributes;
     }
 
+    public function clone()
+    {
+        return new OptimizelyUserContext($this->optimizelyClient, $this->userId, $this->attributes);
+    }
+
     public function setAttribute($key, $value)
     {
         $this->attributes[$key] = $value;
@@ -38,17 +43,17 @@ class OptimizelyUserContext implements \JsonSerializable
 
     public function decide($key, array $options = [])
     {
-        return $this->optimizelyClient->decide($this, $key, $options);
+        return $this->optimizelyClient->decide($this->clone(), $key, $options);
     }
 
     public function decideForKeys(array $keys, array $options = [])
     {
-        return $this->optimizelyClient->decideForKeys($this, $keys, $options);
+        return $this->optimizelyClient->decideForKeys($this->clone(), $keys, $options);
     }
 
     public function decideAll(array $options = [])
     {
-        return $this->optimizelyClient->decideAll($this, $options);
+        return $this->optimizelyClient->decideAll($this->clone(), $options);
     }
 
     public function trackEvent($eventKey, array $eventTags = [])
