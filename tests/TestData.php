@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2019, Optimizely
+ * Copyright 2016-2019, 2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1768,9 +1768,9 @@ class InvalidErrorHandler
  */
 class DecisionTester extends DecisionService
 {
-    public function getBucketingId($userId, $userAttributes)
+    public function getBucketingId($userId, $userAttributes, &$decideReasons = [])
     {
-        return parent::getBucketingId($userId, $userAttributes);
+        return parent::getBucketingId($userId, $userAttributes, $decideReasons);
     }
 }
 

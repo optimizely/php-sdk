@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2020, Optimizely
+ * Copyright 2016-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidEventTagException;
 use Throwable;
 use Monolog\Logger;
+use Optimizely\Decide\OptimizelyDecideOption;
+use Optimizely\Decide\OptimizelyDecision;
+use Optimizely\Decide\OptimizelyDecisionMessage;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
 use Optimizely\Entity\Experiment;
@@ -38,6 +41,7 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\OptimizelyConfig\OptimizelyConfigService;
+use Optimizely\OptimizelyUserContext;
 use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
 use Optimizely\ProjectConfigManager\ProjectConfigManagerInterface;
 use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
@@ -96,6 +100,11 @@ class Optimizely
     private $_logger;
 
     /**
+     * @var array A default list of options for decision making.
+     */
+    private $defaultDecideOptions;
+
+    /**
      * @var ProjectConfigManagerInterface
      */
     public $configManager;
@@ -127,7 +136,8 @@ class Optimizely
         UserProfileServiceInterface $userProfileService = null,
         ProjectConfigManagerInterface $configManager = null,
         NotificationCenter $notificationCenter = null,
-        $sdkKey = null
+        $sdkKey = null,
+        array $defaultDecideOptions = []
     ) {
         $this->_isValid = true;
         $this->_eventDispatcher = $eventDispatcher ?: new DefaultEventDispatcher();
@@ -145,6 +155,8 @@ class Optimizely
                 $this->configManager = new StaticProjectConfigManager($datafile, $skipJsonValidation, $this->_logger, $this->_errorHandler);
             }
         }
+
+        $this->defaultDecideOptions = $defaultDecideOptions;
     }
 
     /**
@@ -242,6 +254,252 @@ class Optimizely
     }
 
     /**
+     * Create a context of the user for which decision APIs will be called.
+     *
+     * A user context will be created successfully even when the SDK is not fully configured yet.
+     *
+     * @param $userId string The user ID to be used for bucketing.
+     * @param $userAttributes array A Hash representing user attribute names and values.
+     *
+     * @return OptimizelyUserContext|null An OptimizelyUserContext associated with this OptimizelyClient,
+     *                                    or null If user attributes are not in valid format.
+     */
+    public function createUserContext($userId, array $userAttributes = [])
+    {
+        // We do not check if config is ready as UserContext can be created even when SDK is not ready.
+
+        // validate userId
+        if (!$this->validateInputs(
+            [
+                self::USER_ID => $userId
+            ]
+        )
+        ) {
+            return null;
+        }
+
+        // validate attributes
+        if (!$this->validateUserInputs($userAttributes)) {
+            return null;
+        }
+
+        return new OptimizelyUserContext($this, $userId, $userAttributes);
+    }
+
+    /**
+     * Returns a decision result (OptimizelyDecision) for a given flag key and a user context, which contains all data required to deliver the flag.
+     *
+     * If the SDK finds an error, it'll return a `decision` with null for `variationKey`. The decision will include an error message in `reasons`
+     *
+     * @param $userContext OptimizelyUserContext context of the user for which decision will be called.
+     * @param $key string A flag key for which a decision will be made.
+     * @param $decideOptions array A list of options for decision making.
+     *
+     * @return OptimizelyDecision A decision result
+     */
+    public function decide(OptimizelyUserContext $userContext, $key, array $decideOptions = [])
+    {
+        $decideReasons = [];
+
+        // check if SDK is ready
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
+            $decideReasons[] = OptimizelyDecisionMessage::SDK_NOT_READY;
+            return new OptimizelyDecision(null, null, null, null, $key, $userContext, $decideReasons);
+        }
+
+        // validate that key is a string
+        if (!$this->validateInputs(
+            [
+                self::FEATURE_FLAG_KEY => $key
+            ]
+        )
+        ) {
+            $errorMessage = sprintf(OptimizelyDecisionMessage::FLAG_KEY_INVALID, $key);
+            $this->_logger->log(Logger::ERROR, $errorMessage);
+            $decideReasons[] = $errorMessage;
+            return new OptimizelyDecision(null, null, null, null, $key, $userContext, $decideReasons);
+        }
+
+
+        // validate that key maps to a feature flag
+        $featureFlag = $config->getFeatureFlagFromKey($key);
+        if ($featureFlag && (!$featureFlag->getId())) {
+            // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
+            $decideReasons[] = sprintf(OptimizelyDecisionMessage::FLAG_KEY_INVALID, $key);
+            return new OptimizelyDecision(null, null, null, null, $key, $userContext, $decideReasons);
+        }
+
+        // merge decide options and default decide options
+        $decideOptions = array_merge($decideOptions, $this->defaultDecideOptions);
+
+        // create optimizely decision result
+        $userId = $userContext->getUserId();
+        $userAttributes = $userContext->getAttributes();
+        $variationKey = null;
+        $featureEnabled = false;
+        $ruleKey = null;
+        $flagKey = $key;
+        $allVariables = [];
+        $decisionEventDispatched = false;
+
+        // get decision
+        $decision = $this->_decisionService->getVariationForFeature(
+            $config,
+            $featureFlag,
+            $userId,
+            $userAttributes,
+            $decideOptions
+        );
+
+        $decideReasons = $decision->getReasons();
+        $variation = $decision->getVariation();
+
+        if ($variation) {
+            $variationKey = $variation->getKey();
+            $featureEnabled = $variation->getFeatureEnabled();
+            $ruleKey = $decision->getExperiment()->getKey();
+        } else {
+            $variationKey = null;
+            $ruleKey = null;
+        }
+
+        // send impression only if decide options do not contain DISABLE_DECISION_EVENT
+        if (!in_array(OptimizelyDecideOption::DISABLE_DECISION_EVENT, $decideOptions)) {
+            $sendFlagDecisions = $config->getSendFlagDecisions();
+            $source = $decision->getSource();
+
+            // send impression for rollout when sendFlagDecisions is enabled.
+            if ($source == FeatureDecision::DECISION_SOURCE_FEATURE_TEST || $sendFlagDecisions) {
+                $this->sendImpressionEvent(
+                    $config,
+                    $ruleKey,
+                    $variationKey === null ? '' : $variationKey,
+                    $flagKey,
+                    $ruleKey === null ? '' : $ruleKey,
+                    $source,
+                    $featureEnabled,
+                    $userId,
+                    $userAttributes
+                );
+
+                $decisionEventDispatched = true;
+            }
+        }
+
+        // Generate all variables map if decide options doesn't include excludeVariables
+        if (!in_array(OptimizelyDecideOption::EXCLUDE_VARIABLES, $decideOptions)) {
+            foreach ($featureFlag->getVariables() as $variable) {
+                $allVariables[$variable->getKey()] = $this->getFeatureVariableValueFromVariation(
+                    $flagKey,
+                    $variable->getKey(),
+                    null,
+                    $featureEnabled,
+                    $variation,
+                    $userId
+                );
+            }
+        }
+
+        $shouldIncludeReasons = in_array(OptimizelyDecideOption::INCLUDE_REASONS, $decideOptions);
+
+        // send notification
+        $this->notificationCenter->sendNotifications(
+            NotificationType::DECISION,
+            array(
+                DecisionNotificationTypes::FLAG,
+                $userId,
+                $userAttributes,
+                (object) array(
+                    'flagKey'=> $flagKey,
+                    'enabled'=> $featureEnabled,
+                    'variables' => $allVariables,
+                    'variationKey' => $variationKey,
+                    'ruleKey' => $ruleKey,
+                    'reasons' => $shouldIncludeReasons ? $decideReasons:[],
+                    'decisionEventDispatched' => $decisionEventDispatched
+                )
+            )
+        );
+
+        return new OptimizelyDecision(
+            $variationKey,
+            $featureEnabled,
+            $allVariables,
+            $ruleKey,
+            $flagKey,
+            $userContext,
+            $shouldIncludeReasons ? $decideReasons:[]
+        );
+    }
+
+    /**
+     * Returns a hash of decision results (OptimizelyDecision) for all active flag keys.
+     *
+     * @param $userContext OptimizelyUserContext context of the user for which decision will be called.
+     * @param $decideOptions array A list of options for decision making.
+     *
+     * @return array Hash of decisions containing flag keys as hash keys and corresponding decisions as their values.
+     */
+    public function decideAll(OptimizelyUserContext $userContext, array $decideOptions = [])
+    {
+        // check if SDK is ready
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
+            return [];
+        }
+
+        // get all feature keys
+        $keys = [];
+        $featureFlags = $config->getFeatureFlags();
+        foreach ($featureFlags as $feature) {
+            $keys [] = $feature->getKey();
+        }
+
+        return $this->decideForKeys($userContext, $keys, $decideOptions);
+    }
+
+    /**
+     * Returns a hash of decision results (OptimizelyDecision) for multiple flag keys and a user context.
+     *
+     * If the SDK finds an error for a key, the response will include a decision for the key showing `reasons` for the error.
+     *
+     * The SDK will always return hash of decisions. When it can not process requests, it'll return an empty hash after logging the errors.
+     *
+     * @param $userContext OptimizelyUserContext context of the user for which decision will be called.
+     * @param $keys array A list of flag keys for which the decisions will be made.
+     * @param $decideOptions array A list of options for decision making.
+     *
+     * @return array Hash of decisions containing flag keys as hash keys and corresponding decisions as their values.
+     */
+    public function decideForKeys(OptimizelyUserContext $userContext, array $keys, array $decideOptions = [])
+    {
+        // check if SDK is ready
+        $config = $this->getConfig();
+        if ($config === null) {
+            $this->_logger->log(Logger::ERROR, sprintf(Errors::INVALID_DATAFILE, __FUNCTION__));
+            return [];
+        }
+
+        // merge decide options and default decide options
+        $decideOptions = array_merge($decideOptions, $this->defaultDecideOptions);
+
+        $enabledFlagsOnly = in_array(OptimizelyDecideOption::ENABLED_FLAGS_ONLY, $decideOptions);
+        $decisions = [];
+
+        foreach ($keys as $key) {
+            $decision = $this->decide($userContext, $key, $decideOptions);
+            if (!$enabledFlagsOnly || $decision->getEnabled() === true) {
+                $decisions [$key] = $decision;
+            }
+        }
+
+        return $decisions;
+    }
+
+    /**
      * Buckets visitor and sends impression event to Optimizely.
      *
      * @param $experimentKey string Key identifying the experiment.
@@ -274,7 +532,7 @@ class Optimizely
             return null;
         }
 
-        $this->sendImpressionEvent($config, $experimentKey, $variationKey, '', $experimentKey, FeatureDecision::DECITION_SOURCE_EXPERIMENT, true, $userId, $attributes);
+        $this->sendImpressionEvent($config, $experimentKey, $variationKey, '', $experimentKey, FeatureDecision::DECISION_SOURCE_EXPERIMENT, true, $userId, $attributes);
 
         return $variationKey;
     }
@@ -424,7 +682,7 @@ class Optimizely
             return null;
         }
 
-        $variation = $this->_decisionService->getVariation($config, $experiment, $userId, $attributes);
+        list($variation, $reasons) = $this->_decisionService->getVariation($config, $experiment, $userId, $attributes);
         $variationKey = ($variation === null) ? null : $variation->getKey();
 
         if ($config->isFeatureExperiment($experiment->getId())) {
@@ -504,7 +762,7 @@ class Optimizely
             return null;
         }
 
-        $forcedVariation = $this->_decisionService->getForcedVariation($config, $experimentKey, $userId);
+        list($forcedVariation, $reasons)  = $this->_decisionService->getForcedVariation($config, $experimentKey, $userId);
         if (isset($forcedVariation)) {
             return $forcedVariation->getKey();
         } else {

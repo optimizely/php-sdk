@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, 2019 Optimizely Inc and Contributors
+ * Copyright 2017, 2019, 2021 Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ class FeatureDecision
 {
     const DECISION_SOURCE_FEATURE_TEST = 'feature-test';
     const DECISION_SOURCE_ROLLOUT = 'rollout';
-    const DECITION_SOURCE_EXPERIMENT = 'experiment';
+    const DECISION_SOURCE_EXPERIMENT = 'experiment';
 
     /**
      * The experiment in this decision.
@@ -44,17 +44,25 @@ class FeatureDecision
     private $_source;
 
     /**
+     * Array of log messages that represent decision making.
+     *
+     * @var array
+     */
+    private $reasons;
+
+    /**
      * FeatureDecision constructor.
      *
      * @param $experiment
      * @param $variation
      * @param $source
      */
-    public function __construct($experiment, $variation, $source)
+    public function __construct($experiment, $variation, $source, array $reasons = [])
     {
         $this->_experiment = $experiment;
         $this->_variation = $variation;
         $this->_source = $source;
+        $this->reasons = $reasons;
     }
 
     public function getExperiment()
@@ -70,5 +78,10 @@ class FeatureDecision
     public function getSource()
     {
         return $this->_source;
+    }
+
+    public function getReasons()
+    {
+        return $this->reasons;
     }
 }
