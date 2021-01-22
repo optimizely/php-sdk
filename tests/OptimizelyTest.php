@@ -430,7 +430,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => true
@@ -590,7 +590,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => true
@@ -681,7 +681,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => true
@@ -772,7 +772,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => false
@@ -852,7 +852,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> false,
                 'variables'=> ["double_variable" => 14.99],
-                'variationKey' => null,
+                'variation' => null,
                 'ruleKey' => null,
                 'reasons' => [],
                 'decisionEventDispatched' => true
@@ -936,7 +936,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> false,
                 'variables'=> ["double_variable" => 14.99],
-                'variationKey' => null,
+                'variation' => null,
                 'ruleKey' => null,
                 'reasons' => [],
                 'decisionEventDispatched' => false
@@ -1012,7 +1012,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => false
@@ -1078,7 +1078,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => false
@@ -1140,7 +1140,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> false,
                 'variables'=> ["double_variable" => 14.99],
-                'variationKey' => 'variation',
+                'variation' => 'variation',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => true
@@ -1214,7 +1214,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => true
@@ -1288,7 +1288,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => true
@@ -1364,7 +1364,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => true
@@ -1439,7 +1439,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> [],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => true
@@ -1527,7 +1527,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> [],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => true
@@ -1667,7 +1667,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> ["double_variable" => 42.42],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => $expectedReasons,
                 'decisionEventDispatched' => true
@@ -1762,7 +1762,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'empty_feature',
                 'enabled'=> false,
                 'variables'=> [],
-                'variationKey' => null,
+                'variation' => null,
                 'ruleKey' => null,
                 'reasons' => $expectedReasons,
                 'decisionEventDispatched' => false
@@ -1840,7 +1840,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> [],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => false
@@ -1951,7 +1951,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'flagKey'=>'double_single_variable_feature',
                 'enabled'=> true,
                 'variables'=> [],
-                'variationKey' => 'control',
+                'variation' => 'control',
                 'ruleKey' => 'test_experiment_double_feature',
                 'reasons' => [],
                 'decisionEventDispatched' => false

@@ -137,6 +137,22 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testDecideResponseUserContextNotEqualCalledUserContext()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+    
+        $optlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($optlyObject, $userId, $attributes);
+        $decision = $optUserContext->decide('test_feature', ['DISABLE_DECISION_EVENT', 'ENABLED_FLAGS_ONLY']);
+        $optUserContext->setAttribute("test_key", "test_value");
+        $this->assertNotEquals(
+            $optUserContext->getAttributes(),
+            $decision->getUserContext()->getAttributes()
+        );
+    }
+
     public function testDecideAllCallsAndReturnsOptimizelyDecideAllAPI()
     {
         $userId = 'test_user';
