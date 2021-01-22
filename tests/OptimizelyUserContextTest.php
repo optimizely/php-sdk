@@ -16,8 +16,6 @@
  */
 namespace Optimizely\Tests;
 
-require(dirname(__FILE__).'/TestData.php');
-
 use Exception;
 use TypeError;
 
@@ -134,6 +132,29 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             'Mocked return value',
             $optUserContext->decide('test_feature', ['DISABLE_DECISION_EVENT', 'ENABLED_FLAGS_ONLY'])
+        );
+    }
+
+    public function testDecideResponseUserContextNotEqualToCalledUserContext()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+    
+        $optlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($optlyObject, $userId, $attributes);
+        $decision = $optUserContext->decide('test_feature', ['DISABLE_DECISION_EVENT', 'ENABLED_FLAGS_ONLY']);
+        
+        $this->assertEquals(
+            $optUserContext->getAttributes(),
+            $decision->getUserContext()->getAttributes()
+        );
+
+        $optUserContext->setAttribute("test_key", "test_value");
+        
+        $this->assertNotEquals(
+            $optUserContext->getAttributes(),
+            $decision->getUserContext()->getAttributes()
         );
     }
 
