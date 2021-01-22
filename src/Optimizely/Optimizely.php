@@ -375,9 +375,9 @@ class Optimizely
                 $this->sendImpressionEvent(
                     $config,
                     $ruleKey,
-                    $variationKey,
+                    $variationKey === null ? '' : $variationKey,
                     $flagKey,
-                    $ruleKey,
+                    $ruleKey === null ? '' : $ruleKey,
                     $source,
                     $featureEnabled,
                     $userId,
@@ -415,7 +415,7 @@ class Optimizely
                     'flagKey'=> $flagKey,
                     'enabled'=> $featureEnabled,
                     'variables' => $allVariables,
-                    'variation' => $variationKey,
+                    'variationKey' => $variationKey,
                     'ruleKey' => $ruleKey,
                     'reasons' => $shouldIncludeReasons ? $decideReasons:[],
                     'decisionEventDispatched' => $decisionEventDispatched
