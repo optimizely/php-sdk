@@ -1,5 +1,19 @@
 # Optimizely PHP SDK Changelog
 
+## 3.7.0
+February 17th, 2021
+
+### New Features:
+- Introducing a new primary interface for retrieving feature flag status, configuration and associated experiment decisions for users ([#220](https://github.com/optimizely/php-sdk/pull/220), [#224](https://github.com/optimizely/php-sdk/pull/224)). The new `OptimizelyUserContext` class is instantiated with `createUserContext` and exposes the following APIs to get `OptimizelyDecision`:
+
+    - setAttribute
+    - decide
+    - decideAll
+    - decideForKeys
+    - trackEvent
+
+- For details, refer to our documentation page: https://docs.developers.optimizely.com/full-stack/v4.0/docs/php-sdk.
+
 ## 3.6.1
 November 19th, 2020
 
