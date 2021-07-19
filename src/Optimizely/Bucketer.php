@@ -197,7 +197,7 @@ class Bucketer
         list($variationId, $reasons) = $this->findBucket($bucketingId, $userId, $experiment->getId(), $experiment->getTrafficAllocation());
         $decideReasons = array_merge($decideReasons, $reasons);
         if (!empty($variationId)) {
-            $variation = $config->getVariationFromId($experiment->getKey(), $variationId);
+            $variation = $config->getVariationFromIdByExperimentId($experiment->getId(), $variationId);
 
             return [ $variation, $decideReasons ];
         }

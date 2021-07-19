@@ -142,6 +142,24 @@ interface ProjectConfigInterface
     public function getVariationFromId($experimentKey, $variationId);
 
     /**
+     * @param $experimentId string ID for experiment.
+     * @param $variationId string ID for variation.
+     *
+     * @return Variation Entity corresponding to the provided experiment ID and variation ID.
+     *         Dummy entity is returned if key or ID is invalid.
+     */
+    public function getVariationFromIdByExperimentId($experimentId, $variationId);
+
+    /**
+     * @param $experimentId string ID for experiment.
+     * @param $variationKey string Key for variation.
+     *
+     * @return Variation Entity corresponding to the provided experiment ID and variation Key.
+     *         Dummy entity is returned if key or ID is invalid.
+     */
+    public function getVariationFromKeyByExperimentId($experimentId, $variationKey);
+
+    /**
      * Gets the feature variable instance given feature flag key and variable key
      *
      * @param string Feature flag key
