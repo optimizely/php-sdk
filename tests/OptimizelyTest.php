@@ -449,7 +449,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'test_experiment_double_feature',
+                '122238',
                 'control',
                 'double_single_variable_feature',
                 'test_experiment_double_feature',
@@ -609,7 +609,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'test_experiment_double_feature',
+                '122238',
                 'control',
                 'double_single_variable_feature',
                 'test_experiment_double_feature',
@@ -700,7 +700,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with(
                 $this->anything(),
-                'test_experiment_double_feature',
+                '122238',
                 'control',
                 'double_single_variable_feature',
                 'test_experiment_double_feature',
@@ -1159,7 +1159,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'test_experiment_double_feature',
+                '122238',
                 'variation',
                 'double_single_variable_feature',
                 'test_experiment_double_feature',
@@ -1233,7 +1233,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'test_experiment_double_feature',
+                '122238',
                 'control',
                 'double_single_variable_feature',
                 'test_experiment_double_feature',
@@ -1307,7 +1307,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'test_experiment_double_feature',
+                '122238',
                 'control',
                 'double_single_variable_feature',
                 'test_experiment_double_feature',
@@ -1383,7 +1383,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'test_experiment_double_feature',
+                '122238',
                 'control',
                 'double_single_variable_feature',
                 'test_experiment_double_feature',
@@ -1458,7 +1458,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'test_experiment_double_feature',
+                '122238',
                 'control',
                 'double_single_variable_feature',
                 'test_experiment_double_feature',
@@ -1546,7 +1546,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'test_experiment_double_feature',
+                '122238',
                 'control',
                 'double_single_variable_feature',
                 'test_experiment_double_feature',
@@ -1686,7 +1686,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('sendImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'test_experiment_double_feature',
+                '122238',
                 'control',
                 'double_single_variable_feature',
                 'test_experiment_double_feature',
@@ -2144,7 +2144,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfig, 'test_experiment', 'variation', '', 'test_experiment', 'experiment', true, '', $userAttributes);
+            ->with($this->projectConfig, '7716830082', 'variation', '', 'test_experiment', 'experiment', true, '', $userAttributes);
 
         // Call activate
         $this->assertEquals('variation', $optimizelyMock->activate('test_experiment', '', $userAttributes));
@@ -2239,7 +2239,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that sendImpression is called with expected params
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfig, 'group_experiment_1', 'group_exp_1_var_2', '', 'group_experiment_1', 'experiment', true, 'user_1', null);
+            ->with($this->projectConfig, '7723330021', 'group_exp_1_var_2', '', 'group_experiment_1', 'experiment', true, 'user_1', null);
 
         // Call activate
         $this->assertSame('group_exp_1_var_2', $optimizelyMock->activate('group_experiment_1', 'user_1'));
@@ -2272,7 +2272,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that sendImpression is called with expected params
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfig, 'group_experiment_1', 'group_exp_1_var_2', '', 'group_experiment_1', 'experiment', true, 'user_1', null);
+            ->with($this->projectConfig, '7723330021', 'group_exp_1_var_2', '', 'group_experiment_1', 'experiment', true, 'user_1', null);
 
         // set forced variation
         $this->assertTrue($optimizelyMock->setForcedVariation($experimentKey, $userId, $variationKey), 'Set variation for paused experiment should have failed.');
@@ -2333,7 +2333,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfig, 'test_experiment', 'control', '', 'test_experiment', 'experiment', true, 'test_user', $userAttributes);
+            ->with($this->projectConfig, '7716830082', 'control', '', 'test_experiment', 'experiment', true, 'test_user', $userAttributes);
 
         // Call activate
         $this->assertEquals('control', $optimizelyMock->activate('test_experiment', 'test_user', $userAttributes));
@@ -2366,7 +2366,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfig, 'test_experiment', 'control', '', 'test_experiment', 'experiment', true, 'test_user', $userAttributes);
+            ->with($this->projectConfig, '7716830082', 'control', '', 'test_experiment', 'experiment', true, 'test_user', $userAttributes);
 
         // Call activate
         $this->assertEquals('control', $optimizelyMock->activate('test_experiment', 'test_user', $userAttributes));
@@ -2391,7 +2391,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->at(0))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfigForTypedAudience, 'typed_audience_experiment', 'A', '', 'typed_audience_experiment', 'experiment', true, 'test_user', $userAttributes);
+            ->with($this->projectConfigForTypedAudience, '1323241597', 'A', '', 'typed_audience_experiment', 'experiment', true, 'test_user', $userAttributes);
 
         // Should be included via exact match string audience with id '3468206642'
         $this->assertEquals('A', $optimizelyMock->activate('typed_audience_experiment', 'test_user', $userAttributes));
@@ -2403,7 +2403,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->at(0))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfigForTypedAudience, 'typed_audience_experiment', 'A', '', 'typed_audience_experiment', 'experiment', true, 'test_user', $userAttributes);
+            ->with($this->projectConfigForTypedAudience, '1323241597', 'A', '', 'typed_audience_experiment', 'experiment', true, 'test_user', $userAttributes);
 
         //Should be included via exact match number audience with id '3468206646'
         $this->assertEquals('A', $optimizelyMock->activate('typed_audience_experiment', 'test_user', $userAttributes));
@@ -2443,7 +2443,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that sendImpressionEvent is called once with expected attributes
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfigForTypedAudience, 'audience_combinations_experiment', 'A', '', 'audience_combinations_experiment', 'experiment', true, 'test_user', $userAttributes);
+            ->with($this->projectConfigForTypedAudience, '1323241598', 'A', '', 'audience_combinations_experiment', 'experiment', true, 'test_user', $userAttributes);
 
         // Should be included via substring match string audience with id '3988293898', and
         // exact match number audience with id '3468206646'
@@ -4306,7 +4306,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // assert that sendImpressionEvent is called with expected params
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfig, 'test_experiment_double_feature', 'control', 'double_single_variable_feature', 'test_experiment_double_feature', FeatureDecision::DECISION_SOURCE_FEATURE_TEST, true, 'user_id', []);
+            ->with($this->projectConfig, '122238', 'control', 'double_single_variable_feature', 'test_experiment_double_feature', FeatureDecision::DECISION_SOURCE_FEATURE_TEST, true, 'user_id', []);
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -4411,7 +4411,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfig, 'test_experiment_double_feature', 'variation', 'double_single_variable_feature', 'test_experiment_double_feature', FeatureDecision::DECISION_SOURCE_FEATURE_TEST, false, 'user_id', []);
+            ->with($this->projectConfig, '122238', 'variation', 'double_single_variable_feature', 'test_experiment_double_feature', FeatureDecision::DECISION_SOURCE_FEATURE_TEST, false, 'user_id', []);
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -4794,7 +4794,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // assert that sendImpressionEvent is called with expected params
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->projectConfig, 'test_experiment_double_feature', 'control', 'double_single_variable_feature', 'test_experiment_double_feature', FeatureDecision::DECISION_SOURCE_FEATURE_TEST, true, '', []);
+            ->with($this->projectConfig, '122238', 'control', 'double_single_variable_feature', 'test_experiment_double_feature', FeatureDecision::DECISION_SOURCE_FEATURE_TEST, true, '', []);
 
         $this->loggerMock->expects($this->at(0))
             ->method('log')
@@ -6429,7 +6429,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('createImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'group_experiment_1',
+                '7723330021',
                 'group_exp_1_var_2',
                 'group_experiment_1',
                 'group_experiment_1',
@@ -6487,7 +6487,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'Dispatching impression event to URL logx.optimizely.com/decision with params {"param1":"val1","param2":"val2"}.'
             );
 
-        $optlyObject->sendImpressionEvent($this->projectConfig, 'group_experiment_1', 'group_exp_1_var_2', 'group_experiment_1', 'group_experiment_1', 'experiment', true, 'user_1', null);
+        $optlyObject->sendImpressionEvent($this->projectConfig, '7723330021', 'group_exp_1_var_2', 'group_experiment_1', 'group_experiment_1', 'experiment', true, 'user_1', null);
     }
 
     public function testSendImpressionEventDispatchFailure()
@@ -6510,7 +6510,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::ERROR, 'Unable to dispatch impression event. Error ');
 
-        $optlyObject->sendImpressionEvent($this->projectConfig, 'test_experiment', 'control', 'test_experiment', 'test_experiment', 'experiment', true, 'test_user', []);
+        $optlyObject->sendImpressionEvent($this->projectConfig, '7716830082', 'control', 'test_experiment', 'test_experiment', 'experiment', true, 'test_user', []);
     }
 
     public function testSendImpressionEventWithAttributes()
@@ -6528,7 +6528,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->method('createImpressionEvent')
             ->with(
                 $this->projectConfig,
-                'test_experiment',
+                '7716830082',
                 'control',
                 'test_experiment',
                 'test_experiment',
@@ -6576,7 +6576,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optlyObject->notificationCenter = $this->notificationCenterMock;
 
-        $optlyObject->sendImpressionEvent($this->projectConfig, 'test_experiment', 'control', 'test_experiment', 'test_experiment', 'experiment', true, 'test_user', $userAttributes);
+        $optlyObject->sendImpressionEvent($this->projectConfig, '7716830082', 'control', 'test_experiment', 'test_experiment', 'experiment', true, 'test_user', $userAttributes);
     }
 
     /*
@@ -6752,7 +6752,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         // Verify that sendImpressionEvent is called with expected attributes
         $optimizelyMock->expects($this->exactly(1))
             ->method('sendImpressionEvent')
-            ->with($this->anything(), 'rollout_1_exp_1', '177771', 'boolean_single_variable_feature', 'rollout_1_exp_1', 'rollout', true, 'user_id', []);
+            ->with($this->anything(), '177770', '177771', 'boolean_single_variable_feature', 'rollout_1_exp_1', 'rollout', true, 'user_id', []);
 
         $this->assertTrue($optimizelyMock->isFeatureEnabled('boolean_single_variable_feature', 'user_id', []));
     }

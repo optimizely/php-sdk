@@ -1694,9 +1694,9 @@ class TestBucketer extends Bucketer
  */
 class OptimizelyTester extends Optimizely
 {
-    public function sendImpressionEvent($config, $experimentKey, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
+    public function sendImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
     {
-        parent::sendImpressionEvent($config, $experimentKey, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes);
+        parent::sendImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes);
     }
 
     public function validateInputs(array $values, $logLevel = Logger::ERROR)

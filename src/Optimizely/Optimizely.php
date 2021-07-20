@@ -201,7 +201,7 @@ class Optimizely
     }
 
     /**
-     * @param  string        Experiment key
+     * @param  string        Experiment ID
      * @param  string        Variation key
      * @param  string        User ID
      * @param  array         Associative array of user attributes
@@ -209,7 +209,7 @@ class Optimizely
      */
     protected function sendImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
     {
-        $experimentKey = $config->getExperimentFromId($experimentId)->getId();
+        $experimentKey = $config->getExperimentFromId($experimentId)->getKey();
         $impressionEvent = $this->_eventBuilder
             ->createImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes);
         $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));

@@ -222,7 +222,7 @@ class EventBuilder
      * Create impression event to be sent to the logging endpoint.
      *
      * @param $config ProjectConfigInterface Configuration for the project.
-     * @param $experimentKey Experiment Experiment being activated.
+     * @param $experimentId Experiment Experiment being activated.
      * @param $variationKey string Variation user
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.

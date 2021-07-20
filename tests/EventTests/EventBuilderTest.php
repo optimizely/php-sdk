@@ -142,7 +142,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
-            'test_experiment',
+            '7716830082',
             'variation',
             'test_experiment',
             'test_experiment',
@@ -202,7 +202,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         ];
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
-            'test_experiment',
+            '7716830082',
             'variation',
             'test_experiment',
             'test_experiment',
@@ -243,7 +243,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         ];
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
-            'test_experiment',
+            '7716830082',
             'variation',
             'test_experiment',
             'test_experiment',
@@ -285,7 +285,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         ];
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
-            'test_experiment',
+            '7716830082',
             'variation',
             'test_experiment',
             'test_experiment',
@@ -317,7 +317,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         ];
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
-            'test_experiment',
+            '7716830082',
             'variation',
             'test_experiment',
             'test_experiment',
@@ -358,7 +358,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         ];
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
-            'test_experiment',
+            '7716830082',
             'variation',
             'test_experiment',
             'test_experiment',
@@ -406,7 +406,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         ];
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
-            'test_experiment',
+            '7716830082',
             'variation',
             'test_experiment',
             'test_experiment',
@@ -457,7 +457,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $configMock,
-            'test_experiment',
+            '7716830082',
             'variation',
             'test_experiment',
             'test_experiment',
@@ -504,7 +504,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
 
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $configMock,
-            'test_experiment',
+            '7716830082',
             'variation',
             'test_experiment',
             'test_experiment',
@@ -834,7 +834,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         ];
         $logEvent = $this->eventBuilder->createImpressionEvent(
             $this->config,
-            'test_experiment',
+            '7716830082',
             'variation',
             'test_experiment',
             'test_experiment',
