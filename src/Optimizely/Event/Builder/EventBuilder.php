@@ -229,12 +229,12 @@ class EventBuilder
      *
      * @return LogEvent Event object to be sent to dispatcher.
      */
-    public function createImpressionEvent($config, $experimentKey, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
+    public function createImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
     {
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
 
-        $experiment = $config->getExperimentFromKey($experimentKey);
-        $variation = $config->getVariationFromKey($experimentKey, $variationKey);
+        $experiment = $config->getExperimentFromId($experimentId);
+        $variation = $config->getVariationFromKeyByExperimentId($experimentId, $variationKey);
         $impressionParams = $this->getImpressionParams($experiment, $variation, $flagKey, $ruleKey, $ruleType, $enabled);
 
         $eventParams[VISITORS][0][SNAPSHOTS][] = $impressionParams;

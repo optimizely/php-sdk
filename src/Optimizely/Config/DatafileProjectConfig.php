@@ -282,20 +282,22 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $this->_variationKeyMap = [];
         $this->_variationIdMap = [];
+        $this->_variationKeyMapByExperimentId = [];
+        $this->_variationIdMapByExperimentId = [];
         $this->_experimentKeyMap = [];
 
         foreach (array_values($this->_experimentIdMap) as $experiment) {
             $this->_variationKeyMap[$experiment->getKey()] = [];
             $this->_variationIdMap[$experiment->getKey()] = [];
-            $this->_variationIdMapByExperimentId[$experiment->getID()] = [];
-            $this->_variationKeyMapByExperimentId[$experiment->getID()] = [];
+            $this->_variationIdMapByExperimentId[$experiment->getId()] = [];
+            $this->_variationKeyMapByExperimentId[$experiment->getId()] = [];
             $this->_experimentKeyMap[$experiment->getKey()] = $experiment;
 
             foreach ($experiment->getVariations() as $variation) {
                 $this->_variationKeyMap[$experiment->getKey()][$variation->getKey()] = $variation;
                 $this->_variationIdMap[$experiment->getKey()][$variation->getId()] = $variation;
-                $this->_variationKeyMapByExperimentId[$experiment->getID()][$variation->getKey()] = $variation;
-                $this->_variationIdMapByExperimentId[$experiment->getID()][$variation->getId()] = $variation;
+                $this->_variationKeyMapByExperimentId[$experiment->getId()][$variation->getKey()] = $variation;
+                $this->_variationIdMapByExperimentId[$experiment->getId()][$variation->getId()] = $variation;
             }
         }
 
@@ -314,17 +316,23 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $rolloutVariationIdMap = [];
         $rolloutVariationKeyMap = [];
+        $rolloutVariationIdMapByExperimentId = [];
+        $rolloutVariationKeyMapByExperimentId = [];
         foreach ($this->_rollouts as $rollout) {
             $this->_rolloutIdMap[$rollout->getId()] = $rollout;
 
             foreach ($rollout->getExperiments() as $rule) {
                 $rolloutVariationIdMap[$rule->getKey()] = [];
                 $rolloutVariationKeyMap[$rule->getKey()] = [];
+                $rolloutVariationIdMapByExperimentId[$rule->getId()] = [];
+                $rolloutVariationKeyMapByExperimentId[$rule->getId()] = [];
 
                 $variations = $rule->getVariations();
                 foreach ($variations as $variation) {
                     $rolloutVariationIdMap[$rule->getKey()][$variation->getId()] = $variation;
                     $rolloutVariationKeyMap[$rule->getKey()][$variation->getKey()] = $variation;
+                    $rolloutVariationIdMapByExperimentId[$rule->getId()][$variation->getId()] = $variation;
+                    $rolloutVariationKeyMapByExperimentId[$rule->getId()][$variation->getKey()] = $variation;
                 }
             }
         }
@@ -332,6 +340,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
         // Add variations for rollout experiments to variationIdMap and variationKeyMap
         $this->_variationIdMap = $this->_variationIdMap + $rolloutVariationIdMap;
         $this->_variationKeyMap = $this->_variationKeyMap + $rolloutVariationKeyMap;
+        $this->_variationIdMapByExperimentId = $this->_variationIdMapByExperimentId + $rolloutVariationIdMapByExperimentId;
+        $this->_variationKeyMapByExperimentId = $this->_variationKeyMapByExperimentId + $rolloutVariationKeyMapByExperimentId;
 
         foreach (array_values($this->_featureFlags) as $featureFlag) {
             $this->_featureKeyMap[$featureFlag->getKey()] = $featureFlag;
