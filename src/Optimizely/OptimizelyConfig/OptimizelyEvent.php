@@ -16,41 +16,33 @@
  */
 namespace Optimizely\OptimizelyConfig;
 
-class OptimizelyExperiment implements \JsonSerializable
+class OptimizelyEvent implements \JsonSerializable
 {
     /**
-     * @var string ID representing Experiment.
+     * @var string ID representing Event.
      */
     private $id;
 
     /**
-     * @var string Key representing Experiment.
+     * @var string Key representing Event.
      */
     private $key;
 
     /**
-     * @var string string representing Experiment audience conditions name mapped.
+     * @var array ExperimentIds representing Event experiment ids.
      */
-    private $audiences;
+    private $experimentIds;
 
 
-    /**
-     * Map of Variation Keys to OptimizelyVariations.
-     *
-     * @var <String, OptimizelyVariation> associative array
-     */
-    private $variationsMap;
-
-    public function __construct($id, $key, array $variationsMap, $audiences)
+    public function __construct($id, $key, array $experimentIds)
     {
         $this->id = $id;
-        $this->key = $key;
-        $this->audiences = $audiences;
-        $this->variationsMap = $variationsMap;
+        $this->name = $key;
+        $this->conditions = $experimentIds;
     }
 
     /**
-     * @return string Experiment ID.
+     * @return string Event ID.
      */
     public function getId()
     {
@@ -58,7 +50,7 @@ class OptimizelyExperiment implements \JsonSerializable
     }
 
     /**
-     * @return string Experiment key.
+     * @return string Event Key.
      */
     public function getKey()
     {
@@ -66,20 +58,11 @@ class OptimizelyExperiment implements \JsonSerializable
     }
 
     /**
-     * @return string Experiment audiences.
+     * @return string Event conditions.
      */
-    public function getExperimentAudiences()
+    public function getExperimentIds()
     {
-        return $this->audiences;
-    }
-
-
-    /**
-     * @return array Map of Variation Keys to OptimizelyVariations.
-     */
-    public function getVariationsMap()
-    {
-        return $this->variationsMap;
+        return $this->experimentIds;
     }
 
     /**

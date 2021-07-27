@@ -38,6 +38,16 @@ class OptimizelyConfigService
     private $revision;
 
     /**
+     * @var string environmentKey of the config.
+     */
+    private $environment_key;
+
+    /**
+     * @var string sdkKey of the config.
+     */
+    private $sdk_key;
+
+    /**
      * @var string String denoting datafile.
      */
     private $datafile;
@@ -69,6 +79,7 @@ class OptimizelyConfigService
         $this->featureFlags = $projectConfig->getFeatureFlags();
         $this->revision = $projectConfig->getRevision();
         $this->datafile = $projectConfig->toDatafile();
+        $this->
         
         $this->createLookupMaps();
     }

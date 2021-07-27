@@ -16,41 +16,26 @@
  */
 namespace Optimizely\OptimizelyConfig;
 
-class OptimizelyExperiment implements \JsonSerializable
+class OptimizelyAttribute implements \JsonSerializable
 {
     /**
-     * @var string ID representing Experiment.
+     * @var string ID representing Attribute.
      */
     private $id;
 
     /**
-     * @var string Key representing Experiment.
+     * @var string Key representing Attribute.
      */
     private $key;
 
-    /**
-     * @var string string representing Experiment audience conditions name mapped.
-     */
-    private $audiences;
-
-
-    /**
-     * Map of Variation Keys to OptimizelyVariations.
-     *
-     * @var <String, OptimizelyVariation> associative array
-     */
-    private $variationsMap;
-
-    public function __construct($id, $key, array $variationsMap, $audiences)
+    public function __construct($id, $key)
     {
         $this->id = $id;
         $this->key = $key;
-        $this->audiences = $audiences;
-        $this->variationsMap = $variationsMap;
     }
 
     /**
-     * @return string Experiment ID.
+     * @return string Attribute ID.
      */
     public function getId()
     {
@@ -58,28 +43,11 @@ class OptimizelyExperiment implements \JsonSerializable
     }
 
     /**
-     * @return string Experiment key.
+     * @return string Attribute key.
      */
     public function getKey()
     {
         return $this->key;
-    }
-
-    /**
-     * @return string Experiment audiences.
-     */
-    public function getExperimentAudiences()
-    {
-        return $this->audiences;
-    }
-
-
-    /**
-     * @return array Map of Variation Keys to OptimizelyVariations.
-     */
-    public function getVariationsMap()
-    {
-        return $this->variationsMap;
     }
 
     /**

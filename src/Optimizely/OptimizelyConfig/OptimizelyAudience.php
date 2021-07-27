@@ -16,41 +16,33 @@
  */
 namespace Optimizely\OptimizelyConfig;
 
-class OptimizelyExperiment implements \JsonSerializable
+class OptimizelyAudience implements \JsonSerializable
 {
     /**
-     * @var string ID representing Experiment.
+     * @var string ID representing Audience.
      */
     private $id;
 
     /**
-     * @var string Key representing Experiment.
+     * @var string Name representing Audience.
      */
-    private $key;
+    private $name;
 
     /**
-     * @var string string representing Experiment audience conditions name mapped.
+     * @var string Conditions representing Audience conditions.
      */
-    private $audiences;
+    private $conditions;
 
 
-    /**
-     * Map of Variation Keys to OptimizelyVariations.
-     *
-     * @var <String, OptimizelyVariation> associative array
-     */
-    private $variationsMap;
-
-    public function __construct($id, $key, array $variationsMap, $audiences)
+    public function __construct($id, $name, $conditions)
     {
         $this->id = $id;
-        $this->key = $key;
-        $this->audiences = $audiences;
-        $this->variationsMap = $variationsMap;
+        $this->name = $name;
+        $this->conditions = $conditions;
     }
 
     /**
-     * @return string Experiment ID.
+     * @return string Audience ID.
      */
     public function getId()
     {
@@ -58,28 +50,19 @@ class OptimizelyExperiment implements \JsonSerializable
     }
 
     /**
-     * @return string Experiment key.
+     * @return string Audience Name.
      */
-    public function getKey()
+    public function getName()
     {
-        return $this->key;
+        return $this->name;
     }
 
     /**
-     * @return string Experiment audiences.
+     * @return string Audience conditions.
      */
-    public function getExperimentAudiences()
+    public function getConditions()
     {
-        return $this->audiences;
-    }
-
-
-    /**
-     * @return array Map of Variation Keys to OptimizelyVariations.
-     */
-    public function getVariationsMap()
-    {
-        return $this->variationsMap;
+        return $this->conditions;
     }
 
     /**

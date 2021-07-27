@@ -33,6 +33,22 @@ class OptimizelyFeature implements \JsonSerializable
      *
      * @var <String, OptimizelyExperiment> associative array
      */
+    private $experiment_rules;
+
+
+    /**
+     * Map of rollout Experiments Keys to OptimizelyExperiments.
+     *
+     * @var <String, OptimizelyExperiment> associative array
+     */
+    private $delivery_rules;
+
+
+    /**
+     * Map of Experiment Keys to OptimizelyExperiments.
+     *
+     * @var <String, OptimizelyExperiment> associative array
+     */
     private $experimentsMap;
 
     /**
@@ -42,10 +58,12 @@ class OptimizelyFeature implements \JsonSerializable
      */
     private $variablesMap;
 
-    public function __construct($id, $key, array $experimentsMap, array $variablesMap)
+    public function __construct($id, $key, array $experimentsMap, array $variablesMap, array $experiment_rules, array $delivery_rules)
     {
         $this->id = $id;
         $this->key = $key;
+        $this->experiment_rules = $experiment_rules;
+        $this->delivery_rules = $delivery_rules;
         $this->experimentsMap = $experimentsMap;
         $this->variablesMap = $variablesMap;
     }
@@ -64,6 +82,22 @@ class OptimizelyFeature implements \JsonSerializable
     public function getKey()
     {
         return $this->key;
+    }
+
+    /**
+     * @return array Map of Experiment Keys to OptimizelyExperiments.
+     */
+    public function getExperimentRules()
+    {
+        return $this->experiment_rules;
+    }
+
+    /**
+     * @return array Map of Rollout Experiments Keys to OptimizelyExperiments.
+     */
+    public function getDeliveryRules()
+    {
+        return $this->delivery_rules;
     }
 
     /**
