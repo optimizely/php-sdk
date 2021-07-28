@@ -94,6 +94,18 @@ class DatafileProjectConfig implements ProjectConfigInterface
     private $datafile;
 
     /**
+     * @var string environmentKey of the config.
+     */
+    private $environment_key;
+
+    /**
+     * @var string sdkKey of the config.
+     */
+    private $sdk_key;
+
+
+
+    /**
      * @var string Revision of the datafile.
      */
     private $_revision;
@@ -212,6 +224,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $this->_logger = $logger;
         $this->_errorHandler = $errorHandler;
         $this->_version = $config['version'];
+        $this->environment_key = isset($config['environmentKey'])? $config['environmentKey'] : null;
+        $this->sdk_key = isset($config['sdkKey'])? $config['sdkKey'] : null;;
         if (!in_array($this->_version, $supportedVersions)) {
             throw new InvalidDatafileVersionException(
                 "This version of the PHP SDK does not support the given datafile version: {$this->_version}."
@@ -423,6 +437,22 @@ class DatafileProjectConfig implements ProjectConfigInterface
     public function getRevision()
     {
         return $this->_revision;
+    }
+
+    /**
+     * @return string Config environmentKey.
+     */
+    public function getEnvironmentKey()
+    {
+        return $this->environment_key;
+    }
+
+    /**
+     * @return string Config sdkKey.
+     */
+    public function getSdkKey()
+    {
+        return $this->sdk_key;
     }
 
     /**

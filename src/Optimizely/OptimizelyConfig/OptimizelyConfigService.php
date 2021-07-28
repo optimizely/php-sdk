@@ -79,7 +79,8 @@ class OptimizelyConfigService
         $this->featureFlags = $projectConfig->getFeatureFlags();
         $this->revision = $projectConfig->getRevision();
         $this->datafile = $projectConfig->toDatafile();
-        $this->
+        $this->environment_key = $projectConfig->getEnvironmentKey();
+        $this->sdk_key = $projectConfig->getSdkKey();
         
         $this->createLookupMaps();
     }
@@ -96,7 +97,9 @@ class OptimizelyConfigService
             $this->revision,
             $experimentsMaps[0],
             $featuresMap,
-            $this->datafile
+            $this->datafile,
+            $this->environment_key,
+            $this->sdk_key
         );
     }
     
@@ -219,6 +222,87 @@ class OptimizelyConfigService
     }
 
     /**
+     * Generates array of delivery rules for optimizelyFeature.
+     *
+     * @param string feature rollout id.
+     *
+     * @return array of optimizelyExperiments as delivery rules .
+     */
+    protected function getExperimentAudiences(array $audience_cond, $projectConfig)
+    {
+        $res_audiences = '';
+        $audience_conditions = array('and', 'or', 'not');
+        if ($audience_cond != null){
+            $cond = '';
+            foreach($audience_cond as $var) {
+                $subAudience = '';
+                if (is_array($var)){
+                    $subAudience = $this->getExperimentAudiences($var, $projectConfig);
+                    $subAudience = "(" + $subAudience + ")";    
+                }
+                elseif (in_array($var, $audience_conditions, TRUE)){
+                    $cond = strtoupper(strval($var));
+                }
+                else {
+                    $itemStr = strval($var);
+                    if ((strval($res_audiences) != '') || $cond="NOT"){
+                        if ($res_audiences = '') {
+                            $res_audiences = $res_audiences + ' ';
+                        }
+                        else {
+                            $res_audiences = $res_audiences;
+
+                        }
+                        if ($cond = ''){
+                            $cond = 'OR';
+                        }
+                        else{
+                            $cond = $cond;
+
+                        }
+                        $audience = $projectConfig->getAudience($itemStr);
+                        $name = $audience->getName();
+                        $res_audiences = $res_audiences + $cond + " \"" + $name + "\"";
+                    }
+                    else{
+                        $audience = $projectConfig->getAudience($itemStr);
+                        $name = $audience->getName();
+                        $res_audiences = "\"" + $name + "\"";
+                    }
+
+                }
+                if (strval($subAudience != '')){
+                    if ((strval($res_audiences) != '') || $cond="NOT"){
+                        if ($res_audiences = '') {
+                            $res_audiences = $res_audiences + ' ';
+                        }
+                        else {
+                            $res_audiences = $res_audiences;
+
+                        }
+                        if ($cond = ''){
+                            $cond = 'OR';
+                        }
+                        else{
+                            $cond = $cond;
+
+                        }
+                        $res_audiences = $res_audiences + $cond + " " + $subAudience;
+                }
+                else{
+                    $res_audiences = $res_audiences + $subAudience;
+                }
+
+            }
+
+        }
+    
+    }
+    return $res_audiences;
+    } 
+
+
+    /**
      * Generates OptimizelyExperiment Key and ID Maps.
      * Returns an array with
      * [0] OptimizelyExperimentKeyMap Used to form OptimizelyConfig
@@ -226,7 +310,7 @@ class OptimizelyConfigService
      *
      * @return [<string, OptimizelyExperiment>, <string, OptimizelyExperiment>]
      */
-    protected function getExperimentsMaps()
+    protected function getExperimentsMaps(ProjectConfigInterface $projectConfig=null)
     {
         $experimentsKeyMap = [];
         $experimentsIdMap = [];
@@ -234,11 +318,21 @@ class OptimizelyConfigService
         foreach ($this->experiments as $exp) {
             $expId = $exp->getId();
             $expKey = $exp->getKey();
+            $audiences = '';
+            if (is_null($exp->getAudienceConditions())) {
+                $audiences = '';
+            }
+            else {
+                $audience_cond = $exp->getAudienceConditions();
+                $audiences = $this->getExperimentAudiences($audience_cond, $projectConfig);
 
+            }
             $optExp = new OptimizelyExperiment(
                 $expId,
                 $expKey,
-                $this->getVariationsMap($exp)
+                $this->getVariationsMap($exp),
+                $audiences
+                
             );
 
             $experimentsKeyMap[$expKey] = $optExp;
@@ -249,23 +343,74 @@ class OptimizelyConfigService
     }
 
     /**
+     * Generates array of delivery rules for optimizelyFeature.
+     *
+     * @param string feature rollout id.
+     *
+     * @return array of optimizelyExperiments as delivery rules .
+     */
+    protected function getDeliveryRules(string $rollout_id, $projectConfig)
+    {
+        $delivery_rules = [];
+        $rollout = $projectConfig->getRolloutFromId($rollout_id);
+        $experiments = $rollout->getExperiments();
+        foreach ($experiments as $exp){
+            $expId = $exp->getId();
+            $expKey = $exp->getKey();
+            $audiences = '';
+            if (is_null($exp->getAudienceConditions())) {
+                $audiences = '';
+            }
+            else {
+                $audience_cond = $exp->getAudienceConditions();
+                $audiences = $this->getExperimentAudiences($audience_cond, $projectConfig);
+
+            }
+            $optExp = new OptimizelyExperiment(
+                $expId,
+                $expKey,
+                $this->getVariationsMap($exp),
+                $audiences
+                
+            );
+            array_push($delivery_rules, $optExp);
+        }
+    
+        return $delivery_rules;
+    }
+
+
+    /**
      * Generates Features map for the project config.
      *
      * @param array Map of ID to OptimizelyExperiments.
      *
      * @return <String, OptimizelyFeature> Map of Feature key to OptimizelyFeature.
      */
-    protected function getFeaturesMap(array $experimentsIdMap)
+    protected function getFeaturesMap(array $experimentsIdMap, ProjectConfigInterface $projectConfig=null)
     {
         $featuresMap = [];
 
         foreach ($this->featureFlags as $feature) {
             $featureKey = $feature->getKey();
             $experimentsMap = [];
+            $experiment_rules = [];
+            $delivery_rules = [];
+            if (is_null($feature->getRolloutId()))
+            {
+                $delivery_rules = [];
+            }
+            else{
+                $rollout_id = $feature->getRolloutId();
+                $delivery_rules = $this->getDeliveryRules($rollout_id, $projectConfig);
+
+            }
 
             foreach ($feature->getExperimentIds() as $expId) {
                 $optExp = $experimentsIdMap[$expId];
                 $experimentsMap[$optExp->getKey()] = $optExp;
+                array_push($experiment_rules, $optExp);
+
             }
 
             $variablesMap = $this->featKeyOptlyVariableKeyVariableMap[$featureKey];
@@ -274,7 +419,9 @@ class OptimizelyConfigService
                 $feature->getId(),
                 $featureKey,
                 $experimentsMap,
-                $variablesMap
+                $variablesMap,
+                $experiment_rules,
+                $delivery_rules,
             );
 
             $featuresMap[$featureKey] = $optFeature;
