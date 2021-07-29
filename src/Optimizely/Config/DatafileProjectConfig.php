@@ -175,6 +175,34 @@ class DatafileProjectConfig implements ProjectConfigInterface
     private $_rollouts;
 
     /**
+     * list of Attributes that will be parsed from the datafile
+     *
+     * @var [Attribute]
+     */
+    private $_attributes;
+
+    /**
+     * list of Audiences that will be parsed from the datafile
+     *
+     * @var [Audiences]
+     */
+    private $_audiences;
+
+    /**
+     * list of Events that will be parsed from the datafile
+     *
+     * @var [Event]
+     */
+    private $_events;
+
+    /**
+     * list of Typed Audiences that will be parsed from the datafile
+     *
+     * @var [typed_audience]
+     */
+    private $_typed_audiences;    
+
+    /**
      * internal mapping of feature keys to feature flag models.
      *
      * @var <String, FeatureFlag>  associative array of feature keys to feature flags
@@ -234,6 +262,10 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
+        $this->_attributes = $config['attributes'] ?: [];
+        $this->_audiences = $config['audiences'] ?: [];
+        $this->_events = $config['events'] ?: [];
+        $this->_typed_audiences = isset($config['typedAudiences']) ? $config['typedAudiences']: [];
         $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
         $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
@@ -461,6 +493,38 @@ class DatafileProjectConfig implements ProjectConfigInterface
     public function getFeatureFlags()
     {
         return $this->_featureFlags;
+    }
+
+    /**
+     * @return array List of attributes parsed from the datafile
+     */
+    public function getAttributes()
+    {
+        return $this->_attributes;
+    }
+
+    /**
+     * @return array List of audiences parsed from the datafile
+     */
+    public function getAudiences()
+    {
+        return $this->_audiences;
+    }
+
+    /**
+     * @return array List of events parsed from the datafile
+     */
+    public function getEvents()
+    {
+        return $this->_events;
+    }
+
+    /**
+     * @return array List of typed audiences parsed from the datafile
+     */
+    public function getTypedAudiences()
+    {
+        return $this->_typed_audiences;
     }
 
     /**

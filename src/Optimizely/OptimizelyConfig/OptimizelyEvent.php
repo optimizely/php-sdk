@@ -37,8 +37,8 @@ class OptimizelyEvent implements \JsonSerializable
     public function __construct($id, $key, array $experimentIds)
     {
         $this->id = $id;
-        $this->name = $key;
-        $this->conditions = $experimentIds;
+        $this->key = $key;
+        $this->experimentIds = $experimentIds;
     }
 
     /**
