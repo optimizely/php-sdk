@@ -20,12 +20,17 @@ use Exception;
 use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
+use Optimizely\OptimizelyConfig\OptimizelyAttribute;
 use Optimizely\OptimizelyConfig\OptimizelyConfig;
 use Optimizely\OptimizelyConfig\OptimizelyConfigService;
+use Optimizely\OptimizelyConfig\OptimizelyEvent;
 use Optimizely\OptimizelyConfig\OptimizelyExperiment;
 use Optimizely\OptimizelyConfig\OptimizelyFeature;
 use Optimizely\OptimizelyConfig\OptimizelyVariable;
 use Optimizely\OptimizelyConfig\OptimizelyVariation;
+
+use function GuzzleHttp\json_decode;
+
 include 'TeatData.php';
 
 class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
@@ -193,7 +198,23 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
               "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
               "id": "$opt_dummy_audience",
               "name": "Optimizely-Generated Audience for Backwards Compatibility"
+            },
+            {
+              "id": "3468206642",
+              "name": "exactString",
+              "conditions": "[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"
+            },
+            {
+              "id": "3988293898",
+              "name": "$$dummySubstringString",
+              "conditions": "{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"
+            },
+            {
+              "id": "3988293899",
+              "name": "$$dummyExists",
+              "conditions": "{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"
             }
+    
           ],
           "groups": [
             {
@@ -370,17 +391,27 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $featExperiment =
             new OptimizelyExperiment("17279300791", "feat_experiment", $this->featExpVariationMap,'');
 
+        //  creating optimizely Experiment for delivery rules 
 
+        $this->deliveryDefaultVariableKeyMap = [];
+        $this->deliveryExpVariationMap = [];
+        $this->deliveryExpVariationMap['17285550838'] = 
+            new OptimizelyVariation('17285550838', '17285550838', true, $this->deliveryDefaultVariableKeyMap);
+       
+        $del_Experiment = 
+            new OptimizelyExperiment("17268110732", "17268110732", $this->deliveryExpVariationMap, '');
         // create feature
         $experimentsMap = ['feat_experiment' => $featExperiment];
+        $experiment_rules = [$featExperiment];
+        $deliver_rules = [$del_Experiment];
         $this->feature =
             new OptimizelyFeature(
                 '17266500726',
                 'test_feature',
                 $experimentsMap,
                 $this->expectedDefaultVariableKeyMap,
-                [],
-                []
+                $experiment_rules,
+                $deliver_rules
             );
 
         // create ab experiment and variations
@@ -485,7 +516,56 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertEquals(['test_feature' => $this->feature], $response);
+        foreach ($response as $feature){
+          $this->assertInstanceof(OptimizelyFeature::class, $feature);
+          $experiment_rules = $feature->getExperimentRules();
+          $deliver_rules = $feature->getDeliveryRules();
+          if (! empty($experiment_rules)){
+            foreach ($experiment_rules as $exp){
+              $this->assertInstanceof(OptimizelyExperiment::class, $exp);
+            }
+          }
+          if (! empty($deliver_rules)){
+            foreach ($deliver_rules as $del){
+              $this->assertInstanceof(OptimizelyExperiment::class, $del);
+            }
+
+          }          
+        }
     }
+
+    public function testgetExperimentAudiences()
+    {
+        $audience_conditions = array("or","3468206642");
+        #fwrite(STDERR, print_r(gettype($audience_conditions), TRUE));
+        $getExperimentAudiences = self::getMethod("getExperimentAudiences");
+        $response = $getExperimentAudiences->invokeArgs($this->optConfigService,
+          array($audience_conditions));
+        $expected_str = '"'."exactString".'"';
+        $this->assertEquals($expected_str, $response);
+    }   
+
+    public function testgetConfigAttributes()
+    {
+        $getConfigAttributes = self::getMethod("getConfigAttributes");
+        $response = $getConfigAttributes->invokeArgs($this->optConfigService, array());
+        if (! empty($response)){
+          foreach ($response as $attr){
+            $this->assertInstanceof(OptimizelyAttribute::class, $attr);
+          }
+        }   
+    }
+
+    public function testgetConfigEvents()
+    {
+        $getConfigEvents = self::getMethod("getConfigEvents");
+        $response = $getConfigEvents->invokeArgs($this->optConfigService, array());
+        if (! empty($response)){
+          foreach ($response as $event){
+            $this->assertInstanceof(OptimizelyEvent::class, $event);
+          }
+        }   
+    }    
 
     public function testGetConfig()
     {
@@ -506,8 +586,6 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
     public function testJsonEncodeofOptimizelyConfig()
     {
         $response = $this->optConfigService->getConfig();
-        #fwrite(STDERR, print_r(json_encode($decodes['featuresMap']), TRUE));
-
         $expectedJSON = '{
           "environment_key":null,
           "sdk_key":null,
@@ -642,6 +720,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
               "id": "17266500726",
               "key": "test_feature",
               "experiment_rules":[{"id":"17279300791","key":"feat_experiment","audiences":"","variationsMap":{"variation_a":{"id":"17289540366","key":"variation_a","featureEnabled":true,"variablesMap":{"boolean_var":{"id":"17252790456","key":"boolean_var","type":"boolean","value":"true"},"integer_var":{"id":"17258820367","key":"integer_var","type":"integer","value":"5"},"double_var":{"id":"17260550714","key":"double_var","type":"double","value":"5.5"},"string_var":{"id":"17290540010","key":"string_var","type":"string","value":"i am variable value"},"json_var":{"id":"17260550458","key":"json_var","type":"json","value":"{\"text\": \"variable value\"}"}}},"variation_b":{"id":"17304990114","key":"variation_b","featureEnabled":false,"variablesMap":{"boolean_var":{"id":"17252790456","key":"boolean_var","type":"boolean","value":"false"},"integer_var":{"id":"17258820367","key":"integer_var","type":"integer","value":"1"},"double_var":{"id":"17260550714","key":"double_var","type":"double","value":"0.5"},"string_var":{"id":"17290540010","key":"string_var","type":"string","value":"i am default value"},"json_var":{"id":"17260550458","key":"json_var","type":"json","value":"{\"text\": \"default value\"}"}}}}}],
+              
               "delivery_rules":[{"id":"17268110732","key":"17268110732","audiences":"","variationsMap":{"17285550838":{"id":"17285550838","key":"17285550838","featureEnabled":true,"variablesMap":[]}}}],
               "experimentsMap": {
                 "feat_experiment": {
@@ -764,7 +843,10 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 
         $optimizelyConfig = json_decode($expectedJSON, true);
         $optimizelyConfig["attributes"]= [["id"=>"111094","key"=>"test_attribute"]];
-        $optimizelyConfig["audiences"] = [];
+        $json_encoded = '[{"id":"3468206642","name":"exactString","conditions":"[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"},{"id":"3988293898","name":"$$dummySubstringString","conditions":"{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"},{"id":"3988293899","name":"$$dummyExists","conditions":"{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"}]';
+        $converted_audiences = json_decode($json_encoded, true);
+        #fwrite(STDERR, print_r(json_encode($converted_audiences), TRUE));
+        $optimizelyConfig["audiences"] = $converted_audiences;
         $optimizelyConfig["events"] = [["id"=>"111095","key"=>"test_event","experimentIds"=>["111127"]]];
         $optimizelyConfig['datafile'] =     '{
           "version": "4",
@@ -926,7 +1008,23 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
               "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
               "id": "$opt_dummy_audience",
               "name": "Optimizely-Generated Audience for Backwards Compatibility"
+            },
+            {
+              "id": "3468206642",
+              "name": "exactString",
+              "conditions": "[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"
+            },
+            {
+              "id": "3988293898",
+              "name": "$$dummySubstringString",
+              "conditions": "{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"
+            },
+            {
+              "id": "3988293899",
+              "name": "$$dummyExists",
+              "conditions": "{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"
             }
+    
           ],
           "groups": [
             {
