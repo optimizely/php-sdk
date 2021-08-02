@@ -234,14 +234,15 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
     public function testgetExperimentAudiences()
     {
         $audience_conditions = array("or","3468206642");
-        $getExperimentAudiences = self::getMethod("getExperimentAudiences");
+        #fwrite(STDERR, print_r(gettype($audience_conditions), TRUE));
+        $getExperimentAudiences = self::getMethod("getAudiences");
         $response = $getExperimentAudiences->invokeArgs($this->optConfigService,
           array($audience_conditions));
         fwrite(STDERR, print_r(gettype($response), TRUE));    
         $expected_str = '"'."exactString".'"';
         $this->assertEquals($expected_str, $response);
         $audience_conditions = array('or','3468206642','3988293899');
-        $getExperimentAudiences = self::getMethod("getExperimentAudiences");
+        $getExperimentAudiences = self::getMethod("getAudiences");
         $response = $getExperimentAudiences->invokeArgs($this->optConfigService,
           array($audience_conditions));
         #fwrite(STDERR, print_r(gettype($response), TRUE));  
@@ -552,7 +553,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         #fwrite(STDERR, print_r(json_encode($converted_audiences), TRUE));
         $optimizelyConfig["audiences"] = $converted_audiences;
         $optimizelyConfig["events"] = [["id"=>"111095","key"=>"test_event","experimentIds"=>["111127"]]];
-        $optimizelyConfig['datafile'] = DATAFILE_FOR_OPTIMIZELY_CONFIG;
+        $optimizelyConfig['datafile'] =     DATAFILE_FOR_OPTIMIZELY_CONFIG;
    
 
 

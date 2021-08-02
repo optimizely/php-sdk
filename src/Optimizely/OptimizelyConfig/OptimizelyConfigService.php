@@ -42,12 +42,12 @@ class OptimizelyConfigService
     /**
      * @var string environmentKey of the config.
      */
-    private $environment_key;
+    private $environmentKey;
 
     /**
      * @var string sdkKey of the config.
      */
-    private $sdk_key;
+    private $sdkKey;
 
     /**
      * @var string String denoting datafile.
@@ -81,9 +81,9 @@ class OptimizelyConfigService
         $this->featureFlags = $projectConfig->getFeatureFlags();
         $this->revision = $projectConfig->getRevision();
         $this->datafile = $projectConfig->toDatafile();
-        $this->environment_key = $projectConfig->getEnvironmentKey();
-        $this->sdk_key = $projectConfig->getSdkKey();
-        $this->project_config = $projectConfig;
+        $this->environmentKey = $projectConfig->getEnvironmentKey();
+        $this->sdkKey = $projectConfig->getSdkKey();
+        $this->projectConfig = $projectConfig;
 
         
         $this->createLookupMaps();
@@ -95,7 +95,7 @@ class OptimizelyConfigService
     public function getConfig()
     {
         $experimentsMaps = $this->getExperimentsMaps();
-        $featuresMap = $this->getFeaturesMap($experimentsMaps[1], $this->project_config);
+        $featuresMap = $this->getFeaturesMap($experimentsMaps[1]);
         $attributes = $this->getConfigAttributes();
         $audiences = $this->getConfigAudiences();
         $events = $this->getConfigEvents();
@@ -104,8 +104,8 @@ class OptimizelyConfigService
             $experimentsMaps[0],
             $featuresMap,
             $this->datafile,
-            $this->environment_key,
-            $this->sdk_key,
+            $this->environmentKey,
+            $this->sdkKey,
             $attributes,
             $audiences,
             $events
@@ -121,7 +121,7 @@ class OptimizelyConfigService
     protected function getConfigAttributes()
     {
         $attributArray = [];
-        $attributes = $this->project_config->getAttributes();
+        $attributes = $this->projectConfig->getAttributes();
         foreach($attributes as $attr){
             $optly_attr = new OptimizelyAttribute(
                 $attr['id'],
@@ -141,7 +141,7 @@ class OptimizelyConfigService
     protected function getConfigEvents()
     {
         $eventsArray = [];
-        $events = $this->project_config->getEvents();
+        $events = $this->projectConfig->getEvents();
         foreach($events as $event){
             $optly_event = new OptimizelyEvent(
                 $event['id'],
@@ -163,8 +163,8 @@ class OptimizelyConfigService
     {
         $optAudiences = [];
         $uniqueIds = [];
-        $normalAudiences = $this->project_config->getAudiences();
-        $typedAudiences = $this->project_config->getTypedAudiences();
+        $normalAudiences = $this->projectConfig->getAudiences();
+        $typedAudiences = $this->projectConfig->getTypedAudiences();
         $audiencesArray = $typedAudiences;
         foreach($audiencesArray as $typedAudience){
             $id = $typedAudience['id'];
@@ -172,7 +172,7 @@ class OptimizelyConfigService
         }
         foreach ($normalAudiences as $naudience) {
             $id = $naudience['id'];
-            if (in_array($id, $uniqueIds) == false) {
+            if (! in_array($id, $uniqueIds)) {
                 array_push($audiencesArray, $naudience);
             }
         }    
@@ -312,15 +312,15 @@ class OptimizelyConfigService
     }
 
     /**
-     * Generates array of delivery rules for optimizelyFeature.
+     * Generates string of audience conditions mapped to audience names.
      *
-     * @param string feature rollout id.
+     * @param array experiment audience conditions .
      *
-     * @return array of optimizelyExperiments as delivery rules .
+     * @return string of experiment audience conditions.
      */
-    protected function getExperimentAudiences(array $audienceCond)
+    protected function getAudiences(array $audienceCond)
     {
-        $projectConfig = $this->project_config;
+        $projectConfig = $this->projectConfig;
         $resAudiences = '';
         $audienceConditions = array('and', 'or', 'not');
         if ($audienceCond != null){
@@ -328,7 +328,7 @@ class OptimizelyConfigService
             foreach($audienceCond as $var) {
                 $subAudience = '';
                 if (is_array($var)){
-                    $subAudience = $this->getExperimentAudiences($var);
+                    $subAudience = $this->getAudiences($var);
                     $subAudience = '('. $subAudience. ')';    
                 }
                 elseif (in_array($var, $audienceConditions, TRUE)){
@@ -403,13 +403,9 @@ class OptimizelyConfigService
             $expId = $exp->getId();
             $expKey = $exp->getKey();
             $audiences = '';
-            if (is_null($exp->getAudienceConditions())) {
-                $audiences = '';
-            }
-            else {
+            if ($exp->getAudienceConditions() != null) {
                 $audienceCond = $exp->getAudienceConditions();
-                $audiences = $this->getExperimentAudiences($audienceCond, $this->project_config);
-
+                $audiences = $this->getAudiences($audienceCond);
             }
             $optExp = new OptimizelyExperiment(
                 $expId,
@@ -442,13 +438,9 @@ class OptimizelyConfigService
             $expId = $exp->getId();
             $expKey = $exp->getKey();
             $audiences = '';
-            if (is_null($exp->getAudienceConditions())) {
-                $audiences = '';
-            }
-            else {
+            if ($exp->getAudienceConditions() != null) {
                 $audienceCond = $exp->getAudienceConditions();
-                $audiences = $this->getExperimentAudiences($audienceCond, $projectConfig);
-
+                $audiences = $this->getAudiences($audienceCond, $projectConfig);
             }
             $optExp = new OptimizelyExperiment(
                 $expId,
@@ -480,13 +472,9 @@ class OptimizelyConfigService
             $experimentRules = [];
             $deliveryRules = [];
             $rollout_id = $feature->getRolloutId();
-            if (is_null($rollout_id))
+            if ($rollout_id != null)
             {
-                $deliveryRules = [];
-            }
-            else{
-                $deliveryRules = $this->getDeliveryRules($rollout_id, $this->project_config);
-
+                $deliveryRules = $this->getDeliveryRules($rollout_id, $this->projectConfig);
             }
             foreach ($feature->getExperimentIds() as $expId) {
                 $optExp = $experimentsIdMap[$expId];
