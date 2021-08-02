@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,12 +96,12 @@ class DatafileProjectConfig implements ProjectConfigInterface
     /**
      * @var string environmentKey of the config.
      */
-    private $environment_key;
+    private $environmentKey;
 
     /**
      * @var string sdkKey of the config.
      */
-    private $sdk_key;
+    private $sdkKey;
 
 
 
@@ -179,28 +179,28 @@ class DatafileProjectConfig implements ProjectConfigInterface
      *
      * @var [Attribute]
      */
-    private $_attributes;
+    private $attributes;
 
     /**
      * list of Audiences that will be parsed from the datafile
      *
      * @var [Audiences]
      */
-    private $_audiences;
+    private $audiences;
 
     /**
      * list of Events that will be parsed from the datafile
      *
      * @var [Event]
      */
-    private $_events;
+    private $events;
 
     /**
      * list of Typed Audiences that will be parsed from the datafile
      *
      * @var [typed_audience]
      */
-    private $_typed_audiences;    
+    private $typedAudiences;    
 
     /**
      * internal mapping of feature keys to feature flag models.
@@ -252,8 +252,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $this->_logger = $logger;
         $this->_errorHandler = $errorHandler;
         $this->_version = $config['version'];
-        $this->environment_key = isset($config['environmentKey'])? $config['environmentKey'] : null;
-        $this->sdk_key = isset($config['sdkKey'])? $config['sdkKey'] : null;;
+        $this->environmentKey = isset($config['environmentKey'])? $config['environmentKey'] : '';
+        $this->sdkKey = isset($config['sdkKey'])? $config['sdkKey'] : '';
         if (!in_array($this->_version, $supportedVersions)) {
             throw new InvalidDatafileVersionException(
                 "This version of the PHP SDK does not support the given datafile version: {$this->_version}."
@@ -262,10 +262,10 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
-        $this->_attributes = $config['attributes'] ?: [];
-        $this->_audiences = $config['audiences'] ?: [];
-        $this->_events = $config['events'] ?: [];
-        $this->_typed_audiences = isset($config['typedAudiences']) ? $config['typedAudiences']: [];
+        $this->attributes = $config['attributes'] ?: [];
+        $this->audiences = $config['audiences'] ?: [];
+        $this->events = $config['events'] ?: [];
+        $this->typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences']: [];
         $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
         $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
@@ -273,10 +273,6 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
-        $events = $config['events'] ?: [];
-        $attributes = $config['attributes'] ?: [];
-        $audiences = $config['audiences'] ?: [];
-        $typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences']: [];
         $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
         $featureFlags = isset($config['featureFlags']) ? $config['featureFlags']: [];
 
@@ -294,10 +290,10 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $this->_groupIdMap = ConfigParser::generateMap($groups, 'id', Group::class);
         $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);
-        $this->_eventKeyMap = ConfigParser::generateMap($events, 'key', Event::class);
-        $this->_attributeKeyMap = ConfigParser::generateMap($attributes, 'key', Attribute::class);
-        $typedAudienceIdMap = ConfigParser::generateMap($typedAudiences, 'id', Audience::class);
-        $this->_audienceIdMap = ConfigParser::generateMap($audiences, 'id', Audience::class);
+        $this->_eventKeyMap = ConfigParser::generateMap($this->events, 'key', Event::class);
+        $this->_attributeKeyMap = ConfigParser::generateMap($this->attributes, 'key', Attribute::class);
+        $typedAudienceIdMap = ConfigParser::generateMap( $this->typedAudiences, 'id', Audience::class);
+        $this->_audienceIdMap = ConfigParser::generateMap($this->audiences, 'id', Audience::class);
         $this->_rollouts = ConfigParser::generateMap($rollouts, null, Rollout::class);
         $this->_featureFlags = ConfigParser::generateMap($featureFlags, null, FeatureFlag::class);
 
@@ -476,7 +472,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getEnvironmentKey()
     {
-        return $this->environment_key;
+        return $this->environmentKey;
     }
 
     /**
@@ -484,7 +480,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getSdkKey()
     {
-        return $this->sdk_key;
+        return $this->sdkKey;
     }
 
     /**
@@ -500,7 +496,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getAttributes()
     {
-        return $this->_attributes;
+        return $this->attributes;
     }
 
     /**
@@ -508,7 +504,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getAudiences()
     {
-        return $this->_audiences;
+        return $this->audiences;
     }
 
     /**
@@ -516,7 +512,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getEvents()
     {
-        return $this->_events;
+        return $this->events;
     }
 
     /**
@@ -524,7 +520,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getTypedAudiences()
     {
-        return $this->_typed_audiences;
+        return $this->typedAudiences;
     }
 
     /**

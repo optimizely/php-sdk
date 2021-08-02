@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely Inc and Contributors
+ * Copyright 2020-2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,18 +120,16 @@ class OptimizelyConfigService
      */
     protected function getConfigAttributes()
     {
-        $attribut_arr = [];
+        $attributArray = [];
         $attributes = $this->project_config->getAttributes();
         foreach($attributes as $attr){
-            $id = $attr["id"];
-            $key = $attr["key"];
             $optly_attr = new OptimizelyAttribute(
-                $id,
-                $key
+                $attr['id'],
+                $attr['key']
             );
-            array_push($attribut_arr, $optly_attr);
+            array_push($attributArray, $optly_attr);
         }
-        return $attribut_arr;
+        return $attributArray;
     }
 
     /**
@@ -142,20 +140,17 @@ class OptimizelyConfigService
      */
     protected function getConfigEvents()
     {
-        $events_arr = [];
+        $eventsArray = [];
         $events = $this->project_config->getEvents();
         foreach($events as $event){
-            $id = $event["id"];
-            $key = $event["key"];
-            $experimentIds = $event["experimentIds"];
             $optly_event = new OptimizelyEvent(
-                $id,
-                $key,
-                $experimentIds
+                $event['id'],
+                $event['key'],
+                $event['experimentIds']
             );
-            array_push($events_arr, $optly_event);
+            array_push($eventsArray, $optly_event);
         }
-        return $events_arr;
+        return $eventsArray;
     }
 
     /**
@@ -166,36 +161,34 @@ class OptimizelyConfigService
      */
     protected function getConfigAudiences()
     {
-        $opt_audiences = [];
-        $unique_ids = [];
-        $normal_audiences = $this->project_config->getAudiences();
-        $typed_audiences = $this->project_config->getTypedAudiences();
-        $audiences_arr = $typed_audiences;
-        foreach($audiences_arr as $type_audience){
-            $id = $type_audience["id"];
-            array_push($unique_ids, $id);
+        $optAudiences = [];
+        $uniqueIds = [];
+        $normalAudiences = $this->project_config->getAudiences();
+        $typedAudiences = $this->project_config->getTypedAudiences();
+        $audiencesArray = $typedAudiences;
+        foreach($audiencesArray as $typedAudience){
+            $id = $typedAudience['id'];
+            array_push($uniqueIds, $id);
         }
-        foreach ($normal_audiences as $n_audience) {
-            $id = $n_audience["id"];
-            if (in_array($id, $unique_ids) == false) {
-                array_push($audiences_arr, $n_audience);
+        foreach ($normalAudiences as $naudience) {
+            $id = $naudience['id'];
+            if (in_array($id, $uniqueIds) == false) {
+                array_push($audiencesArray, $naudience);
             }
         }    
-        foreach ($audiences_arr as $audience){
-            $name = $audience["name"];
-            $conditions = $audience["conditions"];
-            $id = $audience["id"];
+        foreach ($audiencesArray as $audience){
+            $id = $audience['id'];
             if ($id != '$opt_dummy_audience'){
                 $optly_audience = new OptimizelyAudience(
-                    $id,
-                    $name,
-                    $conditions
+                    $audience['id'],
+                    $audience['name'],
+                    $audience['conditions']
                 );
-                array_push($opt_audiences, $optly_audience);
+                array_push($optAudiences, $optly_audience);
             }
 
         }
-        return $opt_audiences;
+        return $optAudiences;
     }
 
 
@@ -325,57 +318,53 @@ class OptimizelyConfigService
      *
      * @return array of optimizelyExperiments as delivery rules .
      */
-    protected function getExperimentAudiences(array $audience_cond)
+    protected function getExperimentAudiences(array $audienceCond)
     {
         $projectConfig = $this->project_config;
-        $res_audiences = '';
-        $audience_conditions = array('and', 'or', 'not');
-        if ($audience_cond != null){
+        $resAudiences = '';
+        $audienceConditions = array('and', 'or', 'not');
+        if ($audienceCond != null){
             $cond = '';
-            foreach($audience_cond as $var) {
+            foreach($audienceCond as $var) {
                 $subAudience = '';
                 if (is_array($var)){
                     $subAudience = $this->getExperimentAudiences($var);
-                    $subAudience = "(". $subAudience. ")";    
+                    $subAudience = '('. $subAudience. ')';    
                 }
-                elseif (in_array($var, $audience_conditions, TRUE)){
+                elseif (in_array($var, $audienceConditions, TRUE)){
                     $cond = strtoupper(strval($var));
                 }
                 else {
                     $itemStr = strval($var);
-                    if ((strval($res_audiences) != '') || $cond="NOT"){
-                        if ($res_audiences != '') {
-                            $res_audiences = $res_audiences + ' ';
+                    if ($resAudiences !== '' || $cond == "NOT"){
+                        if ($resAudiences !== '') {
+                            $resAudiences = $resAudiences . ' ';
                         }
                         else {
-                            $res_audiences = $res_audiences;
-
+                            $resAudiences = $resAudiences;
                         }
-                        if ($cond = ''){
+                        if ($cond ==''){
                             $cond = 'OR';
-                        }
-                        else{
-                            $cond = $cond;
-
                         }
                         $audience = $projectConfig->getAudience($itemStr);
                         $name = $audience->getName();
-                        $res_audiences = $res_audiences . $cond . '"' . $name . '"';
+                        $resAudiences = $resAudiences . $cond .' '.'"' . $name . '"';
                     }
                     else{
                         $audience = $projectConfig->getAudience($itemStr);
                         $name = $audience->getName();
-                        $res_audiences = '"'. $name. '"';
+                        $resAudiences = '"'. $name. '"';
+                        
                     }
 
                 }
-                if (strval($subAudience != '')){
-                    if ((strval($res_audiences) != '') || $cond="NOT"){
-                        if ($res_audiences = '') {
-                            $res_audiences = $res_audiences. ' ';
+                if (strval($subAudience !== '')){
+                    if ((strval($resAudiences) !== '') || $cond=="NOT"){
+                        if ($resAudiences == '') {
+                            $resAudiences = $resAudiences. ' ';
                         }
                         else {
-                            $res_audiences = $res_audiences;
+                            $resAudiences = $resAudiences;
 
                         }
                         if ($cond = ''){
@@ -385,15 +374,15 @@ class OptimizelyConfigService
                             $cond = $cond;
 
                         }
-                        $res_audiences = $res_audiences. $cond. " ". $subAudience;
+                        $resAudiences = $resAudiences. $cond. ' '. $subAudience;
                 }
                 else{
-                    $res_audiences = $res_audiences. $subAudience;
+                    $resAudiences = $resAudiences. $subAudience;
                 }
             }
         }
     }
-    return $res_audiences;
+    return $resAudiences;
     } 
 
 
@@ -418,8 +407,8 @@ class OptimizelyConfigService
                 $audiences = '';
             }
             else {
-                $audience_cond = $exp->getAudienceConditions();
-                $audiences = $this->getExperimentAudiences($audience_cond, $this->project_config);
+                $audienceCond = $exp->getAudienceConditions();
+                $audiences = $this->getExperimentAudiences($audienceCond, $this->project_config);
 
             }
             $optExp = new OptimizelyExperiment(
@@ -446,7 +435,7 @@ class OptimizelyConfigService
      */
     protected function getDeliveryRules(string $rollout_id, $projectConfig)
     {
-        $delivery_rules = [];
+        $deliveryRules = [];
         $rollout = $projectConfig->getRolloutFromId($rollout_id);
         $experiments = $rollout->getExperiments();
         foreach ($experiments as $exp){
@@ -457,8 +446,8 @@ class OptimizelyConfigService
                 $audiences = '';
             }
             else {
-                $audience_cond = $exp->getAudienceConditions();
-                $audiences = $this->getExperimentAudiences($audience_cond, $projectConfig);
+                $audienceCond = $exp->getAudienceConditions();
+                $audiences = $this->getExperimentAudiences($audienceCond, $projectConfig);
 
             }
             $optExp = new OptimizelyExperiment(
@@ -468,10 +457,10 @@ class OptimizelyConfigService
                 $audiences
                 
             );
-            array_push($delivery_rules, $optExp);
+            array_push($deliveryRules, $optExp);
         }
     
-        return $delivery_rules;
+        return $deliveryRules;
     }
 
 
@@ -488,21 +477,21 @@ class OptimizelyConfigService
         foreach ($this->featureFlags as $feature) {
             $featureKey = $feature->getKey();
             $experimentsMap = [];
-            $experiment_rules = [];
-            $delivery_rules = [];
+            $experimentRules = [];
+            $deliveryRules = [];
             $rollout_id = $feature->getRolloutId();
             if (is_null($rollout_id))
             {
-                $delivery_rules = [];
+                $deliveryRules = [];
             }
             else{
-                $delivery_rules = $this->getDeliveryRules($rollout_id, $this->project_config);
+                $deliveryRules = $this->getDeliveryRules($rollout_id, $this->project_config);
 
             }
             foreach ($feature->getExperimentIds() as $expId) {
                 $optExp = $experimentsIdMap[$expId];
                 $experimentsMap[$optExp->getKey()] = $optExp;
-                array_push($experiment_rules, $optExp);
+                array_push($experimentRules, $optExp);
 
             }
 
@@ -513,8 +502,8 @@ class OptimizelyConfigService
                 $featureKey,
                 $experimentsMap,
                 $variablesMap,
-                $experiment_rules,
-                $delivery_rules,
+                $experimentRules,
+                $deliveryRules,
             );
 
             $featuresMap[$featureKey] = $optFeature;

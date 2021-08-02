@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely Inc and Contributors
+ * Copyright 2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ class OptimizelyConfig implements \JsonSerializable
     /**
      * @var string environmentKey of the config.
      */
-    private $environment_key;
+    private $environmentKey;
 
     /**
      * @var string sdkKey of the config.
      */
-    private $sdk_key;
+    private $sdkKey;
 
     /**
      * @var string Revision of the config.
@@ -74,10 +74,10 @@ class OptimizelyConfig implements \JsonSerializable
     private $datafile;
     
 
-    public function __construct($revision, array $experimentsMap, array $featuresMap, $datafile = null, $environment_key='', $sdk_key='', array $attributes=[], array $audiences=[], array $events=[])
+    public function __construct($revision, array $experimentsMap, array $featuresMap, $datafile = null, $environmentKey='', $sdkKey='', array $attributes=[], array $audiences=[], array $events=[])
     {
-        $this->environment_key = $environment_key;
-        $this->sdk_key = $sdk_key;
+        $this->environmentKey = $environmentKey;
+        $this->sdkKey = $sdkKey;
         $this->revision = $revision;
         $this->experimentsMap = $experimentsMap;
         $this->featuresMap = $featuresMap;
@@ -93,7 +93,7 @@ class OptimizelyConfig implements \JsonSerializable
      */
     public function getEnvironmentKey()
     {
-        return $this->environment_key;
+        return $this->environmentKey;
     }
 
     /**
@@ -101,7 +101,7 @@ class OptimizelyConfig implements \JsonSerializable
      */
     public function getSdkKey()
     {
-        return $this->sdk_key;
+        return $this->sdkKey;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely Inc and Contributors
+ * Copyright 2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,17 @@ namespace Optimizely\OptimizelyConfig;
 class OptimizelyEvent implements \JsonSerializable
 {
     /**
-     * @var string ID representing Event.
+     * @var string id representing event.
      */
     private $id;
 
     /**
-     * @var string Key representing Event.
+     * @var string key representing event.
      */
     private $key;
 
     /**
-     * @var array ExperimentIds representing Event experiment ids.
+     * @var array experimentIds representing event experiment ids.
      */
     private $experimentIds;
 
@@ -42,7 +42,7 @@ class OptimizelyEvent implements \JsonSerializable
     }
 
     /**
-     * @return string Event ID.
+     * @return string event ID.
      */
     public function getId()
     {
@@ -50,7 +50,7 @@ class OptimizelyEvent implements \JsonSerializable
     }
 
     /**
-     * @return string Event Key.
+     * @return string event Key.
      */
     public function getKey()
     {
@@ -58,7 +58,7 @@ class OptimizelyEvent implements \JsonSerializable
     }
 
     /**
-     * @return string Event conditions.
+     * @return string event conditions.
      */
     public function getExperimentIds()
     {

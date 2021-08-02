@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely Inc and Contributors
+ * Copyright 2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ namespace Optimizely\OptimizelyConfig;
 class OptimizelyAttribute implements \JsonSerializable
 {
     /**
-     * @var string ID representing Attribute.
+     * @var string id representing attribute.
      */
     private $id;
 
     /**
-     * @var string Key representing Attribute.
+     * @var string key representing attribute.
      */
     private $key;
 
@@ -35,7 +35,7 @@ class OptimizelyAttribute implements \JsonSerializable
     }
 
     /**
-     * @return string Attribute ID.
+     * @return string attribute id.
      */
     public function getId()
     {
@@ -43,7 +43,7 @@ class OptimizelyAttribute implements \JsonSerializable
     }
 
     /**
-     * @return string Attribute key.
+     * @return string attribute key.
      */
     public function getKey()
     {

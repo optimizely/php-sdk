@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely Inc and Contributors
+ * Copyright 2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,17 @@ namespace Optimizely\OptimizelyConfig;
 class OptimizelyAudience implements \JsonSerializable
 {
     /**
-     * @var string ID representing Audience.
+     * @var string id representing audience.
      */
     private $id;
 
     /**
-     * @var string Name representing Audience.
+     * @var string name representing audience.
      */
     private $name;
 
     /**
-     * @var string Conditions representing Audience conditions.
+     * @var string conditions representing audience conditions.
      */
     private $conditions;
 
@@ -42,7 +42,7 @@ class OptimizelyAudience implements \JsonSerializable
     }
 
     /**
-     * @return string Audience ID.
+     * @return string audience id.
      */
     public function getId()
     {
@@ -50,7 +50,7 @@ class OptimizelyAudience implements \JsonSerializable
     }
 
     /**
-     * @return string Audience Name.
+     * @return string audience name.
      */
     public function getName()
     {
@@ -58,7 +58,7 @@ class OptimizelyAudience implements \JsonSerializable
     }
 
     /**
-     * @return string Audience conditions.
+     * @return string audience conditions.
      */
     public function getConditions()
     {
