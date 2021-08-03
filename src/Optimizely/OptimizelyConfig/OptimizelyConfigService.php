@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely Inc and Contributors
+ * Copyright 2020-2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
 
+use function GuzzleHttp\json_decode;
+
 class OptimizelyConfigService
 {
     /**
@@ -36,6 +38,16 @@ class OptimizelyConfigService
      * @var string Revision of config.
      */
     private $revision;
+
+    /**
+     * @var string environmentKey of the config.
+     */
+    private $environmentKey;
+
+    /**
+     * @var string sdkKey of the config.
+     */
+    private $sdkKey;
 
     /**
      * @var string String denoting datafile.
@@ -69,6 +81,10 @@ class OptimizelyConfigService
         $this->featureFlags = $projectConfig->getFeatureFlags();
         $this->revision = $projectConfig->getRevision();
         $this->datafile = $projectConfig->toDatafile();
+        $this->environmentKey = $projectConfig->getEnvironmentKey();
+        $this->sdkKey = $projectConfig->getSdkKey();
+        $this->projectConfig = $projectConfig;
+
         
         $this->createLookupMaps();
     }
@@ -80,15 +96,103 @@ class OptimizelyConfigService
     {
         $experimentsMaps = $this->getExperimentsMaps();
         $featuresMap = $this->getFeaturesMap($experimentsMaps[1]);
-
+        $attributes = $this->getConfigAttributes();
+        $audiences = $this->getConfigAudiences();
+        $events = $this->getConfigEvents();
         return new OptimizelyConfig(
             $this->revision,
             $experimentsMaps[0],
             $featuresMap,
-            $this->datafile
+            $this->datafile,
+            $this->environmentKey,
+            $this->sdkKey,
+            $attributes,
+            $audiences,
+            $events
         );
     }
     
+    /**
+     * Generates array of attributes as OptimizelyAttribute.
+     *
+     *
+     * @return array of OptimizelyAttributes.
+     */
+    protected function getConfigAttributes()
+    {
+        $attributArray = [];
+        $attributes = $this->projectConfig->getAttributes();
+        foreach($attributes as $attr){
+            $optly_attr = new OptimizelyAttribute(
+                $attr['id'],
+                $attr['key']
+            );
+            array_push($attributArray, $optly_attr);
+        }
+        return $attributArray;
+    }
+
+    /**
+     * Generates array of events as OptimizelyEvents.
+     *
+     *
+     * @return array of OptimizelyEvents.
+     */
+    protected function getConfigEvents()
+    {
+        $eventsArray = [];
+        $events = $this->projectConfig->getEvents();
+        foreach($events as $event){
+            $optly_event = new OptimizelyEvent(
+                $event['id'],
+                $event['key'],
+                $event['experimentIds']
+            );
+            array_push($eventsArray, $optly_event);
+        }
+        return $eventsArray;
+    }
+
+    /**
+     * Generates array of audiences giving typed audiences high priority as OptimizelyAudience.
+     *
+     *
+     * @return array of OptimizelyEvents.
+     */
+    protected function getConfigAudiences()
+    {
+        $optAudiences = [];
+        $uniqueIds = [];
+        $normalAudiences = $this->projectConfig->getAudiences();
+        $typedAudiences = $this->projectConfig->getTypedAudiences();
+        $audiencesArray = $typedAudiences;
+        foreach($audiencesArray as $typedAudience){
+            $id = $typedAudience['id'];
+            array_push($uniqueIds, $id);
+        }
+        foreach ($normalAudiences as $naudience) {
+            $id = $naudience['id'];
+            if (! in_array($id, $uniqueIds)) {
+                array_push($audiencesArray, $naudience);
+            }
+        }    
+        foreach ($audiencesArray as $audience){
+            $id = $audience['id'];
+            if ($id != '$opt_dummy_audience'){
+                $optly_audience = new OptimizelyAudience(
+                    $audience['id'],
+                    $audience['name'],
+                    $audience['conditions']
+                );
+                array_push($optAudiences, $optly_audience);
+            }
+
+        }
+        return $optAudiences;
+    }
+
+
+
     /**
      * Generates lookup maps to avoid redundant iteration while creating OptimizelyConfig.
      */
@@ -208,6 +312,81 @@ class OptimizelyConfigService
     }
 
     /**
+     * Generates string of audience conditions mapped to audience names.
+     *
+     * @param array experiment audience conditions .
+     *
+     * @return string of experiment audience conditions.
+     */
+    protected function getAudiences(array $audienceCond)
+    {
+        $projectConfig = $this->projectConfig;
+        $resAudiences = '';
+        $audienceConditions = array('and', 'or', 'not');
+        if ($audienceCond != null){
+            $cond = '';
+            foreach($audienceCond as $var) {
+                $subAudience = '';
+                if (is_array($var)){
+                    $subAudience = $this->getAudiences($var);
+                    $subAudience = '('. $subAudience. ')';    
+                }
+                elseif (in_array($var, $audienceConditions, TRUE)){
+                    $cond = strtoupper(strval($var));
+                }
+                else {
+                    $itemStr = strval($var);
+                    if ($resAudiences !== '' || $cond == "NOT"){
+                        if ($resAudiences !== '') {
+                            $resAudiences = $resAudiences . ' ';
+                        }
+                        else {
+                            $resAudiences = $resAudiences;
+                        }
+                        if ($cond ==''){
+                            $cond = 'OR';
+                        }
+                        $audience = $projectConfig->getAudience($itemStr);
+                        $name = $audience->getName();
+                        $resAudiences = $resAudiences . $cond .' '.'"' . $name . '"';
+                    }
+                    else{
+                        $audience = $projectConfig->getAudience($itemStr);
+                        $name = $audience->getName();
+                        $resAudiences = '"'. $name. '"';
+                        
+                    }
+
+                }
+                if (strval($subAudience !== '')){
+                    if ((strval($resAudiences) !== '') || $cond=="NOT"){
+                        if ($resAudiences == '') {
+                            $resAudiences = $resAudiences. ' ';
+                        }
+                        else {
+                            $resAudiences = $resAudiences;
+
+                        }
+                        if ($cond = ''){
+                            $cond = 'OR';
+                        }
+                        else{
+                            $cond = $cond;
+
+                        }
+                        $resAudiences = $resAudiences. $cond. ' '. $subAudience;
+                }
+                else{
+                    $resAudiences = $resAudiences. $subAudience;
+                }
+            }
+        }
+    }
+    return $resAudiences;
+    } 
+
+
+    /**
      * Generates OptimizelyExperiment Key and ID Maps.
      * Returns an array with
      * [0] OptimizelyExperimentKeyMap Used to form OptimizelyConfig
@@ -223,11 +402,17 @@ class OptimizelyConfigService
         foreach ($this->experiments as $exp) {
             $expId = $exp->getId();
             $expKey = $exp->getKey();
-
+            $audiences = '';
+            if ($exp->getAudienceConditions() != null) {
+                $audienceCond = $exp->getAudienceConditions();
+                $audiences = $this->getAudiences($audienceCond);
+            }
             $optExp = new OptimizelyExperiment(
                 $expId,
                 $expKey,
-                $this->getVariationsMap($exp)
+                $this->getVariationsMap($exp),
+                $audiences
+                
             );
 
             $experimentsKeyMap[$expKey] = $optExp;
@@ -236,6 +421,40 @@ class OptimizelyConfigService
 
         return [$experimentsKeyMap, $experimentsIdMap];
     }
+
+    /**
+     * Generates array of delivery rules for optimizelyFeature.
+     *
+     * @param string feature rollout id.
+     *
+     * @return array of optimizelyExperiments as delivery rules .
+     */
+    protected function getDeliveryRules(string $rollout_id, $projectConfig)
+    {
+        $deliveryRules = [];
+        $rollout = $projectConfig->getRolloutFromId($rollout_id);
+        $experiments = $rollout->getExperiments();
+        foreach ($experiments as $exp){
+            $expId = $exp->getId();
+            $expKey = $exp->getKey();
+            $audiences = '';
+            if ($exp->getAudienceConditions() != null) {
+                $audienceCond = $exp->getAudienceConditions();
+                $audiences = $this->getAudiences($audienceCond, $projectConfig);
+            }
+            $optExp = new OptimizelyExperiment(
+                $expId,
+                $expKey,
+                $this->getVariationsMap($exp),
+                $audiences
+                
+            );
+            array_push($deliveryRules, $optExp);
+        }
+    
+        return $deliveryRules;
+    }
+
 
     /**
      * Generates Features map for the project config.
@@ -247,14 +466,21 @@ class OptimizelyConfigService
     protected function getFeaturesMap(array $experimentsIdMap)
     {
         $featuresMap = [];
-
         foreach ($this->featureFlags as $feature) {
             $featureKey = $feature->getKey();
             $experimentsMap = [];
-
+            $experimentRules = [];
+            $deliveryRules = [];
+            $rollout_id = $feature->getRolloutId();
+            if ($rollout_id != null)
+            {
+                $deliveryRules = $this->getDeliveryRules($rollout_id, $this->projectConfig);
+            }
             foreach ($feature->getExperimentIds() as $expId) {
                 $optExp = $experimentsIdMap[$expId];
                 $experimentsMap[$optExp->getKey()] = $optExp;
+                array_push($experimentRules, $optExp);
+
             }
 
             $variablesMap = $this->featKeyOptlyVariableKeyVariableMap[$featureKey];
@@ -263,7 +489,9 @@ class OptimizelyConfigService
                 $feature->getId(),
                 $featureKey,
                 $experimentsMap,
-                $variablesMap
+                $variablesMap,
+                $experimentRules,
+                $deliveryRules,
             );
 
             $featuresMap[$featureKey] = $optFeature;

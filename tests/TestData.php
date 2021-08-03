@@ -1537,7 +1537,23 @@ define(
           "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
           "id": "$opt_dummy_audience",
           "name": "Optimizely-Generated Audience for Backwards Compatibility"
+        },
+        {
+          "id": "3468206642",
+          "name": "exactString",
+          "conditions": "[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"
+        },
+        {
+          "id": "3988293898",
+          "name": "$$dummySubstringString",
+          "conditions": "{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"
+        },
+        {
+          "id": "3988293899",
+          "name": "$$dummyExists",
+          "conditions": "{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"
         }
+
       ],
       "groups": [
         {
@@ -1655,12 +1671,12 @@ define(
         }
       ],
       "attributes": [
-        
+        {"key": "test_attribute", "id": "111094"}
       ],
       "botFiltering": false,
       "accountId": "8272261422",
       "events": [
-        
+        {"key": "test_event", "experimentIds": ["111127"], "id": "111095"}
       ],
       "revision": "16"
   }'

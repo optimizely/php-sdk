@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely Inc and Contributors
+ * Copyright 2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,16 @@ namespace Optimizely\OptimizelyConfig;
 
 class OptimizelyConfig implements \JsonSerializable
 {
+    /**
+     * @var string environmentKey of the config.
+     */
+    private $environmentKey;
+
+    /**
+     * @var string sdkKey of the config.
+     */
+    private $sdkKey;
+
     /**
      * @var string Revision of the config.
      */
@@ -38,17 +48,60 @@ class OptimizelyConfig implements \JsonSerializable
     private $featuresMap;
 
     /**
+     * array of attributes as OptimizelyAttribute.
+     *
+     * @var <String, OptimizelyAttribute> associative array
+     */
+    private $attributes;
+
+    /**
+     * array of audiences as OptimizelyAudience.
+     *
+     * @var <String, OptimizelyAudience> associative array
+     */
+    private $audiences;
+
+    /**
+     * array of events as OptimizelyEvent.
+     *
+     * @var <String, OptimizelyEvent> associative array
+     */
+    private $events;
+
+    /**
      * @var string Contents of datafile.
      */
     private $datafile;
     
 
-    public function __construct($revision, array $experimentsMap, array $featuresMap, $datafile = null)
+    public function __construct($revision, array $experimentsMap, array $featuresMap, $datafile = null, $environmentKey='', $sdkKey='', array $attributes=[], array $audiences=[], array $events=[])
     {
+        $this->environmentKey = $environmentKey;
+        $this->sdkKey = $sdkKey;
         $this->revision = $revision;
         $this->experimentsMap = $experimentsMap;
         $this->featuresMap = $featuresMap;
+        $this->attributes = $attributes;
+        $this->audiences = $audiences;
+        $this->events = $events;
         $this->datafile = $datafile;
+        
+    }
+
+    /**
+     * @return string Config environmentKey.
+     */
+    public function getEnvironmentKey()
+    {
+        return $this->environmentKey;
+    }
+
+    /**
+     * @return string Config sdkKey.
+     */
+    public function getSdkKey()
+    {
+        return $this->sdkKey;
     }
 
     /**
@@ -81,6 +134,30 @@ class OptimizelyConfig implements \JsonSerializable
     public function getFeaturesMap()
     {
         return $this->featuresMap;
+    }
+
+    /**
+     * @return array attributes as  OptimizelyAttribute.
+     */
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @return array audiences as  OptimizelyAudience.
+     */
+    public function getAudiences()
+    {
+        return $this->audiences;
+    }
+
+    /**
+     * @return array events as  OptimizelyEvent.
+     */
+    public function getEvents()
+    {
+        return $this->events;
     }
 
     /**
