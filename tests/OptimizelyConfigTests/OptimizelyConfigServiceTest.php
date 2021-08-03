@@ -31,7 +31,7 @@ use Optimizely\OptimizelyConfig\OptimizelyVariation;
 
 use function GuzzleHttp\json_decode;
 
-include 'TeatData.php';
+require 'TeatData.php';
 
 class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 {
@@ -86,7 +86,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 
         // create feat_experiment
         $featExperiment =
-            new OptimizelyExperiment("17279300791", "feat_experiment", $this->featExpVariationMap,'');
+            new OptimizelyExperiment("17279300791", "feat_experiment", $this->featExpVariationMap, '');
 
         //  creating optimizely Experiment for delivery rules 
 
@@ -214,38 +214,42 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(['test_feature' => $this->feature], $response);
         foreach ($response as $feature){
-          $this->assertInstanceof(OptimizelyFeature::class, $feature);
-          $experiment_rules = $feature->getExperimentRules();
-          $deliver_rules = $feature->getDeliveryRules();
-          if (! empty($experiment_rules)){
-            foreach ($experiment_rules as $exp){
-              $this->assertInstanceof(OptimizelyExperiment::class, $exp);
+            $this->assertInstanceof(OptimizelyFeature::class, $feature);
+            $experiment_rules = $feature->getExperimentRules();
+            $deliver_rules = $feature->getDeliveryRules();
+            if (! empty($experiment_rules)) {
+                foreach ($experiment_rules as $exp){
+                    $this->assertInstanceof(OptimizelyExperiment::class, $exp);
+                }
             }
-          }
-          if (! empty($deliver_rules)){
-            foreach ($deliver_rules as $del){
-              $this->assertInstanceof(OptimizelyExperiment::class, $del);
-            }
+            if (! empty($deliver_rules)) {
+                foreach ($deliver_rules as $del){
+                    $this->assertInstanceof(OptimizelyExperiment::class, $del);
+                }
 
-          }          
+            }          
         }
     }
 
     public function testgetExperimentAudiences()
     {
         $audience_conditions = array("or","3468206642");
-        #fwrite(STDERR, print_r(gettype($audience_conditions), TRUE));
+        // fwrite(STDERR, print_r(gettype($audience_conditions), TRUE));
         $getExperimentAudiences = self::getMethod("getAudiences");
-        $response = $getExperimentAudiences->invokeArgs($this->optConfigService,
-          array($audience_conditions));
-        fwrite(STDERR, print_r(gettype($response), TRUE));    
+        $response = $getExperimentAudiences->invokeArgs(
+            $this->optConfigService,
+            array($audience_conditions)
+        );
+        fwrite(STDERR, print_r(gettype($response), true));    
         $expected_str = '"'."exactString".'"';
         $this->assertEquals($expected_str, $response);
         $audience_conditions = array('or','3468206642','3988293899');
         $getExperimentAudiences = self::getMethod("getAudiences");
-        $response = $getExperimentAudiences->invokeArgs($this->optConfigService,
-          array($audience_conditions));
-        #fwrite(STDERR, print_r(gettype($response), TRUE));  
+        $response = $getExperimentAudiences->invokeArgs(
+            $this->optConfigService,
+            array($audience_conditions)
+        );
+        // fwrite(STDERR, print_r(gettype($response), TRUE));  
         $expected_str = '"'."exactString".'"'.' '.'OR'. ' ' . '"'.'$$dummyExists'.'"';
         $this->assertEquals($expected_str, $response);
     }   
@@ -254,10 +258,10 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
     {
         $getConfigAttributes = self::getMethod("getConfigAttributes");
         $response = $getConfigAttributes->invokeArgs($this->optConfigService, array());
-        if (! empty($response)){
-          foreach ($response as $attr){
-            $this->assertInstanceof(OptimizelyAttribute::class, $attr);
-          }
+        if (! empty($response)) {
+            foreach ($response as $attr){
+                $this->assertInstanceof(OptimizelyAttribute::class, $attr);
+            }
         }   
     }
 
@@ -265,10 +269,10 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
     {
         $getConfigEvents = self::getMethod("getConfigEvents");
         $response = $getConfigEvents->invokeArgs($this->optConfigService, array());
-        if (! empty($response)){
-          foreach ($response as $event){
-            $this->assertInstanceof(OptimizelyEvent::class, $event);
-          }
+        if (! empty($response)) {
+            foreach ($response as $event){
+                $this->assertInstanceof(OptimizelyEvent::class, $event);
+            }
         }   
     }    
 
@@ -550,7 +554,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $optimizelyConfig["attributes"]= [["id"=>"111094","key"=>"test_attribute"]];
         $json_encoded = '[{"id":"3468206642","name":"exactString","conditions":"[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"},{"id":"3988293898","name":"$$dummySubstringString","conditions":"{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"},{"id":"3988293899","name":"$$dummyExists","conditions":"{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"}]';
         $converted_audiences = json_decode($json_encoded, true);
-        #fwrite(STDERR, print_r(json_encode($converted_audiences), TRUE));
+        // fwrite(STDERR, print_r(json_encode($converted_audiences), TRUE));
         $optimizelyConfig["audiences"] = $converted_audiences;
         $optimizelyConfig["events"] = [["id"=>"111095","key"=>"test_event","experimentIds"=>["111127"]]];
         $optimizelyConfig['datafile'] =     DATAFILE_FOR_OPTIMIZELY_CONFIG;

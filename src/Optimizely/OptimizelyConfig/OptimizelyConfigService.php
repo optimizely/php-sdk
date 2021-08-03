@@ -115,7 +115,6 @@ class OptimizelyConfigService
     /**
      * Generates array of attributes as OptimizelyAttribute.
      *
-     *
      * @return array of OptimizelyAttributes.
      */
     protected function getConfigAttributes()
@@ -134,7 +133,6 @@ class OptimizelyConfigService
 
     /**
      * Generates array of events as OptimizelyEvents.
-     *
      *
      * @return array of OptimizelyEvents.
      */
@@ -155,7 +153,6 @@ class OptimizelyConfigService
 
     /**
      * Generates array of audiences giving typed audiences high priority as OptimizelyAudience.
-     *
      *
      * @return array of OptimizelyEvents.
      */
@@ -178,7 +175,7 @@ class OptimizelyConfigService
         }    
         foreach ($audiencesArray as $audience){
             $id = $audience['id'];
-            if ($id != '$opt_dummy_audience'){
+            if ($id != '$opt_dummy_audience') {
                 $optly_audience = new OptimizelyAudience(
                     $audience['id'],
                     $audience['name'],
@@ -203,12 +200,12 @@ class OptimizelyConfigService
         $this->featKeyOptlyVariableIdVariableMap = [];
 
         foreach ($this->featureFlags as $feature) {
-            # Populate experimentIdFeatureMap
+            // Populate experimentIdFeatureMap
             foreach ($feature->getExperimentIds() as $expId) {
                 $this->experimentIdFeatureMap[$expId] = $feature;
             }
 
-            # Populate featKeyOptlyVariableKeyVariableMap and featKeyOptlyVariableIdVariableMap
+            // Populate featKeyOptlyVariableKeyVariableMap and featKeyOptlyVariableIdVariableMap
             $variablesKeyMap = [];
             $variablesIdMap = [];
 
@@ -323,27 +320,27 @@ class OptimizelyConfigService
         $projectConfig = $this->projectConfig;
         $resAudiences = '';
         $audienceConditions = array('and', 'or', 'not');
-        if ($audienceCond != null){
+        if ($audienceCond != null) {
             $cond = '';
             foreach($audienceCond as $var) {
                 $subAudience = '';
-                if (is_array($var)){
+                if (is_array($var)) {
                     $subAudience = $this->getAudiences($var);
                     $subAudience = '('. $subAudience. ')';    
                 }
-                elseif (in_array($var, $audienceConditions, TRUE)){
+                elseif (in_array($var, $audienceConditions, true)) {
                     $cond = strtoupper(strval($var));
                 }
                 else {
                     $itemStr = strval($var);
-                    if ($resAudiences !== '' || $cond == "NOT"){
+                    if ($resAudiences !== '' || $cond == "NOT") {
                         if ($resAudiences !== '') {
                             $resAudiences = $resAudiences . ' ';
                         }
                         else {
                             $resAudiences = $resAudiences;
                         }
-                        if ($cond ==''){
+                        if ($cond =='') {
                             $cond = 'OR';
                         }
                         $audience = $projectConfig->getAudience($itemStr);
@@ -358,8 +355,8 @@ class OptimizelyConfigService
                     }
 
                 }
-                if (strval($subAudience !== '')){
-                    if ((strval($resAudiences) !== '') || $cond=="NOT"){
+                if (strval($subAudience !== '')) {
+                    if ((strval($resAudiences) !== '') || $cond=="NOT") {
                         if ($resAudiences == '') {
                             $resAudiences = $resAudiences. ' ';
                         }
@@ -367,7 +364,7 @@ class OptimizelyConfigService
                             $resAudiences = $resAudiences;
 
                         }
-                        if ($cond = ''){
+                        if ($cond = '') {
                             $cond = 'OR';
                         }
                         else{
@@ -375,14 +372,14 @@ class OptimizelyConfigService
 
                         }
                         $resAudiences = $resAudiences. $cond. ' '. $subAudience;
-                }
-                else{
-                    $resAudiences = $resAudiences. $subAudience;
+                    }
+                    else{
+                        $resAudiences = $resAudiences. $subAudience;
+                    }
                 }
             }
         }
-    }
-    return $resAudiences;
+        return $resAudiences;
     } 
 
 
@@ -412,7 +409,6 @@ class OptimizelyConfigService
                 $expKey,
                 $this->getVariationsMap($exp),
                 $audiences
-                
             );
 
             $experimentsKeyMap[$expKey] = $optExp;
@@ -447,7 +443,6 @@ class OptimizelyConfigService
                 $expKey,
                 $this->getVariationsMap($exp),
                 $audiences
-                
             );
             array_push($deliveryRules, $optExp);
         }
@@ -472,8 +467,7 @@ class OptimizelyConfigService
             $experimentRules = [];
             $deliveryRules = [];
             $rollout_id = $feature->getRolloutId();
-            if ($rollout_id != null)
-            {
+            if ($rollout_id != null) {
                 $deliveryRules = $this->getDeliveryRules($rollout_id, $this->projectConfig);
             }
             foreach ($feature->getExperimentIds() as $expId) {
