@@ -184,7 +184,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
     /**
      * list of Audiences that will be parsed from the datafile
      *
-     * @var [Audiences]
+     * @var [Audience]
      */
     private $audiences;
 

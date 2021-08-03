@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2021, Optimizely Inc and Contributors
+ * Copyright 2020-2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,21 +50,21 @@ class OptimizelyConfig implements \JsonSerializable
     /**
      * array of attributes as OptimizelyAttribute.
      *
-     * @var <String, OptimizelyAttribute> associative array
+     * @var [OptimizelyAttribute]
      */
     private $attributes;
 
     /**
      * array of audiences as OptimizelyAudience.
      *
-     * @var <String, OptimizelyAudience> associative array
+     * @var [OptimizelyAudience]
      */
     private $audiences;
 
     /**
      * array of events as OptimizelyEvent.
      *
-     * @var <String, OptimizelyEvent> associative array
+     * @var [OptimizelyEvent]
      */
     private $events;
 

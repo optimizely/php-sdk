@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2021, Optimizely
+ * Copyright 2020-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,12 @@ use Optimizely\OptimizelyConfig\OptimizelyVariation;
 
 use function GuzzleHttp\json_decode;
 
-require 'TeatData.php';
-
 class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 {
 
     public function setUp()
     {
         $this->datafile = DATAFILE_FOR_OPTIMIZELY_CONFIG;
-
         $this->projectConfig = new DatafileProjectConfig(
             $this->datafile,
             new NoOpLogger(),
@@ -88,14 +85,14 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $featExperiment =
             new OptimizelyExperiment("17279300791", "feat_experiment", $this->featExpVariationMap, '');
 
-        //  creating optimizely Experiment for delivery rules 
+        //  creating optimizely Experiment for delivery rules
 
         $this->deliveryDefaultVariableKeyMap = [];
         $this->deliveryExpVariationMap = [];
         $this->deliveryExpVariationMap['17285550838'] = 
             new OptimizelyVariation('17285550838', '17285550838', true, $this->deliveryDefaultVariableKeyMap);
        
-        $del_Experiment = 
+        $del_Experiment =
             new OptimizelyExperiment("17268110732", "17268110732", $this->deliveryExpVariationMap, '');
         // create feature
         $experimentsMap = ['feat_experiment' => $featExperiment];
@@ -213,21 +210,20 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertEquals(['test_feature' => $this->feature], $response);
-        foreach ($response as $feature){
+        foreach ($response as $feature) {
             $this->assertInstanceof(OptimizelyFeature::class, $feature);
             $experiment_rules = $feature->getExperimentRules();
             $deliver_rules = $feature->getDeliveryRules();
             if (! empty($experiment_rules)) {
-                foreach ($experiment_rules as $exp){
+                foreach ($experiment_rules as $exp) {
                     $this->assertInstanceof(OptimizelyExperiment::class, $exp);
                 }
             }
             if (! empty($deliver_rules)) {
-                foreach ($deliver_rules as $del){
+                foreach ($deliver_rules as $del) {
                     $this->assertInstanceof(OptimizelyExperiment::class, $del);
                 }
-
-            }          
+            }
         }
     }
 
@@ -243,23 +239,50 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         fwrite(STDERR, print_r(gettype($response), true));    
         $expected_str = '"'."exactString".'"';
         $this->assertEquals($expected_str, $response);
+
         $audience_conditions = array('or','3468206642','3988293899');
         $getExperimentAudiences = self::getMethod("getAudiences");
         $response = $getExperimentAudiences->invokeArgs(
             $this->optConfigService,
             array($audience_conditions)
         );
-        // fwrite(STDERR, print_r(gettype($response), TRUE));  
         $expected_str = '"'."exactString".'"'.' '.'OR'. ' ' . '"'.'$$dummyExists'.'"';
         $this->assertEquals($expected_str, $response);
-    }   
+
+        $audience_conditions = array("not","3468206642");
+        $getExperimentAudiences = self::getMethod("getAudiences");
+        $response = $getExperimentAudiences->invokeArgs(
+            $this->optConfigService,
+            array($audience_conditions)
+        );
+        $expected_str = 'NOT'.' '.'"'."exactString".'"';
+        $this->assertEquals($expected_str, $response);
+
+        $audience_conditions = array('and','3468206642','3988293899');
+        $getExperimentAudiences = self::getMethod("getAudiences");
+        $response = $getExperimentAudiences->invokeArgs(
+            $this->optConfigService,
+            array($audience_conditions)
+        );
+        $expected_str = '"'."exactString".'"'.' '.'AND'. ' ' . '"'.'$$dummyExists'.'"';
+        $this->assertEquals($expected_str, $response);
+        $audience_conditions = array('and',array('or','3468206642','3988293899'),'3988293898');
+        $getExperimentAudiences = self::getMethod("getAudiences");
+        $response = $getExperimentAudiences->invokeArgs(
+            $this->optConfigService,
+            array($audience_conditions)
+        );
+        $expected_str = '('.'"'.'exactString'.'"'.' '.'OR'. ' ' . '"'.'$$dummyExists'.'"'.')'
+        .' '.'AND'. ' '. '"'.'$$dummySubstringString'.'"';
+        $this->assertEquals($expected_str, $response);
+    }
 
     public function testgetConfigAttributes()
     {
         $getConfigAttributes = self::getMethod("getConfigAttributes");
         $response = $getConfigAttributes->invokeArgs($this->optConfigService, array());
         if (! empty($response)) {
-            foreach ($response as $attr){
+            foreach ($response as $attr) {
                 $this->assertInstanceof(OptimizelyAttribute::class, $attr);
             }
         }   
@@ -270,11 +293,11 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $getConfigEvents = self::getMethod("getConfigEvents");
         $response = $getConfigEvents->invokeArgs($this->optConfigService, array());
         if (! empty($response)) {
-            foreach ($response as $event){
+            foreach ($response as $event) {
                 $this->assertInstanceof(OptimizelyEvent::class, $event);
             }
-        }   
-    }    
+        }
+    }
 
     public function testGetConfig()
     {
@@ -557,7 +580,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         // fwrite(STDERR, print_r(json_encode($converted_audiences), TRUE));
         $optimizelyConfig["audiences"] = $converted_audiences;
         $optimizelyConfig["events"] = [["id"=>"111095","key"=>"test_event","experimentIds"=>["111127"]]];
-        $optimizelyConfig['datafile'] =     DATAFILE_FOR_OPTIMIZELY_CONFIG;
+        $optimizelyConfig['datafile'] = DATAFILE_FOR_OPTIMIZELY_CONFIG;
    
 
 
