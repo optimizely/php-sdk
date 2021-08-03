@@ -146,6 +146,7 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             '177776' => $this->config->getExperimentFromId('177776'),
             '177774' => $this->config->getExperimentFromId('177774'),
             '177779' => $this->config->getExperimentFromId('177779'),
+            '7716830083' => $this->config->getExperimentFromId('7716830083'),
             ],
             $experimentIdMap->getValue($this->config)
         );
@@ -533,7 +534,7 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
         $event = $this->config->getEvent('purchase');
         $this->assertEquals('purchase', $event->getKey());
         $this->assertEquals('7718020063', $event->getId());
-        $this->assertEquals(['7716830082', '7723330021', '7718750065', '7716830585'], $event->getExperimentIds());
+        $this->assertEquals(['7716830082', '7716830083', '7723330021', '7718750065', '7716830585'], $event->getExperimentIds());
     }
 
     public function testGetEventInvalidKey()
@@ -653,6 +654,13 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('control', $variation->getKey());
     }
 
+    public function testGetVariationFromKeyValidExperimentIdValidVariationKey()
+    {
+        $variation = $this->config->getVariationFromKeyByExperimentId('7716830083', 'control');
+        $this->assertEquals('7722370028', $variation->getId());
+        $this->assertEquals('control', $variation->getKey());
+    }
+
     public function testGetVariationFromKeyValidExperimentKeyInvalidVariationKey()
     {
         $this->loggerMock->expects($this->once())
@@ -688,6 +696,13 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
         $variation = $this->config->getVariationFromId('test_experiment', '7722370027');
         $this->assertEquals('control', $variation->getKey());
         $this->assertEquals('7722370027', $variation->getId());
+    }
+
+    public function testGetVariationFromIdValidExperimentIdValidVariationId()
+    {
+        $variation = $this->config->getVariationFromIdByExperimentId('7716830083', '7722370028');
+        $this->assertEquals('control', $variation->getKey());
+        $this->assertEquals('7722370028', $variation->getId());
     }
 
     public function testGetVariationFromIdValidExperimentKeyInvalidVariationId()

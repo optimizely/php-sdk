@@ -34,6 +34,42 @@ define(
     {
       "status": "Running",
       "key": "test_experiment",
+      "layerId": "7719770040",
+      "trafficAllocation": [
+        {
+          "entityId": "",
+          "endOfRange": 1500
+        },
+        {
+          "entityId": "7722370028",
+          "endOfRange": 4000
+        },
+        {
+          "entityId": "7721010010",
+          "endOfRange": 8000
+        }
+      ],
+      "audienceIds": [
+        "7718080042"
+      ],
+      "variations": [
+        {
+          "id": "7722370028",
+          "key": "control"
+        },
+        {
+          "id": "7721010010",
+          "key": "variation"
+        }
+      ],
+      "forcedVariations": {
+        "user1": "control"
+      },
+      "id": "7716830083"
+    },
+    {
+      "status": "Running",
+      "key": "test_experiment",
       "layerId": "7719770039",
       "trafficAllocation": [
         {
@@ -575,6 +611,7 @@ define(
     {
       "experimentIds": [
         "7716830082",
+        "7716830083",
         "7723330021",
         "7718750065",
         "7716830585"
@@ -590,6 +627,7 @@ define(
     {
       "experimentIds":[
         "7716830082",
+        "7716830083",
         "122230"
       ],
       "id": "7718020065",
