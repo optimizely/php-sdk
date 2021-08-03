@@ -52,7 +52,7 @@ interface ProjectConfigInterface
     public function getRevision();
 
     /**
-     * @return string String represnting envkey of the datafile.
+     * @return string String represnting representing environment key of the datafile.
      */
     public function getEnvironmentKey();
 
@@ -81,7 +81,6 @@ interface ProjectConfigInterface
      */
     public function getTypedAudiences();
 
-    
     /**
      * @return array List of feature flags parsed from the datafile
      */
@@ -156,7 +155,7 @@ interface ProjectConfigInterface
 
     /**
      * @param $experimentKey string Key for experiment.
-     * @param $variationKey string Key for variation.
+     * @param $variationKey  string Key for variation.
      *
      * @return Variation Entity corresponding to the provided experiment key and variation key.
      *         Dummy entity is returned if key or ID is invalid.
@@ -165,7 +164,7 @@ interface ProjectConfigInterface
 
     /**
      * @param $experimentKey string Key for experiment.
-     * @param $variationId string ID for variation.
+     * @param $variationId   string ID for variation.
      *
      * @return Variation Entity corresponding to the provided experiment key and variation ID.
      *         Dummy entity is returned if key or ID is invalid.
@@ -181,7 +180,7 @@ interface ProjectConfigInterface
      * @return FeatureVariable / null
      */
     public function getFeatureVariableFromKey($featureFlagKey, $variableKey);
-    
+
     /**
      * Determines if given experiment is a feature test.
      *

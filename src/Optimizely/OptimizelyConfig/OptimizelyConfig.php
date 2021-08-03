@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2021, Optimizely Inc and Contributors
+ * Copyright 2020-2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,21 +50,21 @@ class OptimizelyConfig implements \JsonSerializable
     /**
      * array of attributes as OptimizelyAttribute.
      *
-     * @var <String, OptimizelyAttribute> associative array
+     * @var [OptimizelyAttribute]
      */
     private $attributes;
 
     /**
      * array of audiences as OptimizelyAudience.
      *
-     * @var <String, OptimizelyAudience> associative array
+     * @var [OptimizelyAudience]
      */
     private $audiences;
 
     /**
      * array of events as OptimizelyEvent.
      *
-     * @var <String, OptimizelyEvent> associative array
+     * @var [OptimizelyEvent]
      */
     private $events;
 
@@ -72,9 +72,8 @@ class OptimizelyConfig implements \JsonSerializable
      * @var string Contents of datafile.
      */
     private $datafile;
-    
 
-    public function __construct($revision, array $experimentsMap, array $featuresMap, $datafile = null, $environmentKey='', $sdkKey='', array $attributes=[], array $audiences=[], array $events=[])
+    public function __construct($revision, array $experimentsMap, array $featuresMap, $datafile = null, $environmentKey = '', $sdkKey = '', array $attributes = [], array $audiences = [], array $events = [])
     {
         $this->environmentKey = $environmentKey;
         $this->sdkKey = $sdkKey;
@@ -85,7 +84,7 @@ class OptimizelyConfig implements \JsonSerializable
         $this->audiences = $audiences;
         $this->events = $events;
         $this->datafile = $datafile;
-        
+
     }
 
     /**

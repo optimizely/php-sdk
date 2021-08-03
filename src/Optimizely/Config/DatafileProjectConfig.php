@@ -28,7 +28,6 @@ use Optimizely\Entity\FeatureVariable;
 use Optimizely\Entity\Group;
 use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
-use Optimizely\Enums\ControlAttributes;
 use Optimizely\ErrorHandler\ErrorHandlerInterface;
 use Optimizely\Exceptions\InvalidAttributeException;
 use Optimizely\Exceptions\InvalidAudienceException;
@@ -41,10 +40,9 @@ use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidInputException;
 use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidVariationException;
-use Optimizely\Logger\LoggerInterface;
 use Optimizely\Logger\DefaultLogger;
+use Optimizely\Logger\LoggerInterface;
 use Optimizely\Optimizely;
-use Optimizely\Utils\ConditionDecoder;
 use Optimizely\Utils\ConfigParser;
 use Optimizely\Utils\Errors;
 use Optimizely\Utils\Validator;
@@ -102,8 +100,6 @@ class DatafileProjectConfig implements ProjectConfigInterface
      * @var string sdkKey of the config.
      */
     private $sdkKey;
-
-
 
     /**
      * @var string Revision of the datafile.
@@ -184,7 +180,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
     /**
      * list of Audiences that will be parsed from the datafile
      *
-     * @var [Audiences]
+     * @var [Audience]
      */
     private $audiences;
 
@@ -200,7 +196,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
      *
      * @var [typed_audience]
      */
-    private $typedAudiences;    
+    private $typedAudiences;
 
     /**
      * internal mapping of feature keys to feature flag models.
@@ -240,8 +236,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
     /**
      * DatafileProjectConfig constructor to load and set project configuration data.
      *
-     * @param $datafile string JSON string representing the project.
-     * @param $logger LoggerInterface
+     * @param $datafile     string JSON string representing the project.
+     * @param $logger       LoggerInterface
      * @param $errorHandler ErrorHandlerInterface
      */
     public function __construct($datafile, $logger, $errorHandler)
@@ -252,8 +248,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $this->_logger = $logger;
         $this->_errorHandler = $errorHandler;
         $this->_version = $config['version'];
-        $this->environmentKey = isset($config['environmentKey'])? $config['environmentKey'] : '';
-        $this->sdkKey = isset($config['sdkKey'])? $config['sdkKey'] : '';
+        $this->environmentKey = isset($config['environmentKey']) ? $config['environmentKey'] : '';
+        $this->sdkKey = isset($config['sdkKey']) ? $config['sdkKey'] : '';
         if (!in_array($this->_version, $supportedVersions)) {
             throw new InvalidDatafileVersionException(
                 "This version of the PHP SDK does not support the given datafile version: {$this->_version}."
@@ -265,16 +261,16 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $this->attributes = $config['attributes'] ?: [];
         $this->audiences = $config['audiences'] ?: [];
         $this->events = $config['events'] ?: [];
-        $this->typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences']: [];
-        $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
-        $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
+        $this->typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences'] : [];
+        $this->_anonymizeIP = isset($config['anonymizeIP']) ? $config['anonymizeIP'] : false;
+        $this->_botFiltering = isset($config['botFiltering']) ? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
         $this->_sendFlagDecisions = isset($config['sendFlagDecisions']) ? $config['sendFlagDecisions'] : false;
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
         $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
-        $featureFlags = isset($config['featureFlags']) ? $config['featureFlags']: [];
+        $featureFlags = isset($config['featureFlags']) ? $config['featureFlags'] : [];
 
         // JSON type is represented in datafile as a subtype of string for the sake of backwards compatibility.
         // Converting it to a first-class json type while creating Project Config
@@ -292,7 +288,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);
         $this->_eventKeyMap = ConfigParser::generateMap($this->events, 'key', Event::class);
         $this->_attributeKeyMap = ConfigParser::generateMap($this->attributes, 'key', Attribute::class);
-        $typedAudienceIdMap = ConfigParser::generateMap( $this->typedAudiences, 'id', Audience::class);
+        $typedAudienceIdMap = ConfigParser::generateMap($this->typedAudiences, 'id', Audience::class);
         $this->_audienceIdMap = ConfigParser::generateMap($this->audiences, 'id', Audience::class);
         $this->_rollouts = ConfigParser::generateMap($rollouts, null, Rollout::class);
         $this->_featureFlags = ConfigParser::generateMap($featureFlags, null, FeatureFlag::class);
@@ -385,10 +381,10 @@ class DatafileProjectConfig implements ProjectConfigInterface
     /**
      * Create ProjectConfig based on datafile string.
      *
-     * @param string                $datafile           JSON string representing the Optimizely project.
-     * @param bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
-     * @param LoggerInterface       $logger             Logger instance
-     * @param ErrorHandlerInterface $errorHandler       ErrorHandler instance.
+     * @param  string                $datafile           JSON string representing the Optimizely project.
+     * @param  bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
+     * @param  LoggerInterface       $logger             Logger instance
+     * @param  ErrorHandlerInterface $errorHandler       ErrorHandler instance.
      * @return ProjectConfig ProjectConfig instance or null;
      */
     public static function createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler)
@@ -536,9 +532,11 @@ class DatafileProjectConfig implements ProjectConfigInterface
                 $rolloutExperimentIds[] = $experiment->getId();
             }
         }
-        return array_filter(array_values($this->_experimentKeyMap), function ($experiment) use ($rolloutExperimentIds) {
-            return !in_array($experiment->getId(), $rolloutExperimentIds);
-        });
+        return array_filter(
+            array_values($this->_experimentKeyMap), function ($experiment) use ($rolloutExperimentIds) {
+                return !in_array($experiment->getId(), $rolloutExperimentIds);
+            }
+        );
     }
 
     /**
@@ -693,7 +691,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
     /**
      * @param $experimentKey string Key for experiment.
-     * @param $variationKey string Key for variation.
+     * @param $variationKey  string Key for variation.
      *
      * @return Variation Entity corresponding to the provided experiment key and variation key.
      *         Dummy entity is returned if key or ID is invalid.
@@ -720,7 +718,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
     /**
      * @param $experimentKey string Key for experiment.
-     * @param $variationId string ID for variation.
+     * @param $variationId   string ID for variation.
      *
      * @return Variation Entity corresponding to the provided experiment key and variation ID.
      *         Dummy entity is returned if key or ID is invalid.
