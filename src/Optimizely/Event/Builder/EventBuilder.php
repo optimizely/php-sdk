@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2020, Optimizely
+ * Copyright 2016-2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,19 +222,19 @@ class EventBuilder
      * Create impression event to be sent to the logging endpoint.
      *
      * @param $config ProjectConfigInterface Configuration for the project.
-     * @param $experimentKey Experiment Experiment being activated.
+     * @param $experimentId Experiment Experiment being activated.
      * @param $variationKey string Variation user
      * @param $userId string ID of user.
      * @param $attributes array Attributes of the user.
      *
      * @return LogEvent Event object to be sent to dispatcher.
      */
-    public function createImpressionEvent($config, $experimentKey, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
+    public function createImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
     {
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
 
-        $experiment = $config->getExperimentFromKey($experimentKey);
-        $variation = $config->getVariationFromKey($experimentKey, $variationKey);
+        $experiment = $config->getExperimentFromId($experimentId);
+        $variation = $config->getVariationFromKeyByExperimentId($experimentId, $variationKey);
         $impressionParams = $this->getImpressionParams($experiment, $variation, $flagKey, $ruleKey, $ruleType, $enabled);
 
         $eventParams[VISITORS][0][SNAPSHOTS][] = $impressionParams;

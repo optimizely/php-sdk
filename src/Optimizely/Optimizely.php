@@ -201,16 +201,17 @@ class Optimizely
     }
 
     /**
-     * @param  string        Experiment key
+     * @param  string        Experiment ID
      * @param  string        Variation key
      * @param  string        User ID
      * @param  array         Associative array of user attributes
      * @param  DatafileProjectConfig DatafileProjectConfig instance
      */
-    protected function sendImpressionEvent($config, $experimentKey, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
+    protected function sendImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
     {
+        $experimentKey = $config->getExperimentFromId($experimentId)->getKey();
         $impressionEvent = $this->_eventBuilder
-            ->createImpressionEvent($config, $experimentKey, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes);
+            ->createImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes);
         $this->_logger->log(Logger::INFO, sprintf('Activating user "%s" in experiment "%s".', $userId, $experimentKey));
         $this->_logger->log(
             Logger::DEBUG,
@@ -244,10 +245,10 @@ class Optimizely
         $this->notificationCenter->sendNotifications(
             NotificationType::ACTIVATE,
             array(
-                $config->getExperimentFromKey($experimentKey),
+                $config->getExperimentFromId($experimentId),
                 $userId,
                 $attributes,
-                $config->getVariationFromKey($experimentKey, $variationKey),
+                $config->getVariationFromKeyByExperimentId($experimentId, $variationKey),
                 $impressionEvent
             )
         );
@@ -340,6 +341,7 @@ class Optimizely
         $variationKey = null;
         $featureEnabled = false;
         $ruleKey = null;
+        $experimentId = null;
         $flagKey = $key;
         $allVariables = [];
         $decisionEventDispatched = false;
@@ -360,9 +362,11 @@ class Optimizely
             $variationKey = $variation->getKey();
             $featureEnabled = $variation->getFeatureEnabled();
             $ruleKey = $decision->getExperiment()->getKey();
+            $experimentId = $decision->getExperiment()->getId();
         } else {
             $variationKey = null;
             $ruleKey = null;
+            $experimentId = null;
         }
 
         // send impression only if decide options do not contain DISABLE_DECISION_EVENT
@@ -374,7 +378,7 @@ class Optimizely
             if ($source == FeatureDecision::DECISION_SOURCE_FEATURE_TEST || $sendFlagDecisions) {
                 $this->sendImpressionEvent(
                     $config,
-                    $ruleKey,
+                    $experimentId,
                     $variationKey === null ? '' : $variationKey,
                     $flagKey,
                     $ruleKey === null ? '' : $ruleKey,
@@ -531,8 +535,9 @@ class Optimizely
             $this->_logger->log(Logger::INFO, sprintf('Not activating user "%s".', $userId));
             return null;
         }
+        $experimentId = $config->getExperimentFromKey($experimentKey)->getId();
 
-        $this->sendImpressionEvent($config, $experimentKey, $variationKey, '', $experimentKey, FeatureDecision::DECISION_SOURCE_EXPERIMENT, true, $userId, $attributes);
+        $this->sendImpressionEvent($config, $experimentId, $variationKey, '', $experimentKey, FeatureDecision::DECISION_SOURCE_EXPERIMENT, true, $userId, $attributes);
 
         return $variationKey;
     }
@@ -818,11 +823,13 @@ class Optimizely
                 $featureEnabled = $variation->getFeatureEnabled();
             }
             $ruleKey = $decision->getExperiment() ? $decision->getExperiment()->getKey() : '';
-            $this->sendImpressionEvent($config, $ruleKey, $variation ? $variation->getKey() : '', $featureFlagKey, $ruleKey, $decision->getSource(), $featureEnabled, $userId, $attributes);
+            $experimentId = $decision->getExperiment() ? $decision->getExperiment()->getId() : '';
+            $this->sendImpressionEvent($config, $experimentId, $variation ? $variation->getKey() : '', $featureFlagKey, $ruleKey, $decision->getSource(), $featureEnabled, $userId, $attributes);
         }
 
         if ($variation) {
             $experimentKey = $decision->getExperiment()->getKey();
+            $experimentId = $decision->getExperiment()->getId();
             $featureEnabled = $variation->getFeatureEnabled();
             if ($decision->getSource() == FeatureDecision::DECISION_SOURCE_FEATURE_TEST) {
                 $sourceInfo = (object) array(
@@ -830,7 +837,7 @@ class Optimizely
                     'variationKey'=> $variation->getKey()
                 );
 
-                $this->sendImpressionEvent($config, $experimentKey, $variation->getKey(), $featureFlagKey, $experimentKey, $decision->getSource(), $featureEnabled, $userId, $attributes);
+                $this->sendImpressionEvent($config, $experimentId, $variation->getKey(), $featureFlagKey, $experimentKey, $decision->getSource(), $featureEnabled, $userId, $attributes);
             } else {
                 $this->_logger->log(Logger::INFO, "The user '{$userId}' is not being experimented on Feature Flag '{$featureFlagKey}'.");
             }

@@ -518,7 +518,7 @@ class DecisionService
         $forcedVariations = $experiment->getForcedVariations();
         if (!is_null($forcedVariations) && isset($forcedVariations[$userId])) {
             $variationKey = $forcedVariations[$userId];
-            $variation = $projectConfig->getVariationFromKey($experiment->getKey(), $variationKey);
+            $variation = $projectConfig->getVariationFromKeyByExperimentId($experiment->getId(), $variationKey);
             if ($variationKey && !empty($variation->getKey())) {
                 $message = sprintf('User "%s" is forced in variation "%s" of experiment "%s".', $userId, $variationKey, $experiment->getKey());
 

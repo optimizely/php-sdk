@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, 2018-2020 Optimizely
+ * Copyright 2016, 2018-2021 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,24 @@ interface ProjectConfigInterface
      *         Dummy entity is returned if key or ID is invalid.
      */
     public function getVariationFromId($experimentKey, $variationId);
+
+    /**
+     * @param $experimentId string ID for experiment.
+     * @param $variationId string ID for variation.
+     *
+     * @return Variation Entity corresponding to the provided experiment ID and variation ID.
+     *         Dummy entity is returned if key or ID is invalid.
+     */
+    public function getVariationFromIdByExperimentId($experimentId, $variationId);
+
+    /**
+     * @param $experimentId string ID for experiment.
+     * @param $variationKey string Key for variation.
+     *
+     * @return Variation Entity corresponding to the provided experiment ID and variation Key.
+     *         Dummy entity is returned if key or ID is invalid.
+     */
+    public function getVariationFromKeyByExperimentId($experimentId, $variationKey);
 
     /**
      * Gets the feature variable instance given feature flag key and variable key
