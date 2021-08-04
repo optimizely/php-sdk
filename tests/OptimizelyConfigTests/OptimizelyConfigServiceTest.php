@@ -231,7 +231,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
     {
         $audience_conditions = array("or","3468206642");
         // fwrite(STDERR, print_r(gettype($audience_conditions), TRUE));
-        $getExperimentAudiences = self::getMethod("getAudiences");
+        $getExperimentAudiences = self::getMethod("getSerializedAudiences");
         $response = $getExperimentAudiences->invokeArgs(
             $this->optConfigService,
             array($audience_conditions)
@@ -241,7 +241,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected_str, $response);
 
         $audience_conditions = array('or','3468206642','3988293899');
-        $getExperimentAudiences = self::getMethod("getAudiences");
+        $getExperimentAudiences = self::getMethod("getSerializedAudiences");
         $response = $getExperimentAudiences->invokeArgs(
             $this->optConfigService,
             array($audience_conditions)
@@ -250,7 +250,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected_str, $response);
 
         $audience_conditions = array("not","3468206642");
-        $getExperimentAudiences = self::getMethod("getAudiences");
+        $getExperimentAudiences = self::getMethod("getSerializedAudiences");
         $response = $getExperimentAudiences->invokeArgs(
             $this->optConfigService,
             array($audience_conditions)
@@ -259,7 +259,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected_str, $response);
 
         $audience_conditions = array('and','3468206642','3988293899');
-        $getExperimentAudiences = self::getMethod("getAudiences");
+        $getExperimentAudiences = self::getMethod("getSerializedAudiences");
         $response = $getExperimentAudiences->invokeArgs(
             $this->optConfigService,
             array($audience_conditions)
@@ -267,7 +267,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $expected_str = '"'."exactString".'"'.' '.'AND'. ' ' . '"'.'$$dummyExists'.'"';
         $this->assertEquals($expected_str, $response);
         $audience_conditions = array('and',array('or','3468206642','3988293899'),'3988293898');
-        $getExperimentAudiences = self::getMethod("getAudiences");
+        $getExperimentAudiences = self::getMethod("getSerializedAudiences");
         $response = $getExperimentAudiences->invokeArgs(
             $this->optConfigService,
             array($audience_conditions)
@@ -581,10 +581,6 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $optimizelyConfig["audiences"] = $converted_audiences;
         $optimizelyConfig["events"] = [["id"=>"111095","key"=>"test_event","experimentIds"=>["111127"]]];
         $optimizelyConfig['datafile'] = DATAFILE_FOR_OPTIMIZELY_CONFIG;
-   
-
-
-        
         $this->assertEquals(json_encode($optimizelyConfig), json_encode($response));
     }
 

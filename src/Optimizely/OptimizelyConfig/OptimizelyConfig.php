@@ -48,21 +48,21 @@ class OptimizelyConfig implements \JsonSerializable
     private $featuresMap;
 
     /**
-     * array of attributes as OptimizelyAttribute.
+     * Array of attributes as OptimizelyAttribute.
      *
      * @var [OptimizelyAttribute]
      */
     private $attributes;
 
     /**
-     * array of audiences as OptimizelyAudience.
+     * Array of audiences as OptimizelyAudience.
      *
      * @var [OptimizelyAudience]
      */
     private $audiences;
 
     /**
-     * array of events as OptimizelyEvent.
+     * Array of events as OptimizelyEvent.
      *
      * @var [OptimizelyEvent]
      */
@@ -137,7 +137,7 @@ class OptimizelyConfig implements \JsonSerializable
     }
 
     /**
-     * @return array attributes as  OptimizelyAttribute.
+     * @return array Attributes as  OptimizelyAttribute.
      */
     public function getAttributes()
     {
@@ -145,7 +145,7 @@ class OptimizelyConfig implements \JsonSerializable
     }
 
     /**
-     * @return array audiences as  OptimizelyAudience.
+     * @return array Audiences as  OptimizelyAudience.
      */
     public function getAudiences()
     {
@@ -153,7 +153,7 @@ class OptimizelyConfig implements \JsonSerializable
     }
 
     /**
-     * @return array events as  OptimizelyEvent.
+     * @return array Events as  OptimizelyEvent.
      */
     public function getEvents()
     {
