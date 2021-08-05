@@ -21,6 +21,7 @@ use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\OptimizelyConfig\OptimizelyAttribute;
+use Optimizely\OptimizelyConfig\OptimizelyAudience;
 use Optimizely\OptimizelyConfig\OptimizelyConfig;
 use Optimizely\OptimizelyConfig\OptimizelyConfigService;
 use Optimizely\OptimizelyConfig\OptimizelyEvent;
@@ -285,8 +286,20 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
             foreach ($response as $attr) {
                 $this->assertInstanceof(OptimizelyAttribute::class, $attr);
             }
-        }   
+        }
     }
+
+    public function testgetConfigAudiences()
+    {
+        $getConfigAudiences = self::getMethod("getConfigAudiences");
+        $response = $getConfigAudiences->invokeArgs($this->optConfigService, array());
+        if (! empty($response)) {
+            foreach ($response as $attr) {
+                $this->assertInstanceof(OptimizelyAudience::class, $attr);
+            }
+        }
+    }
+
 
     public function testgetConfigEvents()
     {
@@ -577,10 +590,9 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $optimizelyConfig["attributes"]= [["id"=>"111094","key"=>"test_attribute"]];
         $json_encoded = '[{"id":"3468206642","name":"exactString","conditions":"[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"},{"id":"3988293898","name":"$$dummySubstringString","conditions":"{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"},{"id":"3988293899","name":"$$dummyExists","conditions":"{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"}]';
         $converted_audiences = json_decode($json_encoded, true);
-        // fwrite(STDERR, print_r(json_encode($converted_audiences), TRUE));
         $optimizelyConfig["audiences"] = $converted_audiences;
         $optimizelyConfig["events"] = [["id"=>"111095","key"=>"test_event","experimentIds"=>["111127"]]];
-        $optimizelyConfig['datafile'] = DATAFILE_FOR_OPTIMIZELY_CONFIG;
+        $optimizelyConfig['datafile'] =  DATAFILE_FOR_OPTIMIZELY_CONFIG;   
         $this->assertEquals(json_encode($optimizelyConfig), json_encode($response));
     }
 

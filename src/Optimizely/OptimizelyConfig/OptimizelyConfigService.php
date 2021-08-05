@@ -326,7 +326,7 @@ class OptimizelyConfigService
             $subAudience = '';
             if (is_array($var)) {
                 $subAudience = $this->getSerializedAudiences($var);
-                
+
                 $subAudience = '(' . $subAudience . ')';
             } elseif (in_array($var, $ConditionsArray, true)) {
                 $cond = strtoupper(strval($var));
@@ -342,12 +342,20 @@ class OptimizelyConfigService
                         $cond = 'OR';
                     }
                     $audience = $this->projectConfig->getAudience($itemStr);
-                    $name = $audience->getName();
-                    $finalAudiences = $finalAudiences . $cond . ' ' . '"' . $name . '"';
+                    if ($audience == null) {
+                        $finalAudiences = $finalAudiences . $cond . ' ' . '"' . $itemStr . '"';
+                    } else {
+                        $name = $audience->getName();
+                        $finalAudiences = $finalAudiences . $cond . ' ' . '"' . $name . '"';
+                    }
                 } else {
                     $audience = $this->projectConfig->getAudience($itemStr);
-                    $name = $audience->getName();
-                    $finalAudiences = '"' . $name . '"';
+                    if ($audience==null) {
+                        $finalAudiences = '"' . $itemStr . '"';
+                    } else {
+                        $name = $audience->getName();
+                        $finalAudiences = '"' . $name . '"';
+                    }
                 }
             }
             if (strval($subAudience !== '')) {
@@ -412,10 +420,10 @@ class OptimizelyConfigService
      *
      * @return array of optimizelyExperiments as delivery rules .
      */
-    protected function getDeliveryRules(string $rollout_id, $projectConfig)
+    protected function getDeliveryRules($rollout_id)
     {
         $deliveryRules = [];
-        $rollout = $projectConfig->getRolloutFromId($rollout_id);
+        $rollout = $this->projectConfig->getRolloutFromId($rollout_id);
         $experiments = $rollout->getExperiments();
         foreach ($experiments as $exp) {
             $expId = $exp->getId();
@@ -423,7 +431,7 @@ class OptimizelyConfigService
             $audiences = '';
             if ($exp->getAudienceConditions() != null) {
                 $audienceConditions = $exp->getAudienceConditions();
-                $audiences = $this->getSerializedAudiences($audienceConditions, $projectConfig);
+                $audiences = $this->getSerializedAudiences($audienceConditions);
             }
             $optExp = new OptimizelyExperiment(
                 $expId,
@@ -453,9 +461,8 @@ class OptimizelyConfigService
             $experimentsMap = [];
             $experimentRules = [];
             $deliveryRules = [];
-            $rollout_id = $feature->getRolloutId();
-            if ($rollout_id != null) {
-                $deliveryRules = $this->getDeliveryRules($rollout_id, $this->projectConfig);
+            if ($feature->getRolloutId() != null) {
+                $deliveryRules = $this->getDeliveryRules($feature->getRolloutId());
             }
             foreach ($feature->getExperimentIds() as $expId) {
                 $optExp = $experimentsIdMap[$expId];
@@ -471,8 +478,7 @@ class OptimizelyConfigService
                 $experimentsMap,
                 $variablesMap,
                 $experimentRules,
-                $deliveryRules,
-            );
+                $deliveryRules);
 
             $featuresMap[$featureKey] = $optFeature;
         }
