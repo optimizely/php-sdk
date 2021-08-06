@@ -360,7 +360,7 @@ class OptimizelyConfigService
             }
             if (strval($subAudience !== '')) {
                 if ($finalAudiences !== '' || $cond == "NOT") {
-                    if ($finalAudiences == '') {
+                    if ($finalAudiences !== '') {
                         $finalAudiences = $finalAudiences . ' ';
                     } else {
                         $finalAudiences = $finalAudiences;
@@ -465,9 +465,11 @@ class OptimizelyConfigService
                 $deliveryRules = $this->getDeliveryRules($feature->getRolloutId());
             }
             foreach ($feature->getExperimentIds() as $expId) {
-                $optExp = $experimentsIdMap[$expId];
-                $experimentsMap[$optExp->getKey()] = $optExp;
-                array_push($experimentRules, $optExp);
+                if (array_key_exists($expId, $experimentsIdMap)) {
+                    $optExp = $experimentsIdMap[$expId];
+                    $experimentsMap[$optExp->getKey()] = $optExp;
+                    array_push($experimentRules, $optExp);
+                }
             }
 
             $variablesMap = $this->featKeyOptlyVariableKeyVariableMap[$featureKey];

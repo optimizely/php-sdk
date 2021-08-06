@@ -16,6 +16,8 @@
  */
 namespace Optimizely\Tests;
 
+require(dirname(__FILE__).'/../TestData.php');
+
 use Exception;
 use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
@@ -190,6 +192,23 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->featExpVariationMap, $response);
     }
 
+    public function testGetOptimizelyConfigWithDuplicateExperimentKeys()
+    {
+      $this->datafile = DATAFILE_FOR_DUPLICATE_EXP_KEYS;
+      $this->projectConfig = new DatafileProjectConfig(
+          $this->datafile,
+          new NoOpLogger(),
+          new NoOpErrorHandler()
+      );
+      $this->optConfigService = new OptimizelyConfigService($this->projectConfig);
+      $optimizelyConfig = $this->optConfigService->getConfig();
+      $this->assertEquals(Count($optimizelyConfig->getExperimentsMap()), 1);
+      $experimentMapFlag1 = $optimizelyConfig->getFeaturesMap()["flag1"]->getExperimentsMap(); //9300000007569
+      $experimentMapFlag2 = $optimizelyConfig->getFeaturesMap()["flag2"]->getExperimentsMap(); // 9300000007573
+      //fwrite(STDERR, print_r(json_encode($experimentMapFlag2), TRUE));
+      $this->assertEquals($experimentMapFlag2['targeted_delivery']->getId(), '9300000007573');
+    }
+
     public function testGetExperimentsMaps()
     {
         $getExperimentsMap = self::getMethod("getExperimentsMaps");
@@ -230,52 +249,55 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testgetExperimentAudiences()
     {
-        $audience_conditions = array("or","3468206642");
-        // fwrite(STDERR, print_r(gettype($audience_conditions), TRUE));
-        $getExperimentAudiences = self::getMethod("getSerializedAudiences");
-        $response = $getExperimentAudiences->invokeArgs(
-            $this->optConfigService,
-            array($audience_conditions)
-        );
-        fwrite(STDERR, print_r(gettype($response), true));    
-        $expected_str = '"'."exactString".'"';
-        $this->assertEquals($expected_str, $response);
+        $audienceConditions = [
+          array("or","3468206642"),
+          array('or','3468206642','3988293899'),
+          array('or','3468206642','3988293899', '3988293898'),
+          array("not","3468206642"),
+          array('and','3468206642','3988293899'),
+          array("and","3468206642"),
+          array('3468206642','3988293899'),
+          array("3468206642"),
+          array('and',array('or','3468206642','3988293899'),'3988293898'),
+          array('and', 'and'),
+          array(),
+          array('not', array('and','3468206642','3988293899')),
 
-        $audience_conditions = array('or','3468206642','3988293899');
-        $getExperimentAudiences = self::getMethod("getSerializedAudiences");
-        $response = $getExperimentAudiences->invokeArgs(
-            $this->optConfigService,
-            array($audience_conditions)
-        );
-        $expected_str = '"'."exactString".'"'.' '.'OR'. ' ' . '"'.'$$dummyExists'.'"';
-        $this->assertEquals($expected_str, $response);
+          array("and", array("or","3468206642",array( 
+            'and','3468206642','3988293899') ), 
+            array( "and","3468206642", 
+              array('or','3468206642','3988293899') ))];
 
-        $audience_conditions = array("not","3468206642");
-        $getExperimentAudiences = self::getMethod("getSerializedAudiences");
-        $response = $getExperimentAudiences->invokeArgs(
-            $this->optConfigService,
-            array($audience_conditions)
-        );
-        $expected_str = 'NOT'.' '.'"'."exactString".'"';
-        $this->assertEquals($expected_str, $response);
-
-        $audience_conditions = array('and','3468206642','3988293899');
-        $getExperimentAudiences = self::getMethod("getSerializedAudiences");
-        $response = $getExperimentAudiences->invokeArgs(
-            $this->optConfigService,
-            array($audience_conditions)
-        );
-        $expected_str = '"'."exactString".'"'.' '.'AND'. ' ' . '"'.'$$dummyExists'.'"';
-        $this->assertEquals($expected_str, $response);
-        $audience_conditions = array('and',array('or','3468206642','3988293899'),'3988293898');
-        $getExperimentAudiences = self::getMethod("getSerializedAudiences");
-        $response = $getExperimentAudiences->invokeArgs(
-            $this->optConfigService,
-            array($audience_conditions)
-        );
-        $expected_str = '('.'"'.'exactString'.'"'.' '.'OR'. ' ' . '"'.'$$dummyExists'.'"'.')'
-        .' '.'AND'. ' '. '"'.'$$dummySubstringString'.'"';
-        $this->assertEquals($expected_str, $response);
+        $expectedAudienceOutputs=[
+          '"'."exactString".'"',
+          '"'."exactString".'"'.' '.'OR'. ' ' . '"'.'$$dummyExists'.'"',
+          '"'."exactString".'"'.' '.'OR'. ' ' . '"'.'$$dummyExists'.'"' .' '.'OR'. ' ' .'"'.'$$dummySubstringString'.'"',
+          'NOT'.' '.'"'."exactString".'"',
+          '"'."exactString".'"'.' '.'AND'. ' ' . '"'.'$$dummyExists'.'"',
+          '"'."exactString".'"',
+          '"'."exactString".'"'.' '.'OR'. ' ' . '"'.'$$dummyExists'.'"',
+          '"'."exactString".'"',
+          '('.'"'.'exactString'.'"'.' '.'OR'. ' ' . '"'.'$$dummyExists'.'"'.')'
+        .' '.'AND'. ' '. '"'.'$$dummySubstringString'.'"',
+          '',
+          '',
+          'NOT'.' '.'('.'"'."exactString".'"'.' '.'AND'. ' ' . '"'.'$$dummyExists'.'"'.')',
+          
+          '('.'"'."exactString".'"'.' '.'OR'. ' '. 
+          '('.'"'."exactString".'"'.' '.'AND'. ' ' . '"'.'$$dummyExists'.'"'.')'.')'
+          .' '.'AND'. ' ' .'('.'"'."exactString".'"'.' '.'AND'. ' ' .'('.
+          '"'."exactString".'"'.' '.'OR'. ' ' . '"'.'$$dummyExists'.'"'.')'.')'
+          ];
+        
+        for ($testNo=0; $testNo<count($audienceConditions); $testNo++) {
+          $getExperimentAudiences = self::getMethod("getSerializedAudiences");
+          $response = $getExperimentAudiences->invokeArgs(
+              $this->optConfigService,
+              array($audienceConditions[$testNo])
+          );
+          //fwrite(STDERR, print_r(gettype($response), true));    
+          $this->assertEquals($expectedAudienceOutputs[$testNo], $response);
+        }
     }
 
     public function testgetConfigAttributes()

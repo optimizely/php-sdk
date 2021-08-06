@@ -54,6 +54,16 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($expectedJson, json_encode($optConfig));
     }
+    
+    /*
+    public function testGetOptimizelyConfigServiceNullConfig()
+    {
+        $optConfig = new OptimizelyConfigService(null);
+        $this->assertNull($optConfig);
+    }
+    */
+
+
 
     public function testOptimizelyExperimentEntity()
     {
