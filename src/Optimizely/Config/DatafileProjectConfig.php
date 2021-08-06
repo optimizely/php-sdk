@@ -299,7 +299,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
         }
 
         $this->_groupIdMap = ConfigParser::generateMap($groups, 'id', Group::class);
-        $this->_experimentKeyMap = ConfigParser::generateMap($experiments, 'key', Experiment::class);
+        $this->_experimentIdMap = ConfigParser::generateMap($experiments, 'id', Experiment::class);
         $this->_eventKeyMap = ConfigParser::generateMap($this->events, 'key', Event::class);
         $this->_attributeKeyMap = ConfigParser::generateMap($this->attributes, 'key', Attribute::class);
         $typedAudienceIdMap = ConfigParser::generateMap($this->typedAudiences, 'id', Audience::class);
@@ -561,7 +561,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
             }
         }
         return array_filter(
-            array_values($this->_experimentKeyMap), function ($experiment) use ($rolloutExperimentIds) {
+            array_values($this->_experimentIdMap), function ($experiment) use ($rolloutExperimentIds) {
                 return !in_array($experiment->getId(), $rolloutExperimentIds);
             }
         );

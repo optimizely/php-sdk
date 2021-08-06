@@ -205,7 +205,8 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
       $this->assertEquals(Count($optimizelyConfig->getExperimentsMap()), 1);
       $experimentMapFlag1 = $optimizelyConfig->getFeaturesMap()["flag1"]->getExperimentsMap(); //9300000007569
       $experimentMapFlag2 = $optimizelyConfig->getFeaturesMap()["flag2"]->getExperimentsMap(); // 9300000007573
-      //fwrite(STDERR, print_r(json_encode($experimentMapFlag2), TRUE));
+      //fwrite(STDERR, print_r(json_encode($experimentMapFlag1), TRUE));
+      $this->assertEquals($experimentMapFlag1['targeted_delivery']->getId(), '9300000007569');
       $this->assertEquals($experimentMapFlag2['targeted_delivery']->getId(), '9300000007573');
     }
 
