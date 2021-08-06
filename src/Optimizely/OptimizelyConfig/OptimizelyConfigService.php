@@ -350,7 +350,7 @@ class OptimizelyConfigService
                     }
                 } else {
                     $audience = $this->projectConfig->getAudience($itemStr);
-                    if ($audience==null) {
+                    if ($audience == null) {
                         $finalAudiences = '"' . $itemStr . '"';
                     } else {
                         $name = $audience->getName();
@@ -465,11 +465,9 @@ class OptimizelyConfigService
                 $deliveryRules = $this->getDeliveryRules($feature->getRolloutId());
             }
             foreach ($feature->getExperimentIds() as $expId) {
-                if (array_key_exists($expId, $experimentsIdMap)) {
-                    $optExp = $experimentsIdMap[$expId];
-                    $experimentsMap[$optExp->getKey()] = $optExp;
-                    array_push($experimentRules, $optExp);
-                }
+                $optExp = $experimentsIdMap[$expId];
+                $experimentsMap[$optExp->getKey()] = $optExp;
+                array_push($experimentRules, $optExp);
             }
 
             $variablesMap = $this->featKeyOptlyVariableKeyVariableMap[$featureKey];
@@ -480,7 +478,8 @@ class OptimizelyConfigService
                 $experimentsMap,
                 $variablesMap,
                 $experimentRules,
-                $deliveryRules);
+                $deliveryRules
+            );
 
             $featuresMap[$featureKey] = $optFeature;
         }

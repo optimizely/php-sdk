@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2020, Optimizely
  *
@@ -14,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 namespace Optimizely\Tests;
 
 use Exception;
@@ -37,6 +39,9 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("20", $optConfig->getRevision());
         $this->assertEquals(["a" => "apple"], $optConfig->getExperimentsMap());
         $this->assertEquals(["o" => "orange"], $optConfig->getFeaturesMap());
+        $this->assertEquals("", $optConfig->getEnvironmentKey());
+        $this->assertEquals("", $optConfig->getSdkKey());
+
 
         $expectedJson = '{
             "environmentKey":"",
@@ -54,7 +59,7 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($expectedJson, json_encode($optConfig));
     }
-    
+
     /*
     public function testGetOptimizelyConfigServiceNullConfig()
     {
