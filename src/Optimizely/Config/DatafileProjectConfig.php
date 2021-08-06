@@ -136,6 +136,16 @@ class DatafileProjectConfig implements ProjectConfigInterface
     private $_variationIdMap;
 
     /**
+     * @var array Associative array of experiment id to associative array of variation ID to variations.
+     */
+    private $_variationIdMapByExperimentId;
+
+    /**
+     * @var array Associative array of experiment id to associative array of variation key to variations.
+     */
+    private $_variationKeyMapByExperimentId;
+    
+    /**
      * @var array Associative array of event key to Event(s) in the datafile.
      */
     private $_eventKeyMap;
@@ -298,32 +308,38 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $this->_featureFlags = ConfigParser::generateMap($featureFlags, null, FeatureFlag::class);
 
         foreach (array_values($this->_groupIdMap) as $group) {
-            $experimentsInGroup = ConfigParser::generateMap($group->getExperiments(), 'key', Experiment::class);
+            $experimentsInGroup = ConfigParser::generateMap($group->getExperiments(), 'id', Experiment::class);
             foreach (array_values($experimentsInGroup) as $experiment) {
                 $experiment->setGroupId($group->getId());
                 $experiment->setGroupPolicy($group->getPolicy());
             }
-            $this->_experimentKeyMap = $this->_experimentKeyMap + $experimentsInGroup;
+            $this->_experimentIdMap = $this->_experimentIdMap + $experimentsInGroup;
         }
 
         foreach ($this->_rollouts as $rollout) {
             foreach ($rollout->getExperiments() as $experiment) {
-                $this->_experimentKeyMap[$experiment->getKey()] = $experiment;
+                $this->_experimentIdMap[$experiment->getId()] = $experiment;
             }
         }
 
         $this->_variationKeyMap = [];
         $this->_variationIdMap = [];
-        $this->_experimentIdMap = [];
+        $this->_variationKeyMapByExperimentId = [];
+        $this->_variationIdMapByExperimentId = [];
+        $this->_experimentKeyMap = [];
 
-        foreach (array_values($this->_experimentKeyMap) as $experiment) {
+        foreach (array_values($this->_experimentIdMap) as $experiment) {
             $this->_variationKeyMap[$experiment->getKey()] = [];
             $this->_variationIdMap[$experiment->getKey()] = [];
-            $this->_experimentIdMap[$experiment->getId()] = $experiment;
+            $this->_variationIdMapByExperimentId[$experiment->getId()] = [];
+            $this->_variationKeyMapByExperimentId[$experiment->getId()] = [];
+            $this->_experimentKeyMap[$experiment->getKey()] = $experiment;
 
             foreach ($experiment->getVariations() as $variation) {
                 $this->_variationKeyMap[$experiment->getKey()][$variation->getKey()] = $variation;
                 $this->_variationIdMap[$experiment->getKey()][$variation->getId()] = $variation;
+                $this->_variationKeyMapByExperimentId[$experiment->getId()][$variation->getKey()] = $variation;
+                $this->_variationIdMapByExperimentId[$experiment->getId()][$variation->getId()] = $variation;
             }
         }
 
@@ -342,17 +358,23 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $rolloutVariationIdMap = [];
         $rolloutVariationKeyMap = [];
+        $rolloutVariationIdMapByExperimentId = [];
+        $rolloutVariationKeyMapByExperimentId = [];
         foreach ($this->_rollouts as $rollout) {
             $this->_rolloutIdMap[$rollout->getId()] = $rollout;
 
             foreach ($rollout->getExperiments() as $rule) {
                 $rolloutVariationIdMap[$rule->getKey()] = [];
                 $rolloutVariationKeyMap[$rule->getKey()] = [];
+                $rolloutVariationIdMapByExperimentId[$rule->getId()] = [];
+                $rolloutVariationKeyMapByExperimentId[$rule->getId()] = [];
 
                 $variations = $rule->getVariations();
                 foreach ($variations as $variation) {
                     $rolloutVariationIdMap[$rule->getKey()][$variation->getId()] = $variation;
                     $rolloutVariationKeyMap[$rule->getKey()][$variation->getKey()] = $variation;
+                    $rolloutVariationIdMapByExperimentId[$rule->getId()][$variation->getId()] = $variation;
+                    $rolloutVariationKeyMapByExperimentId[$rule->getId()][$variation->getKey()] = $variation;
                 }
             }
         }
@@ -360,6 +382,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
         // Add variations for rollout experiments to variationIdMap and variationKeyMap
         $this->_variationIdMap = $this->_variationIdMap + $rolloutVariationIdMap;
         $this->_variationKeyMap = $this->_variationKeyMap + $rolloutVariationKeyMap;
+        $this->_variationIdMapByExperimentId = $this->_variationIdMapByExperimentId + $rolloutVariationIdMapByExperimentId;
+        $this->_variationKeyMapByExperimentId = $this->_variationKeyMapByExperimentId + $rolloutVariationKeyMapByExperimentId;
 
         foreach (array_values($this->_featureFlags) as $featureFlag) {
             $this->_featureKeyMap[$featureFlag->getKey()] = $featureFlag;
@@ -741,6 +765,60 @@ class DatafileProjectConfig implements ProjectConfigInterface
                 'No variation ID "%s" defined in datafile for experiment "%s".',
                 $variationId,
                 $experimentKey
+            )
+        );
+        $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
+        return new Variation();
+    }
+
+    /**
+     * @param $experimentId string ID for experiment.
+     * @param $variationId string ID for variation.
+     *
+     * @return Variation Entity corresponding to the provided experiment ID and variation ID.
+     *         Dummy entity is returned if key or ID is invalid.
+     */
+    public function getVariationFromIdByExperimentId($experimentId, $variationId)
+    {
+        if (isset($this->_variationIdMapByExperimentId[$experimentId])
+            && isset($this->_variationIdMapByExperimentId[$experimentId][$variationId])
+        ) {
+            return $this->_variationIdMapByExperimentId[$experimentId][$variationId];
+        }
+
+        $this->_logger->log(
+            Logger::ERROR,
+            sprintf(
+                'No variation ID "%s" defined in datafile for experiment "%s".',
+                $variationId,
+                $experimentId
+            )
+        );
+        $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));
+        return new Variation();
+    }
+
+    /**
+     * @param $experimentId string ID for experiment.
+     * @param $variationKey string Key for variation.
+     *
+     * @return Variation Entity corresponding to the provided experiment ID and variation Key.
+     *         Dummy entity is returned if key or ID is invalid.
+     */
+    public function getVariationFromKeyByExperimentId($experimentId, $variationKey)
+    {
+        if (isset($this->_variationKeyMapByExperimentId[$experimentId])
+            && isset($this->_variationKeyMapByExperimentId[$experimentId][$variationKey])
+        ) {
+            return $this->_variationKeyMapByExperimentId[$experimentId][$variationKey];
+        }
+
+        $this->_logger->log(
+            Logger::ERROR,
+            sprintf(
+                'No variation Key "%s" defined in datafile for experiment "%s".',
+                $variationKey,
+                $experimentId
             )
         );
         $this->_errorHandler->handleError(new InvalidVariationException('Provided variation is not in datafile.'));

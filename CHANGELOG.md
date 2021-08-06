@@ -1,5 +1,11 @@
 # Optimizely PHP SDK Changelog
 
+## 3.7.1
+August 4th, 2021
+
+### Bug Fixes
+- Fixed duplicate experiment key issue with multiple feature flags. While trying to get variation from the variationKeyMap, it was unable to find because the latest experiment key was overriding the previous one. [#226](https://github.com/optimizely/php-sdk/pull/226)
+
 ## 3.7.0
 February 17th, 2021
 
