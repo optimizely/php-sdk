@@ -251,10 +251,11 @@ class DatafileProjectConfig implements ProjectConfigInterface
     /**
      * DatafileProjectConfig constructor to load and set project configuration data.
      *
-     * @param $datafile     string JSON string representing the project.
-     * @param $logger       LoggerInterface
+     * @param $datafile  string JSON string representing the project.
+     * @param $logger  LoggerInterface
      * @param $errorHandler ErrorHandlerInterface
      */
+
     public function __construct($datafile, $logger, $errorHandler)
     {
         $supportedVersions = array(self::V2, self::V3, self::V4);
@@ -284,7 +285,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
-        $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
+        $rollouts = isset($config['rollouts']) ? $config['rollouts']: [];
         $featureFlags = isset($config['featureFlags']) ? $config['featureFlags'] : [];
 
         // JSON type is represented in datafile as a subtype of string for the sake of backwards compatibility.
@@ -410,10 +411,10 @@ class DatafileProjectConfig implements ProjectConfigInterface
     /**
      * Create ProjectConfig based on datafile string.
      *
-     * @param  string                $datafile           JSON string representing the Optimizely project.
-     * @param  bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
-     * @param  LoggerInterface       $logger             Logger instance
-     * @param  ErrorHandlerInterface $errorHandler       ErrorHandler instance.
+     * @param  string $datafile JSON string representing the Optimizely project.
+     * @param  bool $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
+     * @param  LoggerInterface $logger Logger instance
+     * @param  ErrorHandlerInterface $errorHandler ErrorHandler instance.
      * @return ProjectConfig ProjectConfig instance or null;
      */
     public static function createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler)
@@ -721,7 +722,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
     /**
      * @param $experimentKey string Key for experiment.
-     * @param $variationKey  string Key for variation.
+     * @param $variationKey string Key for variation.
      *
      * @return Variation Entity corresponding to the provided experiment key and variation key.
      *         Dummy entity is returned if key or ID is invalid.

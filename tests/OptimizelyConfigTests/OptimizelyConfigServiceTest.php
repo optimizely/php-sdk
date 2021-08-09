@@ -18,7 +18,6 @@
 
 namespace Optimizely\Tests;
 
-use Exception;
 use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
@@ -326,7 +325,6 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $this->optConfigService,
         array($audienceConditions[$testNo])
       );
-      //fwrite(STDERR, print_r(gettype($response), true));    
       $this->assertEquals($expectedAudienceOutputs[$testNo], $response);
     }
   }

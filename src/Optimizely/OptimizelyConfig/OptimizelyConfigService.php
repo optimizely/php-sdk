@@ -22,7 +22,6 @@ use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
 
-use function GuzzleHttp\json_decode;
 
 class OptimizelyConfigService
 {
@@ -199,12 +198,12 @@ class OptimizelyConfigService
         $this->featKeyOptlyVariableIdVariableMap = [];
 
         foreach ($this->featureFlags as $feature) {
-            // Populate experimentIdFeatureMap
+            # Populate experimentIdFeatureMap
             foreach ($feature->getExperimentIds() as $expId) {
                 $this->experimentIdFeatureMap[$expId] = $feature;
             }
 
-            // Populate featKeyOptlyVariableKeyVariableMap and featKeyOptlyVariableIdVariableMap
+            # Populate featKeyOptlyVariableKeyVariableMap and featKeyOptlyVariableIdVariableMap
             $variablesKeyMap = [];
             $variablesIdMap = [];
 
@@ -249,7 +248,7 @@ class OptimizelyConfigService
 
         // Set default variables for variation.
         $variablesMap = $this->featKeyOptlyVariableKeyVariableMap[$featureKey];
-
+    
         // Return default variable values if feature is not enabled.
         if (!$variation->getFeatureEnabled()) {
             return $variablesMap;
@@ -308,8 +307,18 @@ class OptimizelyConfigService
     }
 
     /**
-     * Generates string of audience conditions array mapped to audience names.
+     * Converts array of audience conditions to serialized audiences.
      *
+     * for examples:
+     * 1. Input: ["or", "1", "2"]
+     *     Output: "us" OR "female"
+     * 2. Input: ["not", "1"]
+     *     Output: "NOT "us"
+     * 3. Input: ["or", "1"]
+     *     Output: "us"
+     * 4. Input: ["and", ["or", "1", ["and", "2", "3"]], ["and", "11", ["or", "12", "13"]]]
+     *     Output: "("us" OR ("female" AND "adult")) AND ("fr" AND ("male" OR "kid"))"
+     * 
      * @param array audience conditions .
      *
      * @return string of experiment audience conditions.
@@ -317,21 +326,25 @@ class OptimizelyConfigService
     protected function getSerializedAudiences(array $audienceConditions)
     {
         $finalAudiences = '';
-        $ConditionsArray = array('and', 'or', 'not');
         if ($audienceConditions == null) {
             return $finalAudiences;
         }
         $cond = '';
         foreach ($audienceConditions as $var) {
             $subAudience = '';
+            // Checks if item is list of conditions means if it is sub audience
             if (is_array($var)) {
                 $subAudience = $this->getSerializedAudiences($var);
 
                 $subAudience = '(' . $subAudience . ')';
-            } elseif (in_array($var, $ConditionsArray, true)) {
+            } elseif (in_array($var, array('and', 'or', 'not'), true)) {
                 $cond = strtoupper(strval($var));
             } else {
+                // Checks if item is audience id
                 $itemStr = strval($var);
+                $audience = $this->projectConfig->getAudience($itemStr);
+                $name = $audience == null ? $itemStr : $audience->getName();
+                // if audience condition is "NOT" then add "NOT" at start. Otherwise check if there is already audience id in finalAudiences then append condition between finalAudiences and item
                 if ($finalAudiences !== '' || $cond == "NOT") {
                     if ($finalAudiences !== '') {
                         $finalAudiences = $finalAudiences . ' ';
@@ -341,23 +354,13 @@ class OptimizelyConfigService
                     if ($cond == '') {
                         $cond = 'OR';
                     }
-                    $audience = $this->projectConfig->getAudience($itemStr);
-                    if ($audience == null) {
-                        $finalAudiences = $finalAudiences . $cond . ' ' . '"' . $itemStr . '"';
-                    } else {
-                        $name = $audience->getName();
-                        $finalAudiences = $finalAudiences . $cond . ' ' . '"' . $name . '"';
-                    }
+                    $finalAudiences = $finalAudiences . $cond . ' ' . '"' . $name . '"';
+
                 } else {
-                    $audience = $this->projectConfig->getAudience($itemStr);
-                    if ($audience == null) {
-                        $finalAudiences = '"' . $itemStr . '"';
-                    } else {
-                        $name = $audience->getName();
-                        $finalAudiences = '"' . $name . '"';
-                    }
+                    $finalAudiences = '"' . $name . '"';
                 }
             }
+            // Checks if sub audience is empty or not
             if (strval($subAudience !== '')) {
                 if ($finalAudiences !== '' || $cond == "NOT") {
                     if ($finalAudiences !== '') {

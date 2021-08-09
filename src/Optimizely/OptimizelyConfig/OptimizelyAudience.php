@@ -19,12 +19,12 @@ namespace Optimizely\OptimizelyConfig;
 class OptimizelyAudience implements \JsonSerializable
 {
     /**
-     * @var string id representing audience.
+     * @var string representing audience id.
      */
     private $id;
 
     /**
-     * @var string name representing audience.
+     * @var string representing audience name .
      */
     private $name;
 
