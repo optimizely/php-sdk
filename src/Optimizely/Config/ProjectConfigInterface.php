@@ -52,6 +52,37 @@ interface ProjectConfigInterface
     public function getRevision();
 
     /**
+     * @return string String represnting environment key of the datafile.
+     */
+    public function getEnvironmentKey();
+
+    /**
+     * @return string String representing sdkkey of the datafile.
+     */
+    public function getSdkKey();
+
+    /**
+     * @return array List of attributes parsed from the datafile
+     */
+    public function getAttributes();
+
+    /**
+     * @return array List of audiences parsed from the datafile
+     */
+    public function getAudiences();
+
+    /**
+     * @return array List of events parsed from the datafile
+     */
+    public function getEvents();
+
+    /**
+     * @return array List of typed audiences parsed from the datafile
+     */
+    public function getTypedAudiences();
+
+    
+    /**
      * @return array List of feature flags parsed from the datafile
      */
     public function getFeatureFlags();
@@ -125,7 +156,7 @@ interface ProjectConfigInterface
 
     /**
      * @param $experimentKey string Key for experiment.
-     * @param $variationKey string Key for variation.
+     * @param $variationKey  string Key for variation.
      *
      * @return Variation Entity corresponding to the provided experiment key and variation key.
      *         Dummy entity is returned if key or ID is invalid.
@@ -134,7 +165,7 @@ interface ProjectConfigInterface
 
     /**
      * @param $experimentKey string Key for experiment.
-     * @param $variationId string ID for variation.
+     * @param $variationId   string ID for variation.
      *
      * @return Variation Entity corresponding to the provided experiment key and variation ID.
      *         Dummy entity is returned if key or ID is invalid.

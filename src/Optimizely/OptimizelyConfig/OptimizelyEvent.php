@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely Inc and Contributors
+ * Copyright 2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,41 +16,33 @@
  */
 namespace Optimizely\OptimizelyConfig;
 
-class OptimizelyExperiment implements \JsonSerializable
+class OptimizelyEvent implements \JsonSerializable
 {
     /**
-     * @var string ID representing Experiment.
+     * @var string id representing event.
      */
     private $id;
 
     /**
-     * @var string Key representing Experiment.
+     * @var string key representing event.
      */
     private $key;
 
     /**
-     * @var string string representing Experiment audience conditions name mapped.
+     * @var array experimentIds representing event experiment ids.
      */
-    private $audiences;
+    private $experimentIds;
 
 
-    /**
-     * Map of Variation Keys to OptimizelyVariations.
-     *
-     * @var <String, OptimizelyVariation> associative array
-     */
-    private $variationsMap;
-
-    public function __construct($id, $key, $variationsMap, $audiences)
+    public function __construct($id, $key, array $experimentIds)
     {
         $this->id = $id;
         $this->key = $key;
-        $this->audiences = $audiences;
-        $this->variationsMap = $variationsMap;
+        $this->experimentIds = $experimentIds;
     }
 
     /**
-     * @return string Experiment ID.
+     * @return string event ID.
      */
     public function getId()
     {
@@ -58,7 +50,7 @@ class OptimizelyExperiment implements \JsonSerializable
     }
 
     /**
-     * @return string Experiment key.
+     * @return string event Key.
      */
     public function getKey()
     {
@@ -66,20 +58,11 @@ class OptimizelyExperiment implements \JsonSerializable
     }
 
     /**
-     * @return string Experiment audiences.
+     * @return string event conditions.
      */
-    public function getExperimentAudiences()
+    public function getExperimentIds()
     {
-        return $this->audiences;
-    }
-
-
-    /**
-     * @return array Map of Variation Keys to OptimizelyVariations.
-     */
-    public function getVariationsMap()
-    {
-        return $this->variationsMap;
+        return $this->experimentIds;
     }
 
     /**

@@ -40,7 +40,7 @@ class OptimizelyVariation implements \JsonSerializable
      */
     private $variablesMap;
 
-    public function __construct($id, $key, $featureEnabled, array $variablesMap)
+    public function __construct($id, $key, $featureEnabled, $variablesMap)
     {
         $this->id = $id;
         $this->key = $key;

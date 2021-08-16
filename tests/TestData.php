@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright 2016-2019, 2021, Optimizely
  *
@@ -14,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 namespace Optimizely\Tests;
 
 use Exception;
@@ -28,8 +30,8 @@ use Optimizely\Optimizely;
 use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
 
 define(
-    'DATAFILE',
-    '{
+  'DATAFILE',
+  '{
   "experiments": [
     {
       "status": "Running",
@@ -959,8 +961,8 @@ define(
 );
 
 define(
-    'UNSUPPORTED_DATAFILE',
-    '{
+  'UNSUPPORTED_DATAFILE',
+  '{
       "version": "5",
       "rollouts": [],
       "anonymizeIP": true,
@@ -1013,8 +1015,8 @@ define(
 );
 
 define(
-    'DATAFILE_WITH_TYPED_AUDIENCES',
-    '{
+  'DATAFILE_WITH_TYPED_AUDIENCES',
+  '{
       "version": "4",
       "rollouts": [
         {
@@ -1414,8 +1416,8 @@ define(
 );
 
 define(
-    'DATAFILE_FOR_OPTIMIZELY_CONFIG',
-    '{
+  'DATAFILE_FOR_OPTIMIZELY_CONFIG',
+  '{
       "version": "4",
       "rollouts": [
         {
@@ -1575,7 +1577,23 @@ define(
           "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
           "id": "$opt_dummy_audience",
           "name": "Optimizely-Generated Audience for Backwards Compatibility"
+        },
+        {
+          "id": "3468206642",
+          "name": "exactString",
+          "conditions": "[\"and\", [\"or\", [\"or\", {\"name\": \"house\", \"type\": \"custom_attribute\", \"value\": \"Gryffindor\"}]]]"
+        },
+        {
+          "id": "3988293898",
+          "name": "$$dummySubstringString",
+          "conditions": "{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"
+        },
+        {
+          "id": "3988293899",
+          "name": "$$dummyExists",
+          "conditions": "{ \"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\" }"
         }
+
       ],
       "groups": [
         {
@@ -1693,15 +1711,319 @@ define(
         }
       ],
       "attributes": [
-        
+        {"key": "test_attribute", "id": "111094"}
       ],
       "botFiltering": false,
       "accountId": "8272261422",
       "events": [
-        
+        {"key": "test_event", "experimentIds": ["111127"], "id": "111095"}
       ],
       "revision": "16"
   }'
+);
+
+define(
+  'DATAFILE_FOR_DUPLICATE_EXP_KEYS',
+  '{
+      "version": "4",
+      "rollouts": [],
+      "typedAudiences": [
+        {
+          "id": "20415611520",
+          "conditions": [
+            "and",
+            [
+              "or",
+              [
+                "or",
+                {
+                  "value": true,
+                  "type": "custom_attribute",
+                  "name": "hiddenLiveEnabled",
+                  "match": "exact"
+                }
+              ]
+            ]
+          ],
+          "name": "test1"
+        },
+        {
+          "id": "20406066925",
+          "conditions": [
+            "and",
+            [
+              "or",
+              [
+                "or",
+                {
+                  "value": false,
+                  "type": "custom_attribute",
+                  "name": "hiddenLiveEnabled",
+                  "match": "exact"
+                }
+              ]
+            ]
+          ],
+          "name": "test2"
+        }
+      ],
+      "anonymizeIP": true,
+      "projectId": "20430981610",
+      "variables": [],
+      "featureFlags": [
+        {
+          "experimentIds": ["9300000007569"],
+          "rolloutId": "",
+          "variables": [],
+          "id": "3045",
+          "key": "flag1"
+        },
+        {
+          "experimentIds": ["9300000007573"],
+          "rolloutId": "",
+          "variables": [],
+          "id": "3046",
+          "key": "flag2"
+        }
+      ],
+      "experiments": [
+        {
+          "status": "Running",
+          "audienceConditions": ["or", "20415611520"],
+          "audienceIds": ["20415611520"],
+          "variations": [
+            {
+              "variables": [],
+              "id": "8045",
+              "key": "variation1",
+              "featureEnabled": true
+            }
+          ],
+          "forcedVariations": {},
+          "key": "targeted_delivery",
+          "layerId": "9300000007569",
+          "trafficAllocation": [{ "entityId": "8045", "endOfRange": 10000 }],
+          "id": "9300000007569"
+        },
+        {
+          "status": "Running",
+          "audienceConditions": ["or", "20406066925"],
+          "audienceIds": ["20406066925"],
+          "variations": [
+            {
+              "variables": [],
+              "id": "8048",
+              "key": "variation2",
+              "featureEnabled": true
+            }
+          ],
+          "forcedVariations": {},
+          "key": "targeted_delivery",
+          "layerId": "9300000007573",
+          "trafficAllocation": [{ "entityId": "8048", "endOfRange": 10000 }],
+          "id": "9300000007573"
+        }
+      ],
+      "audiences": [
+        {
+          "id": "20415611520",
+          "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+          "name": "test1"
+        },
+        {
+          "id": "20406066925",
+          "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+          "name": "test2"
+        },
+        {
+          "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+          "id": "$opt_dummy_audience",
+          "name": "Optimizely-Generated Audience for Backwards Compatibility"
+        }
+      ],
+      "groups": [],
+      "attributes": [{ "id": "20408641883", "key": "hiddenLiveEnabled" }],
+      "botFiltering": false,
+      "accountId": "17882702980",
+      "events": [],
+      "revision": "25",
+      "sendFlagDecisions": true
+    }'
+);
+
+define(
+  'DATAFILE_FOR_DUPLICATE_RUL_KEYS',
+
+  '{
+      "version": "4",
+      "rollouts": [
+        {
+          "experiments": [
+            {
+              "status": "Running",
+              "audienceConditions": [],
+              "audienceIds": [],
+              "variations": [
+                {
+                  "variables": [],
+                  "id": "5452",
+                  "key": "on",
+                  "featureEnabled": true
+                }
+              ],
+              "forcedVariations": {},
+              "key": "targeted_delivery",
+              "layerId": "9300000004981",
+              "trafficAllocation": [{ "entityId": "5452", "endOfRange": 10000 }],
+              "id": "9300000004981"
+            },
+            {
+              "status": "Running",
+              "audienceConditions": [],
+              "audienceIds": [],
+              "variations": [
+                {
+                  "variables": [],
+                  "id": "5451",
+                  "key": "off",
+                  "featureEnabled": false
+                }
+              ],
+              "forcedVariations": {},
+              "key": "default-rollout-2029-20301771717",
+              "layerId": "default-layer-rollout-2029-20301771717",
+              "trafficAllocation": [{ "entityId": "5451", "endOfRange": 10000 }],
+              "id": "default-rollout-2029-20301771717"
+            }
+          ],
+          "id": "rollout-2029-20301771717"
+        },
+        {
+          "experiments": [
+            {
+              "status": "Running",
+              "audienceConditions": [],
+              "audienceIds": [],
+              "variations": [
+                {
+                  "variables": [],
+                  "id": "5450",
+                  "key": "on",
+                  "featureEnabled": true
+                }
+              ],
+              "forcedVariations": {},
+              "key": "targeted_delivery",
+              "layerId": "9300000004979",
+              "trafficAllocation": [{ "entityId": "5450", "endOfRange": 10000 }],
+              "id": "9300000004979"
+            },
+            {
+              "status": "Running",
+              "audienceConditions": [],
+              "audienceIds": [],
+              "variations": [
+                {
+                  "variables": [],
+                  "id": "5449",
+                  "key": "off",
+                  "featureEnabled": false
+                }
+              ],
+              "forcedVariations": {},
+              "key": "default-rollout-2028-20301771717",
+              "layerId": "default-layer-rollout-2028-20301771717",
+              "trafficAllocation": [{ "entityId": "5449", "endOfRange": 10000 }],
+              "id": "default-rollout-2028-20301771717"
+            }
+          ],
+          "id": "rollout-2028-20301771717"
+        },
+        {
+          "experiments": [
+            {
+              "status": "Running",
+              "audienceConditions": [],
+              "audienceIds": [],
+              "variations": [
+                {
+                  "variables": [],
+                  "id": "5448",
+                  "key": "on",
+                  "featureEnabled": true
+                }
+              ],
+              "forcedVariations": {},
+              "key": "targeted_delivery",
+              "layerId": "9300000004977",
+              "trafficAllocation": [{ "entityId": "5448", "endOfRange": 10000 }],
+              "id": "9300000004977"
+            },
+            {
+              "status": "Running",
+              "audienceConditions": [],
+              "audienceIds": [],
+              "variations": [
+                {
+                  "variables": [],
+                  "id": "5447",
+                  "key": "off",
+                  "featureEnabled": false
+                }
+              ],
+              "forcedVariations": {},
+              "key": "default-rollout-2027-20301771717",
+              "layerId": "default-layer-rollout-2027-20301771717",
+              "trafficAllocation": [{ "entityId": "5447", "endOfRange": 10000 }],
+              "id": "default-rollout-2027-20301771717"
+            }
+          ],
+          "id": "rollout-2027-20301771717"
+        }
+      ],
+      "typedAudiences": [],
+      "anonymizeIP": true,
+      "projectId": "20286295225",
+      "variables": [],
+      "featureFlags": [
+        {
+          "experimentIds": [],
+          "rolloutId": "rollout-2029-20301771717",
+          "variables": [],
+          "id": "2029",
+          "key": "flag_3"
+        },
+        {
+          "experimentIds": [],
+          "rolloutId": "rollout-2028-20301771717",
+          "variables": [],
+          "id": "2028",
+          "key": "flag_2"
+        },
+        {
+          "experimentIds": [],
+          "rolloutId": "rollout-2027-20301771717",
+          "variables": [],
+          "id": "2027",
+          "key": "flag_1"
+        }
+      ],
+      "experiments": [],
+      "audiences": [
+        {
+          "conditions": "[\"or\", {\"match\": \"exact\", \"name\": \"$opt_dummy_attribute\", \"type\": \"custom_attribute\", \"value\": \"$opt_dummy_value\"}]",
+          "id": "$opt_dummy_audience",
+          "name": "Optimizely-Generated Audience for Backwards Compatibility"
+        }
+      ],
+      "groups": [],
+      "attributes": [],
+      "botFiltering": false,
+      "accountId": "19947277778",
+      "events": [],
+      "revision": "11",
+      "sendFlagDecisions": true
+    }'
 );
 
 /**
@@ -1713,17 +2035,17 @@ define(
  */
 class TestBucketer extends Bucketer
 {
-    private $values;
+  private $values;
 
-    public function setBucketValues($values)
-    {
-        $this->values = $values;
-    }
+  public function setBucketValues($values)
+  {
+    $this->values = $values;
+  }
 
-    public function generateBucketValue($bucketingId)
-    {
-        return array_shift($this->values);
-    }
+  public function generateBucketValue($bucketingId)
+  {
+    return array_shift($this->values);
+  }
 }
 
 /**
@@ -1732,72 +2054,72 @@ class TestBucketer extends Bucketer
  */
 class OptimizelyTester extends Optimizely
 {
-    public function sendImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
-    {
-        parent::sendImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes);
-    }
+  public function sendImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
+  {
+    parent::sendImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes);
+  }
 
-    public function validateInputs(array $values, $logLevel = Logger::ERROR)
-    {
-        return parent::validateInputs($values, $logLevel);
-    }
+  public function validateInputs(array $values, $logLevel = Logger::ERROR)
+  {
+    return parent::validateInputs($values, $logLevel);
+  }
 
-    public function getConfig()
-    {
-        return parent::getConfig();
-    }
+  public function getConfig()
+  {
+    return parent::getConfig();
+  }
 }
 
 class FireNotificationTester
 {
-    public function decisionCallbackNoArgs()
-    {
-    }
+  public function decisionCallbackNoArgs()
+  {
+  }
 
-    public function decisionCallbackNoArgs2()
-    {
-    }
+  public function decisionCallbackNoArgs2()
+  {
+  }
 
-    public function decisionCallbackWithArgs($anInt, $aDouble, $aString, $anArray, $aFunction)
-    {
-    }
+  public function decisionCallbackWithArgs($anInt, $aDouble, $aString, $anArray, $aFunction)
+  {
+  }
 
-    public function decisionCallbackWithArgs2($anInt, $aDouble, $aString, $anArray, $aFunction)
-    {
-    }
+  public function decisionCallbackWithArgs2($anInt, $aDouble, $aString, $anArray, $aFunction)
+  {
+  }
 
-    public function trackCallbackNoArgs()
-    {
-    }
+  public function trackCallbackNoArgs()
+  {
+  }
 }
 
 
 class ValidEventDispatcher implements EventDispatcherInterface
 {
-    public function dispatchEvent(LogEvent $event)
-    {
-    }
+  public function dispatchEvent(LogEvent $event)
+  {
+  }
 }
 
 class InvalidEventDispatcher
 {
-    public function dispatchEvent(LogEvent $event)
-    {
-    }
+  public function dispatchEvent(LogEvent $event)
+  {
+  }
 }
 
 class InvalidLogger
 {
-    public function log($logLevel, $logMessage)
-    {
-    }
+  public function log($logLevel, $logMessage)
+  {
+  }
 }
 
 class InvalidErrorHandler
 {
-    public function handleError(Exception $error)
-    {
-    }
+  public function handleError(Exception $error)
+  {
+  }
 }
 
 /**
@@ -1806,10 +2128,10 @@ class InvalidErrorHandler
  */
 class DecisionTester extends DecisionService
 {
-    public function getBucketingId($userId, $userAttributes, &$decideReasons = [])
-    {
-        return parent::getBucketingId($userId, $userAttributes, $decideReasons);
-    }
+  public function getBucketingId($userId, $userAttributes, &$decideReasons = [])
+  {
+    return parent::getBucketingId($userId, $userAttributes, $decideReasons);
+  }
 }
 
 /**
@@ -1818,18 +2140,18 @@ class DecisionTester extends DecisionService
  */
 class HTTPProjectConfigManagerTester extends HTTPProjectConfigManager
 {
-    public function getUrl($sdkKey, $url, $urlTemplate)
-    {
-        return parent::getUrl($sdkKey, $url, $urlTemplate);
-    }
+  public function getUrl($sdkKey, $url, $urlTemplate)
+  {
+    return parent::getUrl($sdkKey, $url, $urlTemplate);
+  }
 
-    public function fetchDatafile()
-    {
-        return parent::fetchDatafile();
-    }
+  public function fetchDatafile()
+  {
+    return parent::fetchDatafile();
+  }
 
-    public function handleResponse($datafile)
-    {
-        return parent::handleResponse($datafile);
-    }
+  public function handleResponse($datafile)
+  {
+    return parent::handleResponse($datafile);
+  }
 }
