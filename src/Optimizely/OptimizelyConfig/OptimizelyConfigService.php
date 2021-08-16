@@ -21,7 +21,9 @@ namespace Optimizely\OptimizelyConfig;
 use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
+use Traversable;
 
+use function GuzzleHttp\json_decode;
 
 class OptimizelyConfigService
 {
@@ -78,16 +80,16 @@ class OptimizelyConfigService
 
     public function __construct(ProjectConfigInterface $projectConfig)
     {
-        $this->experiments = $projectConfig->getAllExperiments();
-        $this->featureFlags = $projectConfig->getFeatureFlags();
-        $this->revision = $projectConfig->getRevision();
-        $this->datafile = $projectConfig->toDatafile();
-        $this->environmentKey = $projectConfig->getEnvironmentKey();
-        $this->sdkKey = $projectConfig->getSdkKey();
-        $this->projectConfig = $projectConfig;
+            $this->experiments = $projectConfig->getAllExperiments();
+            $this->featureFlags = $projectConfig->getFeatureFlags();
+            $this->revision = $projectConfig->getRevision();
+            $this->datafile = $projectConfig->toDatafile();
+            $this->environmentKey = $projectConfig->getEnvironmentKey();
+            $this->sdkKey = $projectConfig->getSdkKey();
+            $this->projectConfig = $projectConfig;
 
 
-        $this->createLookupMaps();
+            $this->createLookupMaps();
     }
 
     /**
@@ -95,14 +97,18 @@ class OptimizelyConfigService
      */
     public function getConfig()
     {
+
+
         $experimentsMaps = $this->getExperimentsMaps();
         $featuresMap = $this->getFeaturesMap($experimentsMaps[1]);
+        $experimentsMap = $experimentsMaps[0];
+        $experimentsMap = (object)$experimentsMap;
         $attributes = $this->getConfigAttributes();
         $audiences = $this->getConfigAudiences();
         $events = $this->getConfigEvents();
         return new OptimizelyConfig(
             $this->revision,
-            $experimentsMaps[0],
+            $experimentsMap,
             $featuresMap,
             $this->datafile,
             $this->environmentKey,
@@ -131,6 +137,7 @@ class OptimizelyConfigService
         }
         return $attributeArray;
     }
+
 
     /**
      * Generates array of events as OptimizelyEvents.
@@ -166,6 +173,7 @@ class OptimizelyConfigService
         $audiencesArray = $typedAudiences;
         foreach ($audiencesArray as $typedAudience) {
             $uniqueIdsMap[$typedAudience['id']] = $typedAudience['id'];
+            $typedAudience['conditions'] = json_encode($typedAudience['conditions']);
         }
         foreach ($normalAudiences as $naudience) {
             if (!array_key_exists($naudience['id'], $uniqueIdsMap)) {
@@ -197,12 +205,18 @@ class OptimizelyConfigService
         $this->featKeyOptlyVariableKeyVariableMap = [];
         $this->featKeyOptlyVariableIdVariableMap = [];
 
+
+
         foreach ($this->featureFlags as $feature) {
             # Populate experimentIdFeatureMap
             foreach ($feature->getExperimentIds() as $expId) {
                 $this->experimentIdFeatureMap[$expId] = $feature;
             }
-
+            $rolloutID = $feature->getRolloutId();
+            $rollout = $this->projectConfig->getRolloutFromId($rolloutID);
+            foreach($rollout->getExperiments() as $exp){
+                $this->experimentIdFeatureMap[$exp->getId()] = $feature;
+            }
             # Populate featKeyOptlyVariableKeyVariableMap and featKeyOptlyVariableIdVariableMap
             $variablesKeyMap = [];
             $variablesIdMap = [];
@@ -244,10 +258,12 @@ class OptimizelyConfigService
         }
 
         $featureFlag = $this->experimentIdFeatureMap[$experimentId];
+
         $featureKey = $featureFlag->getKey();
 
         // Set default variables for variation.
         $variablesMap = $this->featKeyOptlyVariableKeyVariableMap[$featureKey];
+
     
         // Return default variable values if feature is not enabled.
         if (!$variation->getFeatureEnabled()) {
@@ -273,7 +289,7 @@ class OptimizelyConfigService
 
             $variablesMap[$key] = $modifiedOptVariable;
         }
-
+        
         return $variablesMap;
     }
 
@@ -291,6 +307,7 @@ class OptimizelyConfigService
 
         foreach ($experiment->getVariations() as $variation) {
             $variablesMap = $this->getVariablesMap($experiment, $variation);
+            $variablesMap = (object)$variablesMap;
 
             $variationKey = $variation->getKey();
             $optVariation = new OptimizelyVariation(
@@ -302,7 +319,6 @@ class OptimizelyConfigService
 
             $variationsMap[$variationKey] = $optVariation;
         }
-
         return $variationsMap;
     }
 
@@ -405,12 +421,13 @@ class OptimizelyConfigService
             $optExp = new OptimizelyExperiment(
                 $expId,
                 $expKey,
-                $this->getVariationsMap($exp),
+                (object)$this->getVariationsMap($exp),
                 $audiences
             );
 
             $experimentsKeyMap[$expKey] = $optExp;
             $experimentsIdMap[$expId] = $optExp;
+
         }
 
         return [$experimentsKeyMap, $experimentsIdMap];
@@ -439,7 +456,7 @@ class OptimizelyConfigService
             $optExp = new OptimizelyExperiment(
                 $expId,
                 $expKey,
-                $this->getVariationsMap($exp),
+                (object)$this->getVariationsMap($exp),
                 $audiences
             );
             array_push($deliveryRules, $optExp);
@@ -478,15 +495,14 @@ class OptimizelyConfigService
             $optFeature = new OptimizelyFeature(
                 $feature->getId(),
                 $featureKey,
-                $experimentsMap,
-                $variablesMap,
+                (object)$experimentsMap,
+                (object)$variablesMap,
                 $experimentRules,
                 $deliveryRules
             );
 
             $featuresMap[$featureKey] = $optFeature;
         }
-
-        return $featuresMap;
+        return (object)$featuresMap;
     }
 }

@@ -58,7 +58,7 @@ class OptimizelyFeature implements \JsonSerializable
      */
     private $variablesMap;
 
-    public function __construct($id, $key, array $experimentsMap, array $variablesMap, array $experimentRules, array $deliveryRules)
+    public function __construct($id, $key, $experimentsMap, $variablesMap, $experimentRules, $deliveryRules)
     {
         $this->id = $id;
         $this->key = $key;

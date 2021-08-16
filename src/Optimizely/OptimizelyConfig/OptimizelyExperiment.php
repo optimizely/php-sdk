@@ -41,7 +41,7 @@ class OptimizelyExperiment implements \JsonSerializable
      */
     private $variationsMap;
 
-    public function __construct($id, $key, array $variationsMap, $audiences)
+    public function __construct($id, $key, $variationsMap, $audiences)
     {
         $this->id = $id;
         $this->key = $key;

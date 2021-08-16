@@ -274,8 +274,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
-        $this->attributes = $config['attributes'] ?: [];
-        $this->audiences = $config['audiences'] ?: [];
+        $this->attributes = isset($config['attributes']) ? $config['attributes'] : [];
+        $this->audiences = isset($config['audiences']) ? $config['audiences']: [];
         $this->events = $config['events'] ?: [];
         $this->typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences'] : [];
         $this->_anonymizeIP = isset($config['anonymizeIP']) ? $config['anonymizeIP'] : false;
