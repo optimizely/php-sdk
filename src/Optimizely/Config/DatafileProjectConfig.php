@@ -275,7 +275,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
         $this->attributes = isset($config['attributes']) ? $config['attributes'] : [];
-        $this->audiences = isset($config['audiences']) ? $config['audiences']: [];
+        $this->audiences = isset($config['audiences']) ? $config['audiences'] : [];
         $this->events = $config['events'] ?: [];
         $this->typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences'] : [];
         $this->_anonymizeIP = isset($config['anonymizeIP']) ? $config['anonymizeIP'] : false;
@@ -285,7 +285,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
-        $rollouts = isset($config['rollouts']) ? $config['rollouts']: [];
+        $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
         $featureFlags = isset($config['featureFlags']) ? $config['featureFlags'] : [];
 
         // JSON type is represented in datafile as a subtype of string for the sake of backwards compatibility.
@@ -729,10 +729,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getVariationFromKey($experimentKey, $variationKey)
     {
-        if (
-            isset($this->_variationKeyMap[$experimentKey])
-            && isset($this->_variationKeyMap[$experimentKey][$variationKey])
-        ) {
+        if (isset($this->_variationKeyMap[$experimentKey])
+            && isset($this->_variationKeyMap[$experimentKey][$variationKey])) {
             return $this->_variationKeyMap[$experimentKey][$variationKey];
         }
 
@@ -757,10 +755,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getVariationFromId($experimentKey, $variationId)
     {
-        if (
-            isset($this->_variationIdMap[$experimentKey])
-            && isset($this->_variationIdMap[$experimentKey][$variationId])
-        ) {
+        if (isset($this->_variationIdMap[$experimentKey])
+            && isset($this->_variationIdMap[$experimentKey][$variationId])) {
             return $this->_variationIdMap[$experimentKey][$variationId];
         }
 
@@ -785,10 +781,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getVariationFromIdByExperimentId($experimentId, $variationId)
     {
-        if (
-            isset($this->_variationIdMapByExperimentId[$experimentId])
-            && isset($this->_variationIdMapByExperimentId[$experimentId][$variationId])
-        ) {
+        if (isset($this->_variationIdMapByExperimentId[$experimentId])
+            && isset($this->_variationIdMapByExperimentId[$experimentId][$variationId])) {
             return $this->_variationIdMapByExperimentId[$experimentId][$variationId];
         }
 
@@ -813,10 +807,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     public function getVariationFromKeyByExperimentId($experimentId, $variationKey)
     {
-        if (
-            isset($this->_variationKeyMapByExperimentId[$experimentId])
-            && isset($this->_variationKeyMapByExperimentId[$experimentId][$variationKey])
-        ) {
+        if (isset($this->_variationKeyMapByExperimentId[$experimentId])
+            && isset($this->_variationKeyMapByExperimentId[$experimentId][$variationKey])) {
             return $this->_variationKeyMapByExperimentId[$experimentId][$variationKey];
         }
 
@@ -847,10 +839,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
             return null;
         }
 
-        if (
-            isset($this->_featureFlagVariableMap[$featureFlagKey])
-            && isset($this->_featureFlagVariableMap[$featureFlagKey][$variableKey])
-        ) {
+        if (isset($this->_featureFlagVariableMap[$featureFlagKey])
+            && isset($this->_featureFlagVariableMap[$featureFlagKey][$variableKey])) {
             return $this->_featureFlagVariableMap[$featureFlagKey][$variableKey];
         }
 

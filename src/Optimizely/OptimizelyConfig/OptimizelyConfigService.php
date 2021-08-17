@@ -154,7 +154,7 @@ class OptimizelyConfigService
                 $event['key'],
                 $event['experimentIds']
             );
-            array_push($eventsArray, $optlyEvent);
+            $eventsArray[] = $optlyEvent;
         }
         return $eventsArray;
     }
@@ -171,9 +171,9 @@ class OptimizelyConfigService
         $normalAudiences = $this->projectConfig->getAudiences();
         $typedAudiences = $this->projectConfig->getTypedAudiences();
         $audiencesArray = $typedAudiences;
-        foreach ($audiencesArray as $typedAudience) {
+        foreach ($audiencesArray as $key => $typedAudience) {
             $uniqueIdsMap[$typedAudience['id']] = $typedAudience['id'];
-            $typedAudience['conditions'] = json_encode($typedAudience['conditions']);
+            $audiencesArray[$key]['conditions'] = json_encode($typedAudience['conditions']);
         }
         foreach ($normalAudiences as $naudience) {
             if (!array_key_exists($naudience['id'], $uniqueIdsMap)) {
@@ -214,7 +214,7 @@ class OptimizelyConfigService
             }
             $rolloutID = $feature->getRolloutId();
             $rollout = $this->projectConfig->getRolloutFromId($rolloutID);
-            foreach($rollout->getExperiments() as $exp){
+            foreach ($rollout->getExperiments() as $exp) {
                 $this->experimentIdFeatureMap[$exp->getId()] = $feature;
             }
             # Populate featKeyOptlyVariableKeyVariableMap and featKeyOptlyVariableIdVariableMap
@@ -334,7 +334,7 @@ class OptimizelyConfigService
      *     Output: "us"
      * 4. Input: ["and", ["or", "1", ["and", "2", "3"]], ["and", "11", ["or", "12", "13"]]]
      *     Output: "("us" OR ("female" AND "adult")) AND ("fr" AND ("male" OR "kid"))"
-     * 
+     *
      * @param array audience conditions .
      *
      * @return string of experiment audience conditions.
@@ -371,7 +371,6 @@ class OptimizelyConfigService
                         $cond = 'OR';
                     }
                     $finalAudiences = $finalAudiences . $cond . ' ' . '"' . $name . '"';
-
                 } else {
                     $finalAudiences = '"' . $name . '"';
                 }
@@ -427,7 +426,6 @@ class OptimizelyConfigService
 
             $experimentsKeyMap[$expKey] = $optExp;
             $experimentsIdMap[$expId] = $optExp;
-
         }
 
         return [$experimentsKeyMap, $experimentsIdMap];
