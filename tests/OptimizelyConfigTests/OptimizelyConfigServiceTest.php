@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright 2020-2021, Optimizely
  *
@@ -15,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 namespace Optimizely\Tests;
 
 use Optimizely\Config\DatafileProjectConfig;
@@ -39,6 +37,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->datafile = DATAFILE_FOR_OPTIMIZELY_CONFIG;
+
         $this->projectConfig = new DatafileProjectConfig(
             $this->datafile,
             new NoOpLogger(),
@@ -79,7 +78,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $this->featExpVariationMap = [];
         $this->featExpVariationMap['variation_a'] =
             new OptimizelyVariation('17289540366', 'variation_a', true, $this->expectedVariableKeyMap);
-
+    
         $this->featExpVariationMap['variation_b'] =
             new OptimizelyVariation('17304990114', 'variation_b', false, $this->expectedDefaultVariableKeyMap);
 
@@ -88,8 +87,18 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
             new OptimizelyExperiment("17279300791", "feat_experiment", $this->featExpVariationMap, '');
 
         //  creating optimizely Experiment for delivery rules
+        $boolDeliveryFeatVariable = new OptimizelyVariable('17252790456', 'boolean_var', 'boolean', 'false');
+        $intDeliveryFeatVariable = new OptimizelyVariable('17258820367', 'integer_var', 'integer', 1);
+        $doubleDeliveryFeatVariable = new OptimizelyVariable('17260550714', 'double_var', 'double', 0.5);
+        $strDeliveryFeatVariable = new OptimizelyVariable('17290540010', 'string_var', 'string', 'i am default value');
+        $jsonDeliveryFeatVariable = new OptimizelyVariable('17260550458', 'json_var', 'json', "{\"text\": \"default value\"}");
 
         $this->deliveryDefaultVariableKeyMap = [];
+        $this->deliveryDefaultVariableKeyMap['boolean_var'] = $boolDeliveryFeatVariable;
+        $this->deliveryDefaultVariableKeyMap['integer_var'] = $intDeliveryFeatVariable;
+        $this->deliveryDefaultVariableKeyMap['double_var'] = $doubleDeliveryFeatVariable;
+        $this->deliveryDefaultVariableKeyMap['string_var'] = $strDeliveryFeatVariable;
+        $this->deliveryDefaultVariableKeyMap['json_var'] = $jsonDeliveryFeatVariable;
         $this->deliveryExpVariationMap = [];
         $this->deliveryExpVariationMap['17285550838'] =
             new OptimizelyVariation('17285550838', '17285550838', true, $this->deliveryDefaultVariableKeyMap);
@@ -165,8 +174,10 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
     {
         $featExp = $this->projectConfig->getExperimentFromKey("feat_experiment");
         $featureDisabledVar = $featExp->getVariations()[0];
+
         $getVariablesMap = self::getMethod("getVariablesMap");
         $response = $getVariablesMap->invokeArgs($this->optConfigService, array($featExp, $featureDisabledVar));
+
         $this->assertEquals($this->expectedVariableKeyMap, $response);
     }
 
@@ -187,7 +198,6 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 
         $getVariationsMap = self::getMethod("getVariationsMap");
         $response = $getVariationsMap->invokeArgs($this->optConfigService, array($featExp));
-
         $this->assertEquals($this->featExpVariationMap, $response);
     }
 
@@ -202,10 +212,10 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $this->optConfigService = new OptimizelyConfigService($this->projectConfig);
         $optimizelyConfig = $this->optConfigService->getConfig();
         $this->assertEquals(Count($optimizelyConfig->getExperimentsMap()), 1);
-        $experimentMapFlag1 = $optimizelyConfig->getFeaturesMap()->flag1->getExperimentsMap(); // 9300000007569
-        $experimentMapFlag2 = $optimizelyConfig->getFeaturesMap()->flag2->getExperimentsMap(); // 9300000007573
-        $this->assertEquals($experimentMapFlag1->targeted_delivery->getId(), '9300000007569');
-        $this->assertEquals($experimentMapFlag2->targeted_delivery->getId(), '9300000007573');
+        $experimentMapFlag1 = $optimizelyConfig->getFeaturesMap()['flag1']->getExperimentsMap(); // 9300000007569
+        $experimentMapFlag2 = $optimizelyConfig->getFeaturesMap()['flag2']->getExperimentsMap(); // 9300000007573
+        $this->assertEquals($experimentMapFlag1['targeted_delivery']->getId(), '9300000007569');
+        $this->assertEquals($experimentMapFlag2['targeted_delivery']->getId(), '9300000007573');
     }
 
     public function testGetOptimizelyConfigWithDuplicateRuleKeys()
@@ -217,6 +227,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
             new NoOpErrorHandler()
         );
         $this->optConfigService = new OptimizelyConfigService($this->projectConfig);
+        
         $optimizelyConfig = $this->optConfigService->getConfig();
         $this->assertEquals(Count($optimizelyConfig->getExperimentsMap()), 0);
         $rolloutFlag1 = $optimizelyConfig->getFeaturesMap()["flag_1"]->getDeliveryRules()[0]; // 9300000004977
@@ -378,6 +389,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
     public function testJsonEncodeofOptimizelyConfig()
     {
         $response = $this->optConfigService->getConfig();
+
         $expectedJSON = '{
           "environmentKey":"",
           "sdkKey":"",
@@ -513,7 +525,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
               "key": "test_feature",
               "experimentRules":[{"id":"17279300791","key":"feat_experiment","audiences":"","variationsMap":{"variation_a":{"id":"17289540366","key":"variation_a","featureEnabled":true,"variablesMap":{"boolean_var":{"id":"17252790456","key":"boolean_var","type":"boolean","value":"true"},"integer_var":{"id":"17258820367","key":"integer_var","type":"integer","value":"5"},"double_var":{"id":"17260550714","key":"double_var","type":"double","value":"5.5"},"string_var":{"id":"17290540010","key":"string_var","type":"string","value":"i am variable value"},"json_var":{"id":"17260550458","key":"json_var","type":"json","value":"{\"text\": \"variable value\"}"}}},"variation_b":{"id":"17304990114","key":"variation_b","featureEnabled":false,"variablesMap":{"boolean_var":{"id":"17252790456","key":"boolean_var","type":"boolean","value":"false"},"integer_var":{"id":"17258820367","key":"integer_var","type":"integer","value":"1"},"double_var":{"id":"17260550714","key":"double_var","type":"double","value":"0.5"},"string_var":{"id":"17290540010","key":"string_var","type":"string","value":"i am default value"},"json_var":{"id":"17260550458","key":"json_var","type":"json","value":"{\"text\": \"default value\"}"}}}}}],
               
-              "deliveryRules":[{"id":"17268110732","key":"17268110732","audiences":"","variationsMap":{"17285550838":{"id":"17285550838","key":"17285550838","featureEnabled":true,"variablesMap":[]}}}],
+              "deliveryRules":[{"id":"17268110732","key":"17268110732","audiences":"","variationsMap":{"17285550838":{"id":"17285550838","key":"17285550838","featureEnabled":true,"variablesMap":{"boolean_var":{"id":"17252790456","key":"boolean_var","type":"boolean","value":"false"},"integer_var":{"id":"17258820367","key":"integer_var","type":"integer","value":"1"},"double_var":{"id":"17260550714","key":"double_var","type":"double","value":"0.5"},"string_var":{"id":"17290540010","key":"string_var","type":"string","value":"i am default value"},"json_var":{"id":"17260550458","key":"json_var","type":"json","value":"{\"text\": \"default value\"}"}}}}}],
               "experimentsMap": {
                 "feat_experiment": {
                   "id": "17279300791",

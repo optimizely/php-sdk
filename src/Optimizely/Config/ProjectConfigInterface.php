@@ -156,7 +156,7 @@ interface ProjectConfigInterface
 
     /**
      * @param $experimentKey string Key for experiment.
-     * @param $variationKey  string Key for variation.
+     * @param $variationKey string Key for variation.
      *
      * @return Variation Entity corresponding to the provided experiment key and variation key.
      *         Dummy entity is returned if key or ID is invalid.
@@ -165,7 +165,7 @@ interface ProjectConfigInterface
 
     /**
      * @param $experimentKey string Key for experiment.
-     * @param $variationId   string ID for variation.
+     * @param $variationId string ID for variation.
      *
      * @return Variation Entity corresponding to the provided experiment key and variation ID.
      *         Dummy entity is returned if key or ID is invalid.

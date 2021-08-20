@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright 2019-2021, Optimizely
  *
@@ -104,8 +103,6 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     private $sdkKey;
 
-
-
     /**
      * @var string Revision of the datafile.
      */
@@ -140,7 +137,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
      * @var array Associative array of experiment id to associative array of variation ID to variations.
      */
     private $_variationIdMapByExperimentId;
-
+    
     /**
      * @var array Associative array of experiment id to associative array of variation key to variations.
      */
@@ -255,7 +252,6 @@ class DatafileProjectConfig implements ProjectConfigInterface
      * @param $logger  LoggerInterface
      * @param $errorHandler ErrorHandlerInterface
      */
-
     public function __construct($datafile, $logger, $errorHandler)
     {
         $supportedVersions = array(self::V2, self::V3, self::V4);
@@ -411,10 +407,10 @@ class DatafileProjectConfig implements ProjectConfigInterface
     /**
      * Create ProjectConfig based on datafile string.
      *
-     * @param  string $datafile JSON string representing the Optimizely project.
-     * @param  bool $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
-     * @param  LoggerInterface $logger Logger instance
-     * @param  ErrorHandlerInterface $errorHandler ErrorHandler instance.
+     * @param string                $datafile           JSON string representing the Optimizely project.
+     * @param bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
+     * @param LoggerInterface       $logger             Logger instance
+     * @param ErrorHandlerInterface $errorHandler       ErrorHandler instance.
      * @return ProjectConfig ProjectConfig instance or null;
      */
     public static function createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler)

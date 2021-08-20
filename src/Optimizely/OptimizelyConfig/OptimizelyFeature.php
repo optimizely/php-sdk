@@ -35,14 +35,12 @@ class OptimizelyFeature implements \JsonSerializable
      */
     private $experimentRules;
 
-
     /**
      * Map of rollout Experiments Keys to OptimizelyExperiments.
      *
      * @var <String, OptimizelyExperiment> associative array
      */
     private $deliveryRules;
-
 
     /**
      * Map of Experiment Keys to OptimizelyExperiments.
@@ -58,7 +56,7 @@ class OptimizelyFeature implements \JsonSerializable
      */
     private $variablesMap;
 
-    public function __construct($id, $key, $experimentsMap, $variablesMap, $experimentRules, $deliveryRules)
+    public function __construct($id, $key, array $experimentsMap, array $variablesMap, array $experimentRules, array $deliveryRules)
     {
         $this->id = $id;
         $this->key = $key;

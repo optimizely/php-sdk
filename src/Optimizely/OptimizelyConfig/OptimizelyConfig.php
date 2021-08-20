@@ -74,7 +74,7 @@ class OptimizelyConfig implements \JsonSerializable
     private $datafile;
     
 
-    public function __construct($revision, $experimentsMap, $featuresMap, $datafile = null, $environmentKey = '', $sdkKey = '', $attributes = [], $audiences = [], $events = [])
+    public function __construct($revision, array $experimentsMap, array $featuresMap, $datafile = null, $environmentKey = '', $sdkKey = '', $attributes = [], $audiences = [], $events = [])
     {
         $this->environmentKey = $environmentKey;
         $this->sdkKey = $sdkKey;

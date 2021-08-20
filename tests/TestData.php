@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright 2016-2019, 2021, Optimizely
  *
@@ -15,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 namespace Optimizely\Tests;
 
 use Exception;

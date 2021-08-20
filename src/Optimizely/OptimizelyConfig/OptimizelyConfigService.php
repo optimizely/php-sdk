@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright 2020-2021, Optimizely Inc and Contributors
  *
@@ -15,14 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 namespace Optimizely\OptimizelyConfig;
 
 use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
 use Traversable;
-
 use function GuzzleHttp\json_decode;
 
 class OptimizelyConfigService
@@ -80,16 +77,15 @@ class OptimizelyConfigService
 
     public function __construct(ProjectConfigInterface $projectConfig)
     {
-            $this->experiments = $projectConfig->getAllExperiments();
-            $this->featureFlags = $projectConfig->getFeatureFlags();
-            $this->revision = $projectConfig->getRevision();
-            $this->datafile = $projectConfig->toDatafile();
-            $this->environmentKey = $projectConfig->getEnvironmentKey();
-            $this->sdkKey = $projectConfig->getSdkKey();
-            $this->projectConfig = $projectConfig;
+        $this->experiments = $projectConfig->getAllExperiments();
+        $this->featureFlags = $projectConfig->getFeatureFlags();
+        $this->revision = $projectConfig->getRevision();
+        $this->datafile = $projectConfig->toDatafile();
+        $this->environmentKey = $projectConfig->getEnvironmentKey();
+        $this->sdkKey = $projectConfig->getSdkKey();
+        $this->projectConfig = $projectConfig;
 
-
-            $this->createLookupMaps();
+        $this->createLookupMaps();
     }
 
     /**
@@ -97,18 +93,15 @@ class OptimizelyConfigService
      */
     public function getConfig()
     {
-
-
         $experimentsMaps = $this->getExperimentsMaps();
         $featuresMap = $this->getFeaturesMap($experimentsMaps[1]);
-        $experimentsMap = $experimentsMaps[0];
-        $experimentsMap = (object)$experimentsMap;
         $attributes = $this->getConfigAttributes();
         $audiences = $this->getConfigAudiences();
         $events = $this->getConfigEvents();
+
         return new OptimizelyConfig(
             $this->revision,
-            $experimentsMap,
+            $experimentsMaps[0],
             $featuresMap,
             $this->datafile,
             $this->environmentKey,
@@ -194,8 +187,6 @@ class OptimizelyConfigService
         return $finalAudiences;
     }
 
-
-
     /**
      * Generates lookup maps to avoid redundant iteration while creating OptimizelyConfig.
      */
@@ -204,8 +195,6 @@ class OptimizelyConfigService
         $this->experimentIdFeatureMap = [];
         $this->featKeyOptlyVariableKeyVariableMap = [];
         $this->featKeyOptlyVariableIdVariableMap = [];
-
-
 
         foreach ($this->featureFlags as $feature) {
             # Populate experimentIdFeatureMap
@@ -264,7 +253,6 @@ class OptimizelyConfigService
         // Set default variables for variation.
         $variablesMap = $this->featKeyOptlyVariableKeyVariableMap[$featureKey];
 
-    
         // Return default variable values if feature is not enabled.
         if (!$variation->getFeatureEnabled()) {
             return $variablesMap;
@@ -273,13 +261,13 @@ class OptimizelyConfigService
         // Set variation specific value if any.
         foreach ($variation->getVariables() as $variableUsage) {
             $id = $variableUsage->getId();
-
+    
             $optVariable = $this->featKeyOptlyVariableIdVariableMap[$featureKey][$id];
-
+    
             $key = $optVariable->getKey();
             $value = $variableUsage->getValue();
             $type = $optVariable->getType();
-
+            
             $modifiedOptVariable = new OptimizelyVariable(
                 $id,
                 $key,
@@ -289,11 +277,11 @@ class OptimizelyConfigService
 
             $variablesMap[$key] = $modifiedOptVariable;
         }
-        
+
         return $variablesMap;
     }
-
-
+    
+    
     /**
      * Generates Variations map for the given Experiment.
      *
@@ -307,7 +295,6 @@ class OptimizelyConfigService
 
         foreach ($experiment->getVariations() as $variation) {
             $variablesMap = $this->getVariablesMap($experiment, $variation);
-            $variablesMap = (object)$variablesMap;
 
             $variationKey = $variation->getKey();
             $optVariation = new OptimizelyVariation(
@@ -319,6 +306,7 @@ class OptimizelyConfigService
 
             $variationsMap[$variationKey] = $optVariation;
         }
+
         return $variationsMap;
     }
 
@@ -420,7 +408,7 @@ class OptimizelyConfigService
             $optExp = new OptimizelyExperiment(
                 $expId,
                 $expKey,
-                (object)$this->getVariationsMap($exp),
+                $this->getVariationsMap($exp),
                 $audiences
             );
 
@@ -454,7 +442,7 @@ class OptimizelyConfigService
             $optExp = new OptimizelyExperiment(
                 $expId,
                 $expKey,
-                (object)$this->getVariationsMap($exp),
+                $this->getVariationsMap($exp),
                 $audiences
             );
             array_push($deliveryRules, $optExp);
@@ -493,14 +481,14 @@ class OptimizelyConfigService
             $optFeature = new OptimizelyFeature(
                 $feature->getId(),
                 $featureKey,
-                (object)$experimentsMap,
-                (object)$variablesMap,
+                $experimentsMap,
+                $variablesMap,
                 $experimentRules,
                 $deliveryRules
             );
 
             $featuresMap[$featureKey] = $optFeature;
         }
-        return (object)$featuresMap;
+        return $featuresMap;
     }
 }

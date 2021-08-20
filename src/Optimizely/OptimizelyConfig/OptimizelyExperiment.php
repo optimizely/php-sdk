@@ -33,7 +33,6 @@ class OptimizelyExperiment implements \JsonSerializable
      */
     private $audiences;
 
-
     /**
      * Map of Variation Keys to OptimizelyVariations.
      *
@@ -41,7 +40,7 @@ class OptimizelyExperiment implements \JsonSerializable
      */
     private $variationsMap;
 
-    public function __construct($id, $key, $variationsMap, $audiences)
+    public function __construct($id, $key, array $variationsMap, $audiences)
     {
         $this->id = $id;
         $this->key = $key;
@@ -72,7 +71,6 @@ class OptimizelyExperiment implements \JsonSerializable
     {
         return $this->audiences;
     }
-
 
     /**
      * @return array Map of Variation Keys to OptimizelyVariations.
