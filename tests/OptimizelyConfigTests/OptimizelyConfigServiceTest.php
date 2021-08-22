@@ -30,8 +30,6 @@ use Optimizely\OptimizelyConfig\OptimizelyFeature;
 use Optimizely\OptimizelyConfig\OptimizelyVariable;
 use Optimizely\OptimizelyConfig\OptimizelyVariation;
 
-use function GuzzleHttp\json_decode;
-
 class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 {
 
