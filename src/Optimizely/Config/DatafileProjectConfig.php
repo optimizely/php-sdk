@@ -94,6 +94,16 @@ class DatafileProjectConfig implements ProjectConfigInterface
     private $datafile;
 
     /**
+     * @var string environmentKey of the config.
+     */
+    private $environmentKey;
+
+    /**
+     * @var string sdkKey of the config.
+     */
+    private $sdkKey;
+
+    /**
      * @var string Revision of the datafile.
      */
     private $_revision;
@@ -173,6 +183,34 @@ class DatafileProjectConfig implements ProjectConfigInterface
     private $_rollouts;
 
     /**
+     * list of Attributes that will be parsed from the datafile
+     *
+     * @var [Attribute]
+     */
+    private $attributes;
+
+    /**
+     * list of Audiences that will be parsed from the datafile
+     *
+     * @var [Audience]
+     */
+    private $audiences;
+
+    /**
+     * list of Events that will be parsed from the datafile
+     *
+     * @var [Event]
+     */
+    private $events;
+
+    /**
+     * list of Typed Audiences that will be parsed from the datafile
+     *
+     * @var [typed_audience]
+     */
+    private $typedAudiences;
+
+    /**
      * internal mapping of feature keys to feature flag models.
      *
      * @var <String, FeatureFlag>  associative array of feature keys to feature flags
@@ -222,6 +260,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
         $this->_logger = $logger;
         $this->_errorHandler = $errorHandler;
         $this->_version = $config['version'];
+        $this->environmentKey = isset($config['environmentKey']) ? $config['environmentKey'] : '';
+        $this->sdkKey = isset($config['sdkKey']) ? $config['sdkKey'] : '';
         if (!in_array($this->_version, $supportedVersions)) {
             throw new InvalidDatafileVersionException(
                 "This version of the PHP SDK does not support the given datafile version: {$this->_version}."
@@ -230,17 +270,17 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
-        $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
-        $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
+        $this->attributes = isset($config['attributes']) ? $config['attributes'] : [];
+        $this->audiences = isset($config['audiences']) ? $config['audiences'] : [];
+        $this->events = $config['events'] ?: [];
+        $this->typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences'] : [];
+        $this->_anonymizeIP = isset($config['anonymizeIP']) ? $config['anonymizeIP'] : false;
+        $this->_botFiltering = isset($config['botFiltering']) ? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
         $this->_sendFlagDecisions = isset($config['sendFlagDecisions']) ? $config['sendFlagDecisions'] : false;
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
-        $events = $config['events'] ?: [];
-        $attributes = $config['attributes'] ?: [];
-        $audiences = $config['audiences'] ?: [];
-        $typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences']: [];
         $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
         $featureFlags = isset($config['featureFlags']) ? $config['featureFlags']: [];
 
@@ -258,10 +298,10 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $this->_groupIdMap = ConfigParser::generateMap($groups, 'id', Group::class);
         $this->_experimentIdMap = ConfigParser::generateMap($experiments, 'id', Experiment::class);
-        $this->_eventKeyMap = ConfigParser::generateMap($events, 'key', Event::class);
-        $this->_attributeKeyMap = ConfigParser::generateMap($attributes, 'key', Attribute::class);
-        $typedAudienceIdMap = ConfigParser::generateMap($typedAudiences, 'id', Audience::class);
-        $this->_audienceIdMap = ConfigParser::generateMap($audiences, 'id', Audience::class);
+        $this->_eventKeyMap = ConfigParser::generateMap($this->events, 'key', Event::class);
+        $this->_attributeKeyMap = ConfigParser::generateMap($this->attributes, 'key', Attribute::class);
+        $typedAudienceIdMap = ConfigParser::generateMap($this->typedAudiences, 'id', Audience::class);
+        $this->_audienceIdMap = ConfigParser::generateMap($this->audiences, 'id', Audience::class);
         $this->_rollouts = ConfigParser::generateMap($rollouts, null, Rollout::class);
         $this->_featureFlags = ConfigParser::generateMap($featureFlags, null, FeatureFlag::class);
 
@@ -450,11 +490,59 @@ class DatafileProjectConfig implements ProjectConfigInterface
     }
 
     /**
+     * @return string Config environmentKey.
+     */
+    public function getEnvironmentKey()
+    {
+        return $this->environmentKey;
+    }
+
+    /**
+     * @return string Config sdkKey.
+     */
+    public function getSdkKey()
+    {
+        return $this->sdkKey;
+    }
+
+    /**
      * @return array List of feature flags parsed from the datafile
      */
     public function getFeatureFlags()
     {
         return $this->_featureFlags;
+    }
+
+    /**
+     * @return array List of attributes parsed from the datafile
+     */
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @return array List of audiences parsed from the datafile
+     */
+    public function getAudiences()
+    {
+        return $this->audiences;
+    }
+
+    /**
+     * @return array List of events parsed from the datafile
+     */
+    public function getEvents()
+    {
+        return $this->events;
+    }
+
+    /**
+     * @return array List of typed audiences parsed from the datafile
+     */
+    public function getTypedAudiences()
+    {
+        return $this->typedAudiences;
     }
 
     /**
@@ -470,9 +558,12 @@ class DatafileProjectConfig implements ProjectConfigInterface
                 $rolloutExperimentIds[] = $experiment->getId();
             }
         }
-        return array_filter(array_values($this->_experimentKeyMap), function ($experiment) use ($rolloutExperimentIds) {
-            return !in_array($experiment->getId(), $rolloutExperimentIds);
-        });
+        return array_filter(
+            array_values($this->_experimentIdMap),
+            function ($experiment) use ($rolloutExperimentIds) {
+                return !in_array($experiment->getId(), $rolloutExperimentIds);
+            }
+        );
     }
 
     /**

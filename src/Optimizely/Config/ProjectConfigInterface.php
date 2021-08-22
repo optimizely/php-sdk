@@ -52,6 +52,37 @@ interface ProjectConfigInterface
     public function getRevision();
 
     /**
+     * @return string String represnting environment key of the datafile.
+     */
+    public function getEnvironmentKey();
+
+    /**
+     * @return string String representing sdkkey of the datafile.
+     */
+    public function getSdkKey();
+
+    /**
+     * @return array List of attributes parsed from the datafile
+     */
+    public function getAttributes();
+
+    /**
+     * @return array List of audiences parsed from the datafile
+     */
+    public function getAudiences();
+
+    /**
+     * @return array List of events parsed from the datafile
+     */
+    public function getEvents();
+
+    /**
+     * @return array List of typed audiences parsed from the datafile
+     */
+    public function getTypedAudiences();
+
+    
+    /**
      * @return array List of feature flags parsed from the datafile
      */
     public function getFeatureFlags();

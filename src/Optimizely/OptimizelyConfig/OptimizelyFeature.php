@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely Inc and Contributors
+ * Copyright 2020-2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,20 @@ class OptimizelyFeature implements \JsonSerializable
      *
      * @var <String, OptimizelyExperiment> associative array
      */
+    private $experimentRules;
+
+    /**
+     * Map of rollout Experiments Keys to OptimizelyExperiments.
+     *
+     * @var <String, OptimizelyExperiment> associative array
+     */
+    private $deliveryRules;
+
+    /**
+     * Map of Experiment Keys to OptimizelyExperiments.
+     *
+     * @var <String, OptimizelyExperiment> associative array
+     */
     private $experimentsMap;
 
     /**
@@ -42,10 +56,12 @@ class OptimizelyFeature implements \JsonSerializable
      */
     private $variablesMap;
 
-    public function __construct($id, $key, array $experimentsMap, array $variablesMap)
+    public function __construct($id, $key, array $experimentsMap, array $variablesMap, array $experimentRules, array $deliveryRules)
     {
         $this->id = $id;
         $this->key = $key;
+        $this->experimentRules = $experimentRules;
+        $this->deliveryRules = $deliveryRules;
         $this->experimentsMap = $experimentsMap;
         $this->variablesMap = $variablesMap;
     }
@@ -64,6 +80,22 @@ class OptimizelyFeature implements \JsonSerializable
     public function getKey()
     {
         return $this->key;
+    }
+
+    /**
+     * @return array array of feature Experiments as OptimizelyExperiments.
+     */
+    public function getExperimentRules()
+    {
+        return $this->experimentRules;
+    }
+
+    /**
+     * @return array array  of Rollout Experiments of feature as OptimizelyExperiments.
+     */
+    public function getDeliveryRules()
+    {
+        return $this->deliveryRules;
     }
 
     /**

@@ -37,11 +37,18 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("20", $optConfig->getRevision());
         $this->assertEquals(["a" => "apple"], $optConfig->getExperimentsMap());
         $this->assertEquals(["o" => "orange"], $optConfig->getFeaturesMap());
+        $this->assertEquals("", $optConfig->getEnvironmentKey());
+        $this->assertEquals("", $optConfig->getSdkKey());
 
         $expectedJson = '{
+            "environmentKey":"",
+            "sdkKey":"",
             "revision": "20",
             "experimentsMap" : {"a": "apple"},
             "featuresMap": {"o": "orange"},
+            "attributes":[],
+            "audiences":[],
+            "events":[],
             "datafile": null
         }';
 
@@ -55,16 +62,19 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
         $optExp = new OptimizelyExperiment(
             "id",
             "key",
-            ["a" => "apple"]
+            ["a" => "apple"],
+            ''
         );
 
         $this->assertEquals("id", $optExp->getId());
         $this->assertEquals("key", $optExp->getKey());
         $this->assertEquals(["a" => "apple"], $optExp->getVariationsMap());
+        $this->assertEquals('', $optExp->getExperimentAudiences());
 
         $expectedJson = '{
             "id": "id",
             "key" : "key",
+            "audiences":"",
             "variationsMap": {"a": "apple"}
         }';
 
@@ -79,17 +89,23 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
             "id",
             "key",
             ["a" => "apple"],
-            ["o" => "orange"]
+            ["o" => "orange"],
+            [],
+            []
         );
 
         $this->assertEquals("id", $optFeature->getId());
         $this->assertEquals("key", $optFeature->getKey());
         $this->assertEquals(["a" => "apple"], $optFeature->getExperimentsMap());
         $this->assertEquals(["o" => "orange"], $optFeature->getVariablesMap());
+        $this->assertEquals([], $optFeature->getExperimentRules());
+        $this->assertEquals([], $optFeature->getDeliveryRules());
 
         $expectedJson = '{
             "id": "id",
             "key" : "key",
+            "experimentRules":[],
+            "deliveryRules":[],
             "experimentsMap": {"a": "apple"},
             "variablesMap": {"o": "orange"}
         }';
