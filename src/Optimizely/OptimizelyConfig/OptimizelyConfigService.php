@@ -99,6 +99,10 @@ class OptimizelyConfigService
 
         return new OptimizelyConfig(
             $this->revision,
+            # This experimentsMap is for experiments of legacy projects only.
+            # For flag projects, experiment keys are not guaranteed to be unique
+            # across multiple flags, so this map may not include all experiments
+            # when keys conflict. Use experimentRules and deliveryRules instead.
             $experimentsMaps[0],
             $featuresMap,
             $this->datafile,
@@ -480,6 +484,7 @@ class OptimizelyConfigService
             $optFeature = new OptimizelyFeature(
                 $feature->getId(),
                 $featureKey,
+                # This experimentsMap is deprecated. Use experimentRules and deliveryRules instead.
                 $experimentsMap,
                 $variablesMap,
                 $experimentRules,
