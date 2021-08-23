@@ -52,7 +52,7 @@ interface ProjectConfigInterface
     public function getRevision();
 
     /**
-     * @return string String represnting environment key of the datafile.
+     * @return string String representing environment key of the datafile.
      */
     public function getEnvironmentKey();
 
