@@ -270,8 +270,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
-        $this->_anonymizeIP = isset($config['anonymizeIP']) ? $config['anonymizeIP'] : false;
-        $this->_botFiltering = isset($config['botFiltering']) ? $config['botFiltering'] : null;
+        $this->_anonymizeIP = isset($config['anonymizeIP'])? $config['anonymizeIP'] : false;
+        $this->_botFiltering = isset($config['botFiltering'])? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
         $this->_sendFlagDecisions = isset($config['sendFlagDecisions']) ? $config['sendFlagDecisions'] : false;
 
