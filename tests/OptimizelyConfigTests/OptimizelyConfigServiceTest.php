@@ -214,13 +214,15 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $experimentRulesFlag1 = $optimizelyConfig->getFeaturesMap()['flag1']->getExperimentRules(); // 9300000007569
         $experimentRulesFlag2 = $optimizelyConfig->getFeaturesMap()['flag2']->getExperimentRules(); // 9300000007573
         foreach ($experimentRulesFlag1 as $experimentRule) {
-          if ($experimentRule->getKey() == 'targeted_delivery')
-            $this->assertEquals($experimentRule->getId(), '9300000007569');
+            if ($experimentRule->getKey() == 'targeted_delivery') {
+                $this->assertEquals($experimentRule->getId(), '9300000007569');
+            }
         }
 
         foreach ($experimentRulesFlag2 as $experimentRule) {
-          if ($experimentRule->getKey() == 'targeted_delivery')
-            $this->assertEquals($experimentRule->getId(), '9300000007573');
+            if ($experimentRule->getKey() == 'targeted_delivery') {
+                $this->assertEquals($experimentRule->getId(), '9300000007573');
+            }
         }
     }
 
@@ -331,7 +333,7 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                 '(' . '"' . "exactString" . '"' . ' ' . 'AND' . ' ' . '"' . '$$dummyExists' . '"' . ')' . ')'
                 . ' ' . 'AND' . ' ' . '(' . '"' . "exactString" . '"' . ' ' . 'AND' . ' ' . '(' .
                 '"' . "exactString" . '"' . ' ' . 'OR' . ' ' . '"' . '$$dummyExists' . '"' . ')' . ')',
-            '"'. '1'. '"' . ' '. 'OR' . ' ' . '"' . '100000' . '"' 
+            '"'. '1'. '"' . ' '. 'OR' . ' ' . '"' . '100000' . '"'
         ];
 
         for ($testNo = 0; $testNo < count($audienceConditions); $testNo++) {
