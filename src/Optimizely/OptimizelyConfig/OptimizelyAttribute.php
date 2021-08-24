@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020-2021, Optimizely Inc and Contributors
+ * Copyright 2021, Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,26 @@
  */
 namespace Optimizely\OptimizelyConfig;
 
-class OptimizelyExperiment implements \JsonSerializable
+class OptimizelyAttribute implements \JsonSerializable
 {
     /**
-     * @var string ID representing Experiment.
+     * @var string id representing attribute.
      */
     private $id;
 
     /**
-     * @var string Key representing Experiment.
+     * @var string key representing attribute.
      */
     private $key;
 
-    /**
-     * @var string string representing Experiment audience conditions name mapped.
-     */
-    private $audiences;
-
-    /**
-     * Map of Variation Keys to OptimizelyVariations.
-     *
-     * @var <String, OptimizelyVariation> associative array
-     */
-    private $variationsMap;
-
-    public function __construct($id, $key, array $variationsMap, $audiences)
+    public function __construct($id, $key)
     {
         $this->id = $id;
         $this->key = $key;
-        $this->audiences = $audiences;
-        $this->variationsMap = $variationsMap;
     }
 
     /**
-     * @return string Experiment ID.
+     * @return string attribute id.
      */
     public function getId()
     {
@@ -57,27 +43,11 @@ class OptimizelyExperiment implements \JsonSerializable
     }
 
     /**
-     * @return string Experiment key.
+     * @return string attribute key.
      */
     public function getKey()
     {
         return $this->key;
-    }
-
-    /**
-     * @return string Experiment audiences.
-     */
-    public function getExperimentAudiences()
-    {
-        return $this->audiences;
-    }
-
-    /**
-     * @return array Map of Variation Keys to OptimizelyVariations.
-     */
-    public function getVariationsMap()
-    {
-        return $this->variationsMap;
     }
 
     /**
