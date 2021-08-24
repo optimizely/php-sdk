@@ -128,7 +128,6 @@ class OptimizelyConfig implements \JsonSerializable
      */
     public function getExperimentsMap()
     {
-        # This experimentsMap is deprecated. Use experimentRules and deliveryRules instead.
         return $this->experimentsMap;
     }
 

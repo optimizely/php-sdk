@@ -345,7 +345,7 @@ class OptimizelyConfigService
             $subAudience = '';
             // Checks if item is list of conditions means if it is sub audience
             if (is_array($var)) {
-                $subAudience = $subAudience = '(' . $this->getSerializedAudiences($var) . ')';
+                $subAudience = '(' . $this->getSerializedAudiences($var) . ')';
             } elseif (in_array($var, $operators, true)) {
                 $cond = strtoupper(strval($var));
             } else {
