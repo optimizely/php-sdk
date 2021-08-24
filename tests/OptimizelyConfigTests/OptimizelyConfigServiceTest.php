@@ -211,10 +211,17 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
         $this->optConfigService = new OptimizelyConfigService($this->projectConfig);
         $optimizelyConfig = $this->optConfigService->getConfig();
         $this->assertEquals(Count($optimizelyConfig->getExperimentsMap()), 1);
-        $experimentMapFlag1 = $optimizelyConfig->getFeaturesMap()['flag1']->getExperimentsMap(); // 9300000007569
-        $experimentMapFlag2 = $optimizelyConfig->getFeaturesMap()['flag2']->getExperimentsMap(); // 9300000007573
-        $this->assertEquals($experimentMapFlag1['targeted_delivery']->getId(), '9300000007569');
-        $this->assertEquals($experimentMapFlag2['targeted_delivery']->getId(), '9300000007573');
+        $experimentRulesFlag1 = $optimizelyConfig->getFeaturesMap()['flag1']->getExperimentRules(); // 9300000007569
+        $experimentRulesFlag2 = $optimizelyConfig->getFeaturesMap()['flag2']->getExperimentRules(); // 9300000007573
+        foreach ($experimentRulesFlag1 as $experimentRule) {
+          if ($experimentRule->getKey() == 'targeted_delivery')
+            $this->assertEquals($experimentRule->getId(), '9300000007569');
+        }
+
+        foreach ($experimentRulesFlag2 as $experimentRule) {
+          if ($experimentRule->getKey() == 'targeted_delivery')
+            $this->assertEquals($experimentRule->getId(), '9300000007573');
+        }
     }
 
     public function testGetOptimizelyConfigWithDuplicateRuleKeys()
@@ -301,7 +308,8 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
                     "and", "3468206642",
                     array('or', '3468206642', '3988293899')
                 )
-            )
+                ),
+            array('or', '1', '100000')
         ];
 
         $expectedAudienceOutputs = [
@@ -322,7 +330,8 @@ class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
             '(' . '"' . "exactString" . '"' . ' ' . 'OR' . ' ' .
                 '(' . '"' . "exactString" . '"' . ' ' . 'AND' . ' ' . '"' . '$$dummyExists' . '"' . ')' . ')'
                 . ' ' . 'AND' . ' ' . '(' . '"' . "exactString" . '"' . ' ' . 'AND' . ' ' . '(' .
-                '"' . "exactString" . '"' . ' ' . 'OR' . ' ' . '"' . '$$dummyExists' . '"' . ')' . ')'
+                '"' . "exactString" . '"' . ' ' . 'OR' . ' ' . '"' . '$$dummyExists' . '"' . ')' . ')',
+            '"'. '1'. '"' . ' '. 'OR' . ' ' . '"' . '100000' . '"' 
         ];
 
         for ($testNo = 0; $testNo < count($audienceConditions); $testNo++) {
