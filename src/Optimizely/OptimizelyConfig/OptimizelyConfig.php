@@ -35,6 +35,10 @@ class OptimizelyConfig implements \JsonSerializable
 
     /**
      * Map of Experiment Keys to OptimizelyExperiments.
+     * This experimentsMap is for experiments of legacy projects only.
+     * For flag projects, experiment keys are not guaranteed to be unique
+     * across multiple flags, so this map may not include all experiments
+     * when keys conflict. Use experimentRules and deliveryRules instead.
      *
      * @var <String, OptimizelyExperiment> associative array
      */
@@ -124,6 +128,7 @@ class OptimizelyConfig implements \JsonSerializable
      */
     public function getExperimentsMap()
     {
+        # This experimentsMap is deprecated. Use experimentRules and deliveryRules instead.
         return $this->experimentsMap;
     }
 

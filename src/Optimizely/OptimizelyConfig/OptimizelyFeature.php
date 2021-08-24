@@ -29,16 +29,16 @@ class OptimizelyFeature implements \JsonSerializable
     private $key;
 
     /**
-     * Map of Experiment Keys to OptimizelyExperiments.
+     * Array of experiment rules.
      *
-     * @var <String, OptimizelyExperiment> associative array
+     * @var [OptimizelyExperiment]
      */
     private $experimentRules;
 
     /**
-     * Map of rollout Experiments Keys to OptimizelyExperiments.
+     * Array of delivery rules.
      *
-     * @var <String, OptimizelyExperiment> associative array
+     * @var [OptimizelyExperiment]
      */
     private $deliveryRules;
 

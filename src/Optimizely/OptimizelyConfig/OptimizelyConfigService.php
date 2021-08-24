@@ -161,32 +161,37 @@ class OptimizelyConfigService
      */
     protected function getConfigAudiences()
     {
-        $finalAudiences = [];
-        $uniqueIdsMap = [];
-        $normalAudiences = $this->projectConfig->getAudiences();
+        $allAudiences = [];
+        $typedAudienceIds = [];
+        $audiences = $this->projectConfig->getAudiences();
         $typedAudiences = $this->projectConfig->getTypedAudiences();
         $audiencesArray = $typedAudiences;
         foreach ($audiencesArray as $key => $typedAudience) {
-            $uniqueIdsMap[$typedAudience['id']] = $typedAudience['id'];
-            $audiencesArray[$key]['conditions'] = json_encode($typedAudience['conditions']);
-        }
-        foreach ($normalAudiences as $naudience) {
-            if (!array_key_exists($naudience['id'], $uniqueIdsMap)) {
-                array_push($audiencesArray, $naudience);
-            }
-        }
-        foreach ($audiencesArray as $audience) {
-            $id = $audience['id'];
+            $typedAudienceIds[] = $typedAudience['id'];
+            $id = $typedAudience['id'];
             if ($id != '$opt_dummy_audience') {
                 $optlyAudience = new OptimizelyAudience(
                     $id,
-                    $audience['name'],
-                    $audience['conditions']
+                    $typedAudience['name'],
+                    json_encode($typedAudience['conditions'])
                 );
-                array_push($finalAudiences, $optlyAudience);
+                array_push($allAudiences, $optlyAudience);
             }
         }
-        return $finalAudiences;
+        foreach ($audiences as $naudience) {
+            if (!in_array($naudience['id'], $typedAudienceIds, true)) {
+                $id = $naudience['id'];
+                if ($id != '$opt_dummy_audience') {
+                    $optlyAudience = new OptimizelyAudience(
+                        $id,
+                        $naudience['name'],
+                        $naudience['conditions']
+                    );
+                    array_push($allAudiences, $optlyAudience);
+                }
+            }
+        }
+        return $allAudiences;
     }
 
     /**
@@ -249,7 +254,6 @@ class OptimizelyConfigService
         }
 
         $featureFlag = $this->experimentIdFeatureMap[$experimentId];
-
         $featureKey = $featureFlag->getKey();
 
         // Set default variables for variation.
@@ -331,6 +335,7 @@ class OptimizelyConfigService
      */
     protected function getSerializedAudiences(array $audienceConditions)
     {
+        $operators = ['and', 'or', 'not'];
         $finalAudiences = '';
         if ($audienceConditions == null) {
             return $finalAudiences;
@@ -340,10 +345,8 @@ class OptimizelyConfigService
             $subAudience = '';
             // Checks if item is list of conditions means if it is sub audience
             if (is_array($var)) {
-                $subAudience = $this->getSerializedAudiences($var);
-
-                $subAudience = '(' . $subAudience . ')';
-            } elseif (in_array($var, array('and', 'or', 'not'), true)) {
+                $subAudience = $subAudience = '(' . $this->getSerializedAudiences($var) . ')';
+            } elseif (in_array($var, $operators, true)) {
                 $cond = strtoupper(strval($var));
             } else {
                 // Checks if item is audience id
@@ -353,25 +356,21 @@ class OptimizelyConfigService
                 // if audience condition is "NOT" then add "NOT" at start. Otherwise check if there is already audience id in finalAudiences then append condition between finalAudiences and item
                 if ($finalAudiences !== '' || $cond == "NOT") {
                     if ($finalAudiences !== '') {
-                        $finalAudiences = $finalAudiences . ' ';
-                    } else {
-                        $finalAudiences = $finalAudiences;
+                        $finalAudiences .= ' ';
                     }
                     if ($cond == '') {
                         $cond = 'OR';
                     }
-                    $finalAudiences = $finalAudiences . $cond . ' ' . '"' . $name . '"';
+                    $finalAudiences .= $cond . ' ' . '"' . $name . '"';
                 } else {
                     $finalAudiences = '"' . $name . '"';
                 }
             }
             // Checks if sub audience is empty or not
-            if (strval($subAudience !== '')) {
+            if ($subAudience !== '') {
                 if ($finalAudiences !== '' || $cond == "NOT") {
                     if ($finalAudiences !== '') {
-                        $finalAudiences = $finalAudiences . ' ';
-                    } else {
-                        $finalAudiences = $finalAudiences;
+                        $finalAudiences .= ' ';
                     }
                     if ($cond == '') {
                         $cond = 'OR';
@@ -426,7 +425,7 @@ class OptimizelyConfigService
      *
      * @param string feature rollout id.
      *
-     * @return array of optimizelyExperiments as delivery rules .
+     * @return array of optimizelyExperiments as delivery rules.
      */
     protected function getDeliveryRules($rollout_id)
     {

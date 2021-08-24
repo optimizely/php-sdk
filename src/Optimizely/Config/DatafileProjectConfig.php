@@ -206,7 +206,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
     /**
      * list of Typed Audiences that will be parsed from the datafile
      *
-     * @var [typed_audience]
+     * @var [Audience]
      */
     private $typedAudiences;
 
@@ -270,10 +270,6 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $this->_accountId = $config['accountId'];
         $this->_projectId = $config['projectId'];
-        $this->attributes = isset($config['attributes']) ? $config['attributes'] : [];
-        $this->audiences = isset($config['audiences']) ? $config['audiences'] : [];
-        $this->events = $config['events'] ?: [];
-        $this->typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences'] : [];
         $this->_anonymizeIP = isset($config['anonymizeIP']) ? $config['anonymizeIP'] : false;
         $this->_botFiltering = isset($config['botFiltering']) ? $config['botFiltering'] : null;
         $this->_revision = $config['revision'];
@@ -281,6 +277,10 @@ class DatafileProjectConfig implements ProjectConfigInterface
 
         $groups = $config['groups'] ?: [];
         $experiments = $config['experiments'] ?: [];
+        $this->attributes = isset($config['attributes']) ? $config['attributes'] : [];
+        $this->audiences = isset($config['audiences']) ? $config['audiences'] : [];
+        $this->events = isset($config['events']) ? $config['events'] : [];
+        $this->typedAudiences = isset($config['typedAudiences']) ? $config['typedAudiences'] : [];
         $rollouts = isset($config['rollouts']) ? $config['rollouts'] : [];
         $featureFlags = isset($config['featureFlags']) ? $config['featureFlags']: [];
 
@@ -558,12 +558,9 @@ class DatafileProjectConfig implements ProjectConfigInterface
                 $rolloutExperimentIds[] = $experiment->getId();
             }
         }
-        return array_filter(
-            array_values($this->_experimentIdMap),
-            function ($experiment) use ($rolloutExperimentIds) {
-                return !in_array($experiment->getId(), $rolloutExperimentIds);
-            }
-        );
+        return array_filter(array_values($this->_experimentIdMap), function ($experiment) use ($rolloutExperimentIds) {
+            return !in_array($experiment->getId(), $rolloutExperimentIds);
+        });
     }
 
     /**

@@ -58,7 +58,7 @@ class OptimizelyEvent implements \JsonSerializable
     }
 
     /**
-     * @return string event conditions.
+     * @return array experimentIds representing event experiment ids.
      */
     public function getExperimentIds()
     {
