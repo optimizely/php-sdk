@@ -96,7 +96,9 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals("id", $optFeature->getId());
         $this->assertEquals("key", $optFeature->getKey());
-        $this->assertEquals(["a" => "apple"], $optFeature->getExperimentsMap());
+
+        # getExperimentsMap is deprecated
+        # $this->assertEquals(["a" => "apple"], $optFeature->getExperimentsMap());
         $this->assertEquals(["o" => "orange"], $optFeature->getVariablesMap());
         $this->assertEquals([], $optFeature->getExperimentRules());
         $this->assertEquals([], $optFeature->getDeliveryRules());
