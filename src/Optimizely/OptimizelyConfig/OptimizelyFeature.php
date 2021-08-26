@@ -99,15 +99,13 @@ class OptimizelyFeature implements \JsonSerializable
     }
 
     /**
-     * @deprecated
+     * @deprecated. Use 'experimentRules' and 'deliveryRules' instead.
      *
      * @return array Map of Experiment Keys to OptimizelyExperiments.
      */
     public function getExperimentsMap()
     {
-        # This experimentsMap is deprecated. Use experimentRules and deliveryRules instead.
-
-        trigger_error('Method ' . __METHOD__ . ' is deprecated. Use experimentRules and deliveryRules instead.', E_USER_NOTICE);
+        trigger_error('Method ' . __METHOD__ . ' is deprecated. Use experimentRules and deliveryRules instead.', E_USER_WARNING);
 
         return $this->experimentsMap;
     }

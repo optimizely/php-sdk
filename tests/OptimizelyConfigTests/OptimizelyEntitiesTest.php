@@ -97,8 +97,7 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("id", $optFeature->getId());
         $this->assertEquals("key", $optFeature->getKey());
 
-        # getExperimentsMap is deprecated
-        # $this->assertEquals(["a" => "apple"], $optFeature->getExperimentsMap());
+        $this->assertEquals(["a" => "apple"], @$optFeature->getExperimentsMap());
         $this->assertEquals(["o" => "orange"], $optFeature->getVariablesMap());
         $this->assertEquals([], $optFeature->getExperimentRules());
         $this->assertEquals([], $optFeature->getDeliveryRules());
@@ -115,6 +114,25 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
         $expectedJson = json_encode(json_decode($expectedJson));
 
         $this->assertEquals($expectedJson, json_encode($optFeature));
+    }
+
+    /**
+    * @expectedException PHPUnit_Framework_Error
+    */
+    function testOptimizelyFeatureGetExperimentsMapEmitsWarning() {
+        $optFeature = new OptimizelyFeature(
+            "id",
+            "key",
+            ["a" => "apple"],
+            ["o" => "orange"],
+            [],
+            []
+        );
+
+        $this->assertEquals("id", $optFeature->getId());
+        $this->assertEquals("key", $optFeature->getKey());
+
+        $this->assertEquals(["a" => "apple"], $optFeature->getExperimentsMap());
     }
 
     public function testOptimizelyVariableEntity()
