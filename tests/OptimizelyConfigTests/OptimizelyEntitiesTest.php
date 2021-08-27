@@ -96,7 +96,7 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals("id", $optFeature->getId());
         $this->assertEquals("key", $optFeature->getKey());
-
+        # Suppressing warning in getExperimentMap to pass testcase
         $this->assertEquals(["a" => "apple"], @$optFeature->getExperimentsMap());
         $this->assertEquals(["o" => "orange"], $optFeature->getVariablesMap());
         $this->assertEquals([], $optFeature->getExperimentRules());
