@@ -119,7 +119,9 @@ class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
     /**
     * @expectedException PHPUnit_Framework_Error
     */
-    function testOptimizelyFeatureGetExperimentsMapEmitsWarning() {
+
+    public function testOptimizelyFeatureGetExperimentsMapEmitsWarning()
+    {
         $optFeature = new OptimizelyFeature(
             "id",
             "key",
