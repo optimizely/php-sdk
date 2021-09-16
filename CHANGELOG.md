@@ -1,5 +1,23 @@
 # Optimizely PHP SDK Changelog
 
+## 3.8.0
+September 16th, 2021
+
+### New Features:
+- Add new public properties to `OptimizelyConfig`. ([#230](https://github.com/optimizely/php-sdk/pull/230))
+	- sdkKey
+	- environmentKey
+	- attributes
+	- audiences
+	- events
+	- experimentRules and deliveryRules to `OptimizelyFeature`
+	- audiences to `OptimizelyExperiment`
+- For details, refer to our documentation page: [https://docs.developers.optimizely.com/full-stack/v4.0/docs/optimizelyconfig-php](https://docs.developers.optimizely.com/full-stack/v4.0/docs/optimizelyconfig-php).
+
+### Deprecated:
+- `OptimizelyFeature.experimentsMap` of `OptimizelyConfig` is deprecated as of this release. Please use `OptimizelyFeature.experimentRules` and `OptimizelyFeature.deliveryRules`. ([#230](https://github.com/optimizely/php-sdk/pull/230))
+
+
 ## 3.7.1
 August 4th, 2021
 
