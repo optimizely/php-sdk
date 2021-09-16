@@ -1,5 +1,12 @@
 # Optimizely PHP SDK Changelog
 
+## 3.8.0
+September 16th, 2021
+
+### New Features:
+- The new public properties are added to OptimizelyConfig including sdkKey, environmentKey, attributes, audiences, events, experimentRules and deliveryRules in OptimizelyFeature and audiences in OptimizelyExperiment.
+ [#230](https://github.com/optimizely/php-sdk/pull/230)
+
 ## 3.7.1
 August 4th, 2021
 
