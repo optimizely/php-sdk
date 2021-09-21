@@ -245,6 +245,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     private $_sendFlagDecisions;
 
+    private $_flagVariationsMap;
     /**
      * DatafileProjectConfig constructor to load and set project configuration data.
      *
@@ -376,7 +377,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
                 }
             }
         }
-
+        $_flagVariationsMap
         // Add variations for rollout experiments to variationIdMap and variationKeyMap
         $this->_variationIdMap = $this->_variationIdMap + $rolloutVariationIdMap;
         $this->_variationKeyMap = $this->_variationKeyMap + $rolloutVariationKeyMap;
@@ -404,6 +405,12 @@ class DatafileProjectConfig implements ProjectConfigInterface
         }
     }
 
+    function getAllRulesForFlag(_ flag: FeatureFlag) -> [Experiment] {
+    var rules = flag.experimentIds.compactMap { experimentIdMap[$0] }
+let rollout = self.rolloutIdMap[flag.rolloutId]
+        rules.append(contentsOf: rollout?.experiments ?? [])
+        return rules
+    }
     /**
      * Create ProjectConfig based on datafile string.
      *

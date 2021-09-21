@@ -22,8 +22,8 @@ class OptimizelyUserContext implements \JsonSerializable
     private $optimizelyClient;
     private $userId;
     private $attributes;
-    
-    
+    private $forcedDecisions;
+
     public function __construct(Optimizely $optimizelyClient, $userId, array $attributes = [])
     {
         $this->optimizelyClient = $optimizelyClient;
@@ -31,6 +31,60 @@ class OptimizelyUserContext implements \JsonSerializable
         $this->attributes = $attributes;
     }
 
+    public function setForcedDecision($flagKey, $ruleKey = null, $variationKey)
+    {
+        $index = $this->findExisitingRuleAndFlagKey($flagKey, $ruleKey);
+        if($index != -1)
+        {
+            $this->forcedDecisions[$index]->variationKey = $variationKey;
+        } else {
+            array_push($this->forcedDecisions, new ForcedDecision($flagKey,$ruleKey, $variationKey));
+        }
+        return true;
+    }
+
+    public function getForcedDecision($flagKey, $ruleKey = null)
+    {
+        return findForcedDecision($flagKey, $ruleKey);
+    }
+
+    private function findValidatedForcedDecision($flagKey, $ruleKey, array $options = [])
+    {
+        $decideReasons = [];
+        $variationKey = $this->findForcedDecision($flagKey, $ruleKey);
+        if($variationKey != null)
+        {
+            $variation = ($this->optimizelyClient)->getF
+            if()
+        }
+    }
+    private function findExistingRuleAndFlagKey($flagKey, $ruleKey)
+    {
+        for ($index = 0; count($this->forcedDecisions); $index++)
+        {
+            if ($this->forcedDecisions[$index]->getFlagKey() == $flagKey &&  $this->forcedDecisions[$index]->getRuleKey() == $ruleKey) {
+                return $index;
+            }
+        }
+        return -1;
+    }
+
+    private function findForcedDecision($flagKey, $ruleKey)
+    {
+        if(count($this->forcedDecisions) == 0)
+        {
+            return null;
+        }
+
+        $index = $this->findExistingRuleAndFlagKey($flagKey, $ruleKey);
+
+        if ($index != -1)
+        {
+            return $this->forcedDecisions[$index]->getVariationKey();
+        }
+
+        return null;
+    }
     protected function copy()
     {
         return new OptimizelyUserContext($this->optimizelyClient, $this->userId, $this->attributes);
@@ -83,5 +137,42 @@ class OptimizelyUserContext implements \JsonSerializable
             'userId' => $this->userId,
             'attributes' => $this->attributes
         ];
+    }
+}
+class ForcedDecision
+{
+    private $flagKey;
+    private $ruleKey;
+    public $variationKey;
+
+    public function __construct($flagKey, $ruleKey, $variationKey)
+    {
+        $this->flagKey = $flagKey;
+        $this->ruleKey = $ruleKey;
+        $this->variationKey = $variationKey;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFlagKey()
+    {
+        return $this->flagKey;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRuleKey()
+    {
+        return $this->ruleKey;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVariationKey()
+    {
+        return $this->variationKey;
     }
 }

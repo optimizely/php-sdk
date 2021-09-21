@@ -1281,4 +1281,12 @@ class Optimizely
 
         return $isValid;
     }
+
+    public function getFlagVariationByKey($flagKey, $variationKey)
+    {
+        if(array_key_exists($flagKey, $this->_config))
+        {
+
+        }
+    }
 }
