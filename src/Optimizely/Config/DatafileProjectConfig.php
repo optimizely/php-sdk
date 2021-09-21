@@ -405,11 +405,11 @@ class DatafileProjectConfig implements ProjectConfigInterface
         }
     }
 
-    function getAllRulesForFlag(_ flag: FeatureFlag) -> [Experiment] {
-    var rules = flag.experimentIds.compactMap { experimentIdMap[$0] }
-let rollout = self.rolloutIdMap[flag.rolloutId]
-        rules.append(contentsOf: rollout?.experiments ?? [])
-        return rules
+    function getAllRulesForFlag(FeatureFlag $flag) {
+        $rules = $flag->getExperimentIds();
+        $rollout = $this->_rolloutIdMap[$flag->getRolloutId()];
+        array_push($rules , rollout);
+        return rules;
     }
     /**
      * Create ProjectConfig based on datafile string.
