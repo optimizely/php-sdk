@@ -377,7 +377,19 @@ class DatafileProjectConfig implements ProjectConfigInterface
                 }
             }
         }
-        $_flagVariationsMap
+        $this->_flagVariationsMap = array();
+        foreach ($this->_featureFlags as $flag)
+        {
+            $variations = array();
+
+            foreach ($this->getAllRulesForFlag($flag) as $rule)
+            {
+                $variations = array_filter(array_values($rule->getVariations()), function ($variation) use ($variations) {
+                    return !in_array($variation->getId(), $variations);
+                });
+            }
+            $this->_flagVariationsMap[$flag->getKey()] = $variations;
+        }
         // Add variations for rollout experiments to variationIdMap and variationKeyMap
         $this->_variationIdMap = $this->_variationIdMap + $rolloutVariationIdMap;
         $this->_variationKeyMap = $this->_variationKeyMap + $rolloutVariationKeyMap;
@@ -406,9 +418,13 @@ class DatafileProjectConfig implements ProjectConfigInterface
     }
 
     function getAllRulesForFlag(FeatureFlag $flag) {
-        $rules = $flag->getExperimentIds();
+        $rules = array();
+        foreach (flag.experimentIds as $experimentId)
+        {
+            array_push($rules, $this->_experimentIdMap[$experimentId]);
+        }
         $rollout = $this->_rolloutIdMap[$flag->getRolloutId()];
-        array_push($rules , rollout);
+        array_push($rules, $rollout->getExperiments());
         return rules;
     }
     /**
@@ -873,6 +889,16 @@ class DatafileProjectConfig implements ProjectConfigInterface
     public function isFeatureExperiment($experimentId)
     {
         return array_key_exists($experimentId, $this->_experimentFeatureMap);
+    }
+
+    /**
+     * Returns map array of Flag key as key and Variations as value
+     *
+     * @return array
+     */
+    public function getFlagVariationsMap()
+    {
+        return $this->_flagVariationsMap;
     }
 
     /**

@@ -347,13 +347,22 @@ class Optimizely
         $decisionEventDispatched = false;
 
         // get decision
-        $decision = $this->_decisionService->getVariationForFeature(
-            $config,
-            $featureFlag,
-            $userId,
-            $userAttributes,
-            $decideOptions
-        );
+        $decision = null;
+        // check forced-decisions first
+        list($forcedDecisionResponse, $reasons) = $userContext->findValidatedForcedDecision($flagKey, $ruleKey, $decideOptions);
+        $decideReasons = array_merge($decideReasons, $reasons);
+        if($forcedDecisionResponse != null) {
+            $decision = new FeatureDecision(null, $forcedDecisionResponse, FeatureDecision::DECISION_SOURCE_FEATURE_TEST, $decideReasons);
+        } else {
+            // regular decision
+            $decision = $this->_decisionService->getVariationForFeature(
+                $config,
+                $featureFlag,
+                $userId,
+                $userAttributes,
+                $decideOptions
+            );
+        }
 
         $decideReasons = $decision->getReasons();
         $variation = $decision->getVariation();
@@ -1284,9 +1293,15 @@ class Optimizely
 
     public function getFlagVariationByKey($flagKey, $variationKey)
     {
-        if(array_key_exists($flagKey, $this->_config))
+        if(array_key_exists($flagKey, $this->_config->getFlagVariationsMap()))
         {
-
+            $variations = array_filter(array_values($this->_config->getFlagVariationsMap()[$flagKey]), function ($variations) use ($variationKey) {
+                return in_array($variationKey, $variations->getKey());
+            });
+            if(!empty($variations)) {
+                return $variations[0];
+            }
         }
+        return null;
     }
 }
