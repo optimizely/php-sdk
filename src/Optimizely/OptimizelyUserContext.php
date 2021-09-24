@@ -17,6 +17,9 @@
 
 namespace Optimizely;
 
+use Optimizely\Logger\LoggerInterface;
+use Optimizely\Logger\NoOpLogger;
+
 class OptimizelyUserContext implements \JsonSerializable
 {
     private $optimizelyClient;
@@ -31,14 +34,13 @@ class OptimizelyUserContext implements \JsonSerializable
         $this->attributes = $attributes;
     }
 
-    public function setForcedDecision($flagKey, $ruleKey = null, $variationKey)
+    public function setForcedDecision($flagKey, $variationKey, $ruleKey = null)
     {
         $index = $this->findExisitingRuleAndFlagKey($flagKey, $ruleKey);
-        if($index != -1)
-        {
+        if ($index != -1) {
             $this->forcedDecisions[$index]->variationKey = $variationKey;
         } else {
-            array_push($this->forcedDecisions, new ForcedDecision($flagKey,$ruleKey, $variationKey));
+            array_push($this->forcedDecisions, new ForcedDecision($flagKey, $ruleKey, $variationKey));
         }
         return true;
     }
@@ -48,30 +50,30 @@ class OptimizelyUserContext implements \JsonSerializable
         return findForcedDecision($flagKey, $ruleKey);
     }
 
-    public function findValidatedForcedDecision($flagKey, $ruleKey, array $options = [], $logger)
+    public function findValidatedForcedDecision($flagKey, $ruleKey, array $options = [])
     {
         $decideReasons = [];
         $variationKey = $this->findForcedDecision($flagKey, $ruleKey);
-        if($variationKey != null)
-        {
+        if ($variationKey != null) {
             $variation = ($this->optimizelyClient)->getFlagVariationByKey($flagKey, $variationKey);
             $message = sprintf('Variation "%s" is mapped to "%s" and user "%s" in the forced decision map.', $variationKey, $flagKey, $this->userId);
-            $logger->log(Logger::INFO, $message);
+
             $decideReasons[] = $message;
             return [$variation, $decideReasons];
         } else {
             $message = sprintf('Invalid variation is mapped to "%s" and user "%s" in the forced decision map.', $flagKey, $this->userId);
-            $logger->log(Logger::INFO, $message);
+
             $decideReasons[] = $message;
         }
         return [null, $decideReasons];
     }
     private function findExistingRuleAndFlagKey($flagKey, $ruleKey)
     {
-        for ($index = 0; count($this->forcedDecisions); $index++)
-        {
-            if ($this->forcedDecisions[$index]->getFlagKey() == $flagKey &&  $this->forcedDecisions[$index]->getRuleKey() == $ruleKey) {
-                return $index;
+        if ($this->forcedDecisions) {
+            for ($index = 0; $index < count($this->forcedDecisions); $index++) {
+                if ($this->forcedDecisions[$index]->getFlagKey() == $flagKey &&  $this->forcedDecisions[$index]->getRuleKey() == $ruleKey) {
+                    return $index;
+                }
             }
         }
         return -1;
@@ -79,15 +81,13 @@ class OptimizelyUserContext implements \JsonSerializable
 
     private function findForcedDecision($flagKey, $ruleKey)
     {
-        if(count($this->forcedDecisions) == 0)
-        {
+        if ($this->forcedDecisions && count($this->forcedDecisions) == 0) {
             return null;
         }
 
         $index = $this->findExistingRuleAndFlagKey($flagKey, $ruleKey);
 
-        if ($index != -1)
-        {
+        if ($index != -1) {
             return $this->forcedDecisions[$index]->getVariationKey();
         }
 

@@ -378,12 +378,10 @@ class DatafileProjectConfig implements ProjectConfigInterface
             }
         }
         $this->_flagVariationsMap = array();
-        foreach ($this->_featureFlags as $flag)
-        {
+        foreach ($this->_featureFlags as $flag) {
             $variations = array();
-
-            foreach ($this->getAllRulesForFlag($flag) as $rule)
-            {
+            $flagRules = $this->getAllRulesForFlag($flag);
+            foreach ($flagRules as $ruleList) {
                 $variations = array_filter(array_values($rule->getVariations()), function ($variation) use ($variations) {
                     return !in_array($variation->getId(), $variations);
                 });
@@ -417,15 +415,17 @@ class DatafileProjectConfig implements ProjectConfigInterface
         }
     }
 
-    function getAllRulesForFlag(FeatureFlag $flag) {
+    private function getAllRulesForFlag(FeatureFlag $flag)
+    {
         $rules = array();
-        foreach (flag.experimentIds as $experimentId)
-        {
+        foreach ($flag->getExperimentIds() as $experimentId) {
             array_push($rules, $this->_experimentIdMap[$experimentId]);
         }
-        $rollout = $this->_rolloutIdMap[$flag->getRolloutId()];
-        array_push($rules, $rollout->getExperiments());
-        return rules;
+        if ($this->_rolloutIdMap && key_exists($flag->getRolloutId(), $this->_rolloutIdMap)) {
+            $rollout = $this->_rolloutIdMap[$flag->getRolloutId()];
+            $rules = array_merge($rules, $rollout->getExperiments());
+        }
+        return $rules;
     }
     /**
      * Create ProjectConfig based on datafile string.

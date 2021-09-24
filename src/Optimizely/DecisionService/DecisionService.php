@@ -361,11 +361,11 @@ class DecisionService
             return new FeatureDecision(null, null, null, $decideReasons);
         }
         $index = 0;
-        while($index < sizeof($rolloutRules)) {
+        while ($index < sizeof($rolloutRules)) {
             list($decisionResponse, $reasons) = $this->getVariationFromDeliveryRule($projectConfig, $featureFlagKey, $rolloutRules, $index, $user, $decideOptions);
             $decideReasons = array_merge($decideReasons, $reasons);
             list($variation, $skipToEveryoneElse) = $decisionResponse == null? [null, true] : [$decisionResponse, false];
-            if($variation != null) {
+            if ($variation != null) {
                 return new FeatureDecision($rolloutRules[$index], $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT, $decideReasons);
             }
             // the last rule is special for "Everyone Else"
@@ -378,9 +378,9 @@ class DecisionService
     {
         $decideReasons = [];
         // check forced-decision first
-        list($decisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey(), $this->_logger);
+        list($decisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey());
         $decideReasons = array_merge($decideReasons, $reasons);
-        if($decisionResponse != null) {
+        if ($decisionResponse != null) {
             return new FeatureDecision(null, $decisionResponse, FeatureDecision::DECISION_SOURCE_EXPERIMENT, $decideReasons);
         }
 
@@ -413,10 +413,10 @@ class DecisionService
         $skipToEveryoneElse = false;
         // check forced-decision first
         $rule = $rules[$ruleIndex];
-        list($forcedDecisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey(), $options, $this->_logger);
+        list($forcedDecisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey(), $options);
 
         $decideReasons = array_merge($decideReasons, $reasons);
-        if($forcedDecisionResponse != null) {
+        if ($forcedDecisionResponse != null) {
             return new FeatureDecision($rule, $forcedDecisionResponse, null, $decideReasons);
         }
 
@@ -427,10 +427,11 @@ class DecisionService
 
         $everyoneElse = $ruleIndex == sizeof($rules) - 1;
         $loggingKey = $everyoneElse ? "Everyone Else" : $ruleIndex + 1;
+        $bucketedVariation = null;
 
         list($evalResult, $reasons) = Validator::doesUserMeetAudienceConditions($projectConfig, $rule, $attributes, $this->_logger);
         $decideReasons = array_merge($decideReasons, $reasons);
-        if(!$evalResult) {
+        if (!$evalResult) {
             $message = sprintf('User "%s" meets condition for targeting rule "%s".', $userId, $rule->getKey());
             $this->_logger->log(
                 Logger::INFO,

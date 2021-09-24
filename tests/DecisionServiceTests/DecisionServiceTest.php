@@ -28,6 +28,7 @@ use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Optimizely;
+use Optimizely\OptimizelyUserContext;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\Validator;
 
@@ -40,7 +41,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     private $loggerMock;
     private $testUserId;
     private $userProvideServiceMock;
-
+    private $optimizely;
     public function setUp()
     {
         $this->testUserId = 'testUserId';
@@ -84,6 +85,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->setConstructorArgs(array($this->loggerMock))
             ->setMethods(array('getVariation'))
             ->getMock();
+        $this->optimizely = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
     }
 
     public function compareFeatureDecisionsExceptReasons(FeatureDecision $expectedObj, FeatureDecision $actualObj)
@@ -104,13 +106,15 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $pausedExperiment, $this->testUserId);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $pausedExperiment, $this->optimizely->createUserContext($this->testUserId));
 
         $this->assertNull($variation);
     }
 
     public function testGetVariationBucketsUserWhenExperimentIsRunning()
     {
+        $optimizely = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+
         $expectedVariation = new Variation('7722370027', 'control');
         $this->bucketerMock->expects($this->once())
             ->method('bucket')
@@ -122,7 +126,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->testUserId, $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext($this->testUserId, $this->testUserAttributes));
 
         $this->assertEquals(
             $expectedVariation,
@@ -219,7 +223,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1');
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext('user1'));
 
         $this->assertEquals(
             $expectedVariation,
@@ -260,7 +264,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1');
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext('user1'));
 
         $this->assertEquals(
             $expectedVariation,
@@ -290,7 +294,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1', $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext('user1', $this->testUserAttributes));
 
         $this->assertEquals(
             $expectedVariation,
@@ -321,7 +325,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, 'user1', $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext('user1', $this->testUserAttributes));
 
         $this->assertEquals(
             $expectedVariation,
@@ -342,7 +346,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, 'not_whitelisted_user', $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext('not_whitelisted_user', $this->testUserAttributes));
 
         $this->assertEquals(
             $expectedVariation,
@@ -352,6 +356,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationReturnsNullIfUserDoesNotMeetAudienceConditions()
     {
+        $optimizely = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+
         $this->bucketerMock->expects($this->never())
             ->method('bucket');
 
@@ -361,7 +367,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->testUserId); // no matching attributes
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext($this->testUserId)); // no matching attributes
 
         $this->assertNull($variation);
     }
@@ -399,12 +405,14 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $userId);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext($userId));
         $this->assertEquals($expectedVariation, $variation);
     }
 
     public function testGetVariationBucketsIfNoStoredVariation()
     {
+        $optimizely = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+
         $userId = $this->testUserId;
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
         $expectedVariation = new Variation('7722370027', 'control');
@@ -443,7 +451,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext($userId, $this->testUserAttributes));
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -496,7 +504,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext($userId, $this->testUserAttributes));
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -511,6 +519,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetVariationBucketsIfUserProfileServiceLookupThrows()
     {
+        $optimizely = new Optimizely(DATAFILE, new ValidEventDispatcher(), $this->loggerMock);
+
         $userId = $this->testUserId;
         $runningExperiment = $this->config->getExperimentFromKey('test_experiment');
         $expectedVariation = new Variation('7722370027', 'control');
@@ -553,7 +563,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext($userId, $this->testUserAttributes));
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -601,7 +611,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $bucketer->setAccessible(true);
         $bucketer->setValue($this->decisionService, $this->bucketerMock);
 
-        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $userId, $this->testUserAttributes);
+        list($variation, $reasons) = $this->decisionService->getVariation($this->config, $runningExperiment, $this->optimizely->createUserContext($userId, $this->testUserAttributes));
         $this->assertEquals($expectedVariation, $variation);
 
         // Verify Logs
@@ -724,7 +734,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->with(Logger::DEBUG, "The feature flag 'empty_feature' is not used in any experiments.");
 
-        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []);
+        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, $this->optimizely->createUserContext('user1', []));
         $this->assertNull($actualDecision->getVariation());
     }
 
@@ -747,7 +757,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "The user 'user1' is not bucketed into any of the experiments using the feature 'boolean_feature'."
             );
 
-        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []);
+        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, $this->optimizely->createUserContext('user1', []));
         $this->assertNull($actualDecision->getVariation());
     }
 
@@ -769,7 +779,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             );
         $featureFlag = $this->config->getFeatureFlagFromKey('multi_variate_feature');
 
-        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user1', []);
+        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, $this->optimizely->createUserContext('user1', []));
         $this->assertNull($actualDecision->getVariation());
     }
 
@@ -793,7 +803,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "The user 'user_1' is bucketed into experiment 'test_experiment_multivariate' of feature 'multi_variate_feature'."
             );
 
-        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user_1', []);
+        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, $this->optimizely->createUserContext('user_1', []));
         $this->compareFeatureDecisionsExceptReasons($expected_decision, $actualDecision);
     }
 
@@ -818,7 +828,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "The user 'user_1' is bucketed into experiment 'group_experiment_1' of feature 'mutex_group_feature'."
             );
 
-        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, 'user_1', []);
+        $actualDecision = $this->decisionServiceMock->getVariationForFeatureExperiment($this->config, $featureFlag, $this->optimizely->createUserContext('user_1', []));
         $this->compareFeatureDecisionsExceptReasons($expected_decision, $actualDecision);
     }
 
@@ -844,8 +854,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $actualFeatureDecision = $this->decisionServiceMock->getVariationForFeatureExperiment(
             $this->config,
             $featureFlag,
-            'user_1',
-            []
+            $this->optimizely->createUserContext('user_1', [])
         );
         $this->assertNull($actualFeatureDecision->getVariation());
     }
@@ -874,7 +883,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, 'user_1', [])
+            $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, $this->optimizely->createUserContext('user_1', []))
         );
     }
 
@@ -912,7 +921,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
                 "User 'user_1' is bucketed into rollout for feature flag 'string_single_variable_feature'."
             );
 
-        $actualFeatureDecision = $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, 'user_1', []);
+        $actualFeatureDecision = $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, $this->optimizely->createUserContext('user_1', []));
         $this->compareFeatureDecisionsExceptReasons($expected_decision, $actualFeatureDecision);
     }
 
@@ -948,7 +957,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 
-        $actualFeatureDecision = $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, 'user_1', []);
+        $actualFeatureDecision = $decisionServiceMock->getVariationForFeature($this->config, $featureFlag, $this->optimizely->createUserContext('user_1', []));
 
         $this->compareFeatureDecisionsExceptReasons($expectedDecision, $actualFeatureDecision);
     }
@@ -969,8 +978,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $actualFeatureDecision = $this->decisionServiceMock->getVariationForFeatureRollout(
             $this->config,
             $featureFlag,
-            'user_1',
-            []
+            $this->optimizely->createUserContext('user_1', [])
         );
         $this->assertNull($actualFeatureDecision->getVariation());
     }
@@ -993,8 +1001,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $actualFeatureDecision = $this->decisionServiceMock->getVariationForFeatureRollout(
             $this->config,
             $featureFlag,
-            'user_1',
-            []
+            $this->optimizely->createUserContext('user_1', [])
         );
         $this->assertNull($actualFeatureDecision->getVariation());
     }
@@ -1020,7 +1027,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('getRolloutFromId')
             ->will($this->returnValue($experiment_less_rollout));
 
-        $actualFeatureDecision = $this->decisionService->getVariationForFeatureRollout($configMock, $featureFlag, 'user_1', []);
+        $actualFeatureDecision = $this->decisionService->getVariationForFeatureRollout($configMock, $featureFlag, $this->optimizely->createUserContext('user_1', []));
         $this->assertNull($actualFeatureDecision->getVariation());
     }
 
@@ -1053,7 +1060,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->compareFeatureDecisionsExceptReasons(
             $expected_decision,
-            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, $this->optimizely->createUserContext('user_1', $user_attributes))
         );
     }
 
@@ -1091,7 +1098,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, $this->optimizely->createUserContext('user_1', $user_attributes))
         );
     }
 
@@ -1124,8 +1131,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $actualFeatureDecision = $this->decisionService->getVariationForFeatureRollout(
             $this->config,
             $featureFlag,
-            'user_1',
-            $user_attributes
+            $this->optimizely->createUserContext('user_1', $user_attributes)
         );
         
         $this->assertNull($actualFeatureDecision->getVariation());
@@ -1171,7 +1177,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, $this->optimizely->createUserContext('user_1', $user_attributes))
         );
 
         // Verify Logs
@@ -1208,7 +1214,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             ->method('log')
             ->will($this->returnCallback($this->collectLogsForAssertion));
 
-        $actualFeatureDecision = $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes);
+        $actualFeatureDecision = $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, $this->optimizely->createUserContext('user_1', $user_attributes));
 
         $this->assertNull($actualFeatureDecision->getVariation());
 
@@ -1253,7 +1259,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             $expected_decision,
-            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, 'user_1', $user_attributes)
+            $this->decisionService->getVariationForFeatureRollout($this->config, $featureFlag, $this->optimizely->createUserContext('user_1', $user_attributes))
         );
 
         // Verify Logs
