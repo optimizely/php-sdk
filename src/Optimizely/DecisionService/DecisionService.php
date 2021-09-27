@@ -338,7 +338,6 @@ class DecisionService
     public function getVariationForFeatureRollout(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, OptimizelyUserContext $user, $decideOptions = [])
     {
         $decideReasons = [];
-//        list($bucketing_id, $reasons) = $this->getBucketingId($userId, $userAttributes);
         $featureFlagKey = $featureFlag->getKey();
         $rollout_id = $featureFlag->getRolloutId();
         if (empty($rollout_id)) {
@@ -430,10 +429,11 @@ class DecisionService
         $loggingKey = $everyoneElse ? "Everyone Else" : $ruleIndex + 1;
         $bucketedVariation = null;
 
-        list($evalResult, $reasons) = Validator::doesUserMeetAudienceConditions($projectConfig, $rule, $attributes, $this->_logger);
+        // Evaluate if user meets the audience condition of this rollout rule
+        list($evalResult, $reasons) = Validator::doesUserMeetAudienceConditions($projectConfig, $rule, $attributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', $loggingKey);
         $decideReasons = array_merge($decideReasons, $reasons);
-        if (!$evalResult) {
-            $message = sprintf('User "%s" meets condition for targeting rule "%s".', $userId, $rule->getKey());
+        if ($evalResult) {
+            $message = sprintf('User "%s" meets condition for targeting rule "%s".', $userId, $loggingKey);
             $this->_logger->log(
                 Logger::INFO,
                 $message
@@ -442,20 +442,20 @@ class DecisionService
             list($bucketedVariation, $reasons) = $this->_bucketer->bucket($projectConfig, $rule, $bucketingId, $userId);
             $decideReasons = array_merge($decideReasons, $reasons);
             if ($bucketedVariation != null) {
-                $message = sprintf('User "%s" is in the traffic group of targeting rule "%s".', $userId, $rule->getKey());
+                $message = sprintf('User "%s" is in the traffic group of targeting rule "%s".', $userId, $loggingKey);
                 $this->_logger->log(Logger::INFO, $message);
                 $decideReasons[] = $message;
             } else if (!$everyoneElse) {
                 // skip this logging for EveryoneElse since this has a message not for EveryoneElse
-                $message = sprintf('User "%s" is not in the traffic group for targeting rule "%s". Checking Everyone Else rule now.', $userId, $rule->getKey());
+                $message = sprintf('User "%s" is not in the traffic group for targeting rule "%s". Checking Everyone Else rule now.', $userId, $loggingKey);
                 $this->_logger->log(Logger::INFO, $message);
                 $decideReasons[] = $message;
                 // skip the rest of rollout rules to the everyone-else rule if audience matches but not bucketed.
                 $skipToEveryoneElse = true;
             }
         } else {
-            $message = sprintf('User "%s" does not meet conditions for targeting rule "%s".', $userId, $rule->getKey());
-            $this->_logger->log(Logger::INFO, $message);
+            $message = sprintf('User "%s" does not meet conditions for targeting rule "%s".', $userId, $loggingKey);
+            $this->_logger->log(Logger::DEBUG, $message);
             $decideReasons[] = $message;
         }
 

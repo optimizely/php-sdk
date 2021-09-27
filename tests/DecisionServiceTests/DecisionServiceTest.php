@@ -1078,7 +1078,16 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $experiment2,
             $expected_variation,
-            FeatureDecision::DECISION_SOURCE_ROLLOUT
+            FeatureDecision::DECISION_SOURCE_ROLLOUT,
+            ['Invalid variation is mapped to "boolean_single_variable_feature" and user "user_1" in the forced decision map.',
+                'Audiences for rule 1 collectively evaluated to TRUE.',
+                'User "user_1" meets condition for targeting rule "1".',
+                'User "user_1" is not in the traffic group for targeting rule "1". Checking Everyone Else rule now.',
+                'Invalid variation is mapped to "boolean_single_variable_feature" and user "user_1" in the forced decision map.',
+                'Audiences for rule Everyone Else collectively evaluated to TRUE.',
+                'User "user_1" meets condition for targeting rule "Everyone Else".',
+                'User "user_1" is in the traffic group of targeting rule "Everyone Else".'
+            ]
         );
 
         // Provide attributes such that user qualifies for audience
@@ -1156,7 +1165,19 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $experiment2,
             $expected_variation,
-            FeatureDecision::DECISION_SOURCE_ROLLOUT
+            FeatureDecision::DECISION_SOURCE_ROLLOUT,
+            [
+                'Invalid variation is mapped to "boolean_single_variable_feature" and user "user_1" in the forced decision map.',
+                'Audiences for rule 1 collectively evaluated to FALSE.' ,
+                'User "user_1" does not meet conditions for targeting rule "1".',
+                'Invalid variation is mapped to "boolean_single_variable_feature" and user "user_1" in the forced decision map.',
+                'Audiences for rule 2 collectively evaluated to FALSE.',
+                'User "user_1" does not meet conditions for targeting rule "2".',
+                'Invalid variation is mapped to "boolean_single_variable_feature" and user "user_1" in the forced decision map.',
+                'Audiences for rule Everyone Else collectively evaluated to TRUE.',
+                'User "user_1" meets condition for targeting rule "Everyone Else".',
+                'User "user_1" is in the traffic group of targeting rule "Everyone Else".'
+            ]
         );
 
         // Provide null attributes so that user does not qualify for audience
@@ -1181,8 +1202,8 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         );
 
         // Verify Logs
-        $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 1."], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 2."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, 'User "user_1" does not meet conditions for targeting rule "1".'], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, 'User "user_1" does not meet conditions for targeting rule "2".'], $this->collectedLogs);
     }
 
     public function testGetVariationForFeatureRolloutWhenUserDoesNotQualifyForAnyTargetingRuleOrEveryoneElseRule()
@@ -1219,9 +1240,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($actualFeatureDecision->getVariation());
 
         // Verify Logs
-        $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 1."], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 2."], $this->collectedLogs);
-        $this->assertContains([Logger::DEBUG, "User 'user_1' does not meet conditions for targeting rule 'Everyone Else'."], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, 'User "user_1" does not meet conditions for targeting rule "1".'], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, 'User "user_1" does not meet conditions for targeting rule "2".'], $this->collectedLogs);
+        $this->assertContains([Logger::DEBUG, 'User "user_1" does not meet conditions for targeting rule "Everyone Else".'], $this->collectedLogs);
     }
 
 
@@ -1238,7 +1259,19 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
         $expected_decision = new FeatureDecision(
             $experiment2,
             $expected_variation,
-            FeatureDecision::DECISION_SOURCE_ROLLOUT
+            FeatureDecision::DECISION_SOURCE_ROLLOUT,
+            [
+                'Invalid variation is mapped to "boolean_single_variable_feature" and user "user_1" in the forced decision map.',
+                'Audiences for rule 1 collectively evaluated to FALSE.',
+                'User "user_1" does not meet conditions for targeting rule "1".',
+                'Invalid variation is mapped to "boolean_single_variable_feature" and user "user_1" in the forced decision map.',
+                'Audiences for rule 2 collectively evaluated to FALSE.',
+                'User "user_1" does not meet conditions for targeting rule "2".',
+                'Invalid variation is mapped to "boolean_single_variable_feature" and user "user_1" in the forced decision map.',
+                'Audiences for rule Everyone Else collectively evaluated to TRUE.',
+                'User "user_1" meets condition for targeting rule "Everyone Else".',
+                'User "user_1" is in the traffic group of targeting rule "Everyone Else".'
+            ]
         );
 
         // Provide null attributes so that user does not qualify for audience
