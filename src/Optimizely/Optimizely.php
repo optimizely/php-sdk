@@ -358,7 +358,7 @@ class Optimizely
             $decision = $this->_decisionService->getVariationForFeature(
                 $config,
                 $featureFlag,
-                $this->createUserContext($userId, $userAttributes),
+                $userContext,
                 $decideOptions
             );
         }
@@ -695,7 +695,8 @@ class Optimizely
             return null;
         }
 
-        list($variation, $reasons) = $this->_decisionService->getVariation($config, $experiment, $this->createUserContext($userId, $attributes = []));
+        $userContext = $this->createUserContext($userId, $attributes ? $attributes : []);
+        list($variation, $reasons) = $this->_decisionService->getVariation($config, $experiment, $userContext);
         $variationKey = ($variation === null) ? null : $variation->getKey();
 
         if ($config->isFeatureExperiment($experiment->getId())) {
@@ -823,8 +824,8 @@ class Optimizely
         }
 
         $featureEnabled = false;
-        $attributes = $attributes? $attributes : [];
-        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $this->createUserContext($userId, $attributes));
+        $userContext = $this->createUserContext($userId, $attributes?: []);
+        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userContext);
         $variation = $decision->getVariation();
 
         if ($config->getSendFlagDecisions() && ($decision->getSource() == FeatureDecision::DECISION_SOURCE_ROLLOUT || !$variation)) {
@@ -957,8 +958,8 @@ class Optimizely
             // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
             return null;
         }
-        $attributes = $attributes? $attributes : [];
-        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $this->createUserContext($userId, $attributes));
+        $userContext = $this->createUserContext($userId, $attributes? $attributes : []);
+        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userContext);
         $variation = $decision->getVariation();
         $experiment = $decision->getExperiment();
         $featureEnabled = $variation !== null ? $variation->getFeatureEnabled() : false;

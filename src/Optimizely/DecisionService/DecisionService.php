@@ -362,9 +362,9 @@ class DecisionService
         }
         $index = 0;
         while ($index < sizeof($rolloutRules)) {
-            list($decisionResponse, $reasons) = $this->getVariationFromDeliveryRule($projectConfig, $featureFlagKey, $rolloutRules, $index, $user, $decideOptions);
-            $decideReasons = array_merge($decideReasons, $reasons);
-            list($variation, $skipToEveryoneElse) = $decisionResponse == null? [null, true] : [$decisionResponse, false];
+            list($decisionResponses, $skipToEveryoneElse) = $this->getVariationFromDeliveryRule($projectConfig, $featureFlagKey, $rolloutRules, $index, $user, $decideOptions);
+            $decideReasons = array_merge($decideReasons, $decisionResponses->getReasons());
+            $variation = $decisionResponses->getVariation();
             if ($variation != null) {
                 return new FeatureDecision($rolloutRules[$index], $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT, $decideReasons);
             }
@@ -417,13 +417,14 @@ class DecisionService
 
         $decideReasons = array_merge($decideReasons, $reasons);
         if ($forcedDecisionResponse != null) {
-            return new FeatureDecision($rule, $forcedDecisionResponse, null, $decideReasons);
+            return [new FeatureDecision($rule, $forcedDecisionResponse, null, $decideReasons), $skipToEveryoneElse];
         }
 
         // regular decision
         $userId = $user->getUserId();
         $attributes = $user->getAttributes();
-        $bucketingId = $this->getBucketingId($userId, $attributes);
+        list($bucketingId, $reasons) = $this->getBucketingId($userId, $attributes);
+        $decideReasons = array_merge($decideReasons, $reasons);
 
         $everyoneElse = $ruleIndex == sizeof($rules) - 1;
         $loggingKey = $everyoneElse ? "Everyone Else" : $ruleIndex + 1;
@@ -458,7 +459,7 @@ class DecisionService
             $decideReasons[] = $message;
         }
 
-        return new FeatureDecision($rule, $bucketedVariation, null, $decideReasons);
+        return [new FeatureDecision($rule, $bucketedVariation, null, $decideReasons), $skipToEveryoneElse];
     }
 
     /**

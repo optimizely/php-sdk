@@ -381,7 +381,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
         foreach ($this->_featureFlags as $flag) {
             $variations = array();
             $flagRules = $this->getAllRulesForFlag($flag);
-            foreach ($flagRules as $ruleList) {
+            foreach ($flagRules as $rule) {
                 $variations = array_filter(array_values($rule->getVariations()), function ($variation) use ($variations) {
                     return !in_array($variation->getId(), $variations);
                 });
