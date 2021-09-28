@@ -34,12 +34,31 @@ class OptimizelyUserContext implements \JsonSerializable
         $this->attributes = $attributes;
     }
 
+    public function removeForcedDecision($flagKey, $ruleKey = null)
+    {
+        $index = $this->findExistingRuleAndFlagKey($flagKey, $ruleKey);
+        if ($index != -1) {
+            unset($this->forcedDecisions[$index]);
+            return true;
+        }
+        return false;
+    }
+
+    public function removeAllForcedDecisions()
+    {
+        $this->forcedDecisions = [];
+        return true;
+    }
+
     public function setForcedDecision($flagKey, $variationKey, $ruleKey = null)
     {
         $index = $this->findExistingRuleAndFlagKey($flagKey, $ruleKey);
         if ($index != -1) {
-            $this->forcedDecisions[$index]->variationKey = $variationKey;
+            $this->forcedDecisions[$index]->setVariationKey($variationKey);
         } else {
+            if (!$this->forcedDecisions) {
+                $this->forcedDecisions = array();
+            }
             array_push($this->forcedDecisions, new ForcedDecision($flagKey, $ruleKey, $variationKey));
         }
         return true;
@@ -151,13 +170,20 @@ class ForcedDecision
 {
     private $flagKey;
     private $ruleKey;
-    public $variationKey;
+    private $variationKey;
 
     public function __construct($flagKey, $ruleKey, $variationKey)
     {
         $this->flagKey = $flagKey;
         $this->ruleKey = $ruleKey;
-        $this->variationKey = $variationKey;
+        $this->setVariationKey($variationKey);
+    }
+
+    public function setVariationKey($variationKey)
+    {
+        if (isset($variationKey) && trim($variationKey) !== '') {
+            $this->variationKey = $variationKey;
+        }
     }
 
     /**
