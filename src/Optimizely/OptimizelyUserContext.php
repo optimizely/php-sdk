@@ -36,7 +36,7 @@ class OptimizelyUserContext implements \JsonSerializable
 
     public function setForcedDecision($flagKey, $variationKey, $ruleKey = null)
     {
-        $index = $this->findExisitingRuleAndFlagKey($flagKey, $ruleKey);
+        $index = $this->findExistingRuleAndFlagKey($flagKey, $ruleKey);
         if ($index != -1) {
             $this->forcedDecisions[$index]->variationKey = $variationKey;
         } else {
