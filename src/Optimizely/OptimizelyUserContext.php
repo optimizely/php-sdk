@@ -47,7 +47,7 @@ class OptimizelyUserContext implements \JsonSerializable
 
     public function getForcedDecision($flagKey, $ruleKey = null)
     {
-        return findForcedDecision($flagKey, $ruleKey);
+        return $this->findForcedDecision($flagKey, $ruleKey);
     }
 
     public function findValidatedForcedDecision($flagKey, $ruleKey, array $options = [])
