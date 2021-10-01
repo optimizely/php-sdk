@@ -258,4 +258,122 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
             'attributes' => $attributes
         ], json_decode(json_encode($optUserContext), true));
     }
+
+    // Forced decision tests
+
+    public function testForcedDecisionInvalidDatafileReturnStatus()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $invalidOptlyObject = new Optimizely("Invalid datafile");
+
+        $optUserContext = new OptimizelyUserContext($invalidOptlyObject, $userId, $attributes);
+        $setForcedDecision = $optUserContext->setForcedDecision("flag1", "variation1", "targeted_delivery");
+        $this->assertFalse($setForcedDecision);
+
+        $getForcedDecision = $optUserContext->getForcedDecision("flag1", "targeted_delivery");
+        $this->assertNull($getForcedDecision);
+
+        $removeForcedDecision = $optUserContext->removeForcedDecision("flag1", "targeted_delivery");
+        $this->assertFalse($removeForcedDecision);
+
+        $removeAllForcedDecision = $optUserContext->removeAllForcedDecisions("flag1", "targeted_delivery");
+        $this->assertFalse($removeAllForcedDecision);
+    }
+
+    public function testForcedDecisionValidDatafileReturnStatus()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $setForcedDecision = $optUserContext->setForcedDecision("flag1", "variation1", "targeted_delivery");
+        $this->assertTrue($setForcedDecision);
+
+        $getForcedDecision = $optUserContext->getForcedDecision("flag1", "targeted_delivery");
+        $this->assertEquals($getForcedDecision, "variation1");
+
+        $removeForcedDecision = $optUserContext->removeForcedDecision("flag1", "targeted_delivery");
+        $this->assertTrue($removeForcedDecision);
+
+        $removeAllForcedDecision = $optUserContext->removeAllForcedDecisions("flag1", "targeted_delivery");
+        $this->assertTrue($removeAllForcedDecision);
+    }
+
+    public function testForcedDecisionFlagToDecision()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_single_variable_feature", "177773");
+        $this->assertTrue($setForcedDecision);
+
+        $getForcedDecision = $optUserContext->getForcedDecision("boolean_single_variable_feature");
+        $this->assertEquals($getForcedDecision, "177773");
+
+        $decision = $optUserContext->decide('boolean_single_variable_feature');
+        $this->assertEquals($decision->getVariationKey(), "177773");
+        $this->assertNull($decision->getRuleKey());
+        $this->assertTrue($decision->getEnabled());
+        $this->assertEquals($decision->getFlagKey(), "boolean_single_variable_feature");
+        $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
+        $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
+        $this->assertEquals($decision->getReasons(), []);
+
+        // Removing forced decision to test
+        $removeForcedDecision = $optUserContext->removeForcedDecision("boolean_single_variable_feature");
+        $this->assertTrue($removeForcedDecision);
+
+        $decision = $optUserContext->decide('boolean_single_variable_feature');
+        $this->assertEquals($decision->getVariationKey(), "177778");
+        $this->assertEquals($decision->getRuleKey(), "rollout_1_exp_3");
+        $this->assertTrue($decision->getEnabled());
+        $this->assertEquals($decision->getFlagKey(), "boolean_single_variable_feature");
+        $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
+        $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
+        $this->assertEquals($decision->getReasons(), []);
+    }
+
+    public function testForcedDecisionRuleToDecision()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_feature", "test_variation_1", "test_experiment_2");
+        $this->assertTrue($setForcedDecision);
+
+        $getForcedDecision = $optUserContext->getForcedDecision("boolean_feature", "test_experiment_2");
+        $this->assertEquals($getForcedDecision, "test_variation_1");
+
+        $decision = $optUserContext->decide('boolean_feature');
+        $this->assertEquals($decision->getVariationKey(), "test_variation_1");
+        $this->assertEquals($decision->getRuleKey(), "test_experiment_2");
+        $this->assertTrue($decision->getEnabled());
+        $this->assertEquals($decision->getFlagKey(), "boolean_feature");
+        $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
+        $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
+        $this->assertEquals($decision->getReasons(), []);
+
+        // Removing forced decision to test
+        $removeForcedDecision = $optUserContext->removeForcedDecision("boolean_feature", "test_experiment_2");
+        $this->assertTrue($removeForcedDecision);
+
+        $decision = $optUserContext->decide('boolean_feature');
+        $this->assertEquals($decision->getVariationKey(), "test_variation_2");
+        $this->assertEquals($decision->getRuleKey(), "test_experiment_2");
+        $this->assertTrue($decision->getEnabled());
+        $this->assertEquals($decision->getFlagKey(), "boolean_feature");
+        $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
+        $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
+        $this->assertEquals($decision->getReasons(), []);
+    }
 }

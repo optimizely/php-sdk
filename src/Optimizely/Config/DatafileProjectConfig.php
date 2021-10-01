@@ -245,7 +245,13 @@ class DatafileProjectConfig implements ProjectConfigInterface
      */
     private $_sendFlagDecisions;
 
+    /**
+     * Map indicating variations of flag decisions
+     *
+     * @return map
+     */
     private $_flagVariationsMap;
+
     /**
      * DatafileProjectConfig constructor to load and set project configuration data.
      *
@@ -381,11 +387,13 @@ class DatafileProjectConfig implements ProjectConfigInterface
         foreach ($this->_featureFlags as $flag) {
             $variations = array();
             $flagRules = $this->getAllRulesForFlag($flag);
+
             foreach ($flagRules as $rule) {
-                $variations = array_filter(array_values($rule->getVariations()), function ($variation) use ($variations) {
+                $variations = array_merge($variations, array_filter(array_values($rule->getVariations()), function ($variation) use ($variations) {
                     return !in_array($variation->getId(), $variations);
-                });
+                }));
             }
+
             $this->_flagVariationsMap[$flag->getKey()] = $variations;
         }
         // Add variations for rollout experiments to variationIdMap and variationKeyMap

@@ -300,7 +300,7 @@ class DecisionService
                 continue;
             }
 
-            list($variation, $reasons) = $this->getVariation($projectConfig, $experiment, $user, $decideOptions);
+            list($variation, $reasons) = $this->getVariationFromExperimentRule($projectConfig, $featureFlagKey, $experiment, $user, $decideOptions);
             $decideReasons = array_merge($decideReasons, $reasons);
             if ($variation && $variation->getKey()) {
                 $message = "The user '{$userId}' is bucketed into experiment '{$experiment->getKey()}' of feature '{$featureFlagKey}'.";
@@ -380,22 +380,16 @@ class DecisionService
         list($decisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey());
         $decideReasons = array_merge($decideReasons, $reasons);
         if ($decisionResponse != null) {
-            return new FeatureDecision(null, $decisionResponse, FeatureDecision::DECISION_SOURCE_EXPERIMENT, $decideReasons);
+            return [$decisionResponse, $decideReasons];
         }
 
         // regular decision
         list($variation, $reasons) = $this->getVariation($projectConfig, $rule, $user, $decideOptions);
         $decideReasons = array_merge($decideReasons, $reasons);
-        if ($variation && $variation->getKey()) {
-            $message = "The user '{$user->getUserId()}' is bucketed into experiment '{$rule->getKey()}' of feature '{$flagKey}'.";
-            $this->_logger->log(
-                Logger::INFO,
-                $message
-            );
-            $decideReasons[] = $message;
-            return new FeatureDecision($rule, $variation, FeatureDecision::DECISION_SOURCE_FEATURE_TEST, $decideReasons);
-        }
+
+        return [$variation, $decideReasons];
     }
+
     /**
      * Gets the forced variation key for the given user and experiment.
      *

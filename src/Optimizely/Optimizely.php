@@ -369,8 +369,10 @@ class Optimizely
         if ($variation) {
             $variationKey = $variation->getKey();
             $featureEnabled = $variation->getFeatureEnabled();
-            $ruleKey = $decision->getExperiment()->getKey();
-            $experimentId = $decision->getExperiment()->getId();
+            if ($decision->getExperiment()) {
+                $ruleKey = $decision->getExperiment()->getKey();
+                $experimentId = $decision->getExperiment()->getId();
+            }
         } else {
             $variationKey = null;
             $ruleKey = null;
@@ -1294,13 +1296,11 @@ class Optimizely
 
     public function getFlagVariationByKey($flagKey, $variationKey)
     {
-        if(array_key_exists($flagKey, $this->_config->getFlagVariationsMap()))
-        {
-            $variations = array_filter(array_values($this->_config->getFlagVariationsMap()[$flagKey]), function ($variations) use ($variationKey) {
-                return in_array($variationKey, $variations->getKey());
-            });
-            if(!empty($variations)) {
-                return $variations[0];
+        if (array_key_exists($flagKey, $this->getConfig()->getFlagVariationsMap())) {
+            foreach ($this->getConfig()->getFlagVariationsMap()[$flagKey] as $variation) {
+                if ($variation->getKey() == $variationKey) {
+                    return $variation;
+                }
             }
         }
         return null;
