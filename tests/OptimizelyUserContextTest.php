@@ -17,6 +17,7 @@
 namespace Optimizely\Tests;
 
 use Exception;
+use Optimizely\Decide\OptimizelyDecideOption;
 use TypeError;
 
 use Optimizely\Logger\NoOpLogger;
@@ -299,8 +300,8 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $removeForcedDecision = $optUserContext->removeForcedDecision("flag1", "targeted_delivery");
         $this->assertTrue($removeForcedDecision);
 
-        $removeAllForcedDecision = $optUserContext->removeAllForcedDecisions("flag1", "targeted_delivery");
-        $this->assertTrue($removeAllForcedDecision);
+        $removeAllForcedDecision = $optUserContext->removeAllForcedDecisions();
+        $this->assertFalse($removeAllForcedDecision);
     }
 
     public function testForcedDecisionFlagToDecision()
@@ -376,4 +377,191 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
         $this->assertEquals($decision->getReasons(), []);
     }
+
+    public function testForcedDecisionInvalidFlagToDecision()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_feature", "invalid");
+        $this->assertTrue($setForcedDecision);
+
+        $decision = $optUserContext->decide('boolean_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
+        $this->assertEquals($decision->getVariationKey(), "test_variation_2");
+        $this->assertEquals($decision->getRuleKey(), "test_experiment_2");
+        $this->assertTrue($decision->getEnabled());
+        $this->assertEquals($decision->getFlagKey(), "boolean_feature");
+        $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
+        $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
+        $this->assertEquals($decision->getReasons(), [
+            'Invalid variation is mapped to "boolean_feature" and user "test_user" in the forced decision map.',
+            'Audiences for experiment "test_experiment_2" collectively evaluated to TRUE.',
+            'Assigned bucket 9075 to user "test_user" with bucketing ID "test_user".',
+            'User "test_user" is in variation test_variation_2 of experiment test_experiment_2.',
+            "The user 'test_user' is bucketed into experiment 'test_experiment_2' of feature 'boolean_feature'."
+        ]);
+    }
+
+
+    public function testForcedDecisionInvalidDeliveryRuleToDecision()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_single_variable_feature", "invalid", "rollout_1_exp_3");
+        $this->assertTrue($setForcedDecision);
+
+        $decision = $optUserContext->decide('boolean_single_variable_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
+        $this->assertEquals($decision->getVariationKey(), "177778");
+        $this->assertEquals($decision->getRuleKey(), "rollout_1_exp_3");
+        $this->assertTrue($decision->getEnabled());
+        $this->assertEquals($decision->getFlagKey(), "boolean_single_variable_feature");
+        $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
+        $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
+        $this->assertEquals($decision->getReasons(), [
+            "The feature flag 'boolean_single_variable_feature' is not used in any experiments.",
+            'Invalid variation is mapped to "boolean_single_variable_feature" and user "test_user" in the forced decision map.',
+            'Audiences for rule 1 collectively evaluated to FALSE.',
+            'User "test_user" does not meet conditions for targeting rule "1".',
+            'Invalid variation is mapped to "boolean_single_variable_feature" and user "test_user" in the forced decision map.',
+            'Audiences for rule 2 collectively evaluated to FALSE.',
+            'User "test_user" does not meet conditions for targeting rule "2".',
+            'Variation "invalid" is mapped to "boolean_single_variable_feature" and user "test_user" in the forced decision map.',
+            'Audiences for rule Everyone Else collectively evaluated to TRUE.',
+            'User "test_user" meets condition for targeting rule "Everyone Else".',
+            'Assigned bucket 3041 to user "test_user" with bucketing ID "test_user".',
+            'User "test_user" is in the traffic group of targeting rule "Everyone Else".',
+            "User 'test_user' is bucketed into rollout for feature flag 'boolean_single_variable_feature'."
+            ]);
+    }
+
+    public function testForcedDecisionInvalidExperimentRuleToDecision()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_feature", "invalid");
+        $this->assertTrue($setForcedDecision);
+
+        $decision = $optUserContext->decide('boolean_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
+        $this->assertEquals("test_variation_2", $decision->getVariationKey());
+        $this->assertEquals("test_experiment_2", $decision->getRuleKey());
+        $this->assertTrue($decision->getEnabled());
+        $this->assertEquals("boolean_feature", $decision->getFlagKey());
+        $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
+        $this->assertEquals(1, count($decision->getUserContext()->getAttributes()));
+        $this->assertEquals([
+            'Invalid variation is mapped to "boolean_feature" and user "test_user" in the forced decision map.',
+            'Audiences for experiment "test_experiment_2" collectively evaluated to TRUE.',
+            'Assigned bucket 9075 to user "test_user" with bucketing ID "test_user".',
+            'User "test_user" is in variation test_variation_2 of experiment test_experiment_2.',
+            "The user 'test_user' is bucketed into experiment 'test_experiment_2' of feature 'boolean_feature'."
+        ], $decision->getReasons());
+    }
+
+    public function testForcedDecisionConflicts()
+    {
+        $featureKey = "boolean_feature";
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $setForcedDecision1 = $optUserContext->setForcedDecision($featureKey, "test_variation_1");
+        $this->assertTrue($setForcedDecision1);
+
+        $setForcedDecision2 = $optUserContext->setForcedDecision($featureKey, "test_variation_2", "test_experiment_2");
+        $this->assertTrue($setForcedDecision2);
+
+        // flag-to-decision is the 1st priority
+
+        $decision = $optUserContext->decide('boolean_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
+        $this->assertEquals("test_variation_1", $decision->getVariationKey());
+        $this->assertNull($decision->getRuleKey());
+    }
+
+    public function testGetForcedDecision()
+    {
+        $featureKey = "boolean_feature";
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_1"));
+        $this->assertEquals("test_variation_1", $optUserContext->getForcedDecision($featureKey));
+
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_2"));
+        $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey));
+
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_1", "test_experiment_2"));
+        $this->assertEquals("test_variation_1", $optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
+
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_2", "test_experiment_2"));
+        $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
+
+        $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey));
+    }
+
+    public function testRemoveForcedDecision()
+    {
+        $featureKey = "boolean_feature";
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_1"));
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_2", "test_experiment_2"));
+
+        $this->assertEquals("test_variation_1", $optUserContext->getForcedDecision($featureKey));
+        $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
+
+        $this->assertTrue($optUserContext->removeForcedDecision($featureKey));
+        $this->assertNull($optUserContext->getForcedDecision($featureKey));
+        $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
+
+        $this->assertTrue($optUserContext->removeForcedDecision($featureKey, "test_experiment_2"));
+        $this->assertNull($optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
+        $this->assertNull($optUserContext->getForcedDecision($featureKey));
+
+        $this->assertFalse($optUserContext->removeForcedDecision($featureKey));  // no more saved decisions
+    }
+
+    public function testRemoveAllForcedDecisions()
+    {
+        $featureKey = "boolean_feature";
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $this->assertFalse($optUserContext->removeAllForcedDecisions()); // no saved decisions
+
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_1"));
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_2", "test_experiment_2"));
+
+        $this->assertEquals("test_variation_1", $optUserContext->getForcedDecision($featureKey));
+        $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
+
+        $this->assertTrue($optUserContext->removeAllForcedDecisions());
+        $this->assertNull($optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
+        $this->assertNull($optUserContext->getForcedDecision($featureKey));
+
+        $this->assertFalse($optUserContext->removeAllForcedDecisions()); // no more saved decisions
+    }
 }
+

@@ -43,7 +43,7 @@ class OptimizelyUserContext implements \JsonSerializable
         }
         $index = $this->findExistingRuleAndFlagKey($flagKey, $ruleKey);
         if ($index != -1) {
-            unset($this->forcedDecisions[$index]);
+            array_splice($this->forcedDecisions, $index, 1);
             return true;
         }
         return false;
@@ -53,6 +53,9 @@ class OptimizelyUserContext implements \JsonSerializable
     {
         // check if SDK is ready
         if (!$this->optimizelyClient->isValid()) {
+            return false;
+        }
+        if (!$this->forcedDecisions || count($this->forcedDecisions) == 0) {
             return false;
         }
         $this->forcedDecisions = [];

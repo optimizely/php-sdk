@@ -189,6 +189,55 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             $audienceIdMap->getValue($this->config)
         );
 
+        // Check flag key variations map
+        $flagVariationsMap = new \ReflectionProperty(DatafileProjectConfig::class, '_flagVariationsMap');
+        $flagVariationsMap->setAccessible(true);
+
+        $this->assertEquals(
+            [
+                'boolean_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_2', 'test_variation_1'),
+                    $this->config->getVariationFromKey('test_experiment_2', 'test_variation_2')
+                ],
+                'double_single_variable_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_double_feature', 'control'),
+                    $this->config->getVariationFromKey('test_experiment_double_feature', 'variation')
+                ],
+                'integer_single_variable_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_integer_feature', 'control'),
+                    $this->config->getVariationFromKey('test_experiment_integer_feature', 'variation')
+                ],
+                'boolean_single_variable_feature' => [
+                    $this->config->getVariationFromKey('rollout_1_exp_1', '177771'),
+                    $this->config->getVariationFromKey('rollout_1_exp_2', '177773'),
+                    $this->config->getVariationFromKey('rollout_1_exp_3', '177778')
+                ],
+                'string_single_variable_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_with_feature_rollout', 'control'),
+                    $this->config->getVariationFromKey('test_experiment_with_feature_rollout', 'variation'),
+                    $this->config->getVariationFromKey('rollout_2_exp_1', '177775'),
+                    $this->config->getVariationFromKey('rollout_2_exp_2', '177780')
+                ],
+                'multiple_variables_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_json_feature', 'json_variation')
+                ],
+                'multi_variate_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_multivariate', 'Fred'),
+                    $this->config->getVariationFromKey('test_experiment_multivariate', 'Feorge'),
+                    $this->config->getVariationFromKey('test_experiment_multivariate', 'Gred'),
+                    $this->config->getVariationFromKey('test_experiment_multivariate', 'George')
+                ],
+                'mutex_group_feature' => [
+                    $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_1'),
+                    $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_2'),
+                    $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_1'),
+                    $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_2')
+                ],
+                'empty_feature' => []
+            ],
+            $flagVariationsMap->getValue($this->config)
+        );
+
         // Check variation key map
         $variationKeyMap = new \ReflectionProperty(DatafileProjectConfig::class, '_variationKeyMap');
         $variationKeyMap->setAccessible(true);
