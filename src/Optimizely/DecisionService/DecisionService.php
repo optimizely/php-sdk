@@ -215,10 +215,9 @@ class DecisionService
      * Get the variation the user is bucketed into for the given FeatureFlag
      *
      * @param  ProjectConfigInterface $projectConfig  ProjectConfigInterface instance.
-     * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
-     * @param  string        $userId         user ID
-     * @param  array         $userAttributes user attributes
-     * @param  array         $decideOptions   Options to customize evaluation.
+     * @param  FeatureFlag            $featureFlag    The feature flag the user wants to access
+     * @param  OptimizelyUserContext  $user           Optimizely User context containing user id and attribute
+     * @param  array                  $decideOptions  Options to customize evaluation.
      *
      * @return FeatureDecision  representing decision.
      */
@@ -269,8 +268,7 @@ class DecisionService
      *
      * @param  ProjectConfigInterface $projectConfig  ProjectConfigInterface instance.
      * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
-     * @param  string        $userId         user id
-     * @param  array         $userAttributes user userAttributes
+     * @param  OptimizelyUserContext  $user     Optimizely User context containing user id and attribute
      * @param  array         $decideOptions   Options to customize evaluation.
      *
      * @return FeatureDecision  representing decision.
@@ -331,8 +329,8 @@ class DecisionService
      *
      * @param  ProjectConfigInterface $projectConfig  ProjectConfigInterface instance.
      * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
-     * @param  string        $userId         user id
-     * @param  array         $userAttributes user userAttributes
+     * @param  OptimizelyUserContext  $user  Optimizely User context containing user id and attribute
+     * @param  array         $decideOptions   Options to customize evaluation.
      * @return FeatureDecision  representing decision.
      */
     public function getVariationForFeatureRollout(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, OptimizelyUserContext $user, $decideOptions = [])
@@ -394,11 +392,14 @@ class DecisionService
      * Gets the forced variation key for the given user and experiment.
      *
      * @param $projectConfig ProjectConfigInterface  ProjectConfigInterface instance.
-     * @param $experimentKey string         Key for experiment.
-     * @param $userId        string         The user Id.
+     * @param $flagKey  string             Key of feature flag.
+     * @param $rules    array              Array of delivery rules.
+     * @param $ruleIndex  integer          Index of delivery rule of which validation of forced decision is needed.
+     * @param $user OptimizelyUserContext  Optimizely User context containing user id and attribute
+     * @param $options array               Options to customize evaluation.
      *
-     * @return [ Variation, array ] The variation which the given user and experiment should be forced into and
-     *                              array of log messages representing decision making.
+     * @return [ FeatureDecision, Boolean ] The variation which the given user and experiment should be forced into and
+     *                              skipToEveryone boolean to  decision making.
      */
     public function getVariationFromDeliveryRule(ProjectConfigInterface $projectConfig, $flagKey, array $rules, $ruleIndex, OptimizelyUserContext $user, array $options = [])
     {
