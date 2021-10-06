@@ -201,11 +201,15 @@ class Optimizely
     }
 
     /**
+     * @param  DatafileProjectConfig DatafileProjectConfig instance
      * @param  string        Experiment ID
      * @param  string        Variation key
+     * @param  string        Flag key
+     * @param  string        Rule key
+     * @param  string        Rule type
+     * @param  boolean       Feature enabled
      * @param  string        User ID
      * @param  array         Associative array of user attributes
-     * @param  DatafileProjectConfig DatafileProjectConfig instance
      */
     protected function sendImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
     {
@@ -1302,15 +1306,16 @@ class Optimizely
         return $isValid;
     }
 
+    /**
+     * Gets the variation associated with experiment or rollout in instance of given feature flag key
+     *
+     * @param string Feature flag key
+     * @param string variation key
+     *
+     * @return Variation / null
+     */
     public function getFlagVariationByKey($flagKey, $variationKey)
     {
-        if (array_key_exists($flagKey, $this->getConfig()->getFlagVariationsMap())) {
-            foreach ($this->getConfig()->getFlagVariationsMap()[$flagKey] as $variation) {
-                if ($variation->getKey() == $variationKey) {
-                    return $variation;
-                }
-            }
-        }
-        return null;
+        return $this->getConfig()->getFlagVariationByKey($flagKey, $variationKey);
     }
 }

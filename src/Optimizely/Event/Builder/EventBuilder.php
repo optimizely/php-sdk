@@ -27,6 +27,7 @@ use Optimizely\Event\LogEvent;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Utils\GeneratorUtils;
 use Optimizely\Utils\Validator;
+use phpDocumentor\Reflection\Types\This;
 
 class EventBuilder
 {
@@ -139,18 +140,28 @@ class EventBuilder
      * Helper function to get parameters specific to impression event.
      *
      * @param $experiment Experiment Experiment being activated.
-     * @param $variationId String ID representing the variation for the user.
+     * @param $variation Variation representing the variation for the user is allocated.
+     * @param $flagKey string feature flag key.
+     * @param $ruleKey string feature or rollout experiment key.
+     * @param $ruleType string feature or rollout experiment source type.
+     * @param $enabled Boolean feature enabled.
      *
      * @return array Hash representing parameters particular to impression event.
      */
     private function getImpressionParams(Experiment $experiment, $variation, $flagKey, $ruleKey, $ruleType, $enabled)
     {
         $variationKey = $variation->getKey() ? $variation->getKey() : '';
+        $experimentID = '';
+        $campaignID = '';
+        if ($experiment->getId()) {
+            $experimentID = $experiment->getId();
+            $campaignID = $experiment->getLayerId();
+        }
         $impressionParams = [
             DECISIONS => [
                 [
-                    CAMPAIGN_ID => $experiment->getLayerId(),
-                    EXPERIMENT_ID => $experiment->getId(),
+                    CAMPAIGN_ID => $campaignID,
+                    EXPERIMENT_ID => $experimentID,
                     VARIATION_ID => $variation->getId(),
                     METADATA => [
                         FLAG_KEY => $flagKey,
@@ -232,9 +243,14 @@ class EventBuilder
     public function createImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
     {
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
-
         $experiment = $config->getExperimentFromId($experimentId);
-        $variation = $config->getVariationFromKeyByExperimentId($experimentId, $variationKey);
+
+        if (empty($experimentId)) {
+            $variation = $config->getFlagVariationByKey($flagKey, $variationKey);
+        } else {
+            $variation = $config->getVariationFromKeyByExperimentId($experimentId, $variationKey);
+        }
+
         $impressionParams = $this->getImpressionParams($experiment, $variation, $flagKey, $ruleKey, $ruleType, $enabled);
 
         $eventParams[VISITORS][0][SNAPSHOTS][] = $impressionParams;

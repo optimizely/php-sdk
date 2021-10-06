@@ -646,6 +646,26 @@ class DatafileProjectConfig implements ProjectConfigInterface
     }
 
     /**
+     * Gets the variation associated with experiment or rollout in instance of given feature flag key
+     *
+     * @param string Feature flag key
+     * @param string variation key
+     *
+     * @return Variation / null
+     */
+    public function getFlagVariationByKey($flagKey, $variationKey)
+    {
+        if (array_key_exists($flagKey, $this->_flagVariationsMap)) {
+            foreach ($this->_flagVariationsMap[$flagKey] as $variation) {
+                if ($variation->getKey() == $variationKey) {
+                    return $variation;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * @param String $featureKey Key of the feature flag
      *
      * @return FeatureFlag Entity corresponding to the key.

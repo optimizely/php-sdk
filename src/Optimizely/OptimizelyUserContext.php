@@ -66,6 +66,9 @@ class OptimizelyUserContext implements \JsonSerializable
         if (!$this->optimizelyClient->isValid()) {
             return false;
         }
+        if (empty($flagKey)) {
+            return false;
+        }
         $index = $this->findExistingRuleAndFlagKey($flagKey, $ruleKey);
         if ($index != -1) {
             $this->forcedDecisions[$index]->setVariationKey($variationKey);

@@ -199,7 +199,23 @@ interface ProjectConfigInterface
      * @return FeatureVariable / null
      */
     public function getFeatureVariableFromKey($featureFlagKey, $variableKey);
-    
+
+    /**
+     * Gets the variation associated with experiment or rollout in instance of given feature flag key
+     *
+     * @param string Feature flag key
+     * @param string variation key
+     *
+     * @return Variation / null
+     */
+    public function getFlagVariationByKey($flagKey, $variationKey);
+
+    /**
+     * Returns map array of Flag key as key and Variations as value
+     *
+     * @return array
+     */
+    public function getFlagVariationsMap();
     /**
      * Determines if given experiment is a feature test.
      *
