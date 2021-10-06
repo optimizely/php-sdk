@@ -55,9 +55,7 @@ class OptimizelyUserContext implements \JsonSerializable
         if (!$this->optimizelyClient->isValid()) {
             return false;
         }
-        if (!$this->forcedDecisions || count($this->forcedDecisions) == 0) {
-            return false;
-        }
+
         $this->forcedDecisions = [];
         return true;
     }
