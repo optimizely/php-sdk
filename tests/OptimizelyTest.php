@@ -1914,7 +1914,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $expectedReasons = [
-            'Invalid variation is mapped to "double_single_variable_feature" and user "test_user" in the forced decision map.',
+            'Invalid variation is mapped to flag "double_single_variable_feature", rule "test_experiment_double_feature" and user "test_user" in the forced decision map.',
             'Audiences for experiment "test_experiment_double_feature" collectively evaluated to TRUE.',
             'Assigned bucket 4513 to user "test_user" with bucketing ID "test_user".',
             'User "test_user" is in variation control of experiment test_experiment_double_feature.',
@@ -1987,7 +1987,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $expectedReasons = [
-            'Invalid variation is mapped to "multi_variate_feature" and user "test_user" in the forced decision map.',
+            'Invalid variation is mapped to flag "multi_variate_feature", rule "test_experiment_multivariate" and user "test_user" in the forced decision map.',
             'Audiences for experiment "test_experiment_multivariate" collectively evaluated to FALSE.',
             'User "test_user" does not meet conditions to be in experiment "test_experiment_multivariate".',
             "The user 'test_user' is not bucketed into any of the experiments using the feature 'multi_variate_feature'.",

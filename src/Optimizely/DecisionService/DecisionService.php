@@ -362,7 +362,7 @@ class DecisionService
             list($decisionResponses, $skipToEveryoneElse) = $this->getVariationFromDeliveryRule($projectConfig, $featureFlagKey, $rolloutRules, $index, $user, $decideOptions);
             $decideReasons = array_merge($decideReasons, $decisionResponses->getReasons());
             $variation = $decisionResponses->getVariation();
-            if ($variation != null) {
+            if ($variation) {
                 return new FeatureDecision($rolloutRules[$index], $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT, $decideReasons);
             }
             // the last rule is special for "Everyone Else"
@@ -377,7 +377,7 @@ class DecisionService
         // check forced-decision first
         list($decisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey());
         $decideReasons = array_merge($decideReasons, $reasons);
-        if ($decisionResponse != null) {
+        if ($decisionResponse) {
             return [$decisionResponse, $decideReasons];
         }
 
@@ -410,7 +410,7 @@ class DecisionService
         list($forcedDecisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey(), $options);
 
         $decideReasons = array_merge($decideReasons, $reasons);
-        if ($forcedDecisionResponse != null) {
+        if ($forcedDecisionResponse) {
             return [new FeatureDecision($rule, $forcedDecisionResponse, null, $decideReasons), $skipToEveryoneElse];
         }
 
@@ -436,7 +436,7 @@ class DecisionService
             $decideReasons[] = $message;
             list($bucketedVariation, $reasons) = $this->_bucketer->bucket($projectConfig, $rule, $bucketingId, $userId);
             $decideReasons = array_merge($decideReasons, $reasons);
-            if ($bucketedVariation != null) {
+            if ($bucketedVariation) {
                 $message = sprintf('User "%s" is in the traffic group of targeting rule "%s".', $userId, $loggingKey);
                 $this->_logger->log(Logger::INFO, $message);
                 $decideReasons[] = $message;

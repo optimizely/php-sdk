@@ -355,7 +355,7 @@ class Optimizely
         // check forced-decisions first
         list($forcedDecisionResponse, $reasons) = $userContext->findValidatedForcedDecision($flagKey, $ruleKey, $decideOptions);
         $decideReasons = array_merge($decideReasons, $reasons);
-        if ($forcedDecisionResponse != null) {
+        if ($forcedDecisionResponse) {
             $decision = new FeatureDecision(null, $forcedDecisionResponse, FeatureDecision::DECISION_SOURCE_FEATURE_TEST, $decideReasons);
         } else {
             // regular decision

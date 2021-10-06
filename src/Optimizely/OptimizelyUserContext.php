@@ -94,14 +94,14 @@ class OptimizelyUserContext implements \JsonSerializable
     {
         $decideReasons = [];
         $variationKey = $this->findForcedDecision($flagKey, $ruleKey);
-        if ($variationKey != null) {
+        if ($variationKey) {
             $variation = $this->optimizelyClient->getFlagVariationByKey($flagKey, $variationKey);
-            $message = sprintf('Variation "%s" is mapped to "%s" and user "%s" in the forced decision map.', $variationKey, $flagKey, $this->userId);
+            $message = sprintf('Variation "%s" is mapped to %s and user "%s" in the forced decision map.', $variationKey, $ruleKey? 'flag "'.$flagKey.'", rule "'.$ruleKey.'"': 'flag "'.$flagKey.'"', $this->userId);
 
             $decideReasons[] = $message;
             return [$variation, $decideReasons];
         } else {
-            $message = sprintf('Invalid variation is mapped to "%s" and user "%s" in the forced decision map.', $flagKey, $this->userId);
+            $message = sprintf('Invalid variation is mapped to %s and user "%s" in the forced decision map.', $ruleKey? 'flag "'.$flagKey.'", rule "'.$ruleKey.'"': 'flag "'.$flagKey.'"', $this->userId);
 
             $decideReasons[] = $message;
         }
