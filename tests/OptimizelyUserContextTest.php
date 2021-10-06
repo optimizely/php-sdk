@@ -564,4 +564,3 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($optUserContext->removeAllForcedDecisions()); // no more saved decisions
     }
 }
-

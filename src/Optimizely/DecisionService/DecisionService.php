@@ -440,7 +440,7 @@ class DecisionService
                 $message = sprintf('User "%s" is in the traffic group of targeting rule "%s".', $userId, $loggingKey);
                 $this->_logger->log(Logger::INFO, $message);
                 $decideReasons[] = $message;
-            } else if (!$everyoneElse) {
+            } elseif (!$everyoneElse) {
                 // skip this logging for EveryoneElse since this has a message not for EveryoneElse
                 $message = sprintf('User "%s" is not in the traffic group for targeting rule "%s". Checking Everyone Else rule now.', $userId, $loggingKey);
                 $this->_logger->log(Logger::INFO, $message);
