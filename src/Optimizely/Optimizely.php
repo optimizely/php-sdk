@@ -799,7 +799,6 @@ class Optimizely
      * @param array Associative array of user attributes
      *
      * @return boolean
-     * @deprecated Use 'decide' methods of 'OptimizelyUserContext' instead.
      */
     public function isFeatureEnabled($featureFlagKey, $userId, $attributes = null)
     {
@@ -891,7 +890,6 @@ class Optimizely
      * @param  string User ID
      * @param  array Associative array of user attributes
      * @return array List of feature flag keys
-     * @deprecated Use 'decide' methods of 'OptimizelyUserContext' instead.
      */
     public function getEnabledFeatures($userId, $attributes = null)
     {
@@ -1014,7 +1012,6 @@ class Optimizely
      * @param array  Associative array of user attributes
      *
      * @return string boolean variable value / null
-     * @deprecated Use 'decide' methods of 'OptimizelyUserContext' instead.
      */
     public function getFeatureVariableBoolean($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
@@ -1036,7 +1033,6 @@ class Optimizely
      * @param array  Associative array of user attributes
      *
      * @return string integer variable value / null
-     * @deprecated Use 'decide' methods of 'OptimizelyUserContext' instead.
      */
     public function getFeatureVariableInteger($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
@@ -1058,7 +1054,6 @@ class Optimizely
      * @param array  Associative array of user attributes
      *
      * @return string double variable value / null
-     * @deprecated Use 'decide' methods of 'OptimizelyUserContext' instead.
      */
     public function getFeatureVariableDouble($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
@@ -1080,7 +1075,6 @@ class Optimizely
      * @param array  Associative array of user attributes
      *
      * @return string variable value / null
-     * @deprecated Use 'decide' methods of 'OptimizelyUserContext' instead.
      */
     public function getFeatureVariableString($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
@@ -1102,7 +1096,6 @@ class Optimizely
     * @param array  Associative array of user attributes
     *
     * @return array Associative array of json variable including key and value
-    * @deprecated Use 'decide' methods of 'OptimizelyUserContext' instead.
     */
     public function getFeatureVariableJSON($featureFlagKey, $variableKey, $userId, $attributes = null)
     {
@@ -1123,7 +1116,6 @@ class Optimizely
      * @param array  Associative array of user attributes
      *
      * @return array|null array of all the variables, or null if the feature key is invalid
-     * @deprecated Use 'decide' methods of 'OptimizelyUserContext' instead.
      */
     public function getAllFeatureVariables($featureFlagKey, $userId, $attributes = null)
     {
