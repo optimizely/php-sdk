@@ -1263,7 +1263,14 @@ class Optimizely
      */
     public function isValid()
     {
-        return $this->getConfig() !== null;
+        if (!$this->getConfig()) {
+            $this->_logger->log(
+                Logger::ERROR,
+                "Optimizely SDK not configured properly yet."
+            );
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -340,8 +340,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
         $this->assertEquals($decision->getReasons(), []);
     }
-
-    public function testForcedDecisionRuleToDecision()
+    public function testForcedDecisionExperimentRuleToDecision()
     {
         $userId = 'test_user';
         $attributes = [ "browser" => "chrome"];
@@ -373,6 +372,42 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($decision->getRuleKey(), "test_experiment_2");
         $this->assertTrue($decision->getEnabled());
         $this->assertEquals($decision->getFlagKey(), "boolean_feature");
+        $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
+        $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
+        $this->assertEquals($decision->getReasons(), []);
+    }
+    public function testForcedDecisionRuleDeliveryRuleToDecision()
+    {
+        $userId = 'test_user';
+        $attributes = [ "browser" => "chrome"];
+
+        $validOptlyObject = new Optimizely($this->datafile);
+
+        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_single_variable_feature", "rollout_1_exp_3", "177773");
+        $this->assertTrue($setForcedDecision);
+
+        $getForcedDecision = $optUserContext->getForcedDecision("boolean_single_variable_feature", "rollout_1_exp_3");
+        $this->assertEquals($getForcedDecision, "177773");
+
+        $decision = $optUserContext->decide('boolean_single_variable_feature');
+        $this->assertEquals($decision->getVariationKey(), "177773");
+        $this->assertEquals($decision->getRuleKey(), "rollout_1_exp_3");
+        $this->assertTrue($decision->getEnabled());
+        $this->assertEquals($decision->getFlagKey(), "boolean_single_variable_feature");
+        $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
+        $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
+        $this->assertEquals($decision->getReasons(), []);
+
+        // Removing forced decision to test
+        $removeForcedDecision = $optUserContext->removeForcedDecision("boolean_single_variable_feature", "rollout_1_exp_3");
+        $this->assertTrue($removeForcedDecision);
+
+        $decision = $optUserContext->decide('boolean_single_variable_feature');
+        $this->assertEquals($decision->getVariationKey(), "177778");
+        $this->assertEquals($decision->getRuleKey(), "rollout_1_exp_3");
+        $this->assertTrue($decision->getEnabled());
+        $this->assertEquals($decision->getFlagKey(), "boolean_single_variable_feature");
         $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
         $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
         $this->assertEquals($decision->getReasons(), []);
@@ -432,7 +467,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
             'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_2" and user "test_user" in the forced decision map.',
             'Audiences for rule 2 collectively evaluated to FALSE.',
             'User "test_user" does not meet conditions for targeting rule "2".',
-            'Variation "invalid" is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_3" and user "test_user" in the forced decision map.',
+            'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_3" and user "test_user" in the forced decision map.',
             'Audiences for rule Everyone Else collectively evaluated to TRUE.',
             'User "test_user" meets condition for targeting rule "Everyone Else".',
             'Assigned bucket 3041 to user "test_user" with bucketing ID "test_user".',
