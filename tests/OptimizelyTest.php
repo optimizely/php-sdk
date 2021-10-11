@@ -551,7 +551,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optimizelyMock->notificationCenter = $this->notificationCenterMock;
 
-        $this->assertTrue($userContext->setForcedDecision('double_single_variable_feature', 'variation', 'test_experiment_double_feature'));
+        $this->assertTrue($userContext->setForcedDecision('double_single_variable_feature', 'test_experiment_double_feature', 'variation'));
         $optimizelyDecision = $optimizelyMock->decide($userContext, 'double_single_variable_feature');
         $expectedOptimizelyDecision = new OptimizelyDecision(
             'variation',
@@ -642,7 +642,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optimizelyMock->notificationCenter = $this->notificationCenterMock;
 
-        $this->assertTrue($userContext->setForcedDecision('boolean_single_variable_feature', '177773', 'rollout_1_exp_2'));
+        $this->assertTrue($userContext->setForcedDecision('boolean_single_variable_feature', 'rollout_1_exp_2', '177773'));
         $optimizelyDecision = $optimizelyMock->decide($userContext, 'boolean_single_variable_feature');
         $expectedOptimizelyDecision = new OptimizelyDecision(
             '177773',
@@ -722,7 +722,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optimizelyMock->notificationCenter = $this->notificationCenterMock;
 
-        $this->assertTrue($userContext->setForcedDecision('double_single_variable_feature', 'variation'));
+        $this->assertTrue($userContext->setForcedDecision('double_single_variable_feature', null, 'variation'));
         $optimizelyDecision = $optimizelyMock->decide($userContext, 'double_single_variable_feature');
         $expectedOptimizelyDecision = new OptimizelyDecision(
             'variation',

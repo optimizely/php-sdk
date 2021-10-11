@@ -60,7 +60,7 @@ class OptimizelyUserContext implements \JsonSerializable
         return true;
     }
 
-    public function setForcedDecision($flagKey, $variationKey, $ruleKey = null)
+    public function setForcedDecision($flagKey, $ruleKey, $variationKey)
     {
         // check if SDK is ready
         if (!$this->optimizelyClient->isValid()) {

@@ -270,7 +270,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $invalidOptlyObject = new Optimizely("Invalid datafile");
 
         $optUserContext = new OptimizelyUserContext($invalidOptlyObject, $userId, $attributes);
-        $setForcedDecision = $optUserContext->setForcedDecision("flag1", "variation1", "targeted_delivery");
+        $setForcedDecision = $optUserContext->setForcedDecision("flag1", "targeted_delivery", "variation1");
         $this->assertFalse($setForcedDecision);
 
         $getForcedDecision = $optUserContext->getForcedDecision("flag1", "targeted_delivery");
@@ -291,7 +291,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $validOptlyObject = new Optimizely($this->datafile);
 
         $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
-        $setForcedDecision = $optUserContext->setForcedDecision("flag1", "variation1", "targeted_delivery");
+        $setForcedDecision = $optUserContext->setForcedDecision("flag1", "targeted_delivery", "variation1");
         $this->assertTrue($setForcedDecision);
 
         $getForcedDecision = $optUserContext->getForcedDecision("flag1", "targeted_delivery");
@@ -312,7 +312,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $validOptlyObject = new Optimizely($this->datafile);
 
         $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
-        $setForcedDecision = $optUserContext->setForcedDecision("boolean_single_variable_feature", "177773");
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_single_variable_feature", null, "177773");
         $this->assertTrue($setForcedDecision);
 
         $getForcedDecision = $optUserContext->getForcedDecision("boolean_single_variable_feature");
@@ -349,7 +349,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $validOptlyObject = new Optimizely($this->datafile);
 
         $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
-        $setForcedDecision = $optUserContext->setForcedDecision("boolean_feature", "test_variation_1", "test_experiment_2");
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_feature", "test_experiment_2", "test_variation_1");
         $this->assertTrue($setForcedDecision);
 
         $getForcedDecision = $optUserContext->getForcedDecision("boolean_feature", "test_experiment_2");
@@ -386,7 +386,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $validOptlyObject = new Optimizely($this->datafile);
 
         $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
-        $setForcedDecision = $optUserContext->setForcedDecision("boolean_feature", "invalid");
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_feature", null, "invalid");
         $this->assertTrue($setForcedDecision);
 
         $decision = $optUserContext->decide('boolean_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
@@ -414,7 +414,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $validOptlyObject = new Optimizely($this->datafile);
 
         $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
-        $setForcedDecision = $optUserContext->setForcedDecision("boolean_single_variable_feature", "invalid", "rollout_1_exp_3");
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_single_variable_feature", "rollout_1_exp_3", "invalid");
         $this->assertTrue($setForcedDecision);
 
         $decision = $optUserContext->decide('boolean_single_variable_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
@@ -449,7 +449,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $validOptlyObject = new Optimizely($this->datafile);
 
         $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
-        $setForcedDecision = $optUserContext->setForcedDecision("boolean_feature", "invalid");
+        $setForcedDecision = $optUserContext->setForcedDecision("boolean_feature", null, "invalid");
         $this->assertTrue($setForcedDecision);
 
         $decision = $optUserContext->decide('boolean_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
@@ -477,10 +477,10 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $validOptlyObject = new Optimizely($this->datafile);
 
         $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
-        $setForcedDecision1 = $optUserContext->setForcedDecision($featureKey, "test_variation_1");
+        $setForcedDecision1 = $optUserContext->setForcedDecision($featureKey, null, "test_variation_1");
         $this->assertTrue($setForcedDecision1);
 
-        $setForcedDecision2 = $optUserContext->setForcedDecision($featureKey, "test_variation_2", "test_experiment_2");
+        $setForcedDecision2 = $optUserContext->setForcedDecision($featureKey, "test_experiment_2", "test_variation_2");
         $this->assertTrue($setForcedDecision2);
 
         // flag-to-decision is the 1st priority
@@ -499,16 +499,16 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $validOptlyObject = new Optimizely($this->datafile);
 
         $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
-        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_1"));
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, null, "test_variation_1"));
         $this->assertEquals("test_variation_1", $optUserContext->getForcedDecision($featureKey));
 
-        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_2"));
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, null, "test_variation_2"));
         $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey));
 
-        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_1", "test_experiment_2"));
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_experiment_2", "test_variation_1"));
         $this->assertEquals("test_variation_1", $optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
 
-        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_2", "test_experiment_2"));
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_experiment_2", "test_variation_2"));
         $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
 
         $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey));
@@ -523,8 +523,8 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $validOptlyObject = new Optimizely($this->datafile);
 
         $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
-        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_1"));
-        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_2", "test_experiment_2"));
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, null, "test_variation_1"));
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_experiment_2", "test_variation_2"));
 
         $this->assertEquals("test_variation_1", $optUserContext->getForcedDecision($featureKey));
         $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
@@ -551,8 +551,8 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
         $this->assertTrue($optUserContext->removeAllForcedDecisions()); // no saved decisions
 
-        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_1"));
-        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_variation_2", "test_experiment_2"));
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, null, "test_variation_1"));
+        $this->assertTrue($optUserContext->setForcedDecision($featureKey, "test_experiment_2", "test_variation_2"));
 
         $this->assertEquals("test_variation_1", $optUserContext->getForcedDecision($featureKey));
         $this->assertEquals("test_variation_2", $optUserContext->getForcedDecision($featureKey, "test_experiment_2"));
