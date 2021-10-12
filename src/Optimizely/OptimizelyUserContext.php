@@ -90,20 +90,19 @@ class OptimizelyUserContext implements \JsonSerializable
         return true;
     }
 
-    public function findValidatedForcedDecision($flagKey, $ruleKey, array $options = [])
+    public function findValidatedForcedDecision($flagKey, $ruleKey)
     {
         $decideReasons = [];
         $variationKey = $this->findForcedDecision($flagKey, $ruleKey);
         $variation = null;
         if ($variationKey) {
             $variation = $this->optimizelyClient->getFlagVariationByKey($flagKey, $variationKey);
-        }
-        if ($variation) {
-            $message = sprintf('Variation "%s" is mapped to %s and user "%s" in the forced decision map.', $variationKey, $ruleKey? 'flag "'.$flagKey.'", rule "'.$ruleKey.'"': 'flag "'.$flagKey.'"', $this->userId);
-            $decideReasons[] = $message;
-        } else {
-            $message = sprintf('Invalid variation is mapped to %s and user "%s" in the forced decision map.', $ruleKey? 'flag "'.$flagKey.'", rule "'.$ruleKey.'"': 'flag "'.$flagKey.'"', $this->userId);
-            $decideReasons[] = $message;
+            if ($variation) {
+                array_push($decideReasons, 'Decided by forced decision.');
+                array_push($decideReasons, sprintf('Variation "%s" is mapped to %s and user "%s" in the forced decision map.', $variationKey, $ruleKey? 'flag "'.$flagKey.'", rule "'.$ruleKey.'"': 'flag "'.$flagKey.'"', $this->userId));
+            } else {
+                array_push($decideReasons, sprintf('Invalid variation is mapped to %s and user "%s" in the forced decision map.', $ruleKey? 'flag "'.$flagKey.'", rule "'.$ruleKey.'"': 'flag "'.$flagKey.'"', $this->userId));
+            }
         }
         return [$variation, $decideReasons];
     }

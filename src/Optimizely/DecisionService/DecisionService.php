@@ -407,7 +407,7 @@ class DecisionService
         $skipToEveryoneElse = false;
         // check forced-decision first
         $rule = $rules[$ruleIndex];
-        list($forcedDecisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey(), $options);
+        list($forcedDecisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey());
 
         $decideReasons = array_merge($decideReasons, $reasons);
         if ($forcedDecisionResponse) {

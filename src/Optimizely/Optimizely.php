@@ -353,8 +353,7 @@ class Optimizely
         // get decision
         $decision = null;
         // check forced-decisions first
-        list($forcedDecisionResponse, $reasons) = $userContext->findValidatedForcedDecision($flagKey, $ruleKey, $decideOptions);
-        $decideReasons = array_merge($decideReasons, $reasons);
+        list($forcedDecisionResponse, $reasons) = $userContext->findValidatedForcedDecision($flagKey, $ruleKey);
         if ($forcedDecisionResponse) {
             $decision = new FeatureDecision(null, $forcedDecisionResponse, FeatureDecision::DECISION_SOURCE_FEATURE_TEST, $decideReasons);
         } else {
@@ -366,8 +365,8 @@ class Optimizely
                 $decideOptions
             );
         }
-
-        $decideReasons = $decision->getReasons();
+        $decideReasons = array_merge($decideReasons, $reasons);
+        $decideReasons = array_merge($decideReasons, $decision->getReasons());
         $variation = $decision->getVariation();
 
         if ($variation) {

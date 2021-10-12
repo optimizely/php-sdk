@@ -1080,11 +1080,9 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             $expected_variation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT,
             [
-                'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_1" and user "user_1" in the forced decision map.',
                 'Audiences for rule 1 collectively evaluated to TRUE.',
                 'User "user_1" meets condition for targeting rule "1".',
                 'User "user_1" is not in the traffic group for targeting rule "1". Checking Everyone Else rule now.',
-                'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_3" and user "user_1" in the forced decision map.',
                 'Audiences for rule Everyone Else collectively evaluated to TRUE.',
                 'User "user_1" meets condition for targeting rule "Everyone Else".',
                 'User "user_1" is in the traffic group of targeting rule "Everyone Else".'
@@ -1168,13 +1166,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             $expected_variation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT,
             [
-                'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_1" and user "user_1" in the forced decision map.',
                 'Audiences for rule 1 collectively evaluated to FALSE.' ,
                 'User "user_1" does not meet conditions for targeting rule "1".',
-                'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_2" and user "user_1" in the forced decision map.',
                 'Audiences for rule 2 collectively evaluated to FALSE.',
                 'User "user_1" does not meet conditions for targeting rule "2".',
-                'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_3" and user "user_1" in the forced decision map.',
                 'Audiences for rule Everyone Else collectively evaluated to TRUE.',
                 'User "user_1" meets condition for targeting rule "Everyone Else".',
                 'User "user_1" is in the traffic group of targeting rule "Everyone Else".'
@@ -1262,13 +1257,10 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
             $expected_variation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT,
             [
-                'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_1" and user "user_1" in the forced decision map.',
                 'Audiences for rule 1 collectively evaluated to FALSE.',
                 'User "user_1" does not meet conditions for targeting rule "1".',
-                'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_2" and user "user_1" in the forced decision map.',
                 'Audiences for rule 2 collectively evaluated to FALSE.',
                 'User "user_1" does not meet conditions for targeting rule "2".',
-                'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_3" and user "user_1" in the forced decision map.',
                 'Audiences for rule Everyone Else collectively evaluated to TRUE.',
                 'User "user_1" meets condition for targeting rule "Everyone Else".',
                 'User "user_1" is in the traffic group of targeting rule "Everyone Else".'

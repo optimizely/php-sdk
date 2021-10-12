@@ -354,27 +354,36 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $getForcedDecision = $optUserContext->getForcedDecision("boolean_feature", "test_experiment_2");
         $this->assertEquals($getForcedDecision, "test_variation_1");
 
-        $decision = $optUserContext->decide('boolean_feature');
+        $decision = $optUserContext->decide('boolean_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
         $this->assertEquals($decision->getVariationKey(), "test_variation_1");
         $this->assertEquals($decision->getRuleKey(), "test_experiment_2");
         $this->assertTrue($decision->getEnabled());
         $this->assertEquals($decision->getFlagKey(), "boolean_feature");
         $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
         $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
-        $this->assertEquals($decision->getReasons(), []);
+        $this->assertEquals($decision->getReasons(), [
+            'Decided by forced decision.',
+            'Variation "test_variation_1" is mapped to flag "boolean_feature", rule "test_experiment_2" and user "test_user" in the forced decision map.',
+            "The user 'test_user' is bucketed into experiment 'test_experiment_2' of feature 'boolean_feature'."
+        ]);
 
         // Removing forced decision to test
         $removeForcedDecision = $optUserContext->removeForcedDecision("boolean_feature", "test_experiment_2");
         $this->assertTrue($removeForcedDecision);
 
-        $decision = $optUserContext->decide('boolean_feature');
+        $decision = $optUserContext->decide('boolean_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
         $this->assertEquals($decision->getVariationKey(), "test_variation_2");
         $this->assertEquals($decision->getRuleKey(), "test_experiment_2");
         $this->assertTrue($decision->getEnabled());
         $this->assertEquals($decision->getFlagKey(), "boolean_feature");
         $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
         $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
-        $this->assertEquals($decision->getReasons(), []);
+        $this->assertEquals($decision->getReasons(), [
+            'Audiences for experiment "test_experiment_2" collectively evaluated to TRUE.',
+            'Assigned bucket 9075 to user "test_user" with bucketing ID "test_user".',
+            'User "test_user" is in variation test_variation_2 of experiment test_experiment_2.',
+            "The user 'test_user' is bucketed into experiment 'test_experiment_2' of feature 'boolean_feature'."
+        ]);
     }
     public function testForcedDecisionRuleDeliveryRuleToDecision()
     {
@@ -390,56 +399,48 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $getForcedDecision = $optUserContext->getForcedDecision("boolean_single_variable_feature", "rollout_1_exp_3");
         $this->assertEquals($getForcedDecision, "177773");
 
-        $decision = $optUserContext->decide('boolean_single_variable_feature');
+        $decision = $optUserContext->decide('boolean_single_variable_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
         $this->assertEquals($decision->getVariationKey(), "177773");
         $this->assertEquals($decision->getRuleKey(), "rollout_1_exp_3");
         $this->assertTrue($decision->getEnabled());
         $this->assertEquals($decision->getFlagKey(), "boolean_single_variable_feature");
         $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
         $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
-        $this->assertEquals($decision->getReasons(), []);
+        $this->assertEquals($decision->getReasons(), [
+            "The feature flag 'boolean_single_variable_feature' is not used in any experiments.",
+            'Audiences for rule 1 collectively evaluated to FALSE.',
+            'User "test_user" does not meet conditions for targeting rule "1".',
+            'Audiences for rule 2 collectively evaluated to FALSE.',
+            'User "test_user" does not meet conditions for targeting rule "2".',
+            'Decided by forced decision.',
+            'Variation "177773" is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_3" and user "test_user" in the forced decision map.',
+            "User 'test_user' is bucketed into rollout for feature flag 'boolean_single_variable_feature'."
+        ]);
 
         // Removing forced decision to test
         $removeForcedDecision = $optUserContext->removeForcedDecision("boolean_single_variable_feature", "rollout_1_exp_3");
         $this->assertTrue($removeForcedDecision);
 
-        $decision = $optUserContext->decide('boolean_single_variable_feature');
+        $decision = $optUserContext->decide('boolean_single_variable_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
         $this->assertEquals($decision->getVariationKey(), "177778");
         $this->assertEquals($decision->getRuleKey(), "rollout_1_exp_3");
         $this->assertTrue($decision->getEnabled());
         $this->assertEquals($decision->getFlagKey(), "boolean_single_variable_feature");
         $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
         $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
-        $this->assertEquals($decision->getReasons(), []);
-    }
-
-    public function testForcedDecisionInvalidFlagToDecision()
-    {
-        $userId = 'test_user';
-        $attributes = [ "browser" => "chrome"];
-
-        $validOptlyObject = new Optimizely($this->datafile);
-
-        $optUserContext = new OptimizelyUserContext($validOptlyObject, $userId, $attributes);
-        $setForcedDecision = $optUserContext->setForcedDecision("boolean_feature", null, "invalid");
-        $this->assertTrue($setForcedDecision);
-
-        $decision = $optUserContext->decide('boolean_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
-        $this->assertEquals($decision->getVariationKey(), "test_variation_2");
-        $this->assertEquals($decision->getRuleKey(), "test_experiment_2");
-        $this->assertTrue($decision->getEnabled());
-        $this->assertEquals($decision->getFlagKey(), "boolean_feature");
-        $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
-        $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
         $this->assertEquals($decision->getReasons(), [
-            'Invalid variation is mapped to flag "boolean_feature", rule "test_experiment_2" and user "test_user" in the forced decision map.',
-            'Audiences for experiment "test_experiment_2" collectively evaluated to TRUE.',
-            'Assigned bucket 9075 to user "test_user" with bucketing ID "test_user".',
-            'User "test_user" is in variation test_variation_2 of experiment test_experiment_2.',
-            "The user 'test_user' is bucketed into experiment 'test_experiment_2' of feature 'boolean_feature'."
+            "The feature flag 'boolean_single_variable_feature' is not used in any experiments.",
+            'Audiences for rule 1 collectively evaluated to FALSE.',
+            'User "test_user" does not meet conditions for targeting rule "1".',
+            'Audiences for rule 2 collectively evaluated to FALSE.',
+            'User "test_user" does not meet conditions for targeting rule "2".',
+            'Audiences for rule Everyone Else collectively evaluated to TRUE.',
+            'User "test_user" meets condition for targeting rule "Everyone Else".',
+            'Assigned bucket 3041 to user "test_user" with bucketing ID "test_user".',
+            'User "test_user" is in the traffic group of targeting rule "Everyone Else".',
+            "User 'test_user' is bucketed into rollout for feature flag 'boolean_single_variable_feature'."
         ]);
     }
-
 
     public function testForcedDecisionInvalidDeliveryRuleToDecision()
     {
@@ -461,10 +462,8 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
         $this->assertEquals($decision->getReasons(), [
             "The feature flag 'boolean_single_variable_feature' is not used in any experiments.",
-            'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_1" and user "test_user" in the forced decision map.',
             'Audiences for rule 1 collectively evaluated to FALSE.',
             'User "test_user" does not meet conditions for targeting rule "1".',
-            'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_2" and user "test_user" in the forced decision map.',
             'Audiences for rule 2 collectively evaluated to FALSE.',
             'User "test_user" does not meet conditions for targeting rule "2".',
             'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_3" and user "test_user" in the forced decision map.',
@@ -495,7 +494,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
         $this->assertEquals(1, count($decision->getUserContext()->getAttributes()));
         $this->assertEquals([
-            'Invalid variation is mapped to flag "boolean_feature", rule "test_experiment_2" and user "test_user" in the forced decision map.',
+            'Invalid variation is mapped to flag "boolean_feature" and user "test_user" in the forced decision map.',
             'Audiences for experiment "test_experiment_2" collectively evaluated to TRUE.',
             'Assigned bucket 9075 to user "test_user" with bucketing ID "test_user".',
             'User "test_user" is in variation test_variation_2 of experiment test_experiment_2.',
@@ -523,6 +522,10 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $decision = $optUserContext->decide('boolean_feature', [OptimizelyDecideOption::INCLUDE_REASONS]);
         $this->assertEquals("test_variation_1", $decision->getVariationKey());
         $this->assertNull($decision->getRuleKey());
+        $this->assertEquals([
+            'Decided by forced decision.',
+            'Variation "test_variation_1" is mapped to flag "boolean_feature" and user "test_user" in the forced decision map.'
+        ], $decision->getReasons());
     }
 
     public function testGetForcedDecision()
