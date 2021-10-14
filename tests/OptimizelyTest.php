@@ -2256,7 +2256,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $userContext = $optimizelyMock->createUserContext('test_user', ['device_type' => 'iPhone']);
 
-        $this->notificationCenterMock->expects($this->exactly(9))
+        $this->notificationCenterMock->expects($this->exactly(10))
             ->method('sendNotifications');
 
         //assert that sendImpressionEvent is called with expected params
@@ -2287,7 +2287,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
 
         $optimizelyDecisions = $optimizelyMock->decideAll($userContext);
-        $this->assertEquals(count($optimizelyDecisions), 9);
+        $this->assertEquals(count($optimizelyDecisions), 10);
 
         $this->compareOptimizelyDecisions($expectedOptimizelyDecision1, $optimizelyDecisions['double_single_variable_feature']);
         $this->compareOptimizelyDecisions($expectedOptimizelyDecision2, $optimizelyDecisions['boolean_feature']);
@@ -2307,6 +2307,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                  'boolean_single_variable_feature',
                  'string_single_variable_feature',
                  'multiple_variables_feature',
+                 'same_variation_flag',
                  'multi_variate_feature',
                  'mutex_group_feature',
                  'empty_feature'
@@ -5098,7 +5099,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         // Mock isFeatureEnabled to return false for all calls
-        $optimizelyMock->expects($this->exactly(9))
+        $optimizelyMock->expects($this->exactly(10))
             ->method('isFeatureEnabled')
             ->will($this->returnValue(false));
 
@@ -5124,7 +5125,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         ];
 
         // Mock isFeatureEnabled to return specific values
-        $optimizelyMock->expects($this->exactly(9))
+        $optimizelyMock->expects($this->exactly(10))
             ->method('isFeatureEnabled')
             ->will($this->returnValueMap($map));
 
@@ -5147,7 +5148,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         ];
 
         // Mock isFeatureEnabled to return specific values
-        $optimizelyMock->expects($this->exactly(9))
+        $optimizelyMock->expects($this->exactly(10))
             ->method('isFeatureEnabled')
             ->will($this->returnValueMap($map));
 
@@ -5176,19 +5177,20 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             ['integer_single_variable_feature','user_id', $userAttributes, false],
             ['boolean_single_variable_feature','user_id', $userAttributes, false],
             ['string_single_variable_feature','user_id', $userAttributes, false],
+            ['same_variation_flag','user_id', $userAttributes, true],
             ['multi_variate_feature','user_id', $userAttributes, false],
             ['mutex_group_feature','user_id', $userAttributes, false],
             ['empty_feature','user_id', $userAttributes, true],
         ];
 
         // Assert that isFeatureEnabled is called with the same attributes and mock to return value map
-        $optimizelyMock->expects($this->exactly(9))
+        $optimizelyMock->expects($this->exactly(10))
             ->method('isFeatureEnabled')
             ->with()
             ->will($this->returnValueMap($map));
 
         $this->assertEquals(
-            ['empty_feature'],
+            ['same_variation_flag', 'empty_feature'],
             $optimizelyMock->getEnabledFeatures("user_id", $userAttributes)
         );
     }
@@ -5250,22 +5252,27 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             FeatureDecision::DECISION_SOURCE_FEATURE_TEST
         );
         $decision7 = new FeatureDecision(
-            $disabledFeatureExperiment,
-            $disabledFeatureVariation,
-            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
-        );
-        $decision8 = new FeatureDecision(
             $experiment,
             $enabledFeatureVariation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
+        $decision8 = new FeatureDecision(
+            $disabledFeatureExperiment,
+            $disabledFeatureVariation,
+            FeatureDecision::DECISION_SOURCE_FEATURE_TEST
+        );
         $decision9 = new FeatureDecision(
+            $experiment,
+            $enabledFeatureVariation,
+            FeatureDecision::DECISION_SOURCE_ROLLOUT
+        );
+        $decision10 = new FeatureDecision(
             $disabledFeatureExperiment,
             $disabledFeatureVariation,
             FeatureDecision::DECISION_SOURCE_ROLLOUT
         );
 
-        $decisionServiceMock->expects($this->exactly(9))
+        $decisionServiceMock->expects($this->exactly(10))
             ->method('getVariationForFeature')
             ->will($this->onConsecutiveCalls(
                 $decision1,
@@ -5276,7 +5283,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 $decision6,
                 $decision7,
                 $decision8,
-                $decision9
+                $decision9,
+                $decision10
+
             ));
 
         $optimizelyMock->notificationCenter = $this->notificationCenterMock;
@@ -5394,8 +5403,24 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                     )
                 )
             );
-
         $this->notificationCenterMock->expects($this->at(6))
+            ->method('sendNotifications')
+            ->with(
+                NotificationType::DECISION,
+                array(
+                    DecisionNotificationTypes::FEATURE,
+                    'user_id',
+                    [],
+                    (object) array(
+                        'featureKey'=>'same_variation_flag',
+                        'featureEnabled'=> true,
+                        'source'=> 'rollout',
+                        'sourceInfo'=> (object) array()
+                    )
+                )
+            );
+
+        $this->notificationCenterMock->expects($this->at(7))
             ->method('sendNotifications')
             ->with(
                 NotificationType::DECISION,
@@ -5415,7 +5440,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
-        $this->notificationCenterMock->expects($this->at(7))
+        $this->notificationCenterMock->expects($this->at(8))
             ->method('sendNotifications')
             ->with(
                 NotificationType::DECISION,
@@ -5432,7 +5457,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
-        $this->notificationCenterMock->expects($this->at(8))
+        $this->notificationCenterMock->expects($this->at(9))
             ->method('sendNotifications')
             ->with(
                 NotificationType::DECISION,
@@ -5455,6 +5480,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 'integer_single_variable_feature',
                 'string_single_variable_feature',
                 'multiple_variables_feature',
+                'same_variation_flag',
                 'mutex_group_feature'
             ],
             $optimizelyMock->getEnabledFeatures("user_id")

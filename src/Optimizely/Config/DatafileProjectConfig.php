@@ -385,16 +385,21 @@ class DatafileProjectConfig implements ProjectConfigInterface
         }
         $this->_flagVariationsMap = array();
         foreach ($this->_featureFlags as $flag) {
-            $variations = array();
+            $flagVariations = array();
             $flagRules = $this->getAllRulesForFlag($flag);
 
             foreach ($flagRules as $rule) {
-                $variations = array_merge($variations, array_filter(array_values($rule->getVariations()), function ($variation) use ($variations) {
-                    return !in_array($variation->getId(), $variations);
+                $flagVariations = array_merge($flagVariations, array_filter(array_values($rule->getVariations()), function ($variation) use ($flagVariations) {
+                    foreach ($flagVariations as $flagVariation) {
+                        if ($flagVariation->getId() == $variation->getId()) {
+                            return false;
+                        }
+                    }
+                    return true;
                 }));
             }
 
-            $this->_flagVariationsMap[$flag->getKey()] = $variations;
+            $this->_flagVariationsMap[$flag->getKey()] = $flagVariations;
         }
         // Add variations for rollout experiments to variationIdMap and variationKeyMap
         $this->_variationIdMap = $this->_variationIdMap + $rolloutVariationIdMap;
