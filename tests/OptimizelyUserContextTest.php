@@ -327,7 +327,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
         $this->assertEquals($decision->getReasons(), [
             'Decided by forced decision.',
-            'Variation "177773" is mapped to flag "boolean_single_variable_feature" and user "test_user" in the forced decision map.'
+            'Variation (177773) is mapped to flag (boolean_single_variable_feature) and user (test_user) in the forced decision map.'
         ]);
 
         // Removing forced decision to test
@@ -377,7 +377,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(count($decision->getUserContext()->getAttributes()), 1);
         $this->assertEquals($decision->getReasons(), [
             'Decided by forced decision.',
-            'Variation "test_variation_1" is mapped to flag "boolean_feature", rule "test_experiment_2" and user "test_user" in the forced decision map.',
+            'Variation (test_variation_1) is mapped to flag (boolean_feature), rule (test_experiment_2) and user (test_user) in the forced decision map.',
             "The user 'test_user' is bucketed into experiment 'test_experiment_2' of feature 'boolean_feature'."
         ]);
 
@@ -427,7 +427,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
             'Audiences for rule 2 collectively evaluated to FALSE.',
             'User "test_user" does not meet conditions for targeting rule "2".',
             'Decided by forced decision.',
-            'Variation "177773" is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_3" and user "test_user" in the forced decision map.',
+            'Variation (177773) is mapped to flag (boolean_single_variable_feature), rule (rollout_1_exp_3) and user (test_user) in the forced decision map.',
             "User 'test_user' is bucketed into rollout for feature flag 'boolean_single_variable_feature'."
         ]);
 
@@ -480,7 +480,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
             'User "test_user" does not meet conditions for targeting rule "1".',
             'Audiences for rule 2 collectively evaluated to FALSE.',
             'User "test_user" does not meet conditions for targeting rule "2".',
-            'Invalid variation is mapped to flag "boolean_single_variable_feature", rule "rollout_1_exp_3" and user "test_user" in the forced decision map.',
+            'Invalid variation is mapped to flag (boolean_single_variable_feature), rule (rollout_1_exp_3) and user (test_user) in the forced decision map.',
             'Audiences for rule Everyone Else collectively evaluated to TRUE.',
             'User "test_user" meets condition for targeting rule "Everyone Else".',
             'Assigned bucket 3041 to user "test_user" with bucketing ID "test_user".',
@@ -508,7 +508,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($decision->getUserContext()->getUserId(), $userId);
         $this->assertEquals(1, count($decision->getUserContext()->getAttributes()));
         $this->assertEquals([
-            'Invalid variation is mapped to flag "boolean_feature" and user "test_user" in the forced decision map.',
+            'Invalid variation is mapped to flag (boolean_feature) and user (test_user) in the forced decision map.',
             'Audiences for experiment "test_experiment_2" collectively evaluated to TRUE.',
             'Assigned bucket 9075 to user "test_user" with bucketing ID "test_user".',
             'User "test_user" is in variation test_variation_2 of experiment test_experiment_2.',
@@ -538,7 +538,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($decision->getRuleKey());
         $this->assertEquals([
             'Decided by forced decision.',
-            'Variation "test_variation_1" is mapped to flag "boolean_feature" and user "test_user" in the forced decision map.'
+            'Variation (test_variation_1) is mapped to flag (boolean_feature) and user (test_user) in the forced decision map.'
         ], $decision->getReasons());
     }
 
