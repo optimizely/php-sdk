@@ -5285,7 +5285,6 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
                 $decision8,
                 $decision9,
                 $decision10
-
             ));
 
         $optimizelyMock->notificationCenter = $this->notificationCenterMock;
