@@ -35,43 +35,44 @@ class OptimizelyUserContext implements \JsonSerializable
         $this->forcedDecisions = $forcedDecisions;
     }
 
-    public function setForcedDecision($flagKey, $ruleKey, $variationKey)
+    public function setForcedDecision($context, $decision)
     {
         // check if SDK is ready
         if (!$this->optimizelyClient->isValid()) {
             return false;
         }
-        if (empty($flagKey)) {
+        $flagKey = $context->getFlagKey();
+        if (!isset($flagKey)) {
             return false;
         }
-        $index = $this->findExistingRuleAndFlagKey($flagKey, $ruleKey);
+        $index = $this->findExistingRuleAndFlagKey($context);
         if ($index != -1) {
-            $this->forcedDecisions[$index]->setVariationKey($variationKey);
+            $this->forcedDecisions[$index]->setOptimizelyForcedDecision($decision);
         } else {
             if (!$this->forcedDecisions) {
                 $this->forcedDecisions = array();
             }
-            array_push($this->forcedDecisions, new ForcedDecision($flagKey, $ruleKey, $variationKey));
+            array_push($this->forcedDecisions, new ForcedDecision($context, $decision));
         }
         return true;
     }
 
-    public function getForcedDecision($flagKey, $ruleKey = null)
+    public function getForcedDecision($context)
     {
         // check if SDK is ready
         if (!$this->optimizelyClient->isValid()) {
             return null;
         }
-        return $this->findForcedDecision($flagKey, $ruleKey);
+        return $this->findForcedDecision($context);
     }
 
-    public function removeForcedDecision($flagKey, $ruleKey = null)
+    public function removeForcedDecision($context)
     {
         // check if SDK is ready
         if (!$this->optimizelyClient->isValid()) {
             return false;
         }
-        $index = $this->findExistingRuleAndFlagKey($flagKey, $ruleKey);
+        $index = $this->findExistingRuleAndFlagKey($context);
         if ($index != -1) {
             array_splice($this->forcedDecisions, $index, 1);
             return true;
@@ -90,10 +91,12 @@ class OptimizelyUserContext implements \JsonSerializable
         return true;
     }
 
-    public function findValidatedForcedDecision($flagKey, $ruleKey)
+    public function findValidatedForcedDecision($context)
     {
         $decideReasons = [];
-        $variationKey = $this->findForcedDecision($flagKey, $ruleKey);
+        $flagKey = $context->getFlagKey();
+        $ruleKey = $context->getRuleKey();
+        $variationKey = $this->findForcedDecision($context);
         $variation = null;
         if ($variationKey) {
             $variation = $this->optimizelyClient->getFlagVariationByKey($flagKey, $variationKey);
@@ -107,11 +110,11 @@ class OptimizelyUserContext implements \JsonSerializable
         return [$variation, $decideReasons];
     }
 
-    private function findExistingRuleAndFlagKey($flagKey, $ruleKey)
+    private function findExistingRuleAndFlagKey($context)
     {
         if ($this->forcedDecisions) {
             for ($index = 0; $index < count($this->forcedDecisions); $index++) {
-                if ($this->forcedDecisions[$index]->getFlagKey() == $flagKey &&  $this->forcedDecisions[$index]->getRuleKey() == $ruleKey) {
+                if ($this->forcedDecisions[$index]->getOptimizelyDecisionContext()->getFlagKey() == $context->getFlagKey() &&  $this->forcedDecisions[$index]->getOptimizelyDecisionContext()->getRuleKey() == $context->getRuleKey()) {
                     return $index;
                 }
             }
@@ -119,7 +122,7 @@ class OptimizelyUserContext implements \JsonSerializable
         return -1;
     }
 
-    public function findForcedDecision($flagKey, $ruleKey)
+    public function findForcedDecision($context)
     {
         $foundVariationKey = null;
         if (!$this->forcedDecisions) {
@@ -128,9 +131,9 @@ class OptimizelyUserContext implements \JsonSerializable
         if (count($this->forcedDecisions) == 0) {
             return null;
         }
-        $index = $this->findExistingRuleAndFlagKey($flagKey, $ruleKey);
+        $index = $this->findExistingRuleAndFlagKey($context);
         if ($index != -1) {
-            $foundVariationKey = $this->forcedDecisions[$index]->getVariationKey();
+            $foundVariationKey = $this->forcedDecisions[$index]->getOptimizelyForcedDecision()->getVariationKey();
         }
         return $foundVariationKey;
     }
@@ -190,22 +193,46 @@ class OptimizelyUserContext implements \JsonSerializable
 }
 class ForcedDecision
 {
+    private $optimizelyDecisionContext;
+    private $optimizelyForcedDecision;
+
+    public function __construct($optimizelyDecisionContext, $optimizelyForcedDecision)
+    {
+        $this->optimizelyDecisionContext = $optimizelyDecisionContext;
+        $this->setOptimizelyForcedDecision($optimizelyForcedDecision);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOptimizelyDecisionContext()
+    {
+        return $this->optimizelyDecisionContext;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOptimizelyForcedDecision()
+    {
+        return $this->optimizelyForcedDecision;
+    }
+
+    public function setOptimizelyForcedDecision($optimizelyForcedDecision)
+    {
+        $this->optimizelyForcedDecision = $optimizelyForcedDecision;
+    }
+}
+
+class OptimizelyDecisionContext
+{
     private $flagKey;
     private $ruleKey;
-    private $variationKey;
 
-    public function __construct($flagKey, $ruleKey, $variationKey)
+    public function __construct($flagKey, $ruleKey)
     {
         $this->flagKey = $flagKey;
         $this->ruleKey = $ruleKey;
-        $this->setVariationKey($variationKey);
-    }
-
-    public function setVariationKey($variationKey)
-    {
-        if (isset($variationKey) && trim($variationKey) !== '') {
-            $this->variationKey = $variationKey;
-        }
     }
 
     /**
@@ -222,6 +249,22 @@ class ForcedDecision
     public function getRuleKey()
     {
         return $this->ruleKey;
+    }
+}
+class OptimizelyForcedDecision
+{
+    private $variationKey;
+
+    public function __construct($variationKey)
+    {
+        $this->setVariationKey($variationKey);
+    }
+
+    public function setVariationKey($variationKey)
+    {
+        if (isset($variationKey) && trim($variationKey) !== '') {
+            $this->variationKey = $variationKey;
+        }
     }
 
     /**

@@ -46,6 +46,8 @@ use Optimizely\ErrorHandler\DefaultErrorHandler;
 use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\Optimizely;
+use Optimizely\OptimizelyDecisionContext;
+use Optimizely\OptimizelyForcedDecision;
 use Optimizely\OptimizelyUserContext;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 
@@ -550,8 +552,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
             );
 
         $optimizelyMock->notificationCenter = $this->notificationCenterMock;
-
-        $this->assertTrue($userContext->setForcedDecision('double_single_variable_feature', 'test_experiment_double_feature', 'variation'));
+        $context = new OptimizelyDecisionContext('double_single_variable_feature', 'test_experiment_double_feature');
+        $decision = new OptimizelyForcedDecision('variation');
+        $this->assertTrue($userContext->setForcedDecision($context, $decision));
         $optimizelyDecision = $optimizelyMock->decide($userContext, 'double_single_variable_feature');
         $expectedOptimizelyDecision = new OptimizelyDecision(
             'variation',
@@ -642,7 +645,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optimizelyMock->notificationCenter = $this->notificationCenterMock;
 
-        $this->assertTrue($userContext->setForcedDecision('boolean_single_variable_feature', 'rollout_1_exp_2', '177773'));
+        $context = new OptimizelyDecisionContext('boolean_single_variable_feature', 'rollout_1_exp_2');
+        $decision = new OptimizelyForcedDecision('177773');
+        $this->assertTrue($userContext->setForcedDecision($context, $decision));
         $optimizelyDecision = $optimizelyMock->decide($userContext, 'boolean_single_variable_feature');
         $expectedOptimizelyDecision = new OptimizelyDecision(
             '177773',
@@ -722,7 +727,9 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
 
         $optimizelyMock->notificationCenter = $this->notificationCenterMock;
 
-        $this->assertTrue($userContext->setForcedDecision('double_single_variable_feature', null, 'variation'));
+        $context = new OptimizelyDecisionContext('double_single_variable_feature', null);
+        $decision = new OptimizelyForcedDecision('variation');
+        $this->assertTrue($userContext->setForcedDecision($context, $decision));
         $optimizelyDecision = $optimizelyMock->decide($userContext, 'double_single_variable_feature');
         $expectedOptimizelyDecision = new OptimizelyDecision(
             'variation',

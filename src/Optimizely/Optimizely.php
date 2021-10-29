@@ -28,6 +28,7 @@ use Optimizely\Decide\OptimizelyDecision;
 use Optimizely\Decide\OptimizelyDecisionMessage;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
+use Optimizely\OptimizelyDecisionContext;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureVariable;
 use Optimizely\Enums\DecisionNotificationTypes;
@@ -353,7 +354,8 @@ class Optimizely
         // get decision
         $decision = null;
         // check forced-decisions first
-        list($forcedDecisionResponse, $reasons) = $userContext->findValidatedForcedDecision($flagKey, $ruleKey);
+        $context = new OptimizelyDecisionContext($flagKey, $ruleKey);
+        list($forcedDecisionResponse, $reasons) = $userContext->findValidatedForcedDecision($context);
         if ($forcedDecisionResponse) {
             $decision = new FeatureDecision(null, $forcedDecisionResponse, FeatureDecision::DECISION_SOURCE_FEATURE_TEST, $decideReasons);
         } else {

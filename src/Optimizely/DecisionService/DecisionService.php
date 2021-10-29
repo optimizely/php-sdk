@@ -19,6 +19,7 @@ namespace Optimizely\DecisionService;
 use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
+use Optimizely\OptimizelyDecisionContext;
 use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Decide\OptimizelyDecideOption;
 use Optimizely\Entity\Experiment;
@@ -375,7 +376,8 @@ class DecisionService
     {
         $decideReasons = [];
         // check forced-decision first
-        list($decisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey());
+        $context = new OptimizelyDecisionContext($flagKey, $rule->getKey());
+        list($decisionResponse, $reasons) = $user->findValidatedForcedDecision($context);
         $decideReasons = array_merge($decideReasons, $reasons);
         if ($decisionResponse) {
             return [$decisionResponse, $decideReasons];
@@ -407,7 +409,8 @@ class DecisionService
         $skipToEveryoneElse = false;
         // check forced-decision first
         $rule = $rules[$ruleIndex];
-        list($forcedDecisionResponse, $reasons) = $user->findValidatedForcedDecision($flagKey, $rule->getKey());
+        $context = new OptimizelyDecisionContext($flagKey, $rule->getKey());
+        list($forcedDecisionResponse, $reasons) = $user->findValidatedForcedDecision($context);
 
         $decideReasons = array_merge($decideReasons, $reasons);
         if ($forcedDecisionResponse) {
