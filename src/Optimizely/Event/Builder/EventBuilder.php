@@ -150,19 +150,26 @@ class EventBuilder
      */
     private function getImpressionParams(Experiment $experiment, $variation, $flagKey, $ruleKey, $ruleType, $enabled)
     {
-        $variationKey = $variation->getKey() ? $variation->getKey() : '';
+        $variationKey = '';
+        $variationId = null;
+        if ($variation) {
+            $variationKey = $variation->getKey() ? $variation->getKey() : '';
+            $variationId = $variation->getId();
+        }
         $experimentID = '';
         $campaignID = '';
-        if ($experiment->getId()) {
-            $experimentID = $experiment->getId();
-            $campaignID = $experiment->getLayerId();
+        if ($experiment) {
+            if ($experiment->getId()) {
+                $experimentID = $experiment->getId();
+                $campaignID = $experiment->getLayerId();
+            }
         }
         $impressionParams = [
             DECISIONS => [
                 [
                     CAMPAIGN_ID => $campaignID,
                     EXPERIMENT_ID => $experimentID,
-                    VARIATION_ID => $variation->getId(),
+                    VARIATION_ID => $variationId,
                     METADATA => [
                         FLAG_KEY => $flagKey,
                         RULE_KEY => $ruleKey,
