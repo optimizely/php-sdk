@@ -389,14 +389,20 @@ class DatafileProjectConfig implements ProjectConfigInterface
             $flagRules = $this->getAllRulesForFlag($flag);
 
             foreach ($flagRules as $rule) {
-                $flagVariations = array_merge($flagVariations, array_filter(array_values($rule->getVariations()), function ($variation) use ($flagVariations) {
+                $filtered_variations = [];
+                foreach (array_values($rule->getVariations()) as $variation) {
+                    $exist = false;
                     foreach ($flagVariations as $flagVariation) {
                         if ($flagVariation->getId() == $variation->getId()) {
-                            return false;
+                            $exist = true;
+                            break;
                         }
                     }
-                    return true;
-                }));
+                    if (!$exist) {
+                        array_push($filtered_variations, $variation);
+                    }
+                }
+                $flagVariations = array_merge($flagVariations, $filtered_variations);
             }
 
             $this->_flagVariationsMap[$flag->getKey()] = $flagVariations;

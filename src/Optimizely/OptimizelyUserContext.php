@@ -125,7 +125,7 @@ class OptimizelyUserContext implements \JsonSerializable
     public function findForcedDecision($context)
     {
         $foundVariationKey = null;
-        if (!$this->forcedDecisions) {
+        if (!isset($this->forcedDecisions)) {
             return null;
         }
         if (count($this->forcedDecisions) == 0) {

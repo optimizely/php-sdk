@@ -20,4 +20,5 @@ class Errors
 {
     const INVALID_FORMAT = 'Provided %s is in an invalid format.';
     const INVALID_DATAFILE = 'Datafile has invalid format. Failing "%s".';
+    const NO_CONFIG = 'Optimizely SDK not configured properly yet.';
 }

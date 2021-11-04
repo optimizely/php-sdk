@@ -1267,7 +1267,7 @@ class Optimizely
         if (!$this->getConfig()) {
             $this->_logger->log(
                 Logger::ERROR,
-                "Optimizely SDK not configured properly yet."
+                Errors::NO_CONFIG
             );
             return false;
         }
