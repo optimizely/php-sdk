@@ -28,6 +28,7 @@ use Optimizely\Decide\OptimizelyDecision;
 use Optimizely\Decide\OptimizelyDecisionMessage;
 use Optimizely\DecisionService\DecisionService;
 use Optimizely\DecisionService\FeatureDecision;
+use Optimizely\OptimizelyDecisionContext;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureVariable;
 use Optimizely\Enums\DecisionNotificationTypes;
@@ -201,11 +202,15 @@ class Optimizely
     }
 
     /**
+     * @param  DatafileProjectConfig DatafileProjectConfig instance
      * @param  string        Experiment ID
      * @param  string        Variation key
+     * @param  string        Flag key
+     * @param  string        Rule key
+     * @param  string        Rule type
+     * @param  boolean       Feature enabled
      * @param  string        User ID
      * @param  array         Associative array of user attributes
-     * @param  DatafileProjectConfig DatafileProjectConfig instance
      */
     protected function sendImpressionEvent($config, $experimentId, $variationKey, $flagKey, $ruleKey, $ruleType, $enabled, $userId, $attributes)
     {
@@ -347,22 +352,32 @@ class Optimizely
         $decisionEventDispatched = false;
 
         // get decision
-        $decision = $this->_decisionService->getVariationForFeature(
-            $config,
-            $featureFlag,
-            $userId,
-            $userAttributes,
-            $decideOptions
-        );
-
-        $decideReasons = $decision->getReasons();
+        $decision = null;
+        // check forced-decisions first
+        $context = new OptimizelyDecisionContext($flagKey, $ruleKey);
+        list($forcedDecisionResponse, $reasons) = $userContext->findValidatedForcedDecision($context);
+        if ($forcedDecisionResponse) {
+            $decision = new FeatureDecision(null, $forcedDecisionResponse, FeatureDecision::DECISION_SOURCE_FEATURE_TEST, $decideReasons);
+        } else {
+            // regular decision
+            $decision = $this->_decisionService->getVariationForFeature(
+                $config,
+                $featureFlag,
+                $userContext,
+                $decideOptions
+            );
+        }
+        $decideReasons = array_merge($decideReasons, $reasons);
+        $decideReasons = array_merge($decideReasons, $decision->getReasons());
         $variation = $decision->getVariation();
 
         if ($variation) {
             $variationKey = $variation->getKey();
             $featureEnabled = $variation->getFeatureEnabled();
-            $ruleKey = $decision->getExperiment()->getKey();
-            $experimentId = $decision->getExperiment()->getId();
+            if ($decision->getExperiment()) {
+                $ruleKey = $decision->getExperiment()->getKey();
+                $experimentId = $decision->getExperiment()->getId();
+            }
         } else {
             $variationKey = null;
             $ruleKey = null;
@@ -687,7 +702,8 @@ class Optimizely
             return null;
         }
 
-        list($variation, $reasons) = $this->_decisionService->getVariation($config, $experiment, $userId, $attributes);
+        $userContext = $this->createUserContext($userId, $attributes ? $attributes : []);
+        list($variation, $reasons) = $this->_decisionService->getVariation($config, $experiment, $userContext);
         $variationKey = ($variation === null) ? null : $variation->getKey();
 
         if ($config->isFeatureExperiment($experiment->getId())) {
@@ -815,7 +831,8 @@ class Optimizely
         }
 
         $featureEnabled = false;
-        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
+        $userContext = $this->createUserContext($userId, $attributes?: []);
+        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userContext);
         $variation = $decision->getVariation();
 
         if ($config->getSendFlagDecisions() && ($decision->getSource() == FeatureDecision::DECISION_SOURCE_ROLLOUT || !$variation)) {
@@ -948,8 +965,8 @@ class Optimizely
             // Error logged in DatafileProjectConfig - getFeatureFlagFromKey
             return null;
         }
-
-        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
+        $userContext = $this->createUserContext($userId, $attributes? $attributes : []);
+        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userContext);
         $variation = $decision->getVariation();
         $experiment = $decision->getExperiment();
         $featureEnabled = $variation !== null ? $variation->getFeatureEnabled() : false;
@@ -1124,7 +1141,7 @@ class Optimizely
             return null;
         }
 
-        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $userId, $attributes);
+        $decision = $this->_decisionService->getVariationForFeature($config, $featureFlag, $this->createUserContext($userId, $attributes));
         $variation = $decision->getVariation();
         $experiment = $decision->getExperiment();
         $featureEnabled = $variation !== null ? $variation->getFeatureEnabled() : false;
@@ -1247,7 +1264,14 @@ class Optimizely
      */
     public function isValid()
     {
-        return $this->getConfig() !== null;
+        if (!$this->getConfig()) {
+            $this->_logger->log(
+                Logger::ERROR,
+                Errors::NO_CONFIG
+            );
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -1280,5 +1304,18 @@ class Optimizely
         }
 
         return $isValid;
+    }
+
+    /**
+     * Gets the variation associated with experiment or rollout in instance of given feature flag key
+     *
+     * @param string Feature flag key
+     * @param string variation key
+     *
+     * @return Variation / null
+     */
+    public function getFlagVariationByKey($flagKey, $variationKey)
+    {
+        return $this->getConfig()->getFlagVariationByKey($flagKey, $variationKey);
     }
 }

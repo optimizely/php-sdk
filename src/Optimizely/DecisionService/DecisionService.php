@@ -19,6 +19,7 @@ namespace Optimizely\DecisionService;
 use Exception;
 use Monolog\Logger;
 use Optimizely\Bucketer;
+use Optimizely\OptimizelyDecisionContext;
 use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Decide\OptimizelyDecideOption;
 use Optimizely\Entity\Experiment;
@@ -26,8 +27,10 @@ use Optimizely\Entity\FeatureFlag;
 use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
 use Optimizely\Enums\ControlAttributes;
+use Optimizely\ForcedDecision;
 use Optimizely\Logger\LoggerInterface;
 use Optimizely\Optimizely;
+use Optimizely\OptimizelyUserContext;
 use Optimizely\UserProfile\Decision;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\UserProfile\UserProfile;
@@ -118,16 +121,17 @@ class DecisionService
      * Determine which variation to show the user.
      *
      * @param $projectConfig    ProjectConfigInterface   ProjectConfigInterface instance.
-     * @param $experiment       Experiment      Experiment to get the variation for.
-     * @param $userId           string          User identifier.
-     * @param $attributes       array           Attributes of the user.
-     * @param $decideOptions    array           Options to customize evaluation.
+     * @param $experiment       Experiment               Experiment to get the variation for.
+     * @param $user             OptimizelyUserContext    User identifier.
+     * @param $decideOptions    array                    Options to customize evaluation.
      *
      * @return [ Variation, array ]   Variation  which the user is bucketed into and array of log messages representing decision making.
      */
-    public function getVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, $userId, $attributes = null, $decideOptions = [])
+    public function getVariation(ProjectConfigInterface $projectConfig, Experiment $experiment, OptimizelyUserContext $user, $decideOptions = [])
     {
         $decideReasons = [];
+        $userId = $user->getUserId();
+        $attributes = $user->getAttributes();
         list($bucketingId, $reasons) = $this->getBucketingId($userId, $attributes);
 
         $decideReasons = array_merge($decideReasons, $reasons);
@@ -212,14 +216,13 @@ class DecisionService
      * Get the variation the user is bucketed into for the given FeatureFlag
      *
      * @param  ProjectConfigInterface $projectConfig  ProjectConfigInterface instance.
-     * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
-     * @param  string        $userId         user ID
-     * @param  array         $userAttributes user attributes
-     * @param  array         $decideOptions   Options to customize evaluation.
+     * @param  FeatureFlag            $featureFlag    The feature flag the user wants to access
+     * @param  OptimizelyUserContext  $user           Optimizely User context containing user id and attribute
+     * @param  array                  $decideOptions  Options to customize evaluation.
      *
      * @return FeatureDecision  representing decision.
      */
-    public function getVariationForFeature(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes, $decideOptions = [])
+    public function getVariationForFeature(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, OptimizelyUserContext $user, $decideOptions = [])
     {
         $decideReasons = [];
 
@@ -228,7 +231,7 @@ class DecisionService
         //2. Attempt to bucket user into rollout using the feature flag.
 
         // Check if the feature flag is under an experiment and the the user is bucketed into one of these experiments
-        $decision = $this->getVariationForFeatureExperiment($projectConfig, $featureFlag, $userId, $userAttributes, $decideOptions);
+        $decision = $this->getVariationForFeatureExperiment($projectConfig, $featureFlag, $user, $decideOptions);
         if ($decision->getVariation()) {
             return $decision;
         }
@@ -236,9 +239,9 @@ class DecisionService
         $decideReasons = array_merge($decideReasons, $decision->getReasons());
 
         // Check if the feature flag has rollout and the user is bucketed into one of it's rules
-        $decision = $this->getVariationForFeatureRollout($projectConfig, $featureFlag, $userId, $userAttributes);
+        $decision = $this->getVariationForFeatureRollout($projectConfig, $featureFlag, $user);
         $decideReasons = array_merge($decideReasons, $decision->getReasons());
-
+        $userId = $user->getUserId();
         if ($decision->getVariation()) {
             $message = "User '{$userId}' is bucketed into rollout for feature flag '{$featureFlag->getKey()}'.";
             $this->_logger->log(
@@ -266,13 +269,12 @@ class DecisionService
      *
      * @param  ProjectConfigInterface $projectConfig  ProjectConfigInterface instance.
      * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
-     * @param  string        $userId         user id
-     * @param  array         $userAttributes user userAttributes
+     * @param  OptimizelyUserContext  $user     Optimizely User context containing user id and attribute
      * @param  array         $decideOptions   Options to customize evaluation.
      *
      * @return FeatureDecision  representing decision.
      */
-    public function getVariationForFeatureExperiment(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes, $decideOptions = [])
+    public function getVariationForFeatureExperiment(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, OptimizelyUserContext $user, $decideOptions = [])
     {
         $decideReasons = [];
         $featureFlagKey = $featureFlag->getKey();
@@ -288,7 +290,7 @@ class DecisionService
             $decideReasons[] = $message;
             return new FeatureDecision(null, null, null, $decideReasons);
         }
-
+        $userId = $user->getUserId();
         // Evaluate each experiment ID and return the first bucketed experiment variation
         foreach ($experimentIds as $experiment_id) {
             $experiment = $projectConfig->getExperimentFromId($experiment_id);
@@ -297,7 +299,7 @@ class DecisionService
                 continue;
             }
 
-            list($variation, $reasons) = $this->getVariation($projectConfig, $experiment, $userId, $userAttributes, $decideOptions);
+            list($variation, $reasons) = $this->getVariationFromExperimentRule($projectConfig, $featureFlagKey, $experiment, $user, $decideOptions);
             $decideReasons = array_merge($decideReasons, $reasons);
             if ($variation && $variation->getKey()) {
                 $message = "The user '{$userId}' is bucketed into experiment '{$experiment->getKey()}' of feature '{$featureFlagKey}'.";
@@ -328,14 +330,13 @@ class DecisionService
      *
      * @param  ProjectConfigInterface $projectConfig  ProjectConfigInterface instance.
      * @param  FeatureFlag   $featureFlag    The feature flag the user wants to access
-     * @param  string        $userId         user id
-     * @param  array         $userAttributes user userAttributes
+     * @param  OptimizelyUserContext  $user  Optimizely User context containing user id and attribute
+     * @param  array         $decideOptions   Options to customize evaluation.
      * @return FeatureDecision  representing decision.
      */
-    public function getVariationForFeatureRollout(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, $userId, $userAttributes)
+    public function getVariationForFeatureRollout(ProjectConfigInterface $projectConfig, FeatureFlag $featureFlag, OptimizelyUserContext $user, $decideOptions = [])
     {
         $decideReasons = [];
-        list($bucketing_id, $reasons) = $this->getBucketingId($userId, $userAttributes);
         $featureFlagKey = $featureFlag->getKey();
         $rollout_id = $featureFlag->getRolloutId();
         if (empty($rollout_id)) {
@@ -357,57 +358,107 @@ class DecisionService
         if (sizeof($rolloutRules) == 0) {
             return new FeatureDecision(null, null, null, $decideReasons);
         }
-
-        // Evaluate all rollout rules except for last one
-        for ($i = 0; $i < sizeof($rolloutRules) - 1; $i++) {
-            $rolloutRule = $rolloutRules[$i];
-
-            // Evaluate if user meets the audience condition of this rollout rule
-            list($evalResult, $reasons) = Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', $i + 1);
-            $decideReasons = array_merge($decideReasons, $reasons);
-            if (!$evalResult) {
-                $message = sprintf("User '%s' does not meet conditions for targeting rule %s.", $userId, $i+1);
-                $this->_logger->log(
-                    Logger::DEBUG,
-                    $message
-                );
-                $decideReasons[] = $message;
-                // Evaluate this user for the next rule
-                continue;
+        $index = 0;
+        while ($index < sizeof($rolloutRules)) {
+            list($decisionResponses, $skipToEveryoneElse) = $this->getVariationFromDeliveryRule($projectConfig, $featureFlagKey, $rolloutRules, $index, $user, $decideOptions);
+            $decideReasons = array_merge($decideReasons, $decisionResponses->getReasons());
+            $variation = $decisionResponses->getVariation();
+            if ($variation) {
+                return new FeatureDecision($rolloutRules[$index], $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT, $decideReasons);
             }
-
-            // Evaluate if user satisfies the traffic allocation for this rollout rule
-            list($variation, $reasons) = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId);
-            $decideReasons = array_merge($decideReasons, $reasons);
-            if ($variation && $variation->getKey()) {
-                return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT, $decideReasons);
-            }
-            break;
-        }
-        // Evaluate Everyone Else Rule / Last Rule now
-        $rolloutRule = $rolloutRules[sizeof($rolloutRules) - 1];
-
-        // Evaluate if user meets the audience condition of Everyone Else Rule / Last Rule now
-        list($evalResult, $reasons) = Validator::doesUserMeetAudienceConditions($projectConfig, $rolloutRule, $userAttributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', 'Everyone Else');
-        $decideReasons = array_merge($decideReasons, $reasons);
-        if (!$evalResult) {
-            $message = sprintf("User '%s' does not meet conditions for targeting rule 'Everyone Else'.", $userId);
-            $this->_logger->log(
-                Logger::DEBUG,
-                $message
-            );
-            $decideReasons[] = $message;
-            return new FeatureDecision(null, null, null, $decideReasons);
-        }
-
-        list($variation, $reasons) = $this->_bucketer->bucket($projectConfig, $rolloutRule, $bucketing_id, $userId);
-        $decideReasons = array_merge($decideReasons, $reasons);
-        if ($variation && $variation->getKey()) {
-            return new FeatureDecision($rolloutRule, $variation, FeatureDecision::DECISION_SOURCE_ROLLOUT);
+            // the last rule is special for "Everyone Else"
+            $index = $skipToEveryoneElse ? (sizeof($rolloutRules) - 1) : ($index + 1);
         }
         return new FeatureDecision(null, null, null, $decideReasons);
     }
 
+    private function getVariationFromExperimentRule(ProjectConfigInterface $projectConfig, $flagKey, Experiment $rule, OptimizelyUserContext $user, $decideOptions = [])
+    {
+        $decideReasons = [];
+        // check forced-decision first
+        $context = new OptimizelyDecisionContext($flagKey, $rule->getKey());
+        list($decisionResponse, $reasons) = $user->findValidatedForcedDecision($context);
+        $decideReasons = array_merge($decideReasons, $reasons);
+        if ($decisionResponse) {
+            return [$decisionResponse, $decideReasons];
+        }
+
+        // regular decision
+        list($variation, $reasons) = $this->getVariation($projectConfig, $rule, $user, $decideOptions);
+        $decideReasons = array_merge($decideReasons, $reasons);
+
+        return [$variation, $decideReasons];
+    }
+
+    /**
+     * Gets the forced variation key for the given user and experiment.
+     *
+     * @param $projectConfig ProjectConfigInterface  ProjectConfigInterface instance.
+     * @param $flagKey  string             Key of feature flag.
+     * @param $rules    array              Array of delivery rules.
+     * @param $ruleIndex  integer          Index of delivery rule of which validation of forced decision is needed.
+     * @param $user OptimizelyUserContext  Optimizely User context containing user id and attribute
+     * @param $options array               Options to customize evaluation.
+     *
+     * @return [ FeatureDecision, Boolean ] The variation which the given user and experiment should be forced into and
+     *                              skipToEveryone boolean to  decision making.
+     */
+    public function getVariationFromDeliveryRule(ProjectConfigInterface $projectConfig, $flagKey, array $rules, $ruleIndex, OptimizelyUserContext $user, array $options = [])
+    {
+        $decideReasons = [];
+        $skipToEveryoneElse = false;
+        // check forced-decision first
+        $rule = $rules[$ruleIndex];
+        $context = new OptimizelyDecisionContext($flagKey, $rule->getKey());
+        list($forcedDecisionResponse, $reasons) = $user->findValidatedForcedDecision($context);
+
+        $decideReasons = array_merge($decideReasons, $reasons);
+        if ($forcedDecisionResponse) {
+            return [new FeatureDecision($rule, $forcedDecisionResponse, null, $decideReasons), $skipToEveryoneElse];
+        }
+
+        // regular decision
+        $userId = $user->getUserId();
+        $attributes = $user->getAttributes();
+        list($bucketingId, $reasons) = $this->getBucketingId($userId, $attributes);
+        $decideReasons = array_merge($decideReasons, $reasons);
+
+        $everyoneElse = $ruleIndex == sizeof($rules) - 1;
+        $loggingKey = $everyoneElse ? "Everyone Else" : $ruleIndex + 1;
+        $bucketedVariation = null;
+
+        // Evaluate if user meets the audience condition of this rollout rule
+        list($evalResult, $reasons) = Validator::doesUserMeetAudienceConditions($projectConfig, $rule, $attributes, $this->_logger, 'Optimizely\Enums\RolloutAudienceEvaluationLogs', $loggingKey);
+        $decideReasons = array_merge($decideReasons, $reasons);
+        if ($evalResult) {
+            $message = sprintf('User "%s" meets condition for targeting rule "%s".', $userId, $loggingKey);
+            $this->_logger->log(
+                Logger::INFO,
+                $message
+            );
+            $decideReasons[] = $message;
+            list($bucketedVariation, $reasons) = $this->_bucketer->bucket($projectConfig, $rule, $bucketingId, $userId);
+            $decideReasons = array_merge($decideReasons, $reasons);
+            if ($bucketedVariation) {
+                $message = sprintf('User "%s" is in the traffic group of targeting rule "%s".', $userId, $loggingKey);
+                $this->_logger->log(Logger::INFO, $message);
+                $decideReasons[] = $message;
+            } elseif (!$everyoneElse) {
+                // skip this logging for EveryoneElse since this has a message not for EveryoneElse
+                $message = sprintf('User "%s" is not in the traffic group for targeting rule "%s". Checking Everyone Else rule now.', $userId, $loggingKey);
+                $this->_logger->log(Logger::INFO, $message);
+                $decideReasons[] = $message;
+                // skip the rest of rollout rules to the everyone-else rule if audience matches but not bucketed.
+                $skipToEveryoneElse = true;
+            }
+        } else {
+            $message = sprintf('User "%s" does not meet conditions for targeting rule "%s".', $userId, $loggingKey);
+            $this->_logger->log(Logger::DEBUG, $message);
+            $decideReasons[] = $message;
+        }
+
+        return [new FeatureDecision($rule, $bucketedVariation, null, $decideReasons), $skipToEveryoneElse];
+    }
 
     /**
      * Gets the forced variation key for the given user and experiment.

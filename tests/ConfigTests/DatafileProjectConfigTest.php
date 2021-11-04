@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2020, Optimizely
+ * Copyright 2016-2020, 2021, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,6 +122,10 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             'rollout_1_exp_3' =>  $this->config->getExperimentFromKey('rollout_1_exp_3'),
             'rollout_2_exp_1' =>  $this->config->getExperimentFromKey('rollout_2_exp_1'),
             'rollout_2_exp_2' =>  $this->config->getExperimentFromKey('rollout_2_exp_2'),
+            'flag1_targeted_delivery' =>  $this->config->getExperimentFromKey('flag1_targeted_delivery'),
+            'flag1_targeted_delivery2' =>  $this->config->getExperimentFromKey('flag1_targeted_delivery2'),
+            'flag1_targeted_delivery3' =>  $this->config->getExperimentFromKey('flag1_targeted_delivery3'),
+            'default-rollout-5969-20778120250' =>  $this->config->getExperimentFromKey('default-rollout-5969-20778120250'),
             ],
             $experimentKeyMap->getValue($this->config)
         );
@@ -147,6 +151,10 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             '177774' => $this->config->getExperimentFromId('177774'),
             '177779' => $this->config->getExperimentFromId('177779'),
             '7716830083' => $this->config->getExperimentFromId('7716830083'),
+            '9300000018548' => $this->config->getExperimentFromId('9300000018548'),
+            '9300000018549' => $this->config->getExperimentFromId('9300000018549'),
+            '9300000018550' => $this->config->getExperimentFromId('9300000018550'),
+            'default-rollout-5969-20778120250' => $this->config->getExperimentFromId('default-rollout-5969-20778120250'),
             ],
             $experimentIdMap->getValue($this->config)
         );
@@ -184,9 +192,65 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             [
             '7718080042' => $this->config->getAudience('7718080042'),
-            '11155' => $this->config->getAudience('11155')
+            '11155' => $this->config->getAudience('11155'),
+            '20803170009' => $this->config->getAudience('20803170009'),
+            '20787080332' => $this->config->getAudience('20787080332'),
+            '20778250294' => $this->config->getAudience('20778250294')
             ],
             $audienceIdMap->getValue($this->config)
+        );
+
+        // Check flag key variations map
+        $flagVariationsMap = new \ReflectionProperty(DatafileProjectConfig::class, '_flagVariationsMap');
+        $flagVariationsMap->setAccessible(true);
+
+        $this->assertEquals(
+            [
+                'boolean_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_2', 'test_variation_1'),
+                    $this->config->getVariationFromKey('test_experiment_2', 'test_variation_2')
+                ],
+                'double_single_variable_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_double_feature', 'control'),
+                    $this->config->getVariationFromKey('test_experiment_double_feature', 'variation')
+                ],
+                'integer_single_variable_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_integer_feature', 'control'),
+                    $this->config->getVariationFromKey('test_experiment_integer_feature', 'variation')
+                ],
+                'boolean_single_variable_feature' => [
+                    $this->config->getVariationFromKey('rollout_1_exp_1', '177771'),
+                    $this->config->getVariationFromKey('rollout_1_exp_2', '177773'),
+                    $this->config->getVariationFromKey('rollout_1_exp_3', '177778')
+                ],
+                'string_single_variable_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_with_feature_rollout', 'control'),
+                    $this->config->getVariationFromKey('test_experiment_with_feature_rollout', 'variation'),
+                    $this->config->getVariationFromKey('rollout_2_exp_1', '177775'),
+                    $this->config->getVariationFromKey('rollout_2_exp_2', '177780')
+                ],
+                'multiple_variables_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_json_feature', 'json_variation')
+                ],
+                'multi_variate_feature' => [
+                    $this->config->getVariationFromKey('test_experiment_multivariate', 'Fred'),
+                    $this->config->getVariationFromKey('test_experiment_multivariate', 'Feorge'),
+                    $this->config->getVariationFromKey('test_experiment_multivariate', 'Gred'),
+                    $this->config->getVariationFromKey('test_experiment_multivariate', 'George')
+                ],
+                'mutex_group_feature' => [
+                    $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_1'),
+                    $this->config->getVariationFromKey('group_experiment_1', 'group_exp_1_var_2'),
+                    $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_1'),
+                    $this->config->getVariationFromKey('group_experiment_2', 'group_exp_2_var_2')
+                ],
+                'empty_feature' => [],
+                'same_variation_flag' => [
+                    $this->config->getVariationFromKey('flag1_targeted_delivery', 'new_variation'),
+                    $this->config->getVariationFromKey('default-rollout-5969-20778120250', 'off')
+                ]
+            ],
+            $flagVariationsMap->getValue($this->config)
         );
 
         // Check variation key map
@@ -250,6 +314,18 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             ],
             'test_experiment_json_feature' => [
                 'json_variation' => $this->config->getVariationFromKey('test_experiment_json_feature', 'json_variation')
+            ],
+            'flag1_targeted_delivery' => [
+                'new_variation' => $this->config->getVariationFromKey('flag1_targeted_delivery', 'new_variation')
+            ],
+            'flag1_targeted_delivery2' => [
+                'new_variation' => $this->config->getVariationFromKey('flag1_targeted_delivery2', 'new_variation')
+            ],
+            'flag1_targeted_delivery3' => [
+                'new_variation' => $this->config->getVariationFromKey('flag1_targeted_delivery3', 'new_variation')
+            ],
+            'default-rollout-5969-20778120250' => [
+                'off' => $this->config->getVariationFromKey('default-rollout-5969-20778120250', 'off')
             ]
             ],
             $variationKeyMap->getValue($this->config)
@@ -315,6 +391,18 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             ],
             'test_experiment_json_feature' => [
                 '122246' => $this->config->getVariationFromId('test_experiment_json_feature', '122246')
+            ],
+            'flag1_targeted_delivery' => [
+                '16421' => $this->config->getVariationFromId('flag1_targeted_delivery', '16421')
+            ],
+            'flag1_targeted_delivery2' => [
+                '16421' => $this->config->getVariationFromId('flag1_targeted_delivery2', '16421')
+            ],
+            'flag1_targeted_delivery3' => [
+                '16421' => $this->config->getVariationFromId('flag1_targeted_delivery3', '16421')
+            ],
+            'default-rollout-5969-20778120250' => [
+                '16419' => $this->config->getVariationFromId('default-rollout-5969-20778120250', '16419')
             ]
             ],
             $variationIdMap->getValue($this->config)
@@ -334,7 +422,8 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
             'multiple_variables_feature' => $this->config->getFeatureFlagFromKey('multiple_variables_feature'),
             'multi_variate_feature' => $this->config->getFeatureFlagFromKey('multi_variate_feature'),
             'mutex_group_feature' => $this->config->getFeatureFlagFromKey('mutex_group_feature'),
-            'empty_feature' => $this->config->getFeatureFlagFromKey('empty_feature')
+            'empty_feature' => $this->config->getFeatureFlagFromKey('empty_feature'),
+            'same_variation_flag' => $this->config->getFeatureFlagFromKey('same_variation_flag')
             ],
             $featureFlagKeyMap->getValue($this->config)
         );
@@ -346,7 +435,8 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             [
             '166660' => $this->config->getRolloutFromId('166660'),
-            '166661' => $this->config->getRolloutFromId('166661')
+            '166661' => $this->config->getRolloutFromId('166661'),
+            'rollout-5969-20778120250' => $this->config->getRolloutFromId('rollout-5969-20778120250')
             ],
             $rolloutIdMap->getValue($this->config)
         );
