@@ -7,7 +7,6 @@ php:
   - '7.1'
   - '7.2'
   - '7.3.24' # revert it back to 7.3 once 7.3.25 latest build gets fixed.
-  - '7.4'
 install: "composer install"
 script:
 - mkdir -p build/logs
