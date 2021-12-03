@@ -264,31 +264,6 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
 
     // Forced decision tests
 
-    public function testForcedDecisionInvalidDatafileReturnStatus()
-    {
-        $userId = 'test_user';
-        $attributes = [ "browser" => "chrome"];
-
-        $invalidOptlyObject = new Optimizely("Invalid datafile");
-
-        $optUserContext = new OptimizelyUserContext($invalidOptlyObject, $userId, $attributes);
-
-        $context = new OptimizelyDecisionContext("flag1", "targeted_delivery");
-        $decision = new OptimizelyForcedDecision("variation1");
-        
-        $setForcedDecision = $optUserContext->setForcedDecision($context, $decision);
-        $this->assertFalse($setForcedDecision);
-
-        $getForcedDecision = $optUserContext->getForcedDecision($context);
-        $this->assertNull($getForcedDecision);
-
-        $removeForcedDecision = $optUserContext->removeForcedDecision($context);
-        $this->assertFalse($removeForcedDecision);
-
-        $removeAllForcedDecision = $optUserContext->removeAllForcedDecisions();
-        $this->assertFalse($removeAllForcedDecision);
-    }
-
     public function testForcedDecisionValidDatafileReturnStatus()
     {
         $userId = 'test_user';
