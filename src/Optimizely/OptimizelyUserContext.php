@@ -37,10 +37,6 @@ class OptimizelyUserContext implements \JsonSerializable
 
     public function setForcedDecision($context, $decision)
     {
-        // check if SDK is ready
-        if (!$this->optimizelyClient->isValid()) {
-            return false;
-        }
         $flagKey = $context->getFlagKey();
         if (!isset($flagKey)) {
             return false;
@@ -59,19 +55,11 @@ class OptimizelyUserContext implements \JsonSerializable
 
     public function getForcedDecision($context)
     {
-        // check if SDK is ready
-        if (!$this->optimizelyClient->isValid()) {
-            return null;
-        }
         return $this->findForcedDecision($context);
     }
 
     public function removeForcedDecision($context)
     {
-        // check if SDK is ready
-        if (!$this->optimizelyClient->isValid()) {
-            return false;
-        }
         $index = $this->findExistingRuleAndFlagKey($context);
         if ($index != -1) {
             array_splice($this->forcedDecisions, $index, 1);
@@ -82,11 +70,6 @@ class OptimizelyUserContext implements \JsonSerializable
 
     public function removeAllForcedDecisions()
     {
-        // check if SDK is ready
-        if (!$this->optimizelyClient->isValid()) {
-            return false;
-        }
-
         $this->forcedDecisions = [];
         return true;
     }
