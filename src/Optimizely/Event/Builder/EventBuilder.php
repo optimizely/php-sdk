@@ -251,10 +251,9 @@ class EventBuilder
     {
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
         $experiment = $config->getExperimentFromId($experimentId);
+        $variation = $config->getFlagVariationByKey($flagKey, $variationKey);
 
-        if (empty($experimentId)) {
-            $variation = $config->getFlagVariationByKey($flagKey, $variationKey);
-        } else {
+        if (!$variation) {
             $variation = $config->getVariationFromKeyByExperimentId($experimentId, $variationKey);
         }
 
