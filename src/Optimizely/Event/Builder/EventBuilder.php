@@ -255,7 +255,7 @@ class EventBuilder
         // Mapped flagKey can be directly used in variation in that case no experimentKey exist
         $variation = $config->getFlagVariationByKey($flagKey, $variationKey);
 
-        // When variation is not mapped to any flagKey 
+        // When variation is not mapped to any flagKey
         if (!$variation) {
             $variation = $config->getVariationFromKeyByExperimentId($experimentId, $variationKey);
         }
