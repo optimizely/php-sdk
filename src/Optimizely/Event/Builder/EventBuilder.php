@@ -256,7 +256,7 @@ class EventBuilder
         $variation = $config->getVariationFromKeyByExperimentId($experimentId, $variationKey);
 
         // Mapped flagKey can be directly used in variation in that case no experimentKey exist
-        if ($variation && !$variation->getKey()){
+        if ($variation && !$variation->getKey()) {
             $variation = $config->getFlagVariationByKey($flagKey, $variationKey);
         }
         $impressionParams = $this->getImpressionParams($experiment, $variation, $flagKey, $ruleKey, $ruleType, $enabled);
