@@ -252,17 +252,13 @@ class EventBuilder
         $eventParams = $this->getCommonParams($config, $userId, $attributes);
         $experiment = $config->getExperimentFromId($experimentId);
 
-        $variation = "";
+        // When variation is not mapped to any flagKey
+        $variation = $config->getVariationFromKeyByExperimentId($experimentId, $variationKey);
+
         // Mapped flagKey can be directly used in variation in that case no experimentKey exist
-        if (!empty($flagKey)) {
+        if ($variation && !$variation->getKey()){
             $variation = $config->getFlagVariationByKey($flagKey, $variationKey);
         }
-        
-        // When variation is not mapped to any flagKey
-        if (!$variation && !empty($experimentId)) {
-            $variation = $config->getVariationFromKeyByExperimentId($experimentId, $variationKey);
-        }
-
         $impressionParams = $this->getImpressionParams($experiment, $variation, $flagKey, $ruleKey, $ruleType, $enabled);
 
         $eventParams[VISITORS][0][SNAPSHOTS][] = $impressionParams;
