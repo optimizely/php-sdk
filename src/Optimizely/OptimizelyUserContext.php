@@ -74,25 +74,6 @@ class OptimizelyUserContext implements \JsonSerializable
         return true;
     }
 
-    public function findValidatedForcedDecision($context)
-    {
-        $decideReasons = [];
-        $flagKey = $context->getFlagKey();
-        $ruleKey = $context->getRuleKey();
-        $variationKey = $this->findForcedDecision($context);
-        $variation = null;
-        if ($variationKey) {
-            $variation = $this->optimizelyClient->getFlagVariationByKey($flagKey, $variationKey);
-            if ($variation) {
-                array_push($decideReasons, 'Decided by forced decision.');
-                array_push($decideReasons, sprintf('Variation (%s) is mapped to %s and user (%s) in the forced decision map.', $variationKey, $ruleKey? 'flag ('.$flagKey.'), rule ('.$ruleKey.')': 'flag ('.$flagKey.')', $this->userId));
-            } else {
-                array_push($decideReasons, sprintf('Invalid variation is mapped to %s and user (%s) in the forced decision map.', $ruleKey? 'flag ('.$flagKey.'), rule ('.$ruleKey.')': 'flag ('.$flagKey.')', $this->userId));
-            }
-        }
-        return [$variation, $decideReasons];
-    }
-
     private function findExistingRuleAndFlagKey($context)
     {
         if ($this->forcedDecisions) {

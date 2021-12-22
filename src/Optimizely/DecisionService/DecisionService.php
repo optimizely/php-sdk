@@ -118,6 +118,34 @@ class DecisionService
     }
 
     /**
+     * Finds a validated forced decision.
+     *
+     * @param OptimizelyDecisionContext $context         containing flag and rule key.
+     * @param ProjectConfigInterface    $projectConfig   Optimizely project config
+     * @param OptimizelyUserContext     $user            Optimizely user context object.
+     *
+     * @return [ variation, array ] variation and decide reasons.
+     */
+    public function findValidatedForcedDecision(OptimizelyDecisionContext $context, ProjectConfigInterface $projectConfig, OptimizelyUserContext $user)
+    {
+        $decideReasons = [];
+        $flagKey = $context->getFlagKey();
+        $ruleKey = $context->getRuleKey();
+        $variationKey = $user->findForcedDecision($context);
+        $variation = null;
+        if ($variationKey && $projectConfig) {
+            $variation = $projectConfig->getFlagVariationByKey($flagKey, $variationKey);
+            if ($variation) {
+                array_push($decideReasons, 'Decided by forced decision.');
+                array_push($decideReasons, sprintf('Variation (%s) is mapped to %s and user (%s) in the forced decision map.', $variationKey, $ruleKey? 'flag ('.$flagKey.'), rule ('.$ruleKey.')': 'flag ('.$flagKey.')', $user->getUserId()));
+            } else {
+                array_push($decideReasons, sprintf('Invalid variation is mapped to %s and user (%s) in the forced decision map.', $ruleKey? 'flag ('.$flagKey.'), rule ('.$ruleKey.')': 'flag ('.$flagKey.')', $user->getUserId()));
+            }
+        }
+        return [$variation, $decideReasons];
+    }
+
+    /**
      * Determine which variation to show the user.
      *
      * @param $projectConfig    ProjectConfigInterface   ProjectConfigInterface instance.
@@ -377,7 +405,7 @@ class DecisionService
         $decideReasons = [];
         // check forced-decision first
         $context = new OptimizelyDecisionContext($flagKey, $rule->getKey());
-        list($decisionResponse, $reasons) = $user->findValidatedForcedDecision($context);
+        list($decisionResponse, $reasons) = $this->findValidatedForcedDecision($context, $projectConfig, $user);
         $decideReasons = array_merge($decideReasons, $reasons);
         if ($decisionResponse) {
             return [$decisionResponse, $decideReasons];
@@ -410,7 +438,7 @@ class DecisionService
         // check forced-decision first
         $rule = $rules[$ruleIndex];
         $context = new OptimizelyDecisionContext($flagKey, $rule->getKey());
-        list($forcedDecisionResponse, $reasons) = $user->findValidatedForcedDecision($context);
+        list($forcedDecisionResponse, $reasons) = $this->findValidatedForcedDecision($context, $projectConfig, $user);
 
         $decideReasons = array_merge($decideReasons, $reasons);
         if ($forcedDecisionResponse) {
