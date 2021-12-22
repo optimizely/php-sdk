@@ -157,6 +157,53 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($result[0], $result[1]);
     }
 
+    public function testCreateImpressionEventVariationFromSameFlagButDifferentExperiments()
+    {
+        $decisions = array('decisions' => [[
+            'campaign_id'=> '5',
+            'experiment_id'=> '122235',
+            'variation_id'=> '177775',
+            'metadata'=> [
+                'flag_key' => 'string_single_variable_feature',
+                'rule_key' => 'test_experiment_with_feature_rollout',
+                'rule_type' => 'experiment',
+                'variation_key'=> '177775',
+                'enabled' => true
+            ]
+          ]]
+        );
+        $this->expectedImpressionEventParams['visitors'][0]['snapshots'][0] = $decisions +
+                                                                    $this->expectedImpressionEventParams['visitors'][0]['snapshots'][0];
+        $this->expectedImpressionEventParams['visitors'][0]['snapshots'][0]['events'][0] =
+        [
+            'entity_id'=> '5',
+            'timestamp'=> $this->timestamp,
+            'uuid'=> $this->uuid,
+            'key'=> 'campaign_activated'
+        ];
+        $expectedLogEvent = new LogEvent(
+            $this->expectedEventUrl,
+            $this->expectedImpressionEventParams,
+            $this->expectedEventHttpVerb,
+            $this->expectedEventHeaders
+        );
+
+        $logEvent = $this->eventBuilder->createImpressionEvent(
+            $this->config,
+            '122235',
+            '177775',
+            'string_single_variable_feature',
+            'test_experiment_with_feature_rollout',
+            'experiment',
+            true,
+            $this->testUserId,
+            null
+        );
+        $logEvent = $this->fakeParamsToReconcile($logEvent);
+        $result = $this->areLogEventsEqual($expectedLogEvent, $logEvent);
+        $this->assertTrue($result[0], $result[1]);
+    }
+
     public function testCreateImpressionEventWithAttributesNoValue()
     {
         array_unshift(
