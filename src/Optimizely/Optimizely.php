@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2021, Optimizely
+ * Copyright 2016-2022, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -355,7 +355,7 @@ class Optimizely
         $decision = null;
         // check forced-decisions first
         $context = new OptimizelyDecisionContext($flagKey, $ruleKey);
-        list($forcedDecisionResponse, $reasons) = $userContext->findValidatedForcedDecision($context);
+        list($forcedDecisionResponse, $reasons) = $this->_decisionService->findValidatedForcedDecision($context, $config, $userContext);
         if ($forcedDecisionResponse) {
             $decision = new FeatureDecision(null, $forcedDecisionResponse, FeatureDecision::DECISION_SOURCE_FEATURE_TEST, $decideReasons);
         } else {
@@ -1304,18 +1304,5 @@ class Optimizely
         }
 
         return $isValid;
-    }
-
-    /**
-     * Gets the variation associated with experiment or rollout in instance of given feature flag key
-     *
-     * @param string Feature flag key
-     * @param string variation key
-     *
-     * @return Variation / null
-     */
-    public function getFlagVariationByKey($flagKey, $variationKey)
-    {
-        return $this->getConfig()->getFlagVariationByKey($flagKey, $variationKey);
     }
 }
