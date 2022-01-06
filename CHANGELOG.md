@@ -1,5 +1,17 @@
 # Optimizely PHP SDK Changelog
 
+## 3.9.0
+January 6th, 2022
+
+### New Features
+* Add a set of new APIs for overriding and managing user-level flag, experiment and delivery rule decisions. These methods can be used for QA and automated testing purposes. They are an extension of the OptimizelyUserContext interface ([#233](https://github.com/optimizely/php-sdk/pull/233), [#236](https://github.com/optimizely/php-sdk/pull/236), [#237](https://github.com/optimizely/php-sdk/pull/237), [#238](https://github.com/optimizely/php-sdk/pull/238))
+  - setForcedDecision
+  - getForcedDecision
+  - removeForcedDecision
+  - removeAllForcedDecisions
+
+- For details, refer to our documentation pages: [OptimizelyUserContext](https://docs.developers.optimizely.com/full-stack/v4.0/docs/optimizelyusercontext-php) and [Forced Decision methods](https://docs.developers.optimizely.com/full-stack/v4.0/docs/forced-decision-methods-php).
+
 ## 3.8.0
 September 16th, 2021
 
