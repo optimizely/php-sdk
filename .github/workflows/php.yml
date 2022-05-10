@@ -52,5 +52,5 @@ jobs:
       run: |
         mkdir -p build/logs
         ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-    - name: coveralls
-      run: vendor/bin/php-coveralls -v
+#     - name: coveralls
+#       run: vendor/bin/php-coveralls -v
