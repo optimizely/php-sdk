@@ -211,7 +211,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
                 $this->_lastModifiedSince = $response->getHeader(ProjectConfigManagerConstants::LAST_MODIFIED)[0];
             }
 
-            $datafile = $response->getBody();
+            $datafile = $response->getBody()->getContents();
 
             if ($this->handleResponse($datafile) === true) {
                 return $datafile;
