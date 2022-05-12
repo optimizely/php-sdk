@@ -147,6 +147,7 @@ class OptimizelyUserContext implements \JsonSerializable
         return $this->optimizelyClient;
     }
 
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return [
