@@ -1,5 +1,13 @@
 # Optimizely PHP SDK Changelog
 
+## 3.9.1
+May 27th, 2022
+
+### Bug Fixes
+* Since php 8.1 internal functions are using proper return types. This results in deprecation notices for some of the methods. To suppress the notice for php8.1+ the new ReturnTypeWillChange attribute is added to the method in question. ([#242](https://github.com/optimizely/php-sdk/pull/242))
+
+* In HTTPProjectConfigManager fetchDatafile function datafile should be a string. So it is fixed by using ->getContents() which returns string. ([#243](https://github.com/optimizely/php-sdk/pull/243), [#247](https://github.com/optimizely/php-sdk/pull/247))
+
 ## 3.9.0
 January 10th, 2022
 
