@@ -1,7 +1,7 @@
 # Optimizely PHP SDK Changelog
 
 ## 3.9.1
-May 27th, 2022
+May 31st, 2022
 
 ### Bug Fixes
 * Since php 8.1 internal functions are using proper return types. This results in deprecation notices for some of the methods. To suppress the notice for php8.1+ the new ReturnTypeWillChange attribute is added to the method in question. ([#242](https://github.com/optimizely/php-sdk/pull/242))
