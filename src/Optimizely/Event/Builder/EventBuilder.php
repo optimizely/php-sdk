@@ -39,7 +39,7 @@ class EventBuilder
     /**
      * @const string Version of the Optimizely PHP SDK.
      */
-    const SDK_VERSION = '3.9.0';
+    const SDK_VERSION = '3.9.1';
 
     /**
      * @var string URL to send event to.
