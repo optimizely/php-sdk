@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019-2020, Optimizely Inc and Contributors
+ * Copyright 2019-2020, 2022 Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,7 +211,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
                 $this->_lastModifiedSince = $response->getHeader(ProjectConfigManagerConstants::LAST_MODIFIED)[0];
             }
 
-            $datafile = $response->getBody();
+            $datafile = $response->getBody()->getContents();
 
             if ($this->handleResponse($datafile) === true) {
                 return $datafile;

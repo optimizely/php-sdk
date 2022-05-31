@@ -453,7 +453,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
      * @param bool                  $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
      * @param LoggerInterface       $logger             Logger instance
      * @param ErrorHandlerInterface $errorHandler       ErrorHandler instance.
-     * @return ProjectConfig ProjectConfig instance or null;
+     * @return ProjectConfigInterface ProjectConfig instance or null;
      */
     public static function createProjectConfigFromDatafile($datafile, $skipJsonValidation, $logger, $errorHandler)
     {
