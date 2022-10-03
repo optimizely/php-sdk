@@ -1,5 +1,11 @@
 # Optimizely PHP SDK Changelog
 
+## 3.9.2
+October 3rd, 2022
+
+### Bug Fixes
+* String type casting added to avoid deprecation notices when passing null to strlen. ([#253](https://github.com/optimizely/php-sdk/pull/253))
+
 ## 3.9.1
 May 31st, 2022
 
