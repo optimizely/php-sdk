@@ -510,7 +510,7 @@ class DecisionService
         $experimentId = $projectConfig->getExperimentFromKey($experimentKey)->getId();
 
         // check for null and empty string experiment ID
-        if (strlen($experimentId) == 0) {
+        if (strlen((string)$experimentId) == 0) {
             // this case is logged in getExperimentFromKey
             return [ null, $decideReasons];
         }
@@ -554,7 +554,7 @@ class DecisionService
         $experimentId = $experiment->getId();
 
         // check if the experiment exists in the datafile (a new experiment is returned if it is not in the datafile)
-        if (strlen($experimentId) == 0) {
+        if (strlen((string)$experimentId) == 0) {
             // this case is logged in getExperimentFromKey
             return false;
         }
@@ -570,7 +570,7 @@ class DecisionService
         $variationId = $variation->getId();
 
         // check if the variation exists in the datafile (a new variation is returned if it is not in the datafile)
-        if (strlen($variationId) == 0) {
+        if (strlen((string)$variationId) == 0) {
             // this case is logged in getVariationFromKey
             return false;
         }
