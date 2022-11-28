@@ -23,7 +23,7 @@ interface UserProfileServiceInterface
      *
      * @param $userId      string The ID of the user whose profile will be retrieved.
      *
-     * @return UserProfile array  The user profile.
+     * @return array The user profile.
      */
     public function lookup($userId);
 
