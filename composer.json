@@ -1,6 +1,6 @@
 {
   "name": "optimizely/optimizely-sdk",
-  "description": "Optimizely SDK for Full Stack PHP projects.",
+  "description": "Optimizely PHP SDK for Optimizely Feature Experimentation, Optimizely Full Stack (legacy), and Optimizely Rollouts.",
   "keywords": ["optimizely", "sdk"],
   "license": "Apache-2.0",
   "authors": [
