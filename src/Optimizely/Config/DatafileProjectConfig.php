@@ -72,7 +72,7 @@ class DatafileProjectConfig implements ProjectConfigInterface
     private $_accountId;
 
     /**
-     * @var string Project ID of the Full Stack project.
+     * @var string Project ID of the Feature Experimentation project.
      */
     private $_projectId;
 

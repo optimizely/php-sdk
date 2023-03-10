@@ -116,7 +116,7 @@ class Optimizely
     public $notificationCenter;
 
     /**
-     * Optimizely constructor for managing Full Stack PHP projects.
+     * Optimizely constructor for managing Feature Experimentation PHP projects.
      *
      * @param $datafile string JSON string representing the project.
      * @param $eventDispatcher EventDispatcherInterface
