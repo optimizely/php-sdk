@@ -1,6 +1,6 @@
 # Optimizely PHP SDK
 [![Packagist](https://badgen.net/packagist/v/optimizely/optimizely-sdk)](https://packagist.org/packages/optimizely/optimizely-sdk)
-[![Build Status](https://travis-ci.org/optimizely/php-sdk.svg?branch=master)](https://travis-ci.org/optimizely/php-sdk)
+[![Build Status](https://github.com/optimizely/php-sdk/actions/workflows/php.yml/badge.svg?branch=master)](https://github.com/optimizely/php-sdk/actions/workflows/php.yml?query=branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/optimizely/php-sdk/badge.svg?branch=master)](https://coveralls.io/github/optimizely/php-sdk?branch=master)
 [![Total Downloads](https://poser.pugx.org/optimizely/optimizely-sdk/downloads)](https://packagist.org/packages/optimizely/optimizely-sdk)
 [![Apache 2.0](https://img.shields.io/github/license/nebula-plugins/gradle-extra-configurations-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
