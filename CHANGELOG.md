@@ -1,5 +1,16 @@
 # Optimizely PHP SDK Changelog
 
+## 3.9.3
+March 13, 2022
+
+* We updated our README.md and other non-functional code to reflect that this SDK supports both Optimizely Feature Experimentation and Optimizely Full Stack. ([#261](https://github.com/optimizely/php-sdk/pull/261)).
+
+## 3.9.2
+October 5th, 2022
+
+### Bug Fixes
+* String type casting added to avoid deprecation notices when passing null to strlen. ([#253](https://github.com/optimizely/php-sdk/pull/253))
+
 ## 3.9.1
 May 31st, 2022
 
