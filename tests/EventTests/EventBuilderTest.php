@@ -68,7 +68,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
                 ]],
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '3.9.1',
+                'client_version' => '3.9.3',
                 'anonymize_ip'=> false,
                 'enrich_decisions' => true,
             ];
