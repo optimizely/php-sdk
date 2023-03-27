@@ -8,33 +8,36 @@ on:
 
 jobs:
   linting:
+    name: Linting
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Set up PHP 7.0
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.0'
+        php-version: '8.2'
     - name: Install php code sniffer
       run: composer require "squizlabs/php_codesniffer=*"
     - name: Run linting
       run: composer lint
 
   integration_tests:
+    name: Integration Tests
     uses: optimizely/php-sdk/.github/workflows/integration_test.yml@uzair/test-with-fsc
     secrets:
       CI_USER_TOKEN: ${{ secrets.CI_USER_TOKEN }}
       TRAVIS_COM_TOKEN: ${{ secrets.TRAVIS_COM_TOKEN }}
 
   unit_tests:
+    name: Unit Tests ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php-versions: [ '5.5', '5.6', '7.0', '7.1', '7.2', '7.3' ]
+        php-versions: [ '7.3' '7.4', '8.0', '8.1', '8.2' ]
     steps:
     - uses: actions/checkout@v3
-    - name: Set up PHP ${{ matrix.ruby }}
+    - name: Set up PHP v${{ matrix.php-versions }}
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php-versions }}
