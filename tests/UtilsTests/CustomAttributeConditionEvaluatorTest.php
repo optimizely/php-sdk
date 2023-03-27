@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2018-2020, Optimizely
+ * Copyright 2018-2020, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@
 namespace Optimizely\Tests;
 
 use Optimizely\Utils\CustomAttributeConditionEvaluator;
+use PHPUnit\Framework\TestCase;
 
-class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
+class CustomAttributeConditionEvaluatorTest extends TestCase
 {
     public function setUp()
     {

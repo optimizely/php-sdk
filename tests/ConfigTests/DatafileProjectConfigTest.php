@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2020, 2021, Optimizely
+ * Copyright 2016-2020, 2021, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,9 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\Optimizely;
 use Optimizely\Tests\ValidEventDispatcher;
 use Optimizely\Utils\ConfigParser;
+use PHPUnit\Framework\TestCase;
 
-class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
+class DatafileProjectConfigTest extends TestCase
 {
     private $config;
     private $loggerMock;

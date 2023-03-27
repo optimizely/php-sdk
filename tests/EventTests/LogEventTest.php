@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@
 namespace Optimizely\Tests;
 
 use Optimizely\Event\LogEvent;
+use PHPUnit\Framework\TestCase;
 
-class LogEventTest extends \PHPUnit_Framework_TestCase
+class LogEventTest extends TestCase
 {
     private $logEvent;
 

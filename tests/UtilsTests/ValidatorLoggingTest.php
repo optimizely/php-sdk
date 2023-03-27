@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019-2021, Optimizely
+ * Copyright 2019-2021, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@
  use Optimizely\ErrorHandler\NoOpErrorHandler;
  use Optimizely\Logger\NoOpLogger;
  use Optimizely\Utils\Validator;
+ use PHPUnit\Framework\TestCase;
 
-class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
+class ValidatorLoggingTest extends TestCase
 {
     protected function setUp()
     {

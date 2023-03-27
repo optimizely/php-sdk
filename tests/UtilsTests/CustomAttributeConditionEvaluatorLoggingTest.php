@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2020, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ namespace Optimizely\Tests;
 
 use Monolog\Logger;
 use Optimizely\Utils\CustomAttributeConditionEvaluator;
+use PHPUnit\Framework\TestCase;
 
-class CustomAttributeConditionEvaluatorLoggingTest extends \PHPUnit_Framework_TestCase
+class CustomAttributeConditionEvaluatorLoggingTest extends TestCase
 {
     public function setUp()
     {

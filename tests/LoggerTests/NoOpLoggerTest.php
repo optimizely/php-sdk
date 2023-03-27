@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@ namespace Optimizely\Tests;
 
 use Monolog\Logger;
 use Optimizely\Logger\NoOpLogger;
+use PHPUnit\Framework\TestCase;
 
-class NoOpLoggerTest extends \PHPUnit_Framework_TestCase
+class NoOpLoggerTest extends TestCase
 {
     public function testNoOpLogger()
     {

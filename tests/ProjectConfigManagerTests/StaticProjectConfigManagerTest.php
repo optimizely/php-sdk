@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019, Optimizely
+ * Copyright 2019, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Exceptions\InvalidDatafileVersionException;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\ProjectConfigManager\StaticProjectConfigManager;
+use PHPUnit\Framework\TestCase;
 
-class StaticProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
+class StaticProjectConfigManagerTest extends TestCase
 {
     private $loggerMock;
     private $errorHandlerMock;
