@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2021, Optimizely
+ * Copyright 2016-2021, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
+use PHPUnit\Framework\TestCase;
 
-class BucketerTest extends \PHPUnit_Framework_TestCase
+class BucketerTest extends TestCase
 {
     private $testBucketingIdControl;
     private $testBucketingIdVariation;
