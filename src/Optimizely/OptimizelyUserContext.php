@@ -148,7 +148,7 @@ class OptimizelyUserContext implements \JsonSerializable
     }
 
     #[\ReturnTypeWillChange]
-    public function jsonSerialize()
+    public function jsonSerialize() : mixed
     {
         return [
             'userId' => $this->userId,
