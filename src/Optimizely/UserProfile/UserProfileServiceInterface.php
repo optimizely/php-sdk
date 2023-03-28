@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely Inc, and Contributors
+ * Copyright 2017, 2023, Optimizely Inc, and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ interface UserProfileServiceInterface
      *
      * @param $userId      string The ID of the user whose profile will be retrieved.
      *
-     * @return userProfile array  The user profile.
+     * @return array  The user profile.
      */
     public function lookup($userId);
 
