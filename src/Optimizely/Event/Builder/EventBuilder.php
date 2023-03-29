@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2021, Optimizely
+ * Copyright 2016-2021, 2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class EventBuilder
     /**
      * @const string Version of the Optimizely PHP SDK.
      */
-    const SDK_VERSION = '3.9.3';
+    const SDK_VERSION = '3.9.4';
 
     /**
      * @var string URL to send event to.

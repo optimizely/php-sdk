@@ -1,5 +1,10 @@
 # Optimizely PHP SDK Changelog
 
+## 3.9.4
+March 29 , 2023
+
+* We have made changes to avoid unnecessary deprecation notices and fixed some incorrect return hints. ([#265](https://github.com/optimizely/php-sdk/pull/265)).
+
 ## 3.9.3
 March 13, 2023
 
