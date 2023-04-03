@@ -21,7 +21,7 @@ use Optimizely\Utils\CustomAttributeConditionEvaluator;
 
 class CustomAttributeConditionEvaluatorTest extends \PHPUnit_Framework_TestCase
 {
-    public function setUp()
+    protected function setUp() : void
     {
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))

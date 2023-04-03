@@ -33,7 +33,7 @@ use Optimizely\OptimizelyConfig\OptimizelyVariation;
 class OptimizelyConfigServiceTest extends \PHPUnit_Framework_TestCase
 {
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->datafile = DATAFILE_FOR_OPTIMIZELY_CONFIG;
 

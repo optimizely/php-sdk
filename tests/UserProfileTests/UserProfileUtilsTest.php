@@ -26,7 +26,7 @@ class UserProfileUtilsTest extends \PHPUnit_Framework_TestCase
 {
     private $userProfileMap;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->userProfileMap = array(
             'user_id' => 'test_user',

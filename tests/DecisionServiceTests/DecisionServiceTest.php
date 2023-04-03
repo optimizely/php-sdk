@@ -42,7 +42,7 @@ class DecisionServiceTest extends \PHPUnit_Framework_TestCase
     private $testUserId;
     private $userProvideServiceMock;
     private $optimizely;
-    public function setUp()
+    protected function setUp() : void
     {
         $this->testUserId = 'testUserId';
         $this->testUserIdWhitelisted = 'user1';

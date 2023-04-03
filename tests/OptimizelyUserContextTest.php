@@ -32,7 +32,7 @@ class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
     private $loggerMock;
     private $optimizelyObject;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->datafile = DATAFILE;
 

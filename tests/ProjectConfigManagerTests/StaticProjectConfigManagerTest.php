@@ -29,7 +29,7 @@ class StaticProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
     private $loggerMock;
     private $errorHandlerMock;
 
-    public function setUp()
+    protected function setUp() : void
     {
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)

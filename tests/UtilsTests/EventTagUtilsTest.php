@@ -29,7 +29,7 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
     const MIN_FLOAT = -1.8e307;
     protected $loggerMock;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)

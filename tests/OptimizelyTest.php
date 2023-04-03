@@ -76,7 +76,7 @@ class OptimizelyTest extends \PHPUnit_Framework_TestCase
         $optimizely->configManager = $configManager;
     }
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->datafile = DATAFILE;
         $this->typedAudiencesDataFile = DATAFILE_WITH_TYPED_AUDIENCES;

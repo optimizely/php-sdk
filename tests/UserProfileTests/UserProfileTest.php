@@ -24,7 +24,7 @@ class UserProfileTest extends \PHPUnit_Framework_TestCase
 {
     private $userProfile;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $experimentBucketMap = array();
         $experimentBucketMap['111111'] = new Decision('211111');

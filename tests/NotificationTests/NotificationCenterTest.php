@@ -32,7 +32,7 @@ class NotificationCenterTest extends \PHPUnit_Framework_TestCase
     private $notificationCenterObj;
     private $loggerMock;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))

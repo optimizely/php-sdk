@@ -24,10 +24,11 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Optimizely\OptimizelyFactory;
 use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
+use PHPUnit\Framework\TestCase;
 
-class OptimizelyFactoryTest extends \PHPUnit_Framework_TestCase
+class OptimizelyFactoryTest extends TestCase
 {
-    public function setUp()
+    protected function setUp() : void
     {
         $this->datafile = DATAFILE;
         $this->typedAudiencesDataFile = DATAFILE_WITH_TYPED_AUDIENCES;

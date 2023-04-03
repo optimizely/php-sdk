@@ -21,7 +21,7 @@ use Optimizely\Utils\ConditionTreeEvaluator;
 
 class ConditionTreeEvaluatorTest extends \PHPUnit_Framework_TestCase
 {
-    public function setUp()
+    protected function setUp() : void
     {
         $this->conditionA = [
             'name' => 'browser_type',

@@ -18,6 +18,7 @@
 namespace Optimizely\Tests;
 
 use Icecave\Parity\Parity;
+use PHPUnit\Framework\TestCase;
 use SebastianBergmann\Diff\Differ;
 use Optimizely\Bucketer;
 use Optimizely\Config\DatafileProjectConfig;
@@ -27,7 +28,7 @@ use Optimizely\Event\Builder\EventBuilder;
 use Optimizely\Event\LogEvent;
 use Optimizely\Logger\NoOpLogger;
 
-class EventBuilderTest extends \PHPUnit_Framework_TestCase
+class EventBuilderTest extends TestCase
 {
     private $testUserId;
     private $config;
@@ -35,7 +36,7 @@ class EventBuilderTest extends \PHPUnit_Framework_TestCase
     private $timestamp;
     private $uuid;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->testUserId = 'testUserId';
         $logger = new NoOpLogger();

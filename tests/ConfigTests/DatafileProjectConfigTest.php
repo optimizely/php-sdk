@@ -51,7 +51,7 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
     private $loggerMock;
     private $errorHandlerMock;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)

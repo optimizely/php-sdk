@@ -38,7 +38,7 @@ class BucketerTest extends \PHPUnit_Framework_TestCase
     private $config;
     private $loggerMock;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->testBucketingIdControl = 'testBucketingIdControl!';  // generates bucketing number 3741
         $this->testBucketingIdVariation = '123456789'; // generates bucketing number 4567

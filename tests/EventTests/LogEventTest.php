@@ -23,7 +23,7 @@ class LogEventTest extends \PHPUnit_Framework_TestCase
 {
     private $logEvent;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->logEvent = new LogEvent(
             'https://logx.optimizely.com',

@@ -39,7 +39,7 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
     private $url;
     private $template;
 
-    public function setUp()
+    protected function setUp() : void
     {
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)

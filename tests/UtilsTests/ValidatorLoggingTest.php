@@ -25,7 +25,7 @@
 
 class ValidatorLoggingTest extends \PHPUnit_Framework_TestCase
 {
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
             ->setMethods(array('log'))
