@@ -17,12 +17,9 @@
 
 namespace Optimizely\Config\Tests;
 
-require(dirname(__FILE__).'/../TestData.php');
-
 use Monolog\Logger;
 use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Entity\Attribute;
-use Optimizely\Entity\Audience;
 use Optimizely\Entity\Event;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
@@ -41,8 +38,6 @@ use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\Optimizely;
-use Optimizely\Tests\ValidEventDispatcher;
 use Optimizely\Utils\ConfigParser;
 use PHPUnit\Framework\TestCase;
 
@@ -474,7 +469,7 @@ class DatafileProjectConfigTest extends TestCase
     public function testExceptionThrownForUnsupportedVersion()
     {
         // Verify that an exception is thrown when given datafile version is unsupported //
-        $this->setExpectedException(
+        $this->expectException(
             InvalidDatafileVersionException::class,
             'This version of the PHP SDK does not support the given datafile version: 5.'
         );

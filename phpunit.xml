@@ -1,11 +1,12 @@
 <phpunit
         colors="true"
         stderr="true"
+        beStrictAboutTestsThatDoNotTestAnything="false"
         convertErrorsToExceptions="true"
         convertNoticesToExceptions="true"
         convertWarningsToExceptions="true"
         stopOnFailure="false"
-        bootstrap="vendor/autoload.php">
+        bootstrap="phpunit_bootstrap.php">
     <testsuites>
         <testsuite name="Optimizely PHP SDK Tests">
             <directory>tests</directory>
