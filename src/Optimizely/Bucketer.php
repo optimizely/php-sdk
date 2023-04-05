@@ -16,11 +16,9 @@
  */
 namespace Optimizely;
 
-use lastguest\Murmur;
 use Monolog\Logger;
 use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
-use Optimizely\Entity\Variation;
 use Optimizely\Logger\LoggerInterface;
 
 /**
@@ -74,7 +72,7 @@ class Bucketer
      */
     private function generateHashCode($bucketingKey)
     {
-        return Murmur::hash3($bucketingKey, Bucketer::$HASH_SEED) & Bucketer::$UNSIGNED_MAX_32_BIT_VALUE;
+        return murmurhash3_int($bucketingKey, Bucketer::$HASH_SEED) & Bucketer::$UNSIGNED_MAX_32_BIT_VALUE;
     }
 
     /**

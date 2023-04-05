@@ -21,10 +21,8 @@ use Monolog\Logger;
 use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Bucketer;
 use Optimizely\Entity\Experiment;
-use Optimizely\Entity\Rollout;
 use Optimizely\Entity\Variation;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
-use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
 use PHPUnit\Framework\TestCase;
 
