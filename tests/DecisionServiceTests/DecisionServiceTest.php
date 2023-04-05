@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017-2021, Optimizely
+ * Copyright 2017-2021, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,9 @@ use Optimizely\Optimizely;
 use Optimizely\OptimizelyUserContext;
 use Optimizely\UserProfile\UserProfileServiceInterface;
 use Optimizely\Utils\Validator;
+use PHPUnit\Framework\TestCase;
 
-class DecisionServiceTest extends \PHPUnit_Framework_TestCase
+class DecisionServiceTest extends TestCase
 {
     private $bucketerMock;
     private $config;

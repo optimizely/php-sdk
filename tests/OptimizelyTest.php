@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2021, Optimizely
+ * Copyright 2016-2021, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,9 @@ use Optimizely\OptimizelyDecisionContext;
 use Optimizely\OptimizelyForcedDecision;
 use Optimizely\OptimizelyUserContext;
 use Optimizely\UserProfile\UserProfileServiceInterface;
+use PHPUnit\Framework\TestCase;
 
-class OptimizelyTest extends \PHPUnit_Framework_TestCase
+class OptimizelyTest extends TestCase
 {
     const OUTPUT_STREAM = 'output';
 

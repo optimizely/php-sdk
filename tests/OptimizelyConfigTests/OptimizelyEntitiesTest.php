@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely
+ * Copyright 2020, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ use Optimizely\OptimizelyConfig\OptimizelyExperiment;
 use Optimizely\OptimizelyConfig\OptimizelyFeature;
 use Optimizely\OptimizelyConfig\OptimizelyVariable;
 use Optimizely\OptimizelyConfig\OptimizelyVariation;
+use PHPUnit\Framework\TestCase;
 
-class OptimizelyEntitiesTest extends \PHPUnit_Framework_TestCase
+class OptimizelyEntitiesTest extends TestCase
 {
     public function testOptimizelyConfigEntity()
     {

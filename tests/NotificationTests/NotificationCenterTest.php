@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2019, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\Exceptions\InvalidCallbackArgumentCountException;
 use Optimizely\Exceptions\InvalidNotificationTypeException;
+use PHPUnit\Framework\TestCase;
 
-class NotificationCenterTest extends \PHPUnit_Framework_TestCase
+class NotificationCenterTest extends TestCase
 {
     private $notificationCenterObj;
     private $loggerMock;
