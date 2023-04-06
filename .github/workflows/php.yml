@@ -64,6 +64,7 @@ jobs:
           php_version: ${{ matrix.php-versions }}
           memory_limit: 256M
           coverage_clover: ./build/logs/clover.xml
+          bootstrap: phpunit_bootstrap.php
       - name: Verify clover.xml created
         run: |
           if [ ! -f ./build/logs/clover.xml ]; then
