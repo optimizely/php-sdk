@@ -58,10 +58,12 @@ jobs:
         env:
           XDEBUG_MODE: coverage
         with:
-          bootstrap: vendor/autoload.php
           configuration: phpunit.xml
           php_extensions: xdebug
-          args: tests --coverage-clover ./build/logs/coverage.xml
+          version: 8.5
+          php_version: ${{ matrix.php-versions }}
+          memory_limit: 256M
+          coverage_clover: ./build/logs/clover.xml
       - name: Verify clover.xml created
         run: |
           if [ ! -f ./build/logs/clover.xml ]; then
