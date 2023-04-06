@@ -19,8 +19,5 @@
     </filter>
     <php>
         <ini name="memory_limit" value="256M"/>
-        <ini name="xdebug.mode" value="coverage" />
-        <ini name="xdebug.client_host" value="localhost" />
-        <ini name="xdebug.client_port" value="9000" />
     </php>
 </phpunit>
