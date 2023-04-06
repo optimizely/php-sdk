@@ -55,6 +55,12 @@ jobs:
         run: |
           mkdir -p ./build/logs
           ./vendor/bin/phpunit --coverage-clover ./build/logs/clover.xml
+      - name: Verify clover.xml created
+        run: |
+          if [ ! -f ./build/logs/clover.xml ]; then
+            echo "clover.xml was not created"
+            exit 1
+          fi
       - name: Upload coverage results to Coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
