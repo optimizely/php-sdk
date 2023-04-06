@@ -470,8 +470,8 @@ class DatafileProjectConfig implements ProjectConfigInterface
             $config = new DatafileProjectConfig($datafile, $logger, $errorHandler);
         } catch (Exception $exception) {
             $defaultLogger = new DefaultLogger();
-            $errorMsg = $exception->getCode() == InvalidDatafileVersionException::class ? $exception->getMessage() : sprintf(Errors::INVALID_FORMAT, 'datafile');
-            $errorToHandle = $exception->getCode() == InvalidDatafileVersionException::class ? new InvalidDatafileVersionException($errorMsg) : new InvalidInputException($errorMsg);
+            $errorMsg = $exception instanceof InvalidDatafileVersionException ? $exception->getMessage() : sprintf(Errors::INVALID_FORMAT, 'datafile');
+            $errorToHandle = $exception instanceof InvalidDatafileVersionException ? new InvalidDatafileVersionException($errorMsg) : new InvalidInputException($errorMsg);
             $defaultLogger->log(Logger::ERROR, $errorMsg);
             $logger->log(Logger::ERROR, $errorMsg);
             $errorHandler->handleError($errorToHandle);
