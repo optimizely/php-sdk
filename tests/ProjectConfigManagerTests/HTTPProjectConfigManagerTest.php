@@ -115,12 +115,9 @@ class HTTPProjectConfigManagerTest extends TestCase
          $this->assertInstanceOf(DatafileProjectConfig::class, $config);
     }
 
-    /**
-    * @expectedException Exception
-    *
-    */
     public function testConfigManagerThrowsErrorWhenBothSDKKeyAndURLNotProvided()
     {
+        $this->expectException(Exception::class);
         $this->errorHandlerMock->expects($this->once())
             ->method('handleError')
             ->with(new Exception("One of the SDK key or URL must be provided."));

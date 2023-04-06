@@ -22,12 +22,10 @@ use PHPUnit\Framework\TestCase;
 
 class DefaultErrorHandlerTest extends TestCase
 {
-    /**
-     * @expectedException Exception
-     * @expectedExceptionMessage Throw me please.
-     */
     public function testHandleError()
     {
+        $this->expectExceptionMessage("Throw me please.");
+        $this->expectException(Exception::class);
         $exception = new Exception('Throw me please.');
         $errorHandler = new DefaultErrorHandler();
 
