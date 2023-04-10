@@ -51,20 +51,10 @@ jobs:
             ${{ runner.os }}-php-
       - name: Install dependencies
         run: composer install
-      - name: Create build/logs directory
-        run: mkdir -p ./build/logs
-      - name: Run unit tests
-        uses: php-actions/phpunit@v3
-        env:
-          XDEBUG_MODE: coverage
-        with:
-          configuration: phpunit.xml
-          php_extensions: xdebug
-          version: 8.5
-          php_version: ${{ matrix.php-versions }}
-          memory_limit: 256M
-          coverage_clover: ./build/logs/clover.xml
-          bootstrap: phpunit_bootstrap.php
+      - name: Run tests
+        run: |
+          mkdir -p ./build/logs
+          ./vendor/bin/phpunit --coverage-clover ./build/logs/clover.xml
       - name: Verify clover.xml created
         run: |
           if [ ! -f ./build/logs/clover.xml ]; then
