@@ -21,6 +21,16 @@ jobs:
       - name: Run linting
         run: composer lint
 
+  source_clear:
+    name: Source Clear Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Source clear scan
+        env:
+          SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
+        run: curl -sSL https://download.sourceclear.com/ci.sh | bash -s – scan
+
   integration_tests:
     name: Integration Tests
     uses: optimizely/php-sdk/.github/workflows/integration_test.yml@uzair/test-with-fsc
