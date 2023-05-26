@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016, Optimizely
+ * Copyright 2016, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,14 @@ namespace Optimizely\Tests;
 
 use Exception;
 use Optimizely\ErrorHandler\DefaultErrorHandler;
+use PHPUnit\Framework\TestCase;
 
-class DefaultErrorHandlerTest extends \PHPUnit_Framework_TestCase
+class DefaultErrorHandlerTest extends TestCase
 {
-    /**
-     * @expectedException Exception
-     * @expectedExceptionMessage Throw me please.
-     */
     public function testHandleError()
     {
+        $this->expectExceptionMessage("Throw me please.");
+        $this->expectException(Exception::class);
         $exception = new Exception('Throw me please.');
         $errorHandler = new DefaultErrorHandler();
 

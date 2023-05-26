@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2020, 2021, Optimizely
+ * Copyright 2016-2020, 2021, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,9 @@
 
 namespace Optimizely\Config\Tests;
 
-require(dirname(__FILE__).'/../TestData.php');
-
 use Monolog\Logger;
 use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\Entity\Attribute;
-use Optimizely\Entity\Audience;
 use Optimizely\Entity\Event;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\FeatureFlag;
@@ -41,17 +38,16 @@ use Optimizely\Exceptions\InvalidRolloutException;
 use Optimizely\Exceptions\InvalidGroupException;
 use Optimizely\Exceptions\InvalidVariationException;
 use Optimizely\Logger\NoOpLogger;
-use Optimizely\Optimizely;
-use Optimizely\Tests\ValidEventDispatcher;
 use Optimizely\Utils\ConfigParser;
+use PHPUnit\Framework\TestCase;
 
-class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
+class DatafileProjectConfigTest extends TestCase
 {
     private $config;
     private $loggerMock;
     private $errorHandlerMock;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
@@ -473,7 +469,7 @@ class DatafileProjectConfigTest extends \PHPUnit_Framework_TestCase
     public function testExceptionThrownForUnsupportedVersion()
     {
         // Verify that an exception is thrown when given datafile version is unsupported //
-        $this->setExpectedException(
+        $this->expectException(
             InvalidDatafileVersionException::class,
             'This version of the PHP SDK does not support the given datafile version: 5.'
         );

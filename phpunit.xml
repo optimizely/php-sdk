@@ -1,19 +1,23 @@
 <phpunit
         colors="true"
         stderr="true"
+        beStrictAboutTestsThatDoNotTestAnything="false"
         convertErrorsToExceptions="true"
         convertNoticesToExceptions="true"
         convertWarningsToExceptions="true"
         stopOnFailure="false"
-        bootstrap="vendor/autoload.php">
+        bootstrap="phpunit_bootstrap.php">
     <testsuites>
         <testsuite name="Optimizely PHP SDK Tests">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
     <filter>
-        <whitelist>
-            <directory suffix=".php">./src/Optimizely</directory>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">src/Optimizely</directory>
         </whitelist>
     </filter>
+    <php>
+        <ini name="memory_limit" value="256M"/>
+    </php>
 </phpunit>

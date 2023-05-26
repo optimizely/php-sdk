@@ -1,5 +1,5 @@
 .idea/*
 build/
 vendor/
-composer.lock
 composer.phar
+.phpunit.result.cache

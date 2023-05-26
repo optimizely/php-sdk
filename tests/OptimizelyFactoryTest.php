@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020, Optimizely
+ * Copyright 2020, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Optimizely\OptimizelyFactory;
 use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
+use PHPUnit\Framework\TestCase;
 
-class OptimizelyFactoryTest extends \PHPUnit_Framework_TestCase
+class OptimizelyFactoryTest extends TestCase
 {
-    public function setUp()
+    protected function setUp() : void
     {
         $this->datafile = DATAFILE;
         $this->typedAudiencesDataFile = DATAFILE_WITH_TYPED_AUDIENCES;

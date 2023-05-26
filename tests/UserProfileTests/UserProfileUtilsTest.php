@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely Inc and Contributors
+ * Copyright 2017, 2023 Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ use Optimizely\Entity\Experiment;
 use Optimizely\UserProfile\Decision;
 use Optimizely\UserProfile\UserProfile;
 use Optimizely\UserProfile\UserProfileUtils;
+use PHPUnit\Framework\TestCase;
 
-class UserProfileUtilsTest extends \PHPUnit_Framework_TestCase
+class UserProfileUtilsTest extends TestCase
 {
     private $userProfileMap;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->userProfileMap = array(
             'user_id' => 'test_user',

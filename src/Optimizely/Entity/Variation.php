@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2020, Optimizely
+ * Copyright 2016-2020, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,10 @@ class Variation
      */
     private $_variableIdToVariableUsageInstanceMap;
 
+    /**
+     * @var mixed|null
+     */
+    private mixed $_featureEnabled;
 
     public function __construct($id = null, $key = null, $featureEnabled = null, $variableUsageInstances = [])
     {
@@ -121,11 +125,7 @@ class Variation
      */
     public function getVariableUsageById($variableId)
     {
-        if (isset($this->_variableIdToVariableUsageInstanceMap[$variableId])) {
-            return $this->_variableIdToVariableUsageInstanceMap[$variableId];
-        } else {
-            return null;
-        }
+        return $this->_variableIdToVariableUsageInstanceMap[$variableId] ?? null;
     }
 
     /**
@@ -144,7 +144,7 @@ class Variation
     private function generateVariableIdToVariableUsageMap()
     {
         if (!empty($this->_variableUsageInstances)) {
-            foreach (array_values($this->_variableUsageInstances) as $variableUsage) {
+            foreach ($this->_variableUsageInstances as $variableUsage) {
                 $this->_variableIdToVariableUsageInstanceMap[$variableUsage->getId()] = $variableUsage;
             }
         }

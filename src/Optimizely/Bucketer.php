@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2016-2021, Optimizely
+ * Copyright 2016-2021, 2023, Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ namespace Optimizely;
 use Monolog\Logger;
 use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
-use Optimizely\Entity\Variation;
 use Optimizely\Logger\LoggerInterface;
 
 /**

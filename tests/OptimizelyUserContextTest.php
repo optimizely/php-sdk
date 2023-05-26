@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2021, Optimizely
+ * Copyright 2021, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,20 @@ namespace Optimizely\Tests;
 use Exception;
 use Optimizely\Decide\OptimizelyDecideOption;
 use TypeError;
-
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Optimizely;
 use Optimizely\OptimizelyUserContext;
 use Optimizely\OptimizelyDecisionContext;
 use Optimizely\OptimizelyForcedDecision;
+use PHPUnit\Framework\TestCase;
 
-class OptimizelyUserContextTest extends \PHPUnit_Framework_TestCase
+class OptimizelyUserContextTest extends TestCase
 {
     private $datafile;
     private $loggerMock;
     private $optimizelyObject;
 
-    public function setUp()
+    protected function setUp() : void
     {
         $this->datafile = DATAFILE;
 

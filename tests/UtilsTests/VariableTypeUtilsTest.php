@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely
+ * Copyright 2017, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,14 @@ use Monolog\Logger;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\Utils\VariableTypeUtils;
+use PHPUnit\Framework\TestCase;
 
-class VariableTypeUtilsTest extends \PHPUnit_Framework_TestCase
+class VariableTypeUtilsTest extends TestCase
 {
     protected $loggerMock;
     protected $variableUtilObj;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)

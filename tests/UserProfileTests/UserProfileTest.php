@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017, Optimizely Inc and Contributors
+ * Copyright 2017, 2023 Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@ namespace Optimizely\Tests;
 
 use Optimizely\UserProfile\Decision;
 use Optimizely\UserProfile\UserProfile;
+use PHPUnit\Framework\TestCase;
 
-class UserProfileTest extends \PHPUnit_Framework_TestCase
+class UserProfileTest extends TestCase
 {
     private $userProfile;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $experimentBucketMap = array();
         $experimentBucketMap['111111'] = new Decision('211111');

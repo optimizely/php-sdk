@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019-2020, Optimizely
+ * Copyright 2019-2020, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,16 @@ use Optimizely\Logger\NoOpLogger;
 use Optimizely\Notification\NotificationCenter;
 use Optimizely\Notification\NotificationType;
 use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
+use PHPUnit\Framework\TestCase;
 
-class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
+class HTTPProjectConfigManagerTest extends TestCase
 {
     private $loggerMock;
     private $errorHandlerMock;
     private $url;
     private $template;
 
-    public function setUp()
+    protected function setUp() : void
     {
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
@@ -114,12 +115,9 @@ class HTTPProjectConfigManagerTest extends \PHPUnit_Framework_TestCase
          $this->assertInstanceOf(DatafileProjectConfig::class, $config);
     }
 
-    /**
-    * @expectedException Exception
-    *
-    */
     public function testConfigManagerThrowsErrorWhenBothSDKKeyAndURLNotProvided()
     {
+        $this->expectException(Exception::class);
         $this->errorHandlerMock->expects($this->once())
             ->method('handleError')
             ->with(new Exception("One of the SDK key or URL must be provided."));

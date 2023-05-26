@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2017-2019, Optimizely
+ * Copyright 2017-2019, 2023 Optimizely
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ namespace Optimizely\Tests;
 use Optimizely\Utils\EventTagUtils;
 use Optimizely\Logger\NoOpLogger;
 use Monolog\Logger;
+use PHPUnit\Framework\TestCase;
 
-class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
+class EventTagUtilsTest extends TestCase
 {
     // The size of a float is platform-dependent, although a maximum of ~1.8e308 with a precision of roughly 14 decimal digits is a common value (the 64 bit IEEE format). http://php.net/manual/en/language.types.float.php
     // PHP_FLOAT_MAX - Available as of PHP7.2.0 http://php.net/manual/en/reserved.constants.php
@@ -29,7 +30,7 @@ class EventTagUtilsTest extends \PHPUnit_Framework_TestCase
     const MIN_FLOAT = -1.8e307;
     protected $loggerMock;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         // Mock Logger
         $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
