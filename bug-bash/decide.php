@@ -6,14 +6,15 @@ require_once '..\vendor\autoload.php';
 require_once '..\bug-bash\bug-bash-autoload.php';
 
 use Optimizely\Decide\OptimizelyDecideOption;
-use Optimizely\Decide\OptimizelyDecision;
 use Optimizely\Optimizely;
 use Optimizely\OptimizelyUserContext;
 
 // 1. Change this SDK key to your project's SDK Key
 const SDK_KEY = "K4UmaV5Pk7cEh2hbcjgwe";
+// 2. Change this to your flag key
+const FLAG_KEY = "product_sort";
 
-// 2. Uncomment each scenario 1 by 1 modifying the contents of the method
+// 3. Uncomment each scenario 1 by 1 modifying the contents of the method
 // to test additional scenarios.
 
 $test = new DecideTests();
@@ -24,7 +25,7 @@ $test->verifyDecisionProperties();
 //$test->verifyDecisionListenerWasCalled();
 //$test->verifyAnInvalidFlagKeyIsHandledCorrectly();
 
-// 3. Run the following command to execute uncommented test:
+// 4. Run the following command to execute uncommented test:
 // php ./bug-bash/decide.php
 
 class DecideTests
@@ -45,7 +46,7 @@ class DecideTests
     // verify decision return properties with default DecideOptions
     public function verifyDecisionProperties(): void
     {
-        $decision = $this->userContext->decide('product_sort');
+        $decision = $this->userContext->decide(FLAG_KEY);
 
         $this->printDecision($decision, "[Decide] Check that the following decision properties are expected");
     }
@@ -61,7 +62,7 @@ class DecideTests
 //            OptimizelyDecideOption::EXCLUDE_VARIABLES,
         ];
 
-        $decision = $this->userContext->decide('product_sort', $options);
+        $decision = $this->userContext->decide(FLAG_KEY, $options);
 
         $this->printDecision($decision, "[Decide] Modify the OptimizelyDecideOptions and check the decision variables expected");
     }
