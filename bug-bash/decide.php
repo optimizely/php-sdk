@@ -2,9 +2,11 @@
 
 namespace Optimizely\BugBash;
 
-require_once 'bug-bash-autoload.php';
+require_once '..\vendor\autoload.php';
+require_once '..\bug-bash\bug-bash-autoload.php';
 
 use Optimizely\Decide\OptimizelyDecideOption;
+use Optimizely\Decide\OptimizelyDecision;
 use Optimizely\Optimizely;
 use Optimizely\OptimizelyUserContext;
 
@@ -45,14 +47,7 @@ class DecideTests
     {
         $decision = $this->userContext->decide('product_sort');
 
-        print  "{${self::LOG_TAG}} [Decide] Check that the following decision properties are expected: 
-            {$decision->getEnabled()}, 
-            {$decision->getFlagKey()}, 
-            {$decision->getRuleKey()}, 
-            {$decision->getUserContext()}, 
-            {$decision->getVariationKey()}, 
-            {$decision->getVariables()}, 
-            {$decision->getReasons()}";
+        $this->printDecision($decision, "[Decide] Check that the following decision properties are expected");
     }
 
     //   test decide w all options: DISABLE_DECISION_EVENT, ENABLED_FLAGS_ONLY, IGNORE_USER_PROFILE_SERVICE, INCLUDE_REASONS, EXCLUDE_VARIABLES (will need to add variables)
@@ -60,47 +55,46 @@ class DecideTests
     {
         $options = [
             OptimizelyDecideOption::INCLUDE_REASONS,
-            // OptimizelyDecideOption::DISABLE_DECISION_EVENT,
-            // OptimizelyDecideOption::ENABLED_FLAGS_ONLY,
-            // OptimizelyDecideOption::IGNORE_USER_PROFILE_SERVICE,
-            // OptimizelyDecideOption::EXCLUDE_VARIABLES,
+//            OptimizelyDecideOption::DISABLE_DECISION_EVENT,
+//            OptimizelyDecideOption::ENABLED_FLAGS_ONLY,
+//            OptimizelyDecideOption::IGNORE_USER_PROFILE_SERVICE,
+//            OptimizelyDecideOption::EXCLUDE_VARIABLES,
         ];
 
         $decision = $this->userContext->decide('product_sort', $options);
 
-        print  "{${self::LOG_TAG}} [Decide] DECISION 1: 
-            {$decision->getEnabled()}, 
-            {$decision->getFlagKey()}, 
-            {$decision->getRuleKey()}, 
-            {$decision->getUserContext()}, 
-            {$decision->getVariationKey()}, 
-            {$decision->getVariables()}, 
-            {$decision->getReasons()}";
+        $this->printDecision($decision, "[Decide] Modify the OptimizelyDecideOptions and check the decision variables expected");
     }
 
     //   verify in logs that impression event of this decision was dispatched
     public function verifyLogsImpressionsEventsDispatched(): void
     {
-
     }
 
     //   verify on Results page that impression even was created
     public function verifyResultsPageInYourProjectShowsImpressionEvent(): void
     {
-        printf('%s Go to your project\'s results page and verify the decision events', self::LOG_TAG);
+        print 'Go to your project\'s results page and verify the decision events';
     }
 
     //   verify that decision listener contains correct information
     public function verifyDecisionListenerWasCalled(): void
     {
-
     }
 
     //   verify that invalid flag key is handled correctly
     public function verifyAnInvalidFlagKeyIsHandledCorrectly(): void
     {
-
     }
 
-    const LOG_TAG = '>>>';
+    private function printDecision($decision, $message): void
+    {
+        print ">>> $message: 
+            enabled: {$decision->getEnabled()}, 
+            flagKey: {$decision->getFlagKey()}, 
+            ruleKey: {$decision->getRuleKey()}, 
+            variationKey: {$decision->getVariationKey()}, 
+            variables: " . var_dump($decision->getVariables()) . ", 
+            reasons: " . var_dump($decision->getReasons());
+    }
 }
