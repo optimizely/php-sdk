@@ -6,6 +6,7 @@ require_once '../vendor/autoload.php';
 require_once '../bug-bash/bug-bash-autoload.php';
 
 use Optimizely\Decide\OptimizelyDecideOption;
+use Optimizely\Notification\NotificationType;
 use Optimizely\Optimizely;
 use Optimizely\OptimizelyFactory;
 use Optimizely\OptimizelyUserContext;
@@ -20,15 +21,15 @@ const FLAG_KEY = 'product_sort';
 // to test additional scenarios.
 
 $test = new DecideTests();
-$test->verifyDecisionProperties();
-// $test->testWithVariationsOfDecideOptions();
-// $test->verifyLogsImpressionsEventsDispatched();
-// $test->verifyResultsPageInYourProjectShowsImpressionEvent();
-// $test->verifyDecisionListenerWasCalled();
-// $test->verifyAnInvalidFlagKeyIsHandledCorrectly();
+//$test->verifyDecisionProperties();
+//$test->testWithVariationsOfDecideOptions();
+$test->verifyLogsImpressionsEventsDispatched();
+//$test->verifyResultsPageInYourProjectShowsImpressionEvent();
+//$test->verifyDecisionListenerWasCalled();
+//$test->verifyAnInvalidFlagKeyIsHandledCorrectly();
 
-// 4. Run the following command to execute uncommented test:
-// php ./bug-bash/decide.php
+// 4. From within the /bug-bash/ directory, the following command will run the uncommented test:
+// php decide.php
 
 class DecideTests
 {
@@ -37,7 +38,7 @@ class DecideTests
     {
         $decision = $this->userContext->decide(FLAG_KEY);
 
-        $this->printDecision($decision, '[Decide] Check that the following decision properties are expected');
+        $this->printDecision($decision, 'Check that the following decision properties are expected');
     }
 
     //   test decide w all options: DISABLE_DECISION_EVENT, ENABLED_FLAGS_ONLY, IGNORE_USER_PROFILE_SERVICE, INCLUDE_REASONS, EXCLUDE_VARIABLES (will need to add variables)
@@ -53,12 +54,26 @@ class DecideTests
 
         $decision = $this->userContext->decide(FLAG_KEY, $options);
 
-        $this->printDecision($decision, '[Decide] Modify the OptimizelyDecideOptions and check the decision variables expected');
+        $this->printDecision($decision, 'Modify the OptimizelyDecideOptions and check the decision variables expected');
     }
 
     //   verify in logs that impression event of this decision was dispatched
     public function verifyLogsImpressionsEventsDispatched(): void
     {
+        $onDecision = function ($type, $userId, $attributes, $decisionInfo) {
+            print ">>> [NotificationCenter] OnDecision:
+            type: $type,
+            userId: $userId,
+            attributes: " . print_r($attributes, true) . "
+            decisionInfo: " . print_r($decisionInfo, true) . "\r\n";
+        };
+        
+        $this->optimizelyClient->notificationCenter->addNotificationListener(
+            NotificationType::DECISION,
+            $onDecision
+        );
+
+        $this->userContext->decide(FLAG_KEY);
     }
 
     //   verify on Results page that impression even was created
@@ -79,13 +94,13 @@ class DecideTests
 
     private function printDecision($decision, $message): void
     {
-        print ">>> $message: 
+        print ">>> [Decision] $message: 
             enabled: {$decision->getEnabled()}, 
             flagKey: {$decision->getFlagKey()}, 
             ruleKey: {$decision->getRuleKey()}, 
             variationKey: {$decision->getVariationKey()}, 
-            variables: " . implode(', ', $decision->getVariables()) . ", 
-            reasons: " . implode(', ', $decision->getReasons()) . "\r\n";
+            variables: " . print_r($decision->getVariables(), true) . ", 
+            reasons: " . print_r($decision->getReasons(), true) . "\r\n";
     }
 
     private Optimizely $optimizelyClient;
