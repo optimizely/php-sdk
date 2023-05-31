@@ -2,8 +2,8 @@
 
 namespace Optimizely\BugBash;
 
-require_once '..\vendor\autoload.php';
-require_once '..\bug-bash\bug-bash-autoload.php';
+require_once '../vendor/autoload.php';
+require_once '../bug-bash/bug-bash-autoload.php';
 
 use Optimizely\Decide\OptimizelyDecideOption;
 use Optimizely\Optimizely;
@@ -12,6 +12,7 @@ use Optimizely\OptimizelyUserContext;
 
 // 1. Change this SDK key to your project's SDK Key
 const SDK_KEY = 'K4UmaV5Pk7cEh2hbcjgwe';
+
 // 2. Change this to your flag key
 const FLAG_KEY = 'product_sort';
 
@@ -20,11 +21,11 @@ const FLAG_KEY = 'product_sort';
 
 $test = new DecideTests();
 $test->verifyDecisionProperties();
-//$test->testWithVariationsOfDecideOptions();
-//$test->verifyLogsImpressionsEventsDispatched();
-//$test->verifyResultsPageInYourProjectShowsImpressionEvent();
-//$test->verifyDecisionListenerWasCalled();
-//$test->verifyAnInvalidFlagKeyIsHandledCorrectly();
+// $test->testWithVariationsOfDecideOptions();
+// $test->verifyLogsImpressionsEventsDispatched();
+// $test->verifyResultsPageInYourProjectShowsImpressionEvent();
+// $test->verifyDecisionListenerWasCalled();
+// $test->verifyAnInvalidFlagKeyIsHandledCorrectly();
 
 // 4. Run the following command to execute uncommented test:
 // php ./bug-bash/decide.php
@@ -84,7 +85,7 @@ class DecideTests
             ruleKey: {$decision->getRuleKey()}, 
             variationKey: {$decision->getVariationKey()}, 
             variables: " . implode(', ', $decision->getVariables()) . ", 
-            reasons: " . implode(', ', $decision->getReasons());
+            reasons: " . implode(', ', $decision->getReasons()) . "\r\n";
     }
 
     private Optimizely $optimizelyClient;
