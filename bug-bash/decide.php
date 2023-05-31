@@ -7,12 +7,13 @@ require_once '..\bug-bash\bug-bash-autoload.php';
 
 use Optimizely\Decide\OptimizelyDecideOption;
 use Optimizely\Optimizely;
+use Optimizely\OptimizelyFactory;
 use Optimizely\OptimizelyUserContext;
 
 // 1. Change this SDK key to your project's SDK Key
-const SDK_KEY = "K4UmaV5Pk7cEh2hbcjgwe";
+const SDK_KEY = 'K4UmaV5Pk7cEh2hbcjgwe';
 // 2. Change this to your flag key
-const FLAG_KEY = "product_sort";
+const FLAG_KEY = 'product_sort';
 
 // 3. Uncomment each scenario 1 by 1 modifying the contents of the method
 // to test additional scenarios.
@@ -30,25 +31,12 @@ $test->verifyDecisionProperties();
 
 class DecideTests
 {
-    private Optimizely $optimizelyClient;
-    private ?OptimizelyUserContext $userContext;
-    private array $options;
-
-    public function __construct()
-    {
-        $this->optimizelyClient = new Optimizely(datafile:null, sdkKey: SDK_KEY);
-
-        $userId = 'user-' . mt_rand(10, 99);
-        $attributes = ['age' => 11, 'country' => 'usa'];
-        $this->userContext = $this->optimizelyClient->createUserContext($userId, $attributes);
-    }
-
     // verify decision return properties with default DecideOptions
     public function verifyDecisionProperties(): void
     {
         $decision = $this->userContext->decide(FLAG_KEY);
 
-        $this->printDecision($decision, "[Decide] Check that the following decision properties are expected");
+        $this->printDecision($decision, '[Decide] Check that the following decision properties are expected');
     }
 
     //   test decide w all options: DISABLE_DECISION_EVENT, ENABLED_FLAGS_ONLY, IGNORE_USER_PROFILE_SERVICE, INCLUDE_REASONS, EXCLUDE_VARIABLES (will need to add variables)
@@ -64,7 +52,7 @@ class DecideTests
 
         $decision = $this->userContext->decide(FLAG_KEY, $options);
 
-        $this->printDecision($decision, "[Decide] Modify the OptimizelyDecideOptions and check the decision variables expected");
+        $this->printDecision($decision, '[Decide] Modify the OptimizelyDecideOptions and check the decision variables expected');
     }
 
     //   verify in logs that impression event of this decision was dispatched
@@ -95,7 +83,20 @@ class DecideTests
             flagKey: {$decision->getFlagKey()}, 
             ruleKey: {$decision->getRuleKey()}, 
             variationKey: {$decision->getVariationKey()}, 
-            variables: " . var_dump($decision->getVariables()) . ", 
-            reasons: " . var_dump($decision->getReasons());
+            variables: " . implode(', ', $decision->getVariables()) . ", 
+            reasons: " . implode(', ', $decision->getReasons());
+    }
+
+    private Optimizely $optimizelyClient;
+    private ?OptimizelyUserContext $userContext;
+    private array $options;
+
+    public function __construct()
+    {
+        $this->optimizelyClient = OptimizelyFactory::createDefaultInstance(SDK_KEY);
+
+        $userId = 'user-' . mt_rand(10, 99);
+        $attributes = ['age' => 11, 'country' => 'usa'];
+        $this->userContext = $this->optimizelyClient->createUserContext($userId, $attributes);
     }
 }
