@@ -23,9 +23,9 @@ const FLAG_KEY = 'product_sort';
 // to test additional scenarios.
 
 $test = new DecideTests();
-//$test->verifyDecisionProperties();
+$test->verifyDecisionProperties();
 //$test->testWithVariationsOfDecideOptions();
-$test->verifyLogsImpressionsEventsDispatched();
+//$test->verifyLogsImpressionsEventsDispatched();
 //$test->verifyResultsPageInYourProjectShowsImpressionEvent();
 //$test->verifyDecisionListenerWasCalled();
 //$test->verifyAnInvalidFlagKeyIsHandledCorrectly();
@@ -77,7 +77,7 @@ class DecideTests
     // verify on Results page that impression even was created
     public function verifyResultsPageInYourProjectShowsImpressionEvent(): void
     {
-        print "Go to your project's results page and verify decisions events are showing (might be a delay)";
+        print "Go to your project's results page and verify decisions events are showing (might be a 5 min delay)";
     }
 
     // verify that decision listener contains correct information
@@ -103,6 +103,13 @@ class DecideTests
     // verify that invalid flag key is handled correctly
     public function verifyAnInvalidFlagKeyIsHandledCorrectly(): void
     {
+        $logger = new DefaultLogger(Logger::ERROR);
+        $localOptimizelyClient = new Optimizely(datafile: null, logger: $logger, sdkKey: SDK_KEY);
+        $userId = 'user-' . mt_rand(10, 99);
+        $localUserContext = $localOptimizelyClient->createUserContext($userId);
+
+        // ensure you see an error -- Optimizely.ERROR: FeatureFlag Key "a_key_not_in_the_project" is not in datafile.
+        $localUserContext->decide("a_key_not_in_the_project");
     }
 
     private function printDecision($decision, $message): void
