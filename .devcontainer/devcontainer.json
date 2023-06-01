@@ -8,7 +8,10 @@
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	
-	"postCreateCommand": "composer install",	
+	"postCreateCommand": "./prep-env.sh",
+	"mounts": [
+		"source=.,target=/workspace,type=bind,consistency=cached"
+	],
 
 	// Configure tool-specific properties.
 	// "customizations": {},
