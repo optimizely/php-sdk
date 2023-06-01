@@ -8,10 +8,7 @@
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	
-	"postCreateCommand": "./prep-env.sh",
-	"mounts": [
-		"source=.,target=/workspace,type=bind,consistency=cached"
-	],
+	"postCreateCommand": "/workspaces/php-sdk/prep-env.sh",
 
 	// Configure tool-specific properties.
 	// "customizations": {},
