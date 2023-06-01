@@ -24,13 +24,16 @@ const FLAG_KEY = 'product_sort';
 
 $test = new DecideTests();
 $test->verifyDecisionProperties();
-//$test->testWithVariationsOfDecideOptions();
-//$test->verifyLogsImpressionsEventsDispatched();
-//$test->verifyResultsPageInYourProjectShowsImpressionEvent();
-//$test->verifyDecisionListenerWasCalled();
-//$test->verifyAnInvalidFlagKeyIsHandledCorrectly();
+// $test->testWithVariationsOfDecideOptions();
+// $test->verifyLogsImpressionsEventsDispatched();
+// $test->verifyResultsPageInYourProjectShowsImpressionEvent();
+// $test->verifyDecisionListenerWasCalled();
+// $test->verifyAnInvalidFlagKeyIsHandledCorrectly();
 
-// 4. From within the /bug-bash/ directory, the following command will run the uncommented test:
+// 4. Change directory into ./bug-bash 
+// cd ./bug-bash/
+
+// 5. Run the following command to execute the uncommented tests above:
 // php decide.php
 
 class DecideTests
