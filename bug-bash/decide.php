@@ -43,7 +43,7 @@ class DecideTests
     {
         $decision = $this->userContext->decide(FLAG_KEY);
 
-        $this->printDecision($decision, 'Check that the following decision properties are expected');
+        $this->printDecision($decision, "Check that the following decision properties are expected for user $this->userId");
     }
 
     // test decide w all options: DISABLE_DECISION_EVENT, ENABLED_FLAGS_ONLY, IGNORE_USER_PROFILE_SERVICE, INCLUDE_REASONS, EXCLUDE_VARIABLES (will need to add variables)
@@ -51,10 +51,10 @@ class DecideTests
     {
         $options = [
             OptimizelyDecideOption::INCLUDE_REASONS,
-//            OptimizelyDecideOption::DISABLE_DECISION_EVENT,
-//            OptimizelyDecideOption::ENABLED_FLAGS_ONLY,
-//            OptimizelyDecideOption::IGNORE_USER_PROFILE_SERVICE,
-//            OptimizelyDecideOption::EXCLUDE_VARIABLES,
+            // OptimizelyDecideOption::DISABLE_DECISION_EVENT,
+            // OptimizelyDecideOption::ENABLED_FLAGS_ONLY,
+            // OptimizelyDecideOption::IGNORE_USER_PROFILE_SERVICE,
+            // OptimizelyDecideOption::EXCLUDE_VARIABLES,
         ];
 
         $decision = $this->userContext->decide(FLAG_KEY, $options);
@@ -117,8 +117,10 @@ class DecideTests
 
     private function printDecision($decision, $message): void
     {
+        $enabled = $decision->getEnabled() ? "true" : "false";
+
         print ">>> [Decision] $message: 
-            enabled: {$decision->getEnabled()}, 
+            enabled: $enabled, 
             flagKey: {$decision->getFlagKey()}, 
             ruleKey: {$decision->getRuleKey()}, 
             variationKey: {$decision->getVariationKey()}, 
@@ -127,6 +129,7 @@ class DecideTests
     }
 
     private Optimizely $optimizelyClient;
+    private string $userId;
     private ?OptimizelyUserContext $userContext;
     private array $options;
 
@@ -134,8 +137,8 @@ class DecideTests
     {
         $this->optimizelyClient = OptimizelyFactory::createDefaultInstance(SDK_KEY);
 
-        $userId = 'user-' . mt_rand(10, 99);
+        $this->userId = 'user-' . mt_rand(10, 99);
         $attributes = ['age' => 11, 'country' => 'usa'];
-        $this->userContext = $this->optimizelyClient->createUserContext($userId, $attributes);
+        $this->userContext = $this->optimizelyClient->createUserContext($this->userId, $attributes);
     }
 }
