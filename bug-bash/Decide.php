@@ -3,7 +3,7 @@
 namespace Optimizely\BugBash;
 
 require_once '../vendor/autoload.php';
-require_once '../bug-bash/bug-bash-autoload.php';
+require_once '../bug-bash/_bug-bash-autoload.php';
 
 use Monolog\Logger;
 use Optimizely\Decide\OptimizelyDecideOption;
@@ -30,11 +30,11 @@ $test->verifyDecisionProperties();
 // $test->verifyDecisionListenerWasCalled();
 // $test->verifyAnInvalidFlagKeyIsHandledCorrectly();
 
-// 4. Change directory into ./bug-bash 
+// 4. Change directory into ./bug-bash
 // cd ./bug-bash/
 
 // 5. Run the following command to execute the uncommented tests above:
-// php decide.php
+// php Decide.php
 
 class DecideTests
 {
