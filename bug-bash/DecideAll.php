@@ -16,20 +16,17 @@ use Optimizely\OptimizelyUserContext;
 // 1. Change this SDK key to your project's SDK Key
 const SDK_KEY = 'K4UmaV5Pk7cEh2hbcjgwe';
 
-// 2. Change this array of flag keys (2+) to what you have in your project
-const FLAG_KEYS = ['product_sort', 'product_version', 'marketing_banner'];
+// 2. Create additional flag keys in your project (2+)
 
 // 3. Uncomment each scenario 1 by 1 modifying the contents of the method
 // to test additional scenarios.
 
 $test = new DecideAllTests();
 $test->verifyDecisionProperties();
-// $test->testDefaultDecideAllOptions();
-// $test->testWithAllOptions();
+// $test->testWithVariousCombinationsOfOptions();
 // $test->verifyLogImpressionEventDispatched();
-// ->verifyResultsPageShowsImpressionEvents();
+// $test->verifyResultsPageShowsImpressionEvents();
 // $test->verifyDecisionListenerContainsCorrectInformation();
-// $test->verifyInvalidFlagsAreHandled();
 
 // 4. Change the current folder into the bug-bash directory if you're not already there:
 // cd bug-bash/
@@ -39,48 +36,72 @@ $test->verifyDecisionProperties();
 
 class DecideAllTests
 {
-    // verify decision properties
+    // verify decide all returns properties without specifying default options
     public function verifyDecisionProperties(): void
     {
-        $decision = $this->userContext->decideAll(FLAG_KEYS);
+        $decision = $this->userContext->decideAll();
 
-        $this->printDecisions($decision, "Check that the following decision properties are expected for user $this->userId");
+        $this->printDecisions($decision, "Check that all of the decisions' multiple properties are expected for user `$this->userId`");
     }
 
-    // test with default options
-    public function testDefaultDecideAllOptions(): void
+    // test with all and variations/combinations of options
+    public function testWithVariousCombinationsOfOptions(): void
     {
-    }
+        $options = [
+            OptimizelyDecideOption::INCLUDE_REASONS,
+            // OptimizelyDecideOption::DISABLE_DECISION_EVENT,
+            // OptimizelyDecideOption::ENABLED_FLAGS_ONLY,  //  ⬅️ Disable some of your flags
+            // OptimizelyDecideOption::IGNORE_USER_PROFILE_SERVICE,
+            OptimizelyDecideOption::EXCLUDE_VARIABLES,
+        ];
 
-    // test with all options
-    public function testWithAllOptions(): void
-    {
+        $decisions = $this->userContext->decideAll($options);
+
+        $this->printDecisions($decisions, "Check that all of your flags' decisions respected the options passed.");
     }
 
     // verify in logs that impression event of this decision was dispatched
     public function verifyLogImpressionEventDispatched(): void
     {
+        // *** Be sure you have >=1 of your project's flags has an EXPERIMENT type
+        $logger = new DefaultLogger(Logger::DEBUG);
+        $localOptimizelyClient = new Optimizely(datafile: null, logger: $logger, sdkKey: SDK_KEY);
+        $localUserContext = $localOptimizelyClient->createUserContext($this->userId);
+
+        // review the DEBUG output, ensuring you see an impression log for each *EXPERIMENT* with a message like
+        // "Dispatching impression event to URL https://logx.optimizely.com/v1/events with params..."
+        // Rollout flag types will not dispatch and impression event
+        $localUserContext->decideAll();
     }
 
     // verify on Results page that impression events was created
     public function verifyResultsPageShowsImpressionEvents(): void
     {
+        print "After about 5-10 minutes, go to your project's results page and verify decisions events are showing.";
     }
 
     // verify that decision listener contains correct information
     public function verifyDecisionListenerContainsCorrectInformation(): void
     {
-    }
+        // Check that this was called for each of your project flag keys
+        $onDecision = function ($type, $userId, $attributes, $decisionInfo) {
+            print ">>> [NotificationCenter] OnDecision:
+            type: $type,
+            userId: $userId,
+            attributes: " . print_r($attributes, true) . "
+            decisionInfo: " . print_r($decisionInfo, true) . "\r\n";
+        };
+        $this->optimizelyClient->notificationCenter->addNotificationListener(
+            NotificationType::DECISION,
+            $onDecision
+        );
 
-    // verify that invalid flag key is handled
-    public function verifyInvalidFlagsAreHandled(): void
-    {
+        $this->userContext->decideAll();
     }
 
     private Optimizely $optimizelyClient;
     private string $userId;
     private ?OptimizelyUserContext $userContext;
-    private array $options;
 
     public function __construct()
     {

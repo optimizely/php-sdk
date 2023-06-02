@@ -52,7 +52,7 @@ class DecideTests
         $options = [
             OptimizelyDecideOption::INCLUDE_REASONS,
             // OptimizelyDecideOption::DISABLE_DECISION_EVENT,
-            // OptimizelyDecideOption::ENABLED_FLAGS_ONLY,
+            // OptimizelyDecideOption::ENABLED_FLAGS_ONLY,   //  ⬅️ Disable some of your flags
             // OptimizelyDecideOption::IGNORE_USER_PROFILE_SERVICE,
             // OptimizelyDecideOption::EXCLUDE_VARIABLES,
         ];
@@ -69,8 +69,7 @@ class DecideTests
         $featureFlagKey = 'product_version';
         $logger = new DefaultLogger(Logger::DEBUG);
         $localOptimizelyClient = new Optimizely(datafile: null, logger: $logger, sdkKey: SDK_KEY);
-        $userId = 'user-' . mt_rand(10, 99);
-        $localUserContext = $localOptimizelyClient->createUserContext($userId);
+        $localUserContext = $localOptimizelyClient->createUserContext($this->userId);
 
         // review the DEBUG output, ensuring you see an impression log
         // "Dispatching impression event to URL https://logx.optimizely.com/v1/events with params..."
@@ -118,7 +117,6 @@ class DecideTests
     private Optimizely $optimizelyClient;
     private string $userId;
     private ?OptimizelyUserContext $userContext;
-    private array $options;
 
     public function __construct()
     {
