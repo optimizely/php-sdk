@@ -30,8 +30,8 @@ $test->verifyDecisionProperties();
 // $test->verifyDecisionListenerWasCalled();
 // $test->verifyAnInvalidFlagKeyIsHandledCorrectly();
 
-// 4. Change directory into ./bug-bash
-// cd ./bug-bash/
+// 4. Change the current folder into the bug-bash directory
+// cd bug-bash/
 
 // 5. Run the following command to execute the uncommented tests above:
 // php Decide.php
