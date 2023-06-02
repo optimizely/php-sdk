@@ -115,19 +115,6 @@ class DecideTests
         $localUserContext->decide("a_key_not_in_the_project");
     }
 
-    private function printDecision($decision, $message): void
-    {
-        $enabled = $decision->getEnabled() ? "true" : "false";
-
-        print ">>> [Decision] $message: 
-            enabled: $enabled, 
-            flagKey: {$decision->getFlagKey()}, 
-            ruleKey: {$decision->getRuleKey()}, 
-            variationKey: {$decision->getVariationKey()}, 
-            variables: " . print_r($decision->getVariables(), true) . ", 
-            reasons: " . print_r($decision->getReasons(), true) . "\r\n";
-    }
-
     private Optimizely $optimizelyClient;
     private string $userId;
     private ?OptimizelyUserContext $userContext;
@@ -140,5 +127,18 @@ class DecideTests
         $this->userId = 'user-' . mt_rand(10, 99);
         $attributes = ['age' => 11, 'country' => 'usa'];
         $this->userContext = $this->optimizelyClient->createUserContext($this->userId, $attributes);
+    }
+
+    private function printDecision($decision, $message): void
+    {
+        $enabled = $decision->getEnabled() ? "true" : "false";
+
+        print ">>> [Decision] $message: 
+            enabled: $enabled, 
+            flagKey: {$decision->getFlagKey()}, 
+            ruleKey: {$decision->getRuleKey()}, 
+            variationKey: {$decision->getVariationKey()}, 
+            variables: " . print_r($decision->getVariables(), true) . ", 
+            reasons: " . print_r($decision->getReasons(), true) . "\r\n";
     }
 }
