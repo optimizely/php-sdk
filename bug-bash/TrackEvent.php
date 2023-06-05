@@ -38,17 +38,9 @@ class TrackEventTests
     // check that track notification listener produces event with event key
     public function checkTrackNotificationListenerProducesEvent(): void
     {
-        // Check that this was called during the...
-        $onTrackEvent = function ($type, $userId, $attributes, $decisionInfo) {
-            print ">>> [$this->outputTag] OnTrackEvent:
-                type: $type,
-                userId: $userId,
-                attributes: " . print_r($attributes, true) . "
-                decisionInfo: " . print_r($decisionInfo, true) . "\r\n";
-        };
         $this->optimizelyClient->notificationCenter->addNotificationListener(
             NotificationType::TRACK,
-            $onTrackEvent
+            $this->onTrackEvent  // ⬅️ This should be called with a valid EVENT_NAME
         );
 
         // ...send track event.
@@ -72,6 +64,10 @@ class TrackEventTests
         $logger = new DefaultLogger(Logger::DEBUG);
         $localOptimizelyClient = new Optimizely(datafile: null, logger: $logger, sdkKey: SDK_KEY);
         $localUserContext = $localOptimizelyClient->createUserContext($this->userId);
+        $this->optimizelyClient->notificationCenter->addNotificationListener(
+            NotificationType::TRACK,
+            $this->onTrackEvent  // ⬅️ There should not be a Notification Listener OnTrackEvent called on invalid event name
+        );
 
         // You should not see any "Optimizely.DEBUG: Dispatching conversion event" but instead see
         // "Optimizely.INFO: Not tracking user "{user-id}" for event "an_invalid_event_name_not_in_the_project".
@@ -100,6 +96,7 @@ class TrackEventTests
     private string $userId;
     private ?OptimizelyUserContext $userContext;
     private string $outputTag = "Track Event";
+    private \Closure $onTrackEvent;
 
     public function __construct()
     {
@@ -108,5 +105,13 @@ class TrackEventTests
         $this->userId = 'user-' . mt_rand(10, 99);
         $attributes = ['age' => 19, 'country' => 'bangledesh', 'has_purchased' => true];
         $this->userContext = $this->optimizelyClient->createUserContext($this->userId, $attributes);
+
+        $this->onTrackEvent = function ($type, $userId, $attributes, $decisionInfo) {
+            print ">>> [$this->outputTag] OnTrackEvent:
+                type: $type,
+                userId: $userId,
+                attributes: " . print_r($attributes, true) . "
+                decisionInfo: " . print_r($decisionInfo, true) . "\r\n";
+        };
     }
 }
