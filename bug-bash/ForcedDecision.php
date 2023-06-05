@@ -29,6 +29,7 @@ $test = new ForcedDecisionTests();
 // 4. Run the following command to execute the uncommented tests above:
 // php ForcedDecision.php
 
+// https://docs.developers.optimizely.com/feature-experimentation/docs/forced-decision-methods-php
 class ForcedDecisionTests
 {
 

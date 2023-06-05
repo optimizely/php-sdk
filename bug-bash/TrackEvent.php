@@ -33,6 +33,7 @@ $test->checkTrackNotificationListenerProducesEvent();
 // 4. Run the following command to execute the uncommented tests above:
 // php TrackEvent.php
 
+// https://docs.developers.optimizely.com/feature-experimentation/docs/track-event-php
 class TrackEventTests
 {
     // check that track notification listener produces event with event key

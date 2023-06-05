@@ -34,6 +34,7 @@ $test->verifyDecisionProperties();
 // 5. Run the following command to execute the uncommented tests above:
 // php DecideAll.php
 
+// https://docs.developers.optimizely.com/feature-experimentation/docs/decide-methods-php
 class DecideAllTests
 {
     // verify decide all returns properties without specifying default options
