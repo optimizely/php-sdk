@@ -63,14 +63,14 @@ class DecideAllTests
     // verify in logs that impression event of this decision was dispatched
     public function verifyLogImpressionEventDispatched(): void
     {
-        // *** Be sure you have >=1 of your project's flags has an EXPERIMENT type
+        // 💡️ Be sure you have >=1 of your project's flags has an EXPERIMENT type
         $logger = new DefaultLogger(Logger::DEBUG);
         $localOptimizelyClient = new Optimizely(datafile: null, logger: $logger, sdkKey: SDK_KEY);
         $localUserContext = $localOptimizelyClient->createUserContext($this->userId);
 
         // review the DEBUG output, ensuring you see an impression log for each *EXPERIMENT* with a message like
         // "Dispatching impression event to URL https://logx.optimizely.com/v1/events with params..."
-        // Rollout flag types will not dispatch and impression event
+        // ⚠️ Rollout flag types should not dispatch and impression event
         $localUserContext->decideAll();
     }
 
@@ -85,7 +85,7 @@ class DecideAllTests
     {
         // Check that this was called for each of your project flag keys
         $onDecision = function ($type, $userId, $attributes, $decisionInfo) {
-            print ">>> [NotificationCenter] OnDecision:
+            print ">>> [$this->outputTag] OnDecision:
             type: $type,
             userId: $userId,
             attributes: " . print_r($attributes, true) . "
@@ -102,6 +102,7 @@ class DecideAllTests
     private Optimizely $optimizelyClient;
     private string $userId;
     private ?OptimizelyUserContext $userContext;
+    private string $outputTag = "Decide All";
 
     public function __construct()
     {
@@ -118,7 +119,7 @@ class DecideAllTests
         foreach ($decisions as $decision) {
             $enabled = $decision->getEnabled() ? "true" : "false";
 
-            print ">>> [Decision #$count] $message: 
+            print ">>> [$this->outputTag #$count] $message: 
                 enabled: $enabled, 
                 flagKey: {$decision->getFlagKey()}, 
                 ruleKey: {$decision->getRuleKey()}, 

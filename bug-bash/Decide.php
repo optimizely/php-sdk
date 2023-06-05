@@ -65,7 +65,7 @@ class DecideTests
     // verify in logs that impression event of this decision was dispatched
     public function verifyLogsImpressionsEventsDispatched(): void
     {
-        // Create a new flag with an A/B Test eg "product_version"
+        // 💡️ Create a new flag with an A/B Test eg "product_version"
         $featureFlagKey = 'product_version';
         $logger = new DefaultLogger(Logger::DEBUG);
         $localOptimizelyClient = new Optimizely(datafile: null, logger: $logger, sdkKey: SDK_KEY);
@@ -79,7 +79,7 @@ class DecideTests
     // verify on Results page that impression even was created
     public function verifyResultsPageInYourProjectShowsImpressionEvent(): void
     {
-        print "Go to your project's results page and verify decisions events are showing (might be a 5 min delay)";
+        print "Go to your project's results page and verify decisions events are showing (5 min delay)";
     }
 
     // verify that decision listener contains correct information
@@ -87,7 +87,7 @@ class DecideTests
     {
         // Check that this was called during the...
         $onDecision = function ($type, $userId, $attributes, $decisionInfo) {
-            print ">>> [NotificationCenter] OnDecision:
+            print ">>> [$this->outputTag] OnDecision:
             type: $type,
             userId: $userId,
             attributes: " . print_r($attributes, true) . "
@@ -117,6 +117,7 @@ class DecideTests
     private Optimizely $optimizelyClient;
     private string $userId;
     private ?OptimizelyUserContext $userContext;
+    private string $outputTag = "Decide";
 
     public function __construct()
     {
@@ -131,7 +132,7 @@ class DecideTests
     {
         $enabled = $decision->getEnabled() ? "true" : "false";
 
-        print ">>> [Decision] $message: 
+        print ">>> [$this->outputTag] $message: 
             enabled: $enabled, 
             flagKey: {$decision->getFlagKey()}, 
             ruleKey: {$decision->getRuleKey()}, 
