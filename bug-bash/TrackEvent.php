@@ -18,7 +18,7 @@ const SDK_KEY = 'K4UmaV5Pk7cEh2hbcjgwe';
 // 2. Add an event to your project, adding it to your Experiment flag as a metric, then set the key here
 const EVENT_KEY = 'version_presented';
 
-// 2. Uncomment each scenario 1 by 1 modifying the contents of the method
+// 3. Uncomment each scenario 1 by 1 modifying the contents of the method
 // to test additional scenarios.
 
 $test = new TrackEventTests();
@@ -27,10 +27,10 @@ $test->checkTrackNotificationListenerProducesEvent();
 // $test->checkConversionEventLogIsNOTDispatchedOnTrackEventForInvalidEventName();
 // $test->testEventTagsShowInDispatchedEventAndAppOptimizelyCom();
 
-// 3. Change the current folder into the bug-bash directory if you've not already
+// 4. Change the current folder into the bug-bash directory if you've not already
 // cd bug-bash/
 
-// 4. Run the following command to execute the uncommented tests above:
+// 5. Run the following command to execute the uncommented tests above:
 // php TrackEvent.php
 
 // https://docs.developers.optimizely.com/feature-experimentation/docs/track-event-php
