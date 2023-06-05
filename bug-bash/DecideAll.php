@@ -14,7 +14,7 @@ use Optimizely\OptimizelyFactory;
 use Optimizely\OptimizelyUserContext;
 
 // 1. Change this SDK key to your project's SDK Key
-const SDK_KEY = 'K4UmaV5Pk7cEh2hbcjgwe';
+const SDK_KEY = '<your-sdk-key>';
 
 // 2. Create additional flag keys in your project (2+)
 

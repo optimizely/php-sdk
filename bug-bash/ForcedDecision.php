@@ -13,24 +13,24 @@ use Optimizely\OptimizelyForcedDecision;
 use Optimizely\OptimizelyUserContext;
 
 // 1. Change this SDK key to your project's SDK Key
-const SDK_KEY = 'K4UmaV5Pk7cEh2hbcjgwe';
+const SDK_KEY = '<your-sdk-key>';
 
 // 2. Add a Targeted Delivery to your project, then flag key here
-const TARGETED_DELIVERY_FLAG_KEY = 'product_sort';
+const TARGETED_DELIVERY_FLAG_KEY = '<your-delivery-flag-key>';
 
 // 3. Add a Targeted Delivery to your project, then flag key here
-const AB_EXPERIMENT_FLAG_KEY = 'product_version';
+const AB_EXPERIMENT_FLAG_KEY = '<your-experiment-flag-key>';
 
 // 4. Uncomment each scenario 1 by 1 modifying the contents of the method
 // to test additional scenarios.
 
 $test = new ForcedDecisionTests();
 $test->forcedDecisionForAFlag();
-$test->forcedDecisionForExperiment();
-$test->forcedDecisionForDeliveryRule();
-$test->getForcedDecision();
-$test->removeSingleForcedDecisions();
-$test->removeAllForcedDecisions();
+// $test->forcedDecisionForExperiment();
+// $test->forcedDecisionForDeliveryRule();
+// $test->getForcedDecision();
+// $test->removeSingleForcedDecisions();
+// $test->removeAllForcedDecisions();
 
 // 5. Change the current folder into the bug-bash directory if you've not already
 // cd bug-bash/
@@ -90,7 +90,7 @@ class ForcedDecisionTests
 
         $retrievedForcedDecision = $this->userContext->getForcedDecision($decisionContext); // code under test
 
-        print ">>> $this->outputTag variationKey = $retrievedForcedDecision";
+        print ">>> $this->outputTag Get Forced Variation = $retrievedForcedDecision";
     }
 
     // remove forced variations

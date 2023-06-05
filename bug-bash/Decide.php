@@ -14,10 +14,10 @@ use Optimizely\OptimizelyFactory;
 use Optimizely\OptimizelyUserContext;
 
 // 1. Change this SDK key to your project's SDK Key
-const SDK_KEY = 'K4UmaV5Pk7cEh2hbcjgwe';
+const SDK_KEY = '<your-sdk-key>';
 
 // 2. Change this to your flag key
-const FLAG_KEY = 'product_sort';
+const FLAG_KEY = '<your-flag-key>';
 
 // 3. Uncomment each scenario 1 by 1 modifying the contents of the method
 // to test additional scenarios.
