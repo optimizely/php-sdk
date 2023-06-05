@@ -24,11 +24,11 @@ const FLAG_KEYS = ['product_sort', 'marketing_banner', 'product_version'];
 
 $test = new DecideForKeysTests();
 $test->verifyDecisionProperties();
- $test->testWithVariationsOfDecideOptions();
- $test->verifyLogsImpressionsEventsDispatched();
- $test->verifyResultsPageInYourProjectShowsImpressionEvent();
- $test->verifyDecisionListenerWasCalled();
- $test->verifyAnInvalidFlagKeyIsHandledCorrectly();
+// $test->testWithVariationsOfDecideOptions();
+// $test->verifyLogsImpressionsEventsDispatched();
+// $test->verifyResultsPageInYourProjectShowsImpressionEvent();
+// $test->verifyDecisionListenerWasCalled();
+// $test->verifyAnInvalidFlagKeyIsHandledCorrectly();
 
 // 4. Change the current folder into the bug-bash directory if you've not already
 // cd bug-bash/
