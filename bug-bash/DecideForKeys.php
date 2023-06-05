@@ -125,7 +125,7 @@ class DecideForKeysTests
         $this->optimizelyClient = OptimizelyFactory::createDefaultInstance(SDK_KEY);
 
         $this->userId = 'user-' . mt_rand(10, 99);
-        $attributes = ['age' => 11, 'country' => 'usa'];
+        $attributes = ['likes_yams' => true, 'cart_value' => 34.13, 'country' => 'sweden'];
         $this->userContext = $this->optimizelyClient->createUserContext($this->userId, $attributes);
     }
 

@@ -124,7 +124,7 @@ class DecideTests
         $this->optimizelyClient = OptimizelyFactory::createDefaultInstance(SDK_KEY);
 
         $this->userId = 'user-' . mt_rand(10, 99);
-        $attributes = ['age' => 11, 'country' => 'usa'];
+        $attributes = ['age' => 25, 'country' => 'canada', 'abandoned_cart' => false];
         $this->userContext = $this->optimizelyClient->createUserContext($this->userId, $attributes);
     }
 
