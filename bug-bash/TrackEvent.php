@@ -15,8 +15,8 @@ use Optimizely\OptimizelyUserContext;
 // 1. Change this SDK key to your project's SDK Key
 const SDK_KEY = 'K4UmaV5Pk7cEh2hbcjgwe';
 
-// 2. Add an event to your project, adding it to your Experiment flag as a metric, then set the name here
-const EVENT_NAME = 'version_presented';
+// 2. Add an event to your project, adding it to your Experiment flag as a metric, then set the key here
+const EVENT_KEY = 'version_presented';
 
 // 2. Uncomment each scenario 1 by 1 modifying the contents of the method
 // to test additional scenarios.
@@ -44,7 +44,7 @@ class TrackEventTests
         );
 
         // ...send track event.
-        $this->userContext->trackEvent(EVENT_NAME);
+        $this->userContext->trackEvent(EVENT_KEY);
     }
 
     // check that conversion event in the dispatch logs contains event key below
@@ -54,7 +54,7 @@ class TrackEventTests
         $localOptimizelyClient = new Optimizely(datafile: null, logger: $logger, sdkKey: SDK_KEY);
         $localUserContext = $localOptimizelyClient->createUserContext($this->userId);
 
-        $localUserContext->trackEvent(EVENT_NAME);
+        $localUserContext->trackEvent(EVENT_KEY);
     }
 
     // check that event is NOT dispatched if invalid event key is used
@@ -89,7 +89,7 @@ class TrackEventTests
 
         // Dispatched event should have the tags added to the payload `params { ... }` and also
         // should show on app.optimizely.com Reports tab after 5-10 minutes
-        $localUserContext->trackEvent(EVENT_NAME, $custom_tags);
+        $localUserContext->trackEvent(EVENT_KEY, $custom_tags);
     }
 
     private Optimizely $optimizelyClient;
