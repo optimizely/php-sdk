@@ -8,8 +8,12 @@ require_once '../bug-bash/_bug-bash-autoload.php';
 use Optimizely\Optimizely;
 use Optimizely\Decide\OptimizelyDecideOption;
 
+// To test optimizely config simply add your SDK key and attributes in, then run the file.
+// You should be able to see unpacked entities from featureMap and experimentMap
+// verify them and make sure some are not missing or error
+
 // Instantiate an Optimizely client
-$sdkKey = "TbrfRLeKvLyWGusqANoeR";
+$sdkKey = "<your sdk key here>";
 // $optimizelyClient = new Optimizely($sdkKey);
 $optimizelyClient = new Optimizely(null, null, null, null, false, null, null, null, $sdkKey);
 $user = $optimizelyClient->createUserContext('user123', ['attribute1' => 'hello']);
