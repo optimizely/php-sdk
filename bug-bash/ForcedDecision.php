@@ -9,12 +9,14 @@ use Optimizely\OptimizelyDecisionContext;
 use Optimizely\OptimizelyForcedDecision;
 use Optimizely\Decide\OptimizelyDecideOption;
 
-$optimizelyClient = new Optimizely(null, null, null, null, null, null, null, null, "X9mZd2WDywaUL9hZXyh9A");
+// To test forced decisions please add the SDK key, flag key and any attributes from your optimizely 
+// project in the code below. If no errors then forced decision test should pass.
+
+$optimizelyClient = new Optimizely(null, null, null, null, null, null, null, null, "<you sdk key here>");
 
 
 $userId = 'user' . strval(rand(0, 1000001));
 
-// PART 2 a)
 echo '===================================';
 echo 'F-to-D (no rule key specified):';
 echo '==================================='.PHP_EOL;
