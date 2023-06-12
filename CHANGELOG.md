@@ -1,5 +1,10 @@
 # Optimizely PHP SDK Changelog
 
+## 4.0.0
+June 12, 2023
+
+* Provided support for PHP version 8.x.
+
 ## 3.9.4
 March 29 , 2023
 
