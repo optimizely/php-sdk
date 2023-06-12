@@ -4,6 +4,8 @@
 June 12, 2023
 
 * Provided support for PHP version 8.x.
+* Version 4.0.0 requires PHP8+.
+* Version 3 requires PHP5.5+ up to PHP7.
 
 ## 3.9.4
 March 29 , 2023
