@@ -19,6 +19,9 @@ Refer to the [PHP SDK's developer documentation](https://docs.developers.optimiz
 
 To access the Feature Management configuration in the Optimizely dashboard, please contact your Optimizely account executive.
 
+SDK version 4.0.0 requires PHP8+.
+SDK version 3 requires PHP5.5+ up to PHP7.
+
 ### Install the SDK
 
 The Optimizely PHP SDK can be installed through [Composer](https://getcomposer.org/). Please use the following command:
