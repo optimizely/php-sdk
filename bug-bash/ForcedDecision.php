@@ -1,171 +1,323 @@
 <?php
-
 namespace Optimizely\BugBash;
 
 require_once '../vendor/autoload.php';
 require_once '../bug-bash/_bug-bash-autoload.php';
-
-use Optimizely\Decide\OptimizelyDecideOption;
+// fetch the datafile from an authenticated endpoint
 use Optimizely\Optimizely;
 use Optimizely\OptimizelyDecisionContext;
-use Optimizely\OptimizelyFactory;
 use Optimizely\OptimizelyForcedDecision;
-use Optimizely\OptimizelyUserContext;
+use Optimizely\Decide\OptimizelyDecideOption;
 
-// 1. Change this SDK key to your project's SDK Key
-const SDK_KEY = 'K4UmaV5Pk7cEh2hbcjgwe';
+// To test forced decisions please add the SDK key, flag key and any attributes from your optimizely 
+// project in the code below. If no errors then forced decision test should pass.
 
-// 2. Add a Targeted Delivery to your project, then flag key here
-const TARGETED_DELIVERY_FLAG_KEY = 'product_sort';
+$optimizelyClient = new Optimizely(null, null, null, null, null, null, null, null, "<you sdk key here>");
 
-// 3. Add a Targeted Delivery to your project, then flag key here
-const AB_EXPERIMENT_FLAG_KEY = 'product_version';
 
-// 4. Uncomment each scenario 1 by 1 modifying the contents of the method
-// to test additional scenarios.
+$userId = 'user' . strval(rand(0, 1000001));
 
-$test = new ForcedDecisionTests();
-$test->forcedDecisionForAFlag();
-$test->forcedDecisionForExperiment();
-$test->forcedDecisionForDeliveryRule();
-$test->getForcedDecision();
-$test->removeSingleForcedDecisions();
-$test->removeAllForcedDecisions();
+echo '===================================';
+echo 'F-to-D (no rule key specified):';
+echo '==================================='.PHP_EOL;
 
-// 5. Change the current folder into the bug-bash directory if you've not already
-// cd bug-bash/
+echo '  Set user context, userId any, age = 20 (bucketed)'.PHP_EOL;
+echo '  Call decide with flag1  ---> expected result is variation a'.PHP_EOL;
+echo '  ---------------------'.PHP_EOL;
 
-// 6. Run the following command to execute the uncommented tests above:
-// php ForcedDecision.php
+$user = $optimizelyClient->createUserContext($userId, array("age"=> 20));
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert('variation_a' == $decideDecision->getVariationKey());
 
-// https://docs.developers.optimizely.com/feature-experimentation/docs/forced-decision-methods-php
-class ForcedDecisionTests
-{
-    // set a forced decision for a flag
-    public function forcedDecisionForAFlag(): void
-    {
-        $maybeARandomFlagKey = "maybe_a_random_flag_key";
-        $decisionContext = new OptimizelyDecisionContext($maybeARandomFlagKey, "some_rule_key");
-        $forceDecision = new OptimizelyForcedDecision("some_variation_key");
-        $this->userContext->setForcedDecision($decisionContext, $forceDecision);
+echo PHP_EOL . '  Set forced decision w flag1 and variation b' . PHP_EOL;
+echo '  Call decide -----> expected variation b in decide decision' . PHP_EOL;
+echo '  ---------------------';
 
-        // code under test
-        $decision = $this->userContext->decide($maybeARandomFlagKey, [OptimizelyDecideOption::INCLUDE_REASONS]);
+$context = new OptimizelyDecisionContext('flag1', null);
+$decision = new OptimizelyForcedDecision('variation_b');
+$user->setForcedDecision($context, $decision);
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('variation_b' == $decideDecision->getVariationKey());
 
-        $this->printDecision($decision, "Check your expected decision properties for this flag");
-    }
+echo PHP_EOL . '  Set forced decision with flag1 and variation c (invalid)' . PHP_EOL;
+echo '  Call decide  ---->  expected variation a' . PHP_EOL;
+echo '  ---------------------' . PHP_EOL;
+$context = new OptimizelyDecisionContext('flag1', null);
+$decision = new OptimizelyForcedDecision('variation_c');
+$user->setForcedDecision($context, $decision);
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('variation_a' == $decideDecision->getVariationKey());
 
-    // set a forced decision for an ab-test experiment rule
-    public function forcedDecisionForExperiment(): void
-    {
-        $decisionContext = new OptimizelyDecisionContext(AB_EXPERIMENT_FLAG_KEY, "some_rule_key");
-        $forceDecision = new OptimizelyForcedDecision("some_variation_key");
-        $this->userContext->setForcedDecision($decisionContext, $forceDecision);
+// E-to-D (rule key = “flag1_experiment”):
+// -------------------------------------------
+// Set user context, userId any, age = 20 (bucketed)
+// Call decide with flag1  ---> expected result is variation a in the decide decision
+// Set forced decision w flag1 and rule key “flag1_experiment”, and variation b
+// Call decide -----> expected variation b in decide decision
+// Set forced decision with flag1 and rule key “flag1_experiment” and invalid variation c
+// Call decide  ---->  expected variation a
 
-        // code under test
-        $decision = $this->userContext->decide(AB_EXPERIMENT_FLAG_KEY, [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo PHP_EOL . PHP_EOL . '===================================';
+echo 'E-to-D (rule key = “flag1_experiment”):';
+echo '==================================='.PHP_EOL;
 
-        $this->printDecision($decision, "Check your expected decision properties for this experiment rule");
-    }
+echo '  Set user context, userId any, age = 20 (bucketed)'.PHP_EOL;
+echo '  Call decide with flag1  ---> expected result is variation a'.PHP_EOL;
+echo '  ---------------------'.PHP_EOL;
 
-    // set a forced variation for a delivery rule
-    public function forcedDecisionForDeliveryRule(): void
-    {
-        $decisionContext = new OptimizelyDecisionContext(TARGETED_DELIVERY_FLAG_KEY, "some_rule_key");
-        $forceDecision = new OptimizelyForcedDecision("some_variation_key");
-        $this->userContext->setForcedDecision($decisionContext, $forceDecision);
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('variation_a' == $decideDecision->getVariationKey());
 
-        // code under test
-        $decision = $this->userContext->decide(TARGETED_DELIVERY_FLAG_KEY, [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo PHP_EOL . '  Set forced decision with flag1 and rule flag1_experiment and variation b' . PHP_EOL;
+echo '  Call decide -----> expected variation_b in decide decision' . PHP_EOL;
+echo '  ---------------------';
 
-        $this->printDecision($decision, "Check your expected decision properties for this delivery rule");
-    }
+$context = new OptimizelyDecisionContext('flag1', 'flag1_experiment');
+$decision = new OptimizelyForcedDecision('variation_b');
+$user->setForcedDecision($context, $decision);
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('variation_b' == $decideDecision->getVariationKey());
 
-    // get forced variations
-    public function getForcedDecision(): void
-    {
-        $decisionContext = new OptimizelyDecisionContext(AB_EXPERIMENT_FLAG_KEY, "some_rule_key");
-        $forceDecision = new OptimizelyForcedDecision("some_variation_key");
-        $this->userContext->setForcedDecision($decisionContext, $forceDecision);
+echo PHP_EOL . '  Set forced decision with flag1 and rule flag1_experiment and variation c (Invalid)' . PHP_EOL;
+echo '  Call decide -----> expected variation a in decide decision' . PHP_EOL;
+echo '  ---------------------';
 
-        $retrievedForcedDecision = $this->userContext->getForcedDecision($decisionContext); // code under test
+$context = new OptimizelyDecisionContext('flag1', 'flag1_experiment');
+$decision = new OptimizelyForcedDecision('variation_c');
+$user->setForcedDecision($context, $decision);
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('variation_a' == $decideDecision->getVariationKey());
 
-        print ">>> $this->outputTag variationKey = $retrievedForcedDecision";
-    }
+// D-to-D (rule key = “flag1_targeted_delivery”):
+// -------------------------------------------
+// Set user context, userId any, country = “US” (bucketed)
+// Call decide with flag1  ---> expected result is “on” in the decide decision
+// Set forced decision w flag1 and rule key “flag1_targeted_delivery”, and variation b
+// Call decide -----> expected variation b in decide decision
+// Set forced decision with flag1 and rule key “flag1_targeted_delivery” and invalid variation c
+// Call decide  ---->  expected “on”
 
-    // remove forced variations
-    public function removeSingleForcedDecisions(): void
-    {
-        $forcedDecisionThatWillBeRemoved = new OptimizelyForcedDecision("some_variation_key");
-        $forcedDecisionThatShouldBeKept = new OptimizelyForcedDecision("some_other_variation_key");
-        $this->userContext->setForcedDecision(
-            new OptimizelyDecisionContext(AB_EXPERIMENT_FLAG_KEY, "some_rule_key"),
-            $forcedDecisionThatWillBeRemoved
-        );
-        $this->userContext->setForcedDecision(
-            new OptimizelyDecisionContext(TARGETED_DELIVERY_FLAG_KEY, "some_rule_key"),
-            $forcedDecisionThatShouldBeKept
-        );
+echo PHP_EOL . PHP_EOL . '===================================';
+echo 'D-to-D (rule key = “flag1_targeted_delivery”):';
+echo '==================================='.PHP_EOL;
 
-        $this->userContext->removeForcedDecision($forcedDecisionThatWillBeRemoved); // code under test
-        $removed = $this->userContext->getForcedDecision($forcedDecisionThatWillBeRemoved);
-        $kept = $this->userContext->getForcedDecision($forcedDecisionThatShouldBeKept);
+echo '  Set user context, userId any, country = US (bucketed)'.PHP_EOL;
+echo '  Call decide with flag1  ---> expected result is on on'.PHP_EOL;
+echo '  ---------------------'.PHP_EOL;
 
-        // This forced decision should return null because we just removed it
-        print ">>> $this->outputTag Removed forced decision should be null: $removed";
+$user = $optimizelyClient->createUserContext($userId, array("country"=> "US"));
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('on' == $decideDecision->getVariationKey());
 
-        // This forced decision should return since we did not remove it
-        print ">>> $this->outputTag Kept forced decision not be null = $kept";
-    }
+echo PHP_EOL . '  Set forced decision with flag1 and rule “flag1_targeted_delivery” and variation b' . PHP_EOL;
+echo '  Call decide -----> expected variation_b in decide decision' . PHP_EOL;
+echo '  ---------------------';
 
-    public function removeAllForcedDecisions(): void
-    {
-        $forcedDecisionThatShouldBeRemoved = new OptimizelyForcedDecision("some_variation_key");
-        $forcedDecisionThatShouldAlsoBeRemoved = new OptimizelyForcedDecision("some_other_variation_key");
-        $this->userContext->setForcedDecision(
-            new OptimizelyDecisionContext(AB_EXPERIMENT_FLAG_KEY, "some_rule_key"),
-            $forcedDecisionThatShouldBeRemoved
-        );
-        $this->userContext->setForcedDecision(
-            new OptimizelyDecisionContext(TARGETED_DELIVERY_FLAG_KEY, "some_rule_key"),
-            $forcedDecisionThatShouldAlsoBeRemoved
-        );
+$context = new OptimizelyDecisionContext('flag1', 'flag1_targeted_delivery');
+$decision = new OptimizelyForcedDecision('variation_b');
+$user->setForcedDecision($context, $decision);
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('variation_b' == $decideDecision->getVariationKey());
 
-        $this->userContext->removeAllForcedDecisions(); // code under test
-        $wasRemoved = $this->userContext->getForcedDecision($forcedDecisionThatShouldBeRemoved);
-        $alsoRemoved = $this->userContext->getForcedDecision($forcedDecisionThatShouldAlsoBeRemoved);
+echo PHP_EOL . '  Set forced decision with flag1 and rule flag1_targeted_delivery and variation c (Invalid)' . PHP_EOL;
+echo '  Call decide -----> expected on in decide decision' . PHP_EOL;
+echo '  ---------------------';
 
-        // This forced decision should return null because we just removed it
-        print ">>> $this->outputTag Forced decision should be null since it was removed: $wasRemoved";
+$context = new OptimizelyDecisionContext('flag1', 'flag1_targeted_delivery');
+$decision = new OptimizelyForcedDecision('variation_c');
+$user->setForcedDecision($context, $decision);
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('on' == $decideDecision->getVariationKey());
 
-        // This forced decision should return since we did not remove it
-        print ">>> $this->outputTag Second forced decision should also be null since it too was removed = $alsoRemoved";
-    }
 
-    private Optimizely $optimizelyClient;
-    private string $userId;
-    private ?OptimizelyUserContext $userContext;
-    private string $outputTag = "Forced Decision";
+// ================================
+// PART 2 b) Repeat above three blocks, this time user DOES NOT meet audience conditions
+// ================================
 
-    public function __construct()
-    {
-        $this->optimizelyClient = OptimizelyFactory::createDefaultInstance(SDK_KEY);
+// F-to-D (no rule key specified):
+// -------------------------------------------
+// Set user context, userId any, age = 0 (not bucketed)
+// Call decide with flag1  ---> expected result is “off” (everyone else)
+// Set forced decision w flag1, variation b
+// Call decide -----> expected variation b in decide decision
 
-        $this->userId = 'user-' . mt_rand(10, 99);
-        $attributes = ['eats_vegetables' => true, 'age' => 7, 'favorite_vegetable' => 'turnips'];
-        $this->userContext = $this->optimizelyClient->createUserContext($this->userId, $attributes);
-    }
+echo PHP_EOL . PHP_EOL . '===================================';
+echo 'F-to-D (no rule key specified):';
+echo '==================================='.PHP_EOL;
 
-    private function printDecision($decision, $message): void
-    {
-        $enabled = $decision->getEnabled() ? "true" : "false";
+echo '  Set user context, userId any, age = 0 (not bucketed)'.PHP_EOL;
+echo '  Call decide with flag1  ---> expected result is off'.PHP_EOL;
+echo '  ---------------------'.PHP_EOL;
 
-        print ">>> [$this->outputTag] $message: 
-            enabled: $enabled, 
-            flagKey: {$decision->getFlagKey()}, 
-            ruleKey: {$decision->getRuleKey()}, 
-            variationKey: {$decision->getVariationKey()}, 
-            variables: " . print_r($decision->getVariables(), true) . ", 
-            reasons: " . print_r($decision->getReasons(), true) . "\r\n";
-    }
-}
+$user = $optimizelyClient->createUserContext($userId, array("age"=> 0));
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert('off' == $decideDecision->getVariationKey());
+
+echo PHP_EOL . '  Set forced decision w flag1 and variation b' . PHP_EOL;
+echo '  Call decide -----> expected variation b in decide decision' . PHP_EOL;
+echo '  ---------------------';
+
+$context = new OptimizelyDecisionContext('flag1', null);
+$decision = new OptimizelyForcedDecision('variation_b');
+$user->setForcedDecision($context, $decision);
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('variation_b' == $decideDecision->getVariationKey());
+
+
+// E-to-D (rule key = “flag1_experiment”):
+// -------------------------------------------
+// Set user context, userId any, age = 0 ( not bucketed)
+// Call decide with flag1  ---> expected result is “off”
+// Set forced decision w flag1 and rule key “flag1_experiment”, and variation b
+// Call decide -----> expected variation b in decide decision
+
+echo PHP_EOL . PHP_EOL . '===================================';
+echo 'E-to-D (rule key = “flag1_experiment”):';
+echo '==================================='.PHP_EOL;
+
+echo '  Set user context, userId any, age = 0 (not bucketed)'.PHP_EOL;
+echo '  Call decide with flag1 ---> expected result is off'.PHP_EOL;
+echo '  ---------------------'.PHP_EOL;
+
+$user = $optimizelyClient->createUserContext($userId, array("age"=> 0));
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert('off' == $decideDecision->getVariationKey());
+
+echo PHP_EOL . '  Set forced decision w flag1 and rule flag1_experiment and variation b' . PHP_EOL;
+echo '  Call decide -----> expected variation b in decide decision' . PHP_EOL;
+echo '  ---------------------';
+
+$context = new OptimizelyDecisionContext('flag1', 'flag1_experiment');
+$decision = new OptimizelyForcedDecision('variation_b');
+$user->setForcedDecision($context, $decision);
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('variation_b' == $decideDecision->getVariationKey());
+
+
+// D-to-D (rule key = “flag1_targeted_delivery”):
+// -------------------------------------------
+// Set user context, userId any, country = “MX” (not bucketed)
+// Call decide with flag1  ---> expected result is “off”
+// Set forced decision w flag1 and rule key “flag1_targeted_delivery”, and variation b
+// Call decide -----> expected variation b in decide decision
+
+
+echo PHP_EOL . PHP_EOL . '===================================';
+echo 'D-to-D (rule key = flag1_targeted_delivery):';
+echo '==================================='.PHP_EOL;
+
+echo '  Set user context, userId any, country = MX  (not bucketed)'.PHP_EOL;
+echo '  Call decide with flag1 and rule flag1_targeted_delivery ---> expected result is off'.PHP_EOL;
+echo '  ---------------------'.PHP_EOL;
+
+$user = $optimizelyClient->createUserContext($userId, array("country"=> "MX"));
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert('off' == $decideDecision->getVariationKey());
+
+echo PHP_EOL . '  Set forced decision w flag1 and rule flag1_targeted_delivery and variation b' . PHP_EOL;
+echo '  Call decide -----> expected variation b in decide decision' . PHP_EOL;
+echo '  ---------------------';
+
+$context = new OptimizelyDecisionContext('flag1', 'flag1_targeted_delivery');
+$decision = new OptimizelyForcedDecision('variation_b');
+$user->setForcedDecision($context, $decision);
+$decideDecision = $user->decide('flag1', [OptimizelyDecideOption::INCLUDE_REASONS]);
+echo '    VARIATION   >>>  ' . $decideDecision->getVariationKey() . PHP_EOL;
+// ASSERT YOU GET CORRECT VARIATION
+echo '    REASONS     >>>  ' . json_encode($decideDecision->getReasons()) . PHP_EOL;
+// VERIFY REASONS ARE CORRECT
+assert ('variation_b' == $decideDecision->getVariationKey());
+
+// ================================
+// Part 3
+// ================================
+$user = $optimizelyClient->createUserContext($userId);
+
+$user->setForcedDecision(new OptimizelyDecisionContext('F1', null),
+                         new OptimizelyForcedDecision('V1'));
+$user->setForcedDecision(new OptimizelyDecisionContext('F1', 'E1'),
+                        new OptimizelyForcedDecision('V3'));
+
+assert($user->getForcedDecision(new OptimizelyDecisionContext('F1', null)) == 'V1');
+assert($user->getForcedDecision(new OptimizelyDecisionContext('F1', 'E1')) == 'V3');
+$user->setForcedDecision(new OptimizelyDecisionContext('F1', null),
+                         new OptimizelyForcedDecision('V5'));
+$user->setForcedDecision(new OptimizelyDecisionContext('F1', 'E1'),
+                         new OptimizelyForcedDecision('V5'));
+
+assert($user->getForcedDecision(new OptimizelyDecisionContext('F1', null)) == 'V5');
+assert($user->getForcedDecision(new OptimizelyDecisionContext('F1', 'E1')) == 'V5');
+$user->removeForcedDecision(new OptimizelyDecisionContext('F1', null));
+echo $user->getForcedDecision(new OptimizelyDecisionContext('F1', null)) == null;
+assert($user->getForcedDecision(new OptimizelyDecisionContext('F1', null)) == null);
+assert($user->getForcedDecision(new OptimizelyDecisionContext('F1', 'E1')) == 'V5');
+
+$user->removeForcedDecision(new OptimizelyDecisionContext('F1', 'E1'));
+
+assert($user->getForcedDecision(new OptimizelyDecisionContext('F1', null)) == null);
+assert($user->getForcedDecision(new OptimizelyDecisionContext('F1', 'E1')) == null);
+
+$user->removeAllForcedDecisions();
+
+assert($user->getForcedDecision(new OptimizelyDecisionContext('F2', null)) == null);
+assert($user->getForcedDecision(new OptimizelyDecisionContext('F2', 'E1')) == null);
+
+
+
+// ?>
