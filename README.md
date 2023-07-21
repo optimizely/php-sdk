@@ -37,6 +37,10 @@ php composer.phar require optimizely/optimizely-sdk
 Create the Optimizely client, for example:
 
 ```php
+<?php
+
+use Optimizely\Optimizely;
+
 $optimizely = new Optimizely(<<DATAFILE>>);
 ```
 
@@ -56,12 +60,22 @@ $optimizelyClient = OptimizelyFactory::createDefaultInstance(
 To access your HTTPProjectConfigManager:
 
 ```php
+<?php
+
+use Optimizely\Optimizely;
+
+/** @var Optimizely $optimizelyClient */
 $configManager = $optimizelyClient->configManager;
 ```
 
 Or you can also provide an implementation of the [`ProjectConfigManagerInterface`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/ProjectConfigManagerInterface.php) in the constructor:
 
 ```php
+<?php
+
+use Optimizely\Optimizely;
+use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
+
 $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
 $optimizely = new Optimizely(
     <<DATAFILE>>,
@@ -90,6 +104,10 @@ Calling `fetch` will update the internal ProjectConfig instance that will be ret
 ### Use HTTPProjectConfigManager
 
 ```php
+<?php
+
+use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
+
 $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
 ```
 
