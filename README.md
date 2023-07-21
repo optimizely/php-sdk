@@ -43,7 +43,15 @@ $optimizely = new Optimizely(<<DATAFILE>>);
 Or you may also use OptimizelyFactory method to create an optimizely client using your SDK key, an optional fallback datafile and an optional datafile access token. Using this method internally creates an HTTPProjectConfigManager. See [HTTPProjectConfigManager](#use-httpprojectconfigmanager) for further detail.
 
 ```php
-$optimizelyClient = OptimizelyFactory::createDefaultInstance("your-sdk-key", <<DATAFILE>>, <<DATAFILE_AUTH_TOKEN>>);
+<?php
+
+use Optimizely\OptimizelyFactory;
+
+$optimizelyClient = OptimizelyFactory::createDefaultInstance(
+    "your-sdk-key",
+    <<DATAFILE>>,
+    <<DATAFILE_AUTH_TOKEN>>
+);
 ```
 To access your HTTPProjectConfigManager:
 
@@ -55,7 +63,15 @@ Or you can also provide an implementation of the [`ProjectConfigManagerInterface
 
 ```php
 $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
-$optimizely = new Optimizely(<<DATAFILE>>, null, null, null, false, null, $configManager);
+$optimizely = new Optimizely(
+    <<DATAFILE>>,
+    null,
+    null,
+    null,
+    false,
+    null,
+    $configManager
+);
 ```
 
 ### ProjectConfigManagerInterface
