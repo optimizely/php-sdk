@@ -84,6 +84,7 @@ class OptimizelyVariation implements \JsonSerializable
      * @return string JSON representation of the object.
      *                Unsets featureEnabled property for variations of ab experiments.
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         $props = get_object_vars($this);

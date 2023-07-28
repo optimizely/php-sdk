@@ -53,6 +53,7 @@ class OptimizelyAttribute implements \JsonSerializable
     /**
      * @return string JSON representation of the object.
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return get_object_vars($this);
