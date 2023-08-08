@@ -28,7 +28,8 @@
 			"extensions": [
 				"bmewburn.vscode-intelephense-client",
 				"xdebug.php-debug",
-				"DEVSENSE.composer-php-vscode"
+				"DEVSENSE.composer-php-vscode",
+				"xdebug.php-pack"
 			]
 		}
 	}
