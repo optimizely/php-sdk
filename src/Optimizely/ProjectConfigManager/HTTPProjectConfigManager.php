@@ -82,6 +82,11 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
      */
     private $_isDatafileAccessTokenValid;
 
+    /**
+     * @var boolean Flag indicates that the datafile access token is valid.
+     */
+    private $isDatafileAccessTokenValid;
+
     public function __construct(
         $sdkKey = null,
         $url = null,
