@@ -75,12 +75,12 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
     /**
     * @var String datafile access token.
     */
-    private $datafileAccessToken;
+    private $_datafileAccessToken;
 
     /**
      * @var boolean Flag indicates that the datafile access token is valid.
      */
-    private $isDatafileAccessTokenValid;
+    private $_isDatafileAccessTokenValid;
 
     public function __construct(
         $sdkKey = null,
@@ -92,14 +92,14 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         LoggerInterface $logger = null,
         ErrorHandlerInterface $errorHandler = null,
         NotificationCenter $notificationCenter = null,
-        $datafileAccessToken = null
+        $_datafileAccessToken = null
     ) {
         $this->_skipJsonValidation = $skipJsonValidation;
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
         $this->_notificationCenter = $notificationCenter ?: new NotificationCenter($this->_logger, $this->_errorHandler);
-        $this->datafileAccessToken = $datafileAccessToken;
-        $this->isDatafileAccessTokenValid = Validator::validateNonEmptyString($this->datafileAccessToken);
+        $this->_datafileAccessToken = $_datafileAccessToken;
+        $this->_isDatafileAccessTokenValid = Validator::validateNonEmptyString($this->_datafileAccessToken);
 
         $this->httpClient = new HttpClient();
         $this->_url = $this->getUrl($sdkKey, $url, $urlTemplate);
@@ -141,7 +141,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         if (!Validator::validateNonEmptyString($urlTemplate)) {
-            if ($this->isDatafileAccessTokenValid) {
+            if ($this->_isDatafileAccessTokenValid) {
                 $urlTemplate = ProjectConfigManagerConstants::AUTHENTICATED_DATAFILE_URL_TEMPLATE;
             } else {
                 $urlTemplate = ProjectConfigManagerConstants::DEFAULT_DATAFILE_URL_TEMPLATE;
@@ -184,8 +184,8 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         // Add Authorization header if access token available.
-        if ($this->isDatafileAccessTokenValid) {
-            $headers['Authorization'] = "Bearer {$this->datafileAccessToken}";
+        if ($this->_isDatafileAccessTokenValid) {
+            $headers['Authorization'] = "Bearer {$this->_datafileAccessToken}";
         }
 
         $options = [
