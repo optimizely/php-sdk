@@ -30,7 +30,8 @@
 				"xdebug.php-debug",
 				"DEVSENSE.composer-php-vscode",
 				"xdebug.php-pack",
-				"recca0120.vscode-phpunit"
+				"recca0120.vscode-phpunit",
+				"eamodio.gitlens"
 			]
 		}
 	}
