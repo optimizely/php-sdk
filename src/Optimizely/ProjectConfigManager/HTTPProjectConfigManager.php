@@ -82,11 +82,6 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
      */
     private $_isDatafileAccessTokenValid;
 
-    /**
-     * @var boolean Flag indicates that the datafile access token is valid.
-     */
-    private $isDatafileAccessTokenValid;
-
     public function __construct(
         $sdkKey = null,
         $url = null,
@@ -97,13 +92,13 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         LoggerInterface $logger = null,
         ErrorHandlerInterface $errorHandler = null,
         NotificationCenter $notificationCenter = null,
-        $_datafileAccessToken = null
+        $datafileAccessToken = null
     ) {
         $this->_skipJsonValidation = $skipJsonValidation;
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
         $this->_notificationCenter = $notificationCenter ?: new NotificationCenter($this->_logger, $this->_errorHandler);
-        $this->_datafileAccessToken = $_datafileAccessToken;
+        $this->_datafileAccessToken = $datafileAccessToken;
         $this->_isDatafileAccessTokenValid = Validator::validateNonEmptyString($this->_datafileAccessToken);
 
         $this->httpClient = new HttpClient();
