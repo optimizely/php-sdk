@@ -1,12 +1,12 @@
 <?php
 /**
- * Copyright 2019-2020, 2022 Optimizely Inc and Contributors
+ * Copyright 2019-2020, 2022-2023 Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -75,7 +75,12 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
     /**
     * @var String datafile access token.
     */
-    private $datafileAccessToken;
+    private $_datafileAccessToken;
+
+    /**
+     * @var boolean Flag indicates that the datafile access token is valid.
+     */
+    private $_isDatafileAccessTokenValid;
 
     public function __construct(
         $sdkKey = null,
@@ -93,8 +98,8 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         $this->_logger = $logger ?: new NoOpLogger();
         $this->_errorHandler = $errorHandler ?: new NoOpErrorHandler();
         $this->_notificationCenter = $notificationCenter ?: new NotificationCenter($this->_logger, $this->_errorHandler);
-        $this->datafileAccessToken = $datafileAccessToken;
-        $this->isDatafileAccessTokenValid = Validator::validateNonEmptyString($this->datafileAccessToken);
+        $this->_datafileAccessToken = $datafileAccessToken;
+        $this->_isDatafileAccessTokenValid = Validator::validateNonEmptyString($this->_datafileAccessToken);
 
         $this->httpClient = new HttpClient();
         $this->_url = $this->getUrl($sdkKey, $url, $urlTemplate);
@@ -136,7 +141,7 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         if (!Validator::validateNonEmptyString($urlTemplate)) {
-            if ($this->isDatafileAccessTokenValid) {
+            if ($this->_isDatafileAccessTokenValid) {
                 $urlTemplate = ProjectConfigManagerConstants::AUTHENTICATED_DATAFILE_URL_TEMPLATE;
             } else {
                 $urlTemplate = ProjectConfigManagerConstants::DEFAULT_DATAFILE_URL_TEMPLATE;
@@ -179,8 +184,8 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         }
 
         // Add Authorization header if access token available.
-        if ($this->isDatafileAccessTokenValid) {
-            $headers['Authorization'] = "Bearer {$this->datafileAccessToken}";
+        if ($this->_isDatafileAccessTokenValid) {
+            $headers['Authorization'] = "Bearer {$this->_datafileAccessToken}";
         }
 
         $options = [
