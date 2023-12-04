@@ -1,12 +1,12 @@
 <?php
 /**
- * Copyright 2020-2021, Optimizely Inc and Contributors
+ * Copyright 2020-2021, 2023 Optimizely Inc and Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,12 @@
  */
 namespace Optimizely\OptimizelyConfig;
 
+use Monolog\Logger;
 use Optimizely\Config\ProjectConfigInterface;
 use Optimizely\Entity\Experiment;
 use Optimizely\Entity\Variation;
+use Optimizely\Logger\DefaultLogger;
+use Optimizely\Logger\LoggerInterface;
 
 class OptimizelyConfigService
 {
@@ -73,7 +76,14 @@ class OptimizelyConfigService
      */
     private $featKeyOptlyVariableIdVariableMap;
 
-    public function __construct(ProjectConfigInterface $projectConfig)
+    /**
+     * Provided or default logger for logging.
+     *
+     * @var LoggerInterface $logger
+     */
+    private readonly LoggerInterface $logger;
+
+    public function __construct(ProjectConfigInterface $projectConfig, LoggerInterface $logger = null)
     {
         $this->experiments = $projectConfig->getAllExperiments();
         $this->featureFlags = $projectConfig->getFeatureFlags();
@@ -82,7 +92,8 @@ class OptimizelyConfigService
         $this->environmentKey = $projectConfig->getEnvironmentKey();
         $this->sdkKey = $projectConfig->getSdkKey();
         $this->projectConfig = $projectConfig;
-        
+        $this->logger = $logger ?: new DefaultLogger();
+
         $this->createLookupMaps();
     }
 
@@ -258,7 +269,7 @@ class OptimizelyConfigService
 
         // Set default variables for variation.
         $variablesMap = $this->featKeyOptlyVariableKeyVariableMap[$featureKey];
-        
+
         // Return default variable values if feature is not enabled.
         if (!$variation->getFeatureEnabled()) {
             return $variablesMap;
@@ -267,13 +278,13 @@ class OptimizelyConfigService
         // Set variation specific value if any.
         foreach ($variation->getVariables() as $variableUsage) {
             $id = $variableUsage->getId();
-    
+
             $optVariable = $this->featKeyOptlyVariableIdVariableMap[$featureKey][$id];
-    
+
             $key = $optVariable->getKey();
             $value = $variableUsage->getValue();
             $type = $optVariable->getType();
-            
+
             $modifiedOptVariable = new OptimizelyVariable(
                 $id,
                 $key,
@@ -287,7 +298,7 @@ class OptimizelyConfigService
         return $variablesMap;
     }
 
-    
+
     /**
      * Generates Variations map for the given Experiment.
      *
@@ -301,7 +312,7 @@ class OptimizelyConfigService
 
         foreach ($experiment->getVariations() as $variation) {
             $variablesMap = $this->getVariablesMap($experiment, $variation);
- 
+
             $variationKey = $variation->getKey();
             $optVariation = new OptimizelyVariation(
                 $variation->getId(),
@@ -401,11 +412,17 @@ class OptimizelyConfigService
         foreach ($this->experiments as $exp) {
             $expId = $exp->getId();
             $expKey = $exp->getKey();
+
             $audiences = '';
             if ($exp->getAudienceConditions() != null) {
                 $audienceConditions = $exp->getAudienceConditions();
                 $audiences = $this->getSerializedAudiences($audienceConditions);
             }
+
+            if (array_key_exists($expKey, $experimentsKeyMap)) {
+                $this->logger->log(Logger::WARNING, sprintf('Duplicate experiment keys found in datafile: %s', $expKey));
+            }
+
             $optExp = new OptimizelyExperiment(
                 $expId,
                 $expKey,

@@ -16,9 +16,10 @@
  */
 namespace Optimizely\Tests;
 
-use Exception;
+use Monolog\Logger;
 use Optimizely\Config\DatafileProjectConfig;
 use Optimizely\ErrorHandler\NoOpErrorHandler;
+use Optimizely\Logger\DefaultLogger;
 use Optimizely\Logger\NoOpLogger;
 use Optimizely\OptimizelyConfig\OptimizelyAttribute;
 use Optimizely\OptimizelyConfig\OptimizelyAudience;
@@ -29,10 +30,12 @@ use Optimizely\OptimizelyConfig\OptimizelyExperiment;
 use Optimizely\OptimizelyConfig\OptimizelyFeature;
 use Optimizely\OptimizelyConfig\OptimizelyVariable;
 use Optimizely\OptimizelyConfig\OptimizelyVariation;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class OptimizelyConfigServiceTest extends TestCase
 {
+    private MockObject $loggerMock;
 
     protected function setUp() : void
     {
@@ -149,6 +152,9 @@ class OptimizelyConfigServiceTest extends TestCase
         $this->expectedExpIdMap['17301270474'] = $abExperiment;
         $this->expectedExpIdMap['17258450439'] = $groupExperiment;
         $this->expectedExpIdMap['17279300791'] = $featExperiment;
+
+        // Mock Logger
+        $this->loggerMock = $this->getMockBuilder(DefaultLogger::class)->getMock();
     }
 
     protected static function getMethod($name)
@@ -203,28 +209,26 @@ class OptimizelyConfigServiceTest extends TestCase
 
     public function testGetOptimizelyConfigWithDuplicateExperimentKeys()
     {
+        $duplicatedExperimentKey = 'targeted_delivery';
+        $secondDuplicatedExperimentId = '9300000007573';
+        $this->loggerMock->expects($this->once())
+        ->method('log')
+        ->with(
+            Logger::WARNING,
+            sprintf('Duplicate experiment keys found in datafile: %s', $duplicatedExperimentKey)
+        );
+
         $this->datafile = DATAFILE_FOR_DUPLICATE_EXP_KEYS;
         $this->projectConfig = new DatafileProjectConfig(
             $this->datafile,
             new NoOpLogger(),
             new NoOpErrorHandler()
         );
-        $this->optConfigService = new OptimizelyConfigService($this->projectConfig);
+        $this->optConfigService = new OptimizelyConfigService($this->projectConfig, $this->loggerMock);
         $optimizelyConfig = $this->optConfigService->getConfig();
-        $this->assertEquals(Count($optimizelyConfig->getExperimentsMap()), 1);
-        $experimentRulesFlag1 = $optimizelyConfig->getFeaturesMap()['flag1']->getExperimentRules(); // 9300000007569
-        $experimentRulesFlag2 = $optimizelyConfig->getFeaturesMap()['flag2']->getExperimentRules(); // 9300000007573
-        foreach ($experimentRulesFlag1 as $experimentRule) {
-            if ($experimentRule->getKey() == 'targeted_delivery') {
-                $this->assertEquals($experimentRule->getId(), '9300000007569');
-            }
-        }
 
-        foreach ($experimentRulesFlag2 as $experimentRule) {
-            if ($experimentRule->getKey() == 'targeted_delivery') {
-                $this->assertEquals($experimentRule->getId(), '9300000007573');
-            }
-        }
+        $this->assertEquals(1, Count($optimizelyConfig->getExperimentsMap()));
+        $this->assertEquals($optimizelyConfig->getExperimentsMap()[$duplicatedExperimentKey]->getId(), $secondDuplicatedExperimentId);
     }
 
     public function testGetOptimizelyConfigWithDuplicateRuleKeys()
