@@ -37,25 +37,55 @@ php composer.phar require optimizely/optimizely-sdk
 Create the Optimizely client, for example:
 
 ```php
+<?php
+
+use Optimizely\Optimizely;
+
 $optimizely = new Optimizely(<<DATAFILE>>);
 ```
 
 Or you may also use OptimizelyFactory method to create an optimizely client using your SDK key, an optional fallback datafile and an optional datafile access token. Using this method internally creates an HTTPProjectConfigManager. See [HTTPProjectConfigManager](#use-httpprojectconfigmanager) for further detail.
 
 ```php
-$optimizelyClient = OptimizelyFactory::createDefaultInstance("your-sdk-key", <<DATAFILE>>, <<DATAFILE_AUTH_TOKEN>>);
+<?php
+
+use Optimizely\OptimizelyFactory;
+
+$optimizelyClient = OptimizelyFactory::createDefaultInstance(
+    "your-sdk-key",
+    <<DATAFILE>>,
+    <<DATAFILE_AUTH_TOKEN>>
+);
 ```
 To access your HTTPProjectConfigManager:
 
 ```php
+<?php
+
+use Optimizely\Optimizely;
+
+/** @var Optimizely $optimizelyClient */
 $configManager = $optimizelyClient->configManager;
 ```
 
 Or you can also provide an implementation of the [`ProjectConfigManagerInterface`](https://github.com/optimizely/php-sdk/blob/master/src/Optimizely/ProjectConfigManager/ProjectConfigManagerInterface.php) in the constructor:
 
 ```php
+<?php
+
+use Optimizely\Optimizely;
+use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
+
 $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
-$optimizely = new Optimizely(<<DATAFILE>>, null, null, null, false, null, $configManager);
+$optimizely = new Optimizely(
+    <<DATAFILE>>,
+    null,
+    null,
+    null,
+    false,
+    null,
+    $configManager
+);
 ```
 
 ### ProjectConfigManagerInterface
@@ -74,6 +104,10 @@ Calling `fetch` will update the internal ProjectConfig instance that will be ret
 ### Use HTTPProjectConfigManager
 
 ```php
+<?php
+
+use Optimizely\ProjectConfigManager\HTTPProjectConfigManager;
+
 $configManager = new HTTPProjectConfigManager(<<SDK_KEY>>);
 ```
 
