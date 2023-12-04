@@ -1,5 +1,14 @@
 # Optimizely PHP SDK Changelog
 
+## 4.0.1
+December 4, 2023
+
+* Add Dev Containers and bug bash #269
+* Add GitHub Issues templates #278
+* Fix: Deprecation warning #279
+* Return Latest Experiment When Duplicate Keys in Config #280
+* Fix: Code examples by @localheinz #281
+
 ## 4.0.0
 June 12, 2023
 
