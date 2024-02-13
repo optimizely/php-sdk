@@ -19,6 +19,7 @@ namespace Optimizely\Utils;
 
 use Monolog\Logger;
 use Optimizely\Enums\CommonAudienceEvaluationLogs as logs;
+use Optimizely\Logger\LoggerInterface;
 use Optimizely\Utils\SemVersionConditionEvaluator;
 use Optimizely\Utils\Validator;
 
@@ -44,13 +45,15 @@ class CustomAttributeConditionEvaluator
      */
     protected $userAttributes;
 
+    private LoggerInterface $logger;
+
     /**
      * CustomAttributeConditionEvaluator constructor
      *
      * @param array $userAttributes Associative array of user attributes to values.
      * @param $logger LoggerInterface.
      */
-    public function __construct(array $userAttributes, $logger)
+    public function __construct(array $userAttributes, LoggerInterface $logger)
     {
         $this->userAttributes = $userAttributes;
         $this->logger = $logger;
