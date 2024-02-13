@@ -83,6 +83,8 @@ class OptimizelyConfigService
      */
     private readonly LoggerInterface $logger;
 
+    private ProjectConfigInterface $projectConfig;
+
     public function __construct(ProjectConfigInterface $projectConfig, LoggerInterface $logger = null)
     {
         $this->experiments = $projectConfig->getAllExperiments();
