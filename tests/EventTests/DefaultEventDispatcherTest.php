@@ -49,7 +49,7 @@ class DefaultEventDispatcherTest extends TestCase
             ->getMock();
 
         $guzzleClientMock->expects($this->once())
-            ->method('request')
+            ->method('requestAsync')
             ->with($logEvent->getHttpVerb(), $logEvent->getUrl(), $expectedOptions);
 
         $eventDispatcher = new DefaultEventDispatcher($guzzleClientMock);
