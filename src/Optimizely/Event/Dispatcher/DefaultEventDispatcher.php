@@ -50,6 +50,6 @@ class DefaultEventDispatcher implements EventDispatcherInterface
             'connect_timeout' => DefaultEventDispatcher::TIMEOUT
         ];
 
-        $this->httpClient->request($event->getHttpVerb(), $event->getUrl(), $options);
+        $this->httpClient->requestAsync($event->getHttpVerb(), $event->getUrl(), $options);
     }
 }
