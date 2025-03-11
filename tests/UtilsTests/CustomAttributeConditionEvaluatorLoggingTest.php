@@ -20,12 +20,13 @@ namespace Optimizely\Tests;
 use Monolog\Logger;
 use Optimizely\Utils\CustomAttributeConditionEvaluator;
 use PHPUnit\Framework\TestCase;
+use Optimizely\Logger\LoggerInterface;
 
 class CustomAttributeConditionEvaluatorLoggingTest extends TestCase
 {
     protected function setUp() :void
     {
-        $this->loggerMock = $this->getMockBuilder(NoOpLogger::class)
+        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->setMethods(array('log'))
             ->getMock();
     }
