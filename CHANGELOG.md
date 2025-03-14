@@ -1,5 +1,10 @@
 # Optimizely PHP SDK Changelog
 
+## 4.0.2
+March 14, 2025
+
+* Fix: Explicitly define class properties #288
+
 ## 4.0.1
 December 4, 2023
 
