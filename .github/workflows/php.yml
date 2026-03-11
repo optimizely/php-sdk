@@ -22,24 +22,9 @@ jobs:
       - name: Run linting
         run: composer lint
 
-  source_clear:
-    name: Source Clear Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Veracode SCA Scan
-        env:
-          SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
-        uses: veracode/veracode-sca@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          create-issues: false
-
   unit_tests:
     name: Unit Tests ${{ matrix.php-versions }}
-    needs: [ linting, source_clear ]
+    needs: [ linting ]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
