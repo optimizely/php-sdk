@@ -81,7 +81,7 @@ class DecisionService
      * DecisionService constructor.
      *
      * @param LoggerInterface       $logger
-     * @param UserProfileServiceInterface  $userProfileService
+     * @param ?UserProfileServiceInterface  $userProfileService
      */
     public function __construct(LoggerInterface $logger, ?UserProfileServiceInterface $userProfileService = null)
     {
