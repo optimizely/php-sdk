@@ -1,5 +1,11 @@
 # Optimizely PHP SDK Changelog
 
+## 4.0.3
+May 20, 2026
+
+* Fix: PHP 8.4 implicit nullable parameter deprecation warnings #296
+* Security: Fix curl|bash vulnerability in SourceClear scan #294
+
 ## 4.0.2
 March 14, 2025
 
