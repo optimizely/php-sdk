@@ -83,7 +83,7 @@ class DecisionService
      * @param LoggerInterface       $logger
      * @param UserProfileServiceInterface  $userProfileService
      */
-    public function __construct(LoggerInterface $logger, UserProfileServiceInterface $userProfileService = null)
+    public function __construct(LoggerInterface $logger, ?UserProfileServiceInterface $userProfileService = null)
     {
         $this->_logger = $logger;
         $this->_bucketer = new Bucketer($logger);

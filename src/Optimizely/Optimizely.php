@@ -130,13 +130,13 @@ class Optimizely
      */
     public function __construct(
         $datafile,
-        EventDispatcherInterface $eventDispatcher = null,
-        LoggerInterface $logger = null,
-        ErrorHandlerInterface $errorHandler = null,
+        ?EventDispatcherInterface $eventDispatcher = null,
+        ?LoggerInterface $logger = null,
+        ?ErrorHandlerInterface $errorHandler = null,
         $skipJsonValidation = false,
-        UserProfileServiceInterface $userProfileService = null,
-        ProjectConfigManagerInterface $configManager = null,
-        NotificationCenter $notificationCenter = null,
+        ?UserProfileServiceInterface $userProfileService = null,
+        ?ProjectConfigManagerInterface $configManager = null,
+        ?NotificationCenter $notificationCenter = null,
         $sdkKey = null,
         array $defaultDecideOptions = []
     ) {
