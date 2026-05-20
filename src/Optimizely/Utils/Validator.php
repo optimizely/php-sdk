@@ -31,7 +31,7 @@ class Validator
      *
      * @return boolean Representing whether schema is valid or not.
      */
-    public static function validateJsonSchema($datafile, LoggerInterface $logger = null)
+    public static function validateJsonSchema($datafile, ?LoggerInterface $logger = null)
     {
         $data = json_decode($datafile);
 
