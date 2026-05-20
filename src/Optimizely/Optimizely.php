@@ -119,24 +119,24 @@ class Optimizely
      * Optimizely constructor for managing Feature Experimentation PHP projects.
      *
      * @param $datafile string JSON string representing the project.
-     * @param $eventDispatcher EventDispatcherInterface
-     * @param $logger LoggerInterface
-     * @param $errorHandler ErrorHandlerInterface
+     * @param $eventDispatcher ?EventDispatcherInterface
+     * @param $logger ?LoggerInterface
+     * @param $errorHandler ?ErrorHandlerInterface
      * @param $skipJsonValidation boolean representing whether JSON schema validation needs to be performed.
-     * @param $userProfileService UserProfileServiceInterface
-     * @param $configManager ProjectConfigManagerInterface provides ProjectConfig through getConfig method.
-     * @param $notificationCenter NotificationCenter
+     * @param $userProfileService ?UserProfileServiceInterface
+     * @param $configManager ?ProjectConfigManagerInterface provides ProjectConfig through getConfig method.
+     * @param $notificationCenter ?NotificationCenter
      * @param $sdkKey string uniquely identifying the datafile corresponding to project and environment combination. Must provide at least one of datafile or sdkKey.
      */
     public function __construct(
         $datafile,
-        EventDispatcherInterface $eventDispatcher = null,
-        LoggerInterface $logger = null,
-        ErrorHandlerInterface $errorHandler = null,
+        ?EventDispatcherInterface $eventDispatcher = null,
+        ?LoggerInterface $logger = null,
+        ?ErrorHandlerInterface $errorHandler = null,
         $skipJsonValidation = false,
-        UserProfileServiceInterface $userProfileService = null,
-        ProjectConfigManagerInterface $configManager = null,
-        NotificationCenter $notificationCenter = null,
+        ?UserProfileServiceInterface $userProfileService = null,
+        ?ProjectConfigManagerInterface $configManager = null,
+        ?NotificationCenter $notificationCenter = null,
         $sdkKey = null,
         array $defaultDecideOptions = []
     ) {

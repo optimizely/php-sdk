@@ -36,7 +36,7 @@ class DefaultEventDispatcher implements EventDispatcherInterface
      */
     private $httpClient;
 
-    public function __construct(HttpClient $httpClient = null)
+    public function __construct(?HttpClient $httpClient = null)
     {
         $this->httpClient = $httpClient ?: new HttpClient();
     }

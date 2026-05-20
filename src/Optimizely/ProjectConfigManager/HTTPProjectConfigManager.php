@@ -89,9 +89,9 @@ class HTTPProjectConfigManager implements ProjectConfigManagerInterface
         $fetchOnInit = true,
         $datafile = null,
         $skipJsonValidation = false,
-        LoggerInterface $logger = null,
-        ErrorHandlerInterface $errorHandler = null,
-        NotificationCenter $notificationCenter = null,
+        ?LoggerInterface $logger = null,
+        ?ErrorHandlerInterface $errorHandler = null,
+        ?NotificationCenter $notificationCenter = null,
         $datafileAccessToken = null
     ) {
         $this->_skipJsonValidation = $skipJsonValidation;
