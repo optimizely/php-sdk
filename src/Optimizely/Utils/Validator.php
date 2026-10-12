@@ -37,8 +37,12 @@ class Validator
 
         // Validate
         $validator = new JsonSchema\Validator;
-        // validate() replaces check(), which was deprecated in json-schema v6
-        $validator->validate($data, (object)['$ref' => 'file://' . __DIR__.'/schema.json']);
+        // validate() replaces check() in newer json-schema versions
+        if (method_exists($validator, 'validate')) {
+            $validator->validate($data, (object)['$ref' => 'file://' . __DIR__.'/schema.json']);
+        } else {
+            $validator->check($data, (object)['$ref' => 'file://' . __DIR__.'/schema.json']);
+        }
 
         if ($validator->isValid()) {
             return true;
