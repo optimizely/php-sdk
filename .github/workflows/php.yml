@@ -64,6 +64,22 @@ jobs:
           composer global require php-coveralls/php-coveralls
           php-coveralls --coverage_clover=./build/logs/clover.xml -v
 
+  latest_dependency_tests:
+    name: Latest Dependency Tests
+    needs: [ linting ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Install latest supported dependencies
+        run: composer update justinrainbow/json-schema lastguest/murmurhash --with-dependencies
+      - name: Run tests
+        run: ./vendor/bin/phpunit
+
   integration_tests:
     name: Integration Tests
     needs: [ unit_tests ]
