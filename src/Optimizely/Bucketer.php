@@ -72,7 +72,11 @@ class Bucketer
      */
     private function generateHashCode($bucketingKey)
     {
-        return murmurhash3_int($bucketingKey, Bucketer::$HASH_SEED) & Bucketer::$UNSIGNED_MAX_32_BIT_VALUE;
+        // murmurhash v2 replaced the global function with a static class method
+        if (function_exists('murmurhash3_int')) {
+            return murmurhash3_int($bucketingKey, Bucketer::$HASH_SEED) & Bucketer::$UNSIGNED_MAX_32_BIT_VALUE;
+        }
+        return \lastguest\Murmur::hash3_int($bucketingKey, Bucketer::$HASH_SEED) & Bucketer::$UNSIGNED_MAX_32_BIT_VALUE;
     }
 
     /**

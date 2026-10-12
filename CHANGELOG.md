@@ -5,6 +5,8 @@ October 12, 2026
 
 * Update: Allow `justinrainbow/json-schema` v6.x
 * Update: Allow `lastguest/murmurhash` v2.x
+* Fix: Add compatibility for murmurhash v2 API (global function replaced with static class method)
+* Fix: Use `validate()` instead of deprecated `check()` for json-schema forward compatibility
 
 ## 4.0.3
 May 20, 2026
