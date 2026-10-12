@@ -37,7 +37,8 @@ class Validator
 
         // Validate
         $validator = new JsonSchema\Validator;
-        // validate() replaces check() in newer json-schema versions
+        // json-schema added validate() in v5; before that only check() exists,
+        // and check() is a deprecated alias in v6+. Prefer validate() when available.
         if (method_exists($validator, 'validate')) {
             $validator->validate($data, (object)['$ref' => 'file://' . __DIR__.'/schema.json']);
         } else {

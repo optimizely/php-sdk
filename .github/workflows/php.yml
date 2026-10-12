@@ -65,22 +65,38 @@ jobs:
           php-coveralls --coverage_clover=./build/logs/clover.xml -v
 
   latest_dependency_tests:
-    name: Latest Dependency Tests
+    name: Latest Deps (PHP ${{ matrix.php-versions }})
     needs: [ linting ]
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: [ '8.1', '8.2' ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up PHP
+      - name: Set up PHP v${{ matrix.php-versions }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ matrix.php-versions }}
+      - name: Install dependencies
+        run: composer install
       - name: Install latest supported dependencies
         run: composer update justinrainbow/json-schema lastguest/murmurhash --with-dependencies
+      - name: Verify latest majors resolved
+        run: |
+          composer show justinrainbow/json-schema lastguest/murmurhash
+          php -r '
+            require "vendor/autoload.php";
+            $jsonSchema = Composer\InstalledVersions::getVersion("justinrainbow/json-schema");
+            $murmur = Composer\InstalledVersions::getVersion("lastguest/murmurhash");
+            echo "json-schema: $jsonSchema\nmurmurhash: $murmur\n";
+            exit((version_compare($jsonSchema, "6.0.0", ">=") && version_compare($murmur, "2.0.0", ">=")) ? 0 : 1);
+          '
       - name: Run tests
-        run: ./vendor/bin/phpunit
+        run: |
+          mkdir -p ./build/logs
+          ./vendor/bin/phpunit
 
   integration_tests:
     name: Integration Tests

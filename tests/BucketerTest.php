@@ -88,6 +88,15 @@ class BucketerTest extends TestCase
                 )
             )
         );
+        // Edge cases: empty string and multibyte UTF-8
+        $this->assertSame(
+            3175,
+            $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), '')
+        );
+        $this->assertSame(
+            8308,
+            $generateBucketValueMethod->invoke(new Bucketer($this->loggerMock), '日本語テスト1886780721')
+        );
     }
 
     public function testBucketValidExperimentNotInGroup()
