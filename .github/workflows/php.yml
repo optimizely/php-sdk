@@ -79,14 +79,10 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-      - name: Install dependencies
-        run: composer install
       - name: Install latest supported dependencies
         run: composer update justinrainbow/json-schema lastguest/murmurhash --with-dependencies
       - name: Verify latest majors resolved
         run: |
-          composer show justinrainbow/json-schema
-          composer show lastguest/murmurhash
           php -r '
             require "vendor/autoload.php";
             $jsonSchema = Composer\InstalledVersions::getVersion("justinrainbow/json-schema");
