@@ -85,7 +85,8 @@ jobs:
         run: composer update justinrainbow/json-schema lastguest/murmurhash --with-dependencies
       - name: Verify latest majors resolved
         run: |
-          composer show justinrainbow/json-schema lastguest/murmurhash
+          composer show justinrainbow/json-schema
+          composer show lastguest/murmurhash
           php -r '
             require "vendor/autoload.php";
             $jsonSchema = Composer\InstalledVersions::getVersion("justinrainbow/json-schema");
