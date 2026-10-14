@@ -88,7 +88,7 @@ jobs:
             $jsonSchema = Composer\InstalledVersions::getVersion("justinrainbow/json-schema");
             $murmur = Composer\InstalledVersions::getVersion("lastguest/murmurhash");
             echo "json-schema: $jsonSchema\nmurmurhash: $murmur\n";
-            exit((version_compare($jsonSchema, "6.0.0", ">=") && version_compare($murmur, "2.0.0", ">=")) ? 0 : 1);
+            exit((version_compare($jsonSchema, "6.0.0", ">=") && version_compare($murmur, "2.1.0", ">=")) ? 0 : 1);
           '
       - name: Run tests
         run: |
