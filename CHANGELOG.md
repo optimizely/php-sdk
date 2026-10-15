@@ -1,5 +1,10 @@
 # Optimizely PHP SDK Changelog
 
+## 4.0.4
+October 15, 2026
+
+* Update: Allow `justinrainbow/json-schema` v6.x and `lastguest/murmurhash` v2.x #298
+
 ## 4.0.3
 May 20, 2026
 

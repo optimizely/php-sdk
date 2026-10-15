@@ -69,7 +69,7 @@ class EventBuilderTest extends TestCase
                 ]],
                 'revision' => '15',
                 'client_name' => 'php-sdk',
-                'client_version' => '4.0.3',
+                'client_version' => '4.0.4',
                 'anonymize_ip'=> false,
                 'enrich_decisions' => true,
             ];
