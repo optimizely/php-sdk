@@ -1,5 +1,13 @@
 # Optimizely PHP SDK Changelog
 
+## 4.0.4
+October 15, 2026
+
+* Update: Allow `justinrainbow/json-schema` v6.x #298
+* Update: Allow `lastguest/murmurhash` v2.x; bucketing supports both the v1 and v2 APIs with identical results #298
+* Add bucketing tests for empty-string and UTF-8 bucketing IDs #298
+* Add CI job that tests against the latest supported dependency versions on PHP 8.1 and 8.2 #298
+
 ## 4.0.3
 May 20, 2026
 
